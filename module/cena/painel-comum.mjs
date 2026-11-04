@@ -417,6 +417,8 @@ export function PainelInvestigacaoMixin(Base) {
           abordagens: Object.entries(ROTULOS_ABORDAGEM).filter(([chave]) => abordagens[chave]).map(([, chave]) => game.i18n.localize(chave))
             .concat(abordagens.generico ? [generico.rotulo || game.i18n.localize("OP2.Desafio.Generico")] : []),
           temArrombar: abordagens.arrombar,
+          ocultarProgresso: desafio.system.ocultarProgresso,
+          ocultarTentativas: desafio.system.ocultarTentativas,
           temDestrancar: abordagens.destrancar,
           temHackTecnico: abordagens.hackTecnico,
           temHackSocial: abordagens.hackSocial,

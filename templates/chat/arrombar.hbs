@@ -47,8 +47,8 @@
     </p>
   {{else}}
     <p class="op2-ajuda">
-      {{localize "OP2.Desafio.Progresso"}}: <strong>{{pontuacaoAtual}} / {{pontuacaoAlvo}}</strong>
-      {{#if maxTentativas}} · {{localize "OP2.Desafio.Tentativas"}}: {{tentativasUsadas}} / {{maxTentativas}}{{/if}}
+      {{#unless ocultarProgresso}}{{localize "OP2.Desafio.Progresso"}}: <strong>{{pontuacaoAtual}} / {{pontuacaoAlvo}}</strong>{{/unless}}
+      {{#unless ocultarTentativas}}{{#if maxTentativas}} · {{localize "OP2.Desafio.Tentativas"}}: {{tentativasUsadas}} / {{maxTentativas}}{{/if}}{{/unless}}
     </p>
   {{/if}}
 </div>

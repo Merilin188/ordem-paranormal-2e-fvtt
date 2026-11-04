@@ -53,6 +53,11 @@ import { abrirLaboratorio } from "./cena/laboratorio-app.mjs";
 import { abrirRadio } from "./cena/radio-app.mjs";
 import { abrirAcoesInvestigacao } from "./cena/acoes-app.mjs";
 import { registrarAtalhos } from "./ui/atalhos.mjs";
+import { registrarTabelas, abrirTabelaParaTodos } from "./cena/tabelas.mjs";
+import { registrarEquilibrio, iniciarEquilibrio } from "./cena/equilibrio.mjs";
+import { registrarCondicoes } from "./cena/condicoes.mjs";
+import { registrarGuiaCombate, alternarGuiaCombate } from "./ui/guia-combate.mjs";
+import { aplicarPavor, removerPavor, abrirPavor } from "./cena/pavor.mjs";
 import { registrarFerramentasMestre, alternarFerramentasMestre, solicitarTeste, testeOposto, abrirDesafios } from "./ui/ferramentas-mestre.mjs";
 import { rolarTesteDeQueda, zerarContadoresDeQueda } from "./cena/ferimentos.mjs";
 import { ajudar } from "./cena/acoes-ajuda.mjs";
@@ -110,13 +115,18 @@ Hooks.once("init", () => {
   registrarBoasVindas();
   registrarAtalhos();
   registrarFerramentasMestre();
+  registrarTabelas();
+  registrarEquilibrio();
+  registrarGuiaCombate();
 
   // Sem iniciativa rolada: os jogadores decidem a ordem entre si (spec §5.2).
   CONFIG.Combat.initiative = { formula: "0", decimals: 0 };
+  registrarCondicoes();
 
   game.op2 = {
     migrarLinhasDoQuadro,
-    ferramentasMestre: alternarFerramentasMestre, solicitarTeste, testeOposto, desafiosDeAcesso: abrirDesafios,
+    ferramentasMestre: alternarFerramentasMestre, abrirTabelaParaTodos, iniciarEquilibrio,
+    aplicarPavor, removerPavor, abrirPavor, guiaCombate: alternarGuiaCombate, solicitarTeste, testeOposto, desafiosDeAcesso: abrirDesafios,
     rolarTeste, encerrarCena, stepDie, faces, OP2Roll,
     examinar, interagir, recapitular, compartilhar, dialogoExaminar, cicloVisibilidadeInfo,
     limparRevelacao, contarAoGrupo,

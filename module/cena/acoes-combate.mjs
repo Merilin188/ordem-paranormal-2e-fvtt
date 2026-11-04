@@ -10,7 +10,7 @@
  */
 import { SYSTEM_ID } from "../config.mjs";
 import { rolarTeste, renderizar } from "../dice/teste.mjs";
-import { vencedorDoOposto, resolverAtaque } from "./combate.mjs";
+import { vencedorDoOposto, resolverAtaque, danoDoAtaque, empateAcertaOsDois } from "./combate.mjs";
 import { alvosDaCenaAtiva, alvosMarcados } from "./encerrar-investigacao.mjs";
 
 /** Rola o ataque e publica o card que espera a resposta do defensor. */
@@ -79,6 +79,8 @@ export async function defender(defensor, { atacanteId, totalAtaque, raAtaque, rb
   if (!roll) return null;
 
   const vencedor = vencedorDoOposto(totalAtaque, roll.total);
+  const bonusAtacante = bonusDeArma(atacante);
+  const bonusDefensor = bonusDeArma(defensor);
   const { dano, alvo } = resolverAtaque({
     vencedor,
     esquiva,
@@ -86,7 +88,15 @@ export async function defender(defensor, { atacanteId, totalAtaque, raAtaque, rb
     leituraDefensor: { ra: roll.ra, rb: roll.rb },
     armadoAtacante,
     armadoDefensor,
+    bonusAtacante,
+    bonusDefensor,
   });
+  // Empate em ataques opostos: os dois se acertam se ambos atingiram a DT 7.
+  const mutuo = !esquiva && empateAcertaOsDois(totalAtaque, roll.total);
+  const danosMutuos = mutuo ? [
+    { id: defensor.id, nome: defensor.name, dano: danoDoAtaque({ ra: raAtaque, rb: rbAtaque }, { armado: armadoAtacante, bonus: bonusAtacante }) },
+    { id: atacante.id, nome: atacante.name, dano: danoDoAtaque({ ra: roll.ra, rb: roll.rb }, { armado: armadoDefensor, bonus: bonusDefensor }) },
+  ] : [];
 
   const quemSofre = alvo === "defensor" ? defensor : (alvo === "atacante" ? atacante : null);
   const conteudo = await renderizar(`systems/${SYSTEM_ID}/templates/chat/ataque-resultado.hbs`, {
@@ -94,7 +104,8 @@ export async function defender(defensor, { atacanteId, totalAtaque, raAtaque, rb
     totalAtaque,
     totalDefesa: roll.total,
     esquiva,
-    texto: textoDoDesfecho({ vencedor, esquiva, atacante, defensor, dano }),
+    texto: mutuo ? game.i18n.localize("OP2.Combate.EmpateMutuo") : textoDoDesfecho({ vencedor, esquiva, atacante, defensor, dano }),
+    danosMutuos,
     temDano: dano > 0 && Boolean(quemSofre),
     dano,
     quemSofreId: quemSofre?.id ?? "",
@@ -108,6 +119,12 @@ export async function defender(defensor, { atacanteId, totalAtaque, raAtaque, rb
   });
 
   return { roll, vencedor, dano, alvo };
+}
+
+/** Modificador de dano da melhor arma equipada (0 sem arma). */
+function bonusDeArma(ator) {
+  const armas = ator?.items?.filter((i) => i.type === "equipamento" && i.system.arma && i.system.equipado) ?? [];
+  return armas.reduce((max, i) => Math.max(max, i.system.danoBonus ?? 0), 0);
 }
 
 function textoDoDesfecho({ vencedor, esquiva, atacante, defensor, dano }) {

@@ -1,0 +1,48 @@
+<div class="op2-equilibrio-corpo op2-dt">
+  <header class="op2-dt__topo">
+    {{#if ator}}<img src="{{ator.img}}" alt="">{{/if}}
+    <strong class="op2-dt__nome">{{ator.nome}}</strong>
+    <span class="op2-dt__info">{{localize "OP2.Equilibrio.Rodada"}} {{rodada}}</span>
+  </header>
+
+  {{#unless ativo}}
+    <p class="op2-dt__vazio">{{localize "OP2.Equilibrio.Inativo"}}</p>
+  {{else}}
+    <div class="op2-equilibrio__reserva">
+      <span class="op2-dt__rotulo">{{localize "OP2.Equilibrio.DadosRestantes"}}</span>
+      <span class="op2-equilibrio__d4s">{{#each icones}}<i class="fa-solid fa-play fa-rotate-270"></i>{{else}}<em>0</em>{{/each}}</span>
+    </div>
+
+    {{#if temDados}}
+      <div class="op2-dt__caixas">
+        {{#each dados}}
+          <div class="op2-dt__posicao">
+            <span class="op2-dt__caixa op2-dt__caixa--grande {{#if ../equilibrado}}op2-dt__caixa--exato{{else}}op2-dt__caixa--baixo{{/if}}">{{this}}</span>
+            {{#if ../d4Pendente}}{{#if ../podeAgir}}
+              <button type="button" class="op2-botao op2-botao--pequeno" data-action="somar" data-indice="{{@index}}">+{{../d4Pendente}}</button>
+            {{/if}}{{/if}}
+          </div>
+        {{/each}}
+      </div>
+      {{#if equilibrado}}
+        <div class="op2-dt__aviso op2-dt__aviso--ok"><strong>{{localize "OP2.Equilibrio.Equilibrou"}}</strong></div>
+      {{else}}
+        <div class="op2-dt__aviso op2-dt__aviso--falha"><strong>{{localize "OP2.Equilibrio.Caindo"}}</strong>
+          {{#if d4Pendente}}<span>{{localize "OP2.Equilibrio.EscolhaSoma" valor=d4Pendente}}</span>{{/if}}</div>
+      {{/if}}
+    {{/if}}
+
+    {{#if podeAgir}}
+      {{#if podeUsarDado}}
+        <button type="button" class="op2-dt__principal op2-dt__principal--secundario" data-action="usarDado"><i class="fa-solid fa-dice-d6"></i> {{localize "OP2.Equilibrio.UsarDado"}}</button>
+      {{/if}}
+      <button type="button" class="op2-dt__principal" data-action="rolar" {{#if d4Pendente}}disabled{{/if}}><i class="fa-solid fa-dice"></i> {{localize "OP2.Equilibrio.Rolar"}}</button>
+      <div class="op2-dt__links"><a data-action="encerrar">{{localize "OP2.Equilibrio.Encerrar"}}</a></div>
+    {{/if}}
+
+    {{#if historico.length}}
+      <span class="op2-dt__rotulo">{{localize "OP2.Ferramentas.Destrancar.Historico"}}</span>
+      <ul class="op2-equilibrio__historico">{{#each historico}}<li>{{this}}</li>{{/each}}</ul>
+    {{/if}}
+  {{/unless}}
+</div>

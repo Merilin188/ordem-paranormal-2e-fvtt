@@ -53,7 +53,7 @@ export class SelecaoDados extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   async _prepareContext() {
-    const dados = this.roll.dados;
+    const dados = this.roll.dadosDoTeste;
     const previa = dados.map((d) => ({ ...d, contado: this.selecionados.has(d.indice) }));
     const parcial = analise.analisar(previa, { dt: this.roll.dt, escopoCritico: this.roll.escopoCritico });
 

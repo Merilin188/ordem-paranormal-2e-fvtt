@@ -155,3 +155,15 @@ export function semPrefixoDoPonto(nome, ponto) {
   const resto = cheio.slice(ponto.length).replace(/^[\s—–-]+/, "").trim();
   return resto || cheio;
 }
+
+/**
+ * Faces do dado de cada posição da senha: `facesPorPosicao` quando tem o tamanho
+ * certo, senão `facesSenha` em todas.
+ * @param {{tamanhoSenha: number, facesSenha: number, facesPorPosicao?: number[]}} sistema
+ * @returns {number[]}
+ */
+export function facesDasPosicoes(sistema) {
+  const tamanho = sistema.tamanhoSenha;
+  const lista = sistema.facesPorPosicao ?? [];
+  return Array.from({ length: tamanho }, (_, i) => Number(lista[i]) || sistema.facesSenha);
+}

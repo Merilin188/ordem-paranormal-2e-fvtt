@@ -1,0 +1,37 @@
+<section class="op2-painel op2-painel--marcas tab {{tabs.marcas.cssClass}}" data-group="principal" data-tab="marcas">
+  <span class="op2-tag op2-tag--secao">{{localize "OP2.Marcas.Titulo"}}</span>
+
+  <div class="op2-marcas__linha">
+    <label class="op2-campo">
+      <span>{{localize "OP2.Armadura.Pontos"}}</span>
+      <input type="number" name="system.armadura.value" value="{{sistema.armadura.value}}" min="0" {{#unless editavel}}disabled{{/unless}}>
+    </label>
+    <div class="op2-marcas__pavor {{#if pavor}}ativo{{/if}}">
+      <span>{{localize "OP2.Pavor.Dado"}}</span>
+      {{#if pavor}}
+        <strong><i class="fa-solid fa-ghost"></i> {{pavor}}</strong>
+        {{#if ehGM}}<button type="button" class="op2-botao-icone" data-action="removerPavor" aria-label="{{localize 'OP2.Pavor.Remover'}}"><i class="fa-solid fa-xmark"></i></button>{{/if}}
+      {{else}}<em>{{localize "OP2.Pavor.Nenhum"}}</em>{{/if}}
+    </div>
+  </div>
+  {{#if modificadoresTexto}}<p class="op2-ajuda"><strong>{{localize "OP2.Marcas.Modificador"}}:</strong> {{modificadoresTexto}}</p>{{/if}}
+
+  <h4 class="op2-marcas__titulo">{{localize "OP2.Marcas.Lesoes"}}
+    <button type="button" class="op2-botao op2-botao--pequeno" data-action="consultarTabela" data-tabela="lesoes">{{localize "OP2.Marcas.VerTabela"}}</button></h4>
+  <ul class="op2-marcas__lista">
+    {{#each lesoes}}
+      <li><strong>{{nome}}</strong> — {{texto}}
+        {{#if @root.ehGM}}<button type="button" class="op2-botao-icone" data-action="removerMarca" data-campo="lesoes" data-indice="{{indice}}" aria-label="×"><i class="fa-solid fa-xmark"></i></button>{{/if}}</li>
+    {{else}}<li class="op2-ajuda">{{localize "OP2.Marcas.Nenhuma"}}</li>{{/each}}
+  </ul>
+
+  <h4 class="op2-marcas__titulo">{{localize "OP2.Marcas.Traumas"}}
+    <button type="button" class="op2-botao op2-botao--pequeno" data-action="consultarTabela" data-tabela="traumas">{{localize "OP2.Marcas.VerTabela"}}</button></h4>
+  <ul class="op2-marcas__lista">
+    {{#each traumas}}
+      <li><strong>{{nome}}</strong> — {{texto}}
+        {{#if @root.ehGM}}<button type="button" class="op2-botao-icone" data-action="removerMarca" data-campo="traumas" data-indice="{{indice}}" aria-label="×"><i class="fa-solid fa-xmark"></i></button>{{/if}}</li>
+    {{else}}<li class="op2-ajuda">{{localize "OP2.Marcas.Nenhuma"}}</li>{{/each}}
+  </ul>
+  <p class="op2-ajuda">{{localize "OP2.Marcas.Ajuda"}}</p>
+</section>

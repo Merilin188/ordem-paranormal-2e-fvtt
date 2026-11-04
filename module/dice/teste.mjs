@@ -10,6 +10,7 @@ import { lerConfig } from "../settings/register.mjs";
 import { stepDie } from "./escada.mjs";
 import { consumirAjuda } from "../cena/acoes-ajuda.mjs";
 import { gastarImpeto, podePreencherImpeto } from "../cena/impeto.mjs";
+import { modificadorDoTeste } from "../cena/tabelas-dados.mjs";
 
 /**
  * @param {Actor} ator
@@ -74,11 +75,21 @@ export async function rolarTeste(ator, {
   // O espaço de ímpeto só some depois de a rolagem ser confirmada.
   if (config.gastarImpeto) await gastarImpeto(ator, 1);
 
-  const roll = OP2Roll.paraComponentes(config.componentes, {
+  // Lesões/traumas dão modificador fixo; o dado de pavor rola junto e consome os menores.
+  const atributoUsado = config.componentes.find((c) => c.tipo === "atributo")?.chave?.split(".")[1] ?? null;
+  const modificador = modificadorDoTeste(sistema.modificadores, chavePericia, atributoUsado);
+  const componentes = [...config.componentes];
+  const pavor = sistema.estado?.pavor;
+  if (pavor) {
+    componentes.push({ chave: "pavor", rotulo: game.i18n.localize("OP2.Pavor.Dado"), tipo: "pavor", dado: pavor });
+  }
+
+  const roll = OP2Roll.paraComponentes(componentes, {
     dt: config.dt,
     escopoCritico: lerConfig("escopoCritico"),
     rotulo: contexto ?? base.rotuloPericia,
     atorId: ator.id,
+    modificador,
   });
 
   await roll.evaluate();
@@ -148,7 +159,7 @@ export function rotuloDePericia(chave) {
   return `${game.i18n.localize("OP2.Pericia.aptidao")} (${rotuloSub})`;
 }
 
-async function mostrarDados3D(roll) {
+export async function mostrarDados3D(roll) {
   if (!game.dice3d) return;
   try {
     await game.dice3d.showForRoll(roll, game.user, true);
@@ -161,18 +172,22 @@ async function mostrarDados3D(roll) {
  * @param {OP2Roll} roll
  * @param {Actor} ator
  */
-export async function enviarParaChat(roll, ator, { pularDados3D = false } = {}) {
-  const dados = { roll, ator, resultado: roll.resultado };
-  const conteudo = await renderizar("systems/ordem-paranormal-2e/templates/chat/teste.hbs", {
+/** HTML do card de resultado de um teste (o mesmo do chat). */
+export function htmlDoTeste(roll, ator) {
+  const resultado = roll.resultado;
+  return renderizar("systems/ordem-paranormal-2e/templates/chat/teste.hbs", {
     rotulo: roll.options.rotulo,
     componentes: roll.dados,
-    ...dados.resultado,
+    ...resultado,
+    atorId: ator.id,
     ehGM: game.user.isGM,
     // "Sempre que falha em um teste, você preenche um espaço" (ficha do Ato I).
-    // É botão, não automático: a mesa às vezes reinterpreta o que foi uma falha, e
-    // nenhum outro efeito do sistema se aplica sozinho.
-    podePreencherImpeto: !dados.resultado.sucesso && podePreencherImpeto(ator),
+    podePreencherImpeto: !resultado.sucesso && podePreencherImpeto(ator),
   });
+}
+
+export async function enviarParaChat(roll, ator, { pularDados3D = false } = {}) {
+  const conteudo = await htmlDoTeste(roll, ator);
 
   return roll.toMessage(
     {

@@ -6,6 +6,16 @@
 
   <p class="op2-card__texto">{{texto}}</p>
 
+  {{#if danosMutuos.length}}
+    <div class="op2-card__acoes">
+      {{#each danosMutuos}}
+      <button type="button" class="op2-botao op2-botao--pequeno op2-botao--perigo"
+        data-op2-acao="aplicar-dano-alvo" data-ator-id="{{id}}" data-quantidade="{{dano}}" data-recurso="pv">
+        {{localize "OP2.Combate.AplicarDano" nome=nome dano=dano}}
+      </button>
+      {{/each}}
+    </div>
+  {{/if}}
   {{#if temDano}}
     <div class="op2-card__acoes">
       <button type="button" class="op2-botao op2-botao--pequeno op2-botao--perigo"

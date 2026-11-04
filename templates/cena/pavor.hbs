@@ -1,0 +1,18 @@
+<div class="op2-pavor-janela">
+  <p class="op2-ajuda">{{localize "OP2.Pavor.Ajuda"}}</p>
+  <ul class="op2-pavor-lista">
+    {{#each personagens}}
+      <li class="{{#if pavor}}op2-pavor-ativo{{/if}}">
+        <img src="{{img}}" alt="">
+        <span class="op2-pavor-nome">{{nome}}{{#if pavor}} <em><i class="fa-solid fa-ghost"></i> {{pavor}}</em>{{/if}}</span>
+        <select data-dado-de="{{id}}">
+          {{#each ../dados}}<option value="{{this}}" {{#if (op2Eq this ../pavor)}}selected{{/if}}>{{this}}</option>{{/each}}
+        </select>
+        <button type="button" data-action="aplicar" data-ator-id="{{id}}" data-tooltip="{{localize 'OP2.Pavor.Aplicar'}}"><i class="fa-solid fa-ghost"></i></button>
+        {{#if pavor}}<button type="button" data-action="remover" data-ator-id="{{id}}" data-tooltip="{{localize 'OP2.Pavor.Remover'}}"><i class="fa-solid fa-xmark"></i></button>{{/if}}
+      </li>
+    {{else}}
+      <li>{{localize "OP2.Ferramentas.SemPersonagens"}}</li>
+    {{/each}}
+  </ul>
+</div>

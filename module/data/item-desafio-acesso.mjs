@@ -52,6 +52,11 @@ export class DesafioAcessoData extends foundry.abstract.TypeDataModel {
       tamanhoSenha: new NumberField({ required: true, initial: 4, min: 1, max: 8, integer: true, nullable: false }),
       facesSenha: new NumberField({ required: true, initial: 6, min: 2, max: 12, integer: true, nullable: false }),
       senha: new ArrayField(new NumberField({ required: true, min: 1, integer: true, nullable: false }), { initial: [] }),
+      // Dado de cada posição (ex.: d8 + d6 + d12). Vazio = todas usam `facesSenha`.
+      facesPorPosicao: new ArrayField(new NumberField({ required: true, min: 2, max: 20, integer: true, nullable: false }), { initial: [] }),
+      // O mestre pode esconder dos jogadores as tentativas e o progresso do arrombamento.
+      ocultarTentativas: new BooleanField({ required: true, initial: false }),
+      ocultarProgresso: new BooleanField({ required: true, initial: false }),
       destrancarTentativas: new NumberField({ required: true, initial: 0, min: 0, integer: true, nullable: false }),
       destrancado: new BooleanField({ required: true, initial: false }),
       historicoDestrancar: new ArrayField(new SchemaField({

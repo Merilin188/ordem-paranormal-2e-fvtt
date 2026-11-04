@@ -15,6 +15,9 @@ import { enriquecerHtml as enriquecer } from "../ui/enriquecer.mjs";
 import { ligarRodaDoMouse } from "../ui/controle-dado.mjs";
 import { abrirAcoesInvestigacao } from "../cena/acoes-app.mjs";
 import { renderDoPerfil } from "../ui/perfil.mjs";
+import { descreverMarca } from "../cena/tabelas-dados.mjs";
+import { consultarTabela } from "../cena/tabelas.mjs";
+import { removerPavor } from "../cena/pavor.mjs";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
@@ -43,6 +46,12 @@ export class PersonagemSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       encerrarCena: PersonagemSheet.#encerrarCena,
       definirImpeto: PersonagemSheet.#definirImpeto,
       gastarImpetoAtributo: PersonagemSheet.#gastarImpetoAtributo,
+      adicionarRelacao: PersonagemSheet.#adicionarRelacao,
+      removerRelacao: PersonagemSheet.#removerRelacao,
+      definirGrau: PersonagemSheet.#definirGrau,
+      removerMarca: PersonagemSheet.#removerMarca,
+      consultarTabela: PersonagemSheet.#consultarTabela,
+      removerPavor: PersonagemSheet.#removerPavor,
     },
   };
 
@@ -52,12 +61,14 @@ export class PersonagemSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     habilidades: { template: "systems/ordem-paranormal-2e/templates/actor/personagem-habilidades.hbs" },
     inventario: { template: "systems/ordem-paranormal-2e/templates/actor/personagem-inventario.hbs" },
     notas: { template: "systems/ordem-paranormal-2e/templates/actor/personagem-notas.hbs" },
+    relacoes: { template: "systems/ordem-paranormal-2e/templates/actor/personagem-relacoes.hbs" },
+    marcas: { template: "systems/ordem-paranormal-2e/templates/actor/personagem-marcas.hbs" },
     pericias: { template: "systems/ordem-paranormal-2e/templates/actor/personagem-pericias.hbs" },
   };
 
   static TABS = {
     principal: {
-      tabs: [{ id: "habilidades" }, { id: "inventario" }, { id: "notas" }],
+      tabs: [{ id: "habilidades" }, { id: "inventario" }, { id: "relacoes" }, { id: "marcas" }, { id: "notas" }],
       initial: "habilidades",
       labelPrefix: "OP2.Aba",
     },
@@ -116,7 +127,73 @@ export class PersonagemSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       // Barra de ímpeto: mesma leitura dos traços de recurso — um espaço por
       // clique, preenchidos primeiro.
       biografia: await enriquecer(sistema.biografia, this.actor),
+      relacoes: sistema.relacoes.map((r, indice) => ({
+        ...r, indice,
+        circulos: [1, 2, 3].map((n) => ({ n, cheio: n <= r.grau })),
+      })),
+      lesoes: sistema.lesoes.map((m, indice) => ({ indice, ...descreverMarca(m.chave) })),
+      traumas: sistema.traumas.map((m, indice) => ({ indice, ...descreverMarca(m.chave) })),
+      pavor: sistema.estado.pavor,
+      modificadoresTexto: Object.entries(sistema.modificadores?.pericia ?? {})
+        .map(([k, v]) => `${game.i18n.localize(`OP2.Pericia.${k}`)} ${v > 0 ? "+" : ""}${v}`)
+        .concat(Object.entries(sistema.modificadores?.atributo ?? {})
+          .map(([k, v]) => `${game.i18n.localize(`OP2.Atributo.${k}`)} ${v > 0 ? "+" : ""}${v}`))
+        .join(" · "),
     };
+  }
+
+  /* ---- Relações ---- */
+
+  static async #adicionarRelacao() {
+    if (!this.isEditable) return;
+    await this.actor.update({ "system.relacoes": [...this.actor.system.relacoes, { nome: "", grau: 0, rotulo: "", descricao: "" }] });
+  }
+
+  static async #removerRelacao(_evento, alvo) {
+    if (!this.isEditable) return;
+    const lista = this.actor.system.relacoes.filter((_, i) => i !== Number(alvo.dataset.indice));
+    await this.actor.update({ "system.relacoes": lista });
+  }
+
+  static async #definirGrau(_evento, alvo) {
+    if (!this.isEditable) return;
+    const i = Number(alvo.dataset.indice);
+    const n = Number(alvo.dataset.grau);
+    const lista = foundry.utils.deepClone(this.actor.system.relacoes);
+    lista[i].grau = lista[i].grau === n ? n - 1 : n;
+    await this.actor.update({ "system.relacoes": lista });
+  }
+
+  /** Campos de texto das relações: gravam a lista inteira (ArrayField não aceita caminho por índice). */
+  #ligarRelacoes() {
+    for (const campo of this.element.querySelectorAll("[data-relacao-campo]")) {
+      campo.addEventListener("change", async (evento) => {
+        evento.stopPropagation();
+        const lista = foundry.utils.deepClone(this.actor.system.relacoes);
+        const i = Number(campo.dataset.indice);
+        if (!lista[i]) return;
+        lista[i][campo.dataset.relacaoCampo] = campo.value;
+        await this.actor.update({ "system.relacoes": lista });
+      });
+    }
+  }
+
+  /* ---- Lesões, traumas, pavor ---- */
+
+  static async #removerMarca(_evento, alvo) {
+    if (!game.user.isGM) return;
+    const campo = alvo.dataset.campo;
+    const lista = this.actor.system[campo].filter((_, i) => i !== Number(alvo.dataset.indice));
+    await this.actor.update({ [`system.${campo}`]: lista });
+  }
+
+  static #consultarTabela(_evento, alvo) {
+    consultarTabela(alvo.dataset.tabela, this.actor.id);
+  }
+
+  static async #removerPavor() {
+    if (!game.user.isGM) return;
+    await removerPavor(this.actor);
   }
 
   #atributos(sistema) {
@@ -423,6 +500,7 @@ export class PersonagemSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     super._onRender(contexto, opcoes);
     // O acento da ficha vem do perfil (as cores do livro): o CSS lê daqui.
     this.element.dataset.perfil = this.actor.system.perfil ?? "";
+    this.#ligarRelacoes();
 
     const campo = this.element.querySelector(".op2-busca__campo");
     if (campo) {

@@ -6,10 +6,11 @@
  * mecânicas deste sistema: `rolarTeste`, os desafios de acesso de `acoes-desafio.mjs`
  * e a janela de aventuras.
  */
-import { SYSTEM_ID, PERICIAS, APTIDOES_PADRAO, ATRIBUTOS } from "../config.mjs";
-import { rolarTeste, rotuloDePericia } from "../dice/teste.mjs";
-import { lerConfig } from "../settings/register.mjs";
-import { registrarAcaoDeMestre, comoMestre } from "./socket.mjs";
+import { SYSTEM_ID } from "../config.mjs";
+import {
+  solicitarTeste, testeOposto, testeDeEquilibrio, registrarTestesDoMestre, personagens, selecionados,
+} from "./ferramentas-testes.mjs";
+import { abrirPavor } from "../cena/pavor.mjs";
 import { registrarAcaoDeChat } from "./chat.mjs";
 import { abrirAventurasApp } from "../aventura/aventuras-app.mjs";
 import { investigacaoAtiva, todasInvestigacoes, removerDesafio } from "../cena/investigacao-ativa.mjs";
@@ -23,293 +24,6 @@ const ICONES = `systems/${SYSTEM_ID}/assets/icons/ferramentas-mestre`;
 const L = (chave) => game.i18n.localize(`OP2.Ferramentas.${chave}`);
 const F = (chave, dados) => game.i18n.format(`OP2.Ferramentas.${chave}`, dados);
 const esc = (texto) => foundry.utils.escapeHTML(String(texto ?? ""));
-
-/* ------------------------------------------------------------------ */
-/* Perícias                                                             */
-/* ------------------------------------------------------------------ */
-
-function rotuloDeChave(chave, ator = null) {
-  if (ATRIBUTOS[chave]) return game.i18n.localize(`OP2.Atributo.${chave}`);
-  if (chave.startsWith("aptidao.") || PERICIAS[chave]) return rotuloDePericia(chave);
-  return ator?.system?.pericias?.[chave]?.rotulo || chave;
-}
-
-/** Chaves de teste que valem para qualquer personagem. */
-function chavesGerais() {
-  const chaves = [...Object.keys(ATRIBUTOS)];
-  for (const chave of Object.keys(PERICIAS)) {
-    if (chave === "aptidao") chaves.push(...APTIDOES_PADRAO.map((a) => `aptidao.${a}`));
-    else chaves.push(chave);
-  }
-  return chaves;
-}
-
-/** Chaves de teste do próprio ator (NPC tem lista reduzida; personagem pode ter aptidões extras). */
-function chavesDoAtor(ator) {
-  if (ator?.type === "npc") {
-    return [...Object.keys(ator.system.atributos ?? {}), ...Object.keys(ator.system.pericias ?? {})];
-  }
-  const chaves = [...Object.keys(ATRIBUTOS)];
-  for (const chave of Object.keys(PERICIAS)) {
-    if (chave !== "aptidao") chaves.push(chave);
-  }
-  const aptidoes = Object.keys(ator?.system?.aptidoes ?? {});
-  chaves.push(...(aptidoes.length ? aptidoes : APTIDOES_PADRAO).map((a) => `aptidao.${a}`));
-  return chaves;
-}
-
-function opcoesDePericia(chaves, ator = null, selecionada = "percepcao") {
-  return chaves
-    .map((c) => ({ c, r: rotuloDeChave(c, ator) }))
-    .sort((a, b) => a.r.localeCompare(b.r, "pt-BR"))
-    .map(({ c, r }) => `<option value="${esc(c)}" ${c === selecionada ? "selected" : ""}>${esc(r)}</option>`)
-    .join("");
-}
-
-const personagens = () => game.actors.filter((a) => a.type === "personagem");
-const testaveis = () => game.actors.filter((a) => a.type === "personagem" || a.type === "npc");
-const selecionados = () => (canvas?.tokens?.controlled ?? []).map((t) => t.actor).filter(Boolean);
-
-function rotuloDesfecho(resultado) {
-  if (!resultado) return "";
-  const mapa = {
-    critico: "OP2.Ferramentas.Desfecho.critico",
-    "falha-critica": "OP2.Ferramentas.Desfecho.falhaCritica",
-    sucesso: "OP2.Ferramentas.Desfecho.sucesso",
-    falha: "OP2.Ferramentas.Desfecho.falha",
-  };
-  return mapa[resultado.desfecho] ? game.i18n.localize(mapa[resultado.desfecho]) : "";
-}
-
-/* ------------------------------------------------------------------ */
-/* Solicitar teste                                                      */
-/* ------------------------------------------------------------------ */
-
-function htmlSolicitacao(dados) {
-  const dt = dados.semDT ? L("SemDT") : `DT ${dados.dt}`;
-  const linhas = dados.alvos.map((alvo) => {
-    const r = alvo.resultado;
-    const acao = r
-      ? `<span class="op2-ferr-res op2-ferr-${esc(r.desfecho)}">${r.total} · ${esc(rotuloDesfecho(r) || L("Rolado"))}</span>`
-      : `<button type="button" data-op2-acao="ferr-solicitado" data-ator-id="${esc(alvo.atorId)}">${L("Rolar")}</button>`;
-    return `<li><img src="${esc(alvo.img)}" alt=""><span class="op2-ferr-nome">${esc(alvo.nome)}</span>${acao}</li>`;
-  }).join("");
-  return `<div class="op2-card op2-ferr-card">
-    <header><i class="fa-solid fa-dice"></i> ${L("SolicitarTeste")}</header>
-    <p class="op2-ferr-sub"><strong>${esc(dados.rotulo)}</strong> · ${esc(dt)}</p>
-    ${dados.motivo ? `<p class="op2-ferr-motivo">${esc(dados.motivo)}</p>` : ""}
-    <ul class="op2-ferr-lista">${linhas}</ul>
-  </div>`;
-}
-
-async function solicitarTeste() {
-  const atores = personagens();
-  if (!atores.length) return void ui.notifications.warn(L("SemPersonagens"));
-  const marcados = new Set(selecionados().map((a) => a.id));
-  const nenhumMarcado = marcados.size === 0;
-  const checks = atores.map((a) => {
-    const marcado = nenhumMarcado ? a.hasPlayerOwner : marcados.has(a.id);
-    return `<label class="op2-ferr-check"><input type="checkbox" name="atores" value="${a.id}" ${marcado ? "checked" : ""}>
-      <img src="${esc(a.img)}" alt=""> ${esc(a.name)}</label>`;
-  }).join("");
-
-  const conteudo = `<div class="op2-ferr-form">
-    <fieldset><legend>${L("Personagens")}</legend><div class="op2-ferr-checks">${checks}</div></fieldset>
-    <div class="form-group"><label>${L("Pericia")}</label><select name="pericia">${opcoesDePericia(chavesGerais())}</select></div>
-    <div class="form-group"><label>DT</label><input type="number" name="dt" min="1" value="${lerConfig("dtPadrao")}"></div>
-    <div class="form-group"><label>${L("SemDT")}</label><input type="checkbox" name="semDT"></div>
-    <div class="form-group"><label>${L("Motivo")}</label><input type="text" name="motivo" placeholder="${L("MotivoDica")}"></div>
-  </div>`;
-
-  const resposta = await DialogV2.prompt({
-    window: { title: L("SolicitarTeste"), icon: "fa-solid fa-dice" },
-    classes: ["op2", "op2-ferr-dialogo"],
-    content: conteudo,
-    ok: {
-      label: L("Enviar"),
-      icon: "fa-solid fa-paper-plane",
-      callback: (_evento, botao) => {
-        const form = botao.form;
-        return {
-          atores: [...form.querySelectorAll("input[name=atores]:checked")].map((i) => i.value),
-          pericia: form.elements.pericia.value,
-          dt: Number(form.elements.dt.value) || lerConfig("dtPadrao"),
-          semDT: form.elements.semDT.checked,
-          motivo: form.elements.motivo.value.trim(),
-        };
-      },
-    },
-    rejectClose: false,
-  });
-  if (!resposta) return;
-  if (!resposta.atores.length) return void ui.notifications.warn(L("NenhumSelecionado"));
-
-  const dados = {
-    pericia: resposta.pericia,
-    rotulo: rotuloDeChave(resposta.pericia),
-    dt: resposta.dt,
-    semDT: resposta.semDT,
-    motivo: resposta.motivo,
-    alvos: resposta.atores.map((id) => {
-      const a = game.actors.get(id);
-      return { atorId: id, nome: a.name, img: a.img, resultado: null };
-    }),
-  };
-  await ChatMessage.create({
-    speaker: ChatMessage.getSpeaker({ alias: L("Mestre") }),
-    content: htmlSolicitacao(dados),
-    flags: { [SYSTEM_ID]: { tipo: "solicitacao", solicitacao: dados } },
-  });
-}
-
-/* ------------------------------------------------------------------ */
-/* Teste oposto                                                         */
-/* ------------------------------------------------------------------ */
-
-function vencedorOposto(lados) {
-  const [a, b] = lados.map((l) => l.resultado);
-  if (!a || !b) return null;
-  // Crítico vence, falha crítica perde; depois maior total; empate fica empatado.
-  const peso = (r) => (r.desfecho === "critico" ? 1 : r.desfecho === "falha-critica" ? -1 : 0);
-  if (peso(a) !== peso(b)) return peso(a) > peso(b) ? 0 : 1;
-  if (a.total !== b.total) return a.total > b.total ? 0 : 1;
-  return -1;
-}
-
-function htmlOposto(dados) {
-  const vencedor = vencedorOposto(dados.lados);
-  const linhas = dados.lados.map((lado, i) => {
-    const r = lado.resultado;
-    const acao = r
-      ? `<span class="op2-ferr-res ${vencedor === i ? "op2-ferr-sucesso" : ""}">${r.total}${r.desfecho === "critico" || r.desfecho === "falha-critica" ? ` · ${esc(rotuloDesfecho(r))}` : ""}</span>`
-      : `<button type="button" data-op2-acao="ferr-oposto" data-ator-id="${esc(lado.atorId)}" data-lado="${i}">${L("Rolar")}</button>`;
-    return `<li><img src="${esc(lado.img)}" alt=""><span class="op2-ferr-nome">${esc(lado.nome)}<small>${esc(lado.rotulo)}</small></span>${acao}</li>`;
-  }).join(`<li class="op2-ferr-vs">VS</li>`);
-  let rodape = "";
-  if (vencedor === -1) rodape = `<p class="op2-ferr-veredito">${L("Empate")}</p>`;
-  else if (vencedor !== null) rodape = `<p class="op2-ferr-veredito">${F("Venceu", { nome: esc(dados.lados[vencedor].nome) })}</p>`;
-  return `<div class="op2-card op2-ferr-card">
-    <header><i class="fa-solid fa-swords"></i> ${L("TesteOposto")}</header>
-    ${dados.motivo ? `<p class="op2-ferr-motivo">${esc(dados.motivo)}</p>` : ""}
-    <ul class="op2-ferr-lista">${linhas}</ul>${rodape}
-  </div>`;
-}
-
-async function testeOposto() {
-  const atores = testaveis();
-  if (atores.length < 1) return void ui.notifications.warn(L("SemPersonagens"));
-  const sel = selecionados();
-  const padraoA = sel[0]?.id ?? atores[0].id;
-  const padraoB = sel[1]?.id ?? atores.find((a) => a.id !== padraoA)?.id ?? padraoA;
-  const opcoesAtor = (padrao) => atores
-    .map((a) => `<option value="${a.id}" ${a.id === padrao ? "selected" : ""}>${esc(a.name)}${a.type === "npc" ? " (NPC)" : ""}</option>`)
-    .join("");
-  const lado = (n, padrao) => `<fieldset><legend>${F("Lado", { n })}</legend>
-    <div class="form-group"><label>${L("Ator")}</label><select name="ator${n}" data-lado="${n}">${opcoesAtor(padrao)}</select></div>
-    <div class="form-group"><label>${L("Pericia")}</label><select name="pericia${n}">${opcoesDePericia(chavesDoAtor(game.actors.get(padrao)), game.actors.get(padrao))}</select></div>
-  </fieldset>`;
-
-  const conteudo = `<div class="op2-ferr-form">${lado(1, padraoA)}${lado(2, padraoB)}
-    <div class="form-group"><label>${L("Motivo")}</label><input type="text" name="motivo" placeholder="${L("MotivoDica")}"></div></div>`;
-
-  const resposta = await DialogV2.prompt({
-    window: { title: L("TesteOposto"), icon: "fa-solid fa-swords" },
-    classes: ["op2", "op2-ferr-dialogo"],
-    content: conteudo,
-    render: (_evento, dialogo) => {
-      const raiz = dialogo.element ?? dialogo;
-      for (const select of raiz.querySelectorAll("select[data-lado]")) {
-        select.addEventListener("change", () => {
-          const ator = game.actors.get(select.value);
-          const alvo = raiz.querySelector(`select[name=pericia${select.dataset.lado}]`);
-          alvo.innerHTML = opcoesDePericia(chavesDoAtor(ator), ator, alvo.value);
-        });
-      }
-    },
-    ok: {
-      label: L("Enviar"),
-      icon: "fa-solid fa-paper-plane",
-      callback: (_evento, botao) => {
-        const f = botao.form.elements;
-        return {
-          lados: [1, 2].map((n) => ({ atorId: f[`ator${n}`].value, pericia: f[`pericia${n}`].value })),
-          motivo: f.motivo.value.trim(),
-        };
-      },
-    },
-    rejectClose: false,
-  });
-  if (!resposta) return;
-
-  const dados = {
-    motivo: resposta.motivo,
-    lados: resposta.lados.map(({ atorId, pericia }) => {
-      const a = game.actors.get(atorId);
-      return { atorId, pericia, rotulo: rotuloDeChave(pericia, a), nome: a.name, img: a.img, resultado: null };
-    }),
-  };
-  await ChatMessage.create({
-    speaker: ChatMessage.getSpeaker({ alias: L("Mestre") }),
-    content: htmlOposto(dados),
-    flags: { [SYSTEM_ID]: { tipo: "oposto", oposto: dados } },
-  });
-}
-
-/* ------------------------------------------------------------------ */
-/* Ações dos cards de chat + gravação pelo mestre                       */
-/* ------------------------------------------------------------------ */
-
-function mensagemDoBotao(dataset) {
-  return game.messages.get(dataset.mensagemId);
-}
-
-function resumo(roll) {
-  const r = roll.resultado;
-  return { total: r.total, desfecho: r.desfecho, sucesso: r.sucesso };
-}
-
-async function rolarSolicitado(ator, dataset) {
-  if (!ator.isOwner) return void ui.notifications.warn(L("SemPermissao"));
-  const mensagem = mensagemDoBotao(dataset);
-  const dados = mensagem?.getFlag(SYSTEM_ID, "solicitacao");
-  if (!dados) return;
-  const roll = await rolarTeste(ator, {
-    chavePericia: dados.pericia, dt: dados.semDT ? null : dados.dt, semDT: dados.semDT,
-    contexto: dados.motivo || undefined,
-  });
-  if (!roll) return;
-  await comoMestre("ferrRegistrarSolicitacao", { mensagemId: mensagem.id, atorId: ator.id, resultado: resumo(roll) });
-}
-
-async function rolarOposto(ator, dataset) {
-  if (!ator.isOwner) return void ui.notifications.warn(L("SemPermissao"));
-  const mensagem = mensagemDoBotao(dataset);
-  const dados = mensagem?.getFlag(SYSTEM_ID, "oposto");
-  const indice = Number(dataset.lado);
-  const lado = dados?.lados?.[indice];
-  if (!lado) return;
-  const roll = await rolarTeste(ator, { chavePericia: lado.pericia, oposto: true, contexto: dados.motivo || undefined });
-  if (!roll) return;
-  await comoMestre("ferrRegistrarOposto", { mensagemId: mensagem.id, indice, resultado: resumo(roll) });
-}
-
-async function registrarSolicitacao({ mensagemId, atorId, resultado }) {
-  const mensagem = game.messages.get(mensagemId);
-  const dados = foundry.utils.deepClone(mensagem?.getFlag(SYSTEM_ID, "solicitacao"));
-  if (!dados) return;
-  const alvo = dados.alvos.find((a) => a.atorId === atorId);
-  if (!alvo) return;
-  alvo.resultado = resultado;
-  await mensagem.update({ content: htmlSolicitacao(dados), [`flags.${SYSTEM_ID}.solicitacao`]: dados });
-}
-
-async function registrarOposto({ mensagemId, indice, resultado }) {
-  const mensagem = game.messages.get(mensagemId);
-  const dados = foundry.utils.deepClone(mensagem?.getFlag(SYSTEM_ID, "oposto"));
-  if (!dados?.lados?.[indice]) return;
-  dados.lados[indice].resultado = resultado;
-  await mensagem.update({ content: htmlOposto(dados), [`flags.${SYSTEM_ID}.oposto`]: dados });
-}
 
 /* ------------------------------------------------------------------ */
 /* Desafios de acesso                                                   */
@@ -469,6 +183,8 @@ class FerramentasMestre extends HandlebarsApplicationMixin(ApplicationV2) {
       testeOposto: () => testeOposto(),
       desafios: () => abrirDesafios(),
       aventura: () => abrirAventurasApp(),
+      equilibrio: () => testeDeEquilibrio(),
+      pavor: () => abrirPavor(),
     },
   };
 
@@ -485,6 +201,8 @@ class FerramentasMestre extends HandlebarsApplicationMixin(ApplicationV2) {
         { acao: "solicitarTeste", icone: `${ICONES}/rolling-dices.svg`, rotulo: L("SolicitarTeste") },
         { acao: "testeOposto", icone: `${ICONES}/sword-clash.svg`, rotulo: L("TesteOposto") },
         { acao: "desafios", icone: `${ICONES}/access-challenges.png`, rotulo: L("DesafiosAcesso"), grande: true },
+        { acao: "equilibrio", fa: "fa-person-falling", rotulo: game.i18n.localize("OP2.Equilibrio.Titulo") },
+        { acao: "pavor", fa: "fa-ghost", rotulo: game.i18n.localize("OP2.Pavor.Janela") },
         { acao: "aventura", icone: `${ICONES}/adventure-import.svg`, rotulo: L("ImportarAventura") },
       ],
     };
@@ -542,14 +260,11 @@ export function registrarFerramentasMestre() {
     precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL,
   });
 
-  registrarAcaoDeChat("ferr-solicitado", rolarSolicitado);
-  registrarAcaoDeChat("ferr-oposto", rolarOposto);
+  registrarTestesDoMestre();
   registrarAcaoDeChat("ferr-abrir-destrancar", (ator, dataset) => {
     if (!game.user.isGM && !ator.isOwner) return void ui.notifications.warn(L("SemPermissao"));
     abrirDestrancar(dataset.desafioUuid);
   });
-  registrarAcaoDeMestre("ferrRegistrarSolicitacao", registrarSolicitacao);
-  registrarAcaoDeMestre("ferrRegistrarOposto", registrarOposto);
 
   Hooks.once("ready", () => {
     if (game.user.isGM && game.settings.get(SYSTEM_ID, "mostrarFerramentasMestre")) alternarFerramentasMestre(true);

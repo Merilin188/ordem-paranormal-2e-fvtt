@@ -25,8 +25,8 @@
     </p>
   {{else}}
     <p class="op2-ajuda">
-      {{localize "OP2.Desafio.Tentativas"}}: {{tentativas}}{{#if maxTentativas}} / {{maxTentativas}}{{/if}}
-      · {{localize "OP2.Desafio.DestrancarNaRodada" usadas=naRodada teto=tetoRodada dado=dadoCrime}}
+      {{#unless ocultarTentativas}}{{localize "OP2.Desafio.Tentativas"}}: {{tentativas}}{{#if maxTentativas}} / {{maxTentativas}}{{/if}}
+      · {{/unless}}{{localize "OP2.Desafio.DestrancarNaRodada" usadas=naRodada teto=tetoRodada dado=dadoCrime}}
     </p>
   {{/if}}
 </div>

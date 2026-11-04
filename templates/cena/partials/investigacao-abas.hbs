@@ -498,6 +498,8 @@
                     <i class="fa-solid fa-plus" aria-hidden="true"></i>
                   </button>
                 </span>
+              {{else if ocultarProgresso}}
+                ?
               {{else}}
                 {{pontuacaoAtual}} / {{pontuacaoAlvo}}
               {{/if}}
@@ -506,7 +508,7 @@
             </p>
           {{/if}}
           {{#if temDestrancar}}
-            <p class="op2-ajuda">{{localize "OP2.Desafio.Destrancar"}}: {{localize "OP2.Desafio.Tentativas"}} {{destrancarTentativas}}{{#if maxTentativas}} / {{maxTentativas}}{{/if}}{{#if destrancado}} — {{localize "OP2.Desafio.Destrancou"}}{{/if}}{{#if senha}} · {{localize "OP2.Desafio.SenhaMestre"}} <strong>{{senha}}</strong>{{/if}}</p>
+            <p class="op2-ajuda">{{localize "OP2.Desafio.Destrancar"}}: {{#if (op2Eq @root.ehGM false)}}{{#unless ocultarTentativas}}{{localize "OP2.Desafio.Tentativas"}} {{destrancarTentativas}}{{#if maxTentativas}} / {{maxTentativas}}{{/if}}{{/unless}}{{else}}{{localize "OP2.Desafio.Tentativas"}} {{destrancarTentativas}}{{#if maxTentativas}} / {{maxTentativas}}{{/if}}{{/if}}{{#if destrancado}} — {{localize "OP2.Desafio.Destrancou"}}{{/if}}{{#if senha}} · {{localize "OP2.Desafio.SenhaMestre"}} <strong>{{senha}}</strong>{{/if}}</p>
           {{/if}}
           {{#if temHackTecnico}}
             <p class="op2-ajuda">{{localize "OP2.Desafio.HackTecnico"}}: {{#if hackTecnicoResolvido}}{{localize "OP2.Desafio.Resolvido"}}{{else}}{{localize "OP2.Desafio.Pendente"}}{{/if}}</p>

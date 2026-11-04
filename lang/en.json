@@ -112,7 +112,9 @@
     "Aba": {
       "habilidades": "Abilities",
       "inventario": "Inventory",
-      "notas": "Notes"
+      "notas": "Notes",
+      "relacoes": "Relações",
+      "marcas": "Lesões e traumas"
     },
     "Dado": {
       "Alterar": "Change the die"
@@ -166,7 +168,9 @@
       "NaoEquipado": "Not equipped",
       "AlternarEquipado": "Equip or unequip",
       "AumentarCarga": "Add one charge (increase)",
-      "DiminuirCarga": "Spend one charge (decrease)"
+      "DiminuirCarga": "Spend one charge (decrease)",
+      "DanoBonus": "Modificador de dano (RA + mod.)",
+      "Armadura": "Pontos de armadura que fornece"
     },
     "Item": {
       "Novo": "New {tipo}",
@@ -680,7 +684,18 @@
       "HackErrou": "Wrong",
       "HackAcertouTexto": "{ator} solved the problem — the panel opened.",
       "HackErrouTexto": "{ator} got it wrong — try again next round.",
-      "HackTempoEsgotado": "Time's up"
+      "HackTempoEsgotado": "Time's up",
+      "VisivelJogadores": "O que os jogadores veem",
+      "OcultarTentativas": "Ocultar tentativas totais/restantes",
+      "OcultarProgresso": "Ocultar progresso do arrombamento",
+      "SenhaManual": "Senha manual e dado de cada posição",
+      "DadoPosicao": "Dado",
+      "ValorPosicao": "Valor",
+      "SalvarDados": "Salvar só os dados",
+      "SalvarSenhaManual": "Salvar senha digitada",
+      "SenhaManualAjuda": "Escolha o dado de cada posição (ex.: d8 + d6 + d12). \"Salvar só os dados\" mantém o sorteio automático com esses dados; \"Salvar senha digitada\" usa os valores que você escreveu (zera o histórico).",
+      "SenhaManualInvalida": "Preencha todas as posições com valores dentro do dado de cada uma.",
+      "SenhaManualSalva": "Senha salva."
     },
     "Ferramenta": {
       "Rotulo": "Tool",
@@ -727,28 +742,35 @@
       "RadioDescartadas": "Discarded:"
     },
     "Ferimento": {
-      "Titulo": "Wound",
-      "Texto": "{ator} reached 0 HP. {pericia} check against DT {dt}.",
-      "Consequencia": "Success: keeps acting. Failure: dies.",
-      "Rolar": "Roll wound (DT {dt})",
+      "Titulo": "Teste de lesão",
+      "Texto": "{ator} chegou a 0 PV. Teste de Físico + {pericia} contra DT {dt}.",
+      "Consequencia": "Crítico: recupera 1 PV. Sucesso: inconsciente e moribundo. Falha: tabela de Lesões. Falha crítica: morre.",
+      "Rolar": "Rolar teste de lesão (DT {dt})",
       "Sucesso": "{ator} stays on their feet.",
       "Falha": {
         "morte": "{ator} dies."
       },
-      "ProximaDT": "The next check will be against DT {dt}."
+      "ProximaDT": "The next check will be against DT {dt}.",
+      "Resultado": {
+        "Critico": "{ator} recupera 1 PV e se recupera de inconsciente e moribundo.",
+        "Sucesso": "{ator} fica inconsciente e moribundo.",
+        "Falha": "{ator} sofre uma lesão: role na tabela de Lesões.",
+        "FalhaCritica": "{ator} morre."
+      }
     },
     "Trauma": {
-      "Titulo": "Trauma",
-      "Texto": "{ator} reached 0 DP. {pericia} check against DT {dt}.",
-      "Consequencia": {
-        "morte": "Success: keeps acting. Failure: mental collapse and death.",
-        "colapso": "Success: keeps acting. Failure: mental collapse — the character leaves the scene, without dying."
-      },
-      "Rolar": "Roll trauma (DT {dt})",
+      "Titulo": "Teste de trauma",
+      "Texto": "{ator} chegou a 0 PD. Teste de Emoção + {pericia} contra DT {dt}.",
+      "Rolar": "Rolar teste de trauma (DT {dt})",
       "Sucesso": "{ator} holds it together.",
       "Falha": {
         "morte": "{ator} suffers a mental collapse and dies.",
         "colapso": "{ator} suffers a mental collapse and leaves the scene."
+      },
+      "Consequencia": "Sucesso: nenhum efeito. Falha: tabela de Traumas.",
+      "Resultado": {
+        "Sucesso": "{ator} aguenta firme.",
+        "Falha": "{ator} sofre um trauma: role na tabela de Traumas."
       }
     },
     "Ajuda": {
@@ -779,7 +801,17 @@
       "Venceu": "{vencedor} wins the opposed check and deals {dano} damage to {perdedor}.",
       "EsquivouTexto": "{defensor} dodges: nobody takes or deals damage.",
       "Empate": "Tie on the opposed check — nobody deals damage.",
-      "AplicarDano": "Apply {dano} damage to {nome}"
+      "AplicarDano": "Apply {dano} damage to {nome}",
+      "Fase": {
+        "geral": "Geral",
+        "distancia": "Distância",
+        "corpo": "Corpo a corpo"
+      },
+      "EscolherFase": "Declarar fase da rodada",
+      "FaseAjuda": "Em que fase cada um age nesta rodada? Geral (qualquer ação, exceto ataques) → Ataques à distância → Ataques corpo a corpo. Quem age numa fase não age nas seguintes.",
+      "Declarar": "Declarar",
+      "FasesDeclaradas": "Fases declaradas",
+      "EmpateMutuo": "Empate: os dois atingiram a DT 7 e se acertam."
     },
     "Impeto": {
       "Titulo": "Momentum",
@@ -1046,7 +1078,126 @@
           "alto": "▼ high",
           "baixo": "▲ low"
         }
+      },
+      "SelecionePersonagem": "Selecione um personagem",
+      "SelecioneTeste": "Selecione um teste",
+      "NenhumParticipante": "Nenhum participante",
+      "Personagem": "Personagem",
+      "Teste": "Teste",
+      "DtOpcional": "DT (opcional)",
+      "NenhumTeste": "Nenhum teste selecionado",
+      "SolicitarSub": "Configure o teste solicitado",
+      "CriarSolicitacao": "Criar solicitação",
+      "Cancelar": "Cancelar",
+      "AguardandoRolagem": "Aguardando rolagem",
+      "Aguardando": "Aguardando",
+      "OpostoSub": "Configure os dois participantes",
+      "ParticipanteA": "Participante A",
+      "ParticipanteB": "Participante B",
+      "CriarTeste": "Criar teste"
+    },
+    "Pavor": {
+      "Dado": "Dado de pavor",
+      "Consumido": "consumido pelo pavor",
+      "ConsumiuN": "O pavor consumiu {n} dado(s).",
+      "NadaConsumido": "O pavor não consumiu nenhum dado.",
+      "Titulo": "Dado de pavor",
+      "Aplicado": "{nome} recebe um dado de pavor ({dado}). Em todo teste ele rola junto e consome os dados menores.",
+      "Removido": "{nome} se livra do pavor.",
+      "Janela": "Dado de pavor",
+      "Ajuda": "Aplique ou remova o dado de pavor de cada personagem. Enquanto ativo, ele rola junto em todo teste e consome os dados do teste que tirarem menos que ele.",
+      "Aplicar": "Aplicar dado de pavor",
+      "Remover": "Remover dado de pavor",
+      "Nenhum": "Nenhum"
+    },
+    "Marcas": {
+      "Modificador": "Modificadores de lesões e traumas",
+      "Titulo": "Lesões, traumas e pavor",
+      "Lesoes": "Lesões (permanentes)",
+      "Traumas": "Traumas (até serem curados)",
+      "VerTabela": "Ver tabela",
+      "Nenhuma": "Nenhuma.",
+      "Ajuda": "Lesões e traumas entram sozinhos ao rolar nas tabelas; os modificadores (−1, −2…) são somados ao total dos testes. O mestre remove um trauma quando ele é curado."
+    },
+    "Tabela": {
+      "Titulo": "Tabela: {tabela}",
+      "Efeito": "Efeito",
+      "Repetida": "Já possui este resultado: role novamente.",
+      "Rolar": "Rolar {formula}",
+      "Rolando": "Rolando…",
+      "Aguardando": "Aguardando {nome} rolar.",
+      "Abrir": {
+        "lesoes": "Abrir tabela de Lesões",
+        "traumas": "Abrir tabela de Traumas"
       }
+    },
+    "Morte": {
+      "Titulo": "Teste de morte",
+      "Texto": "{ator} está moribundo. Teste de {pericia} contra DT {dt}.",
+      "Consequencia": "Crítico: recupera 1 PV. Sucesso: segue moribundo. Falha: tabela de Lesões. Falha crítica: morre.",
+      "Rolar": "Rolar teste de morte (DT {dt})",
+      "Resultado": {
+        "Critico": "{ator} recupera 1 PV e se recupera de inconsciente e moribundo.",
+        "Sucesso": "{ator} resiste, mas segue inconsciente e moribundo.",
+        "Falha": "{ator} sofre uma lesão: role na tabela de Lesões.",
+        "FalhaCritica": "{ator} morre."
+      }
+    },
+    "Condicao": {
+      "caido": "Caído",
+      "inconsciente": "Inconsciente",
+      "moribundo": "Moribundo",
+      "morto": "Morto",
+      "agarrado": "Agarrado",
+      "sobrecarregado": "Sobrecarregado",
+      "atordoado": "Perde a próxima ação",
+      "apavorado": "Apavorado (dado de pavor)",
+      "cego": "Cego",
+      "sangrando": "Sangrando"
+    },
+    "Guia": {
+      "Titulo": "Guia rápido de combate",
+      "Buscar": "Buscar ação…"
+    },
+    "Equilibrio": {
+      "Titulo": "Teste de equilíbrio",
+      "Rodada": "Rodada",
+      "Equilibrou": "Equilibrado",
+      "Caindo": "Caindo!",
+      "UsouDado": "usou um dado de equilíbrio:",
+      "Inicio": "{nome} começa a travessia com {n} dado(s) de equilíbrio (d4), metade da Acrobacia {dado}.",
+      "Abrir": "Abrir travessia",
+      "Inativo": "Nenhuma travessia em andamento.",
+      "DadosRestantes": "Dados de equilíbrio",
+      "EscolhaSoma": "Some o {valor} a um dos dados.",
+      "UsarDado": "Usar dado de equilíbrio (d4)",
+      "Rolar": "Rolar 2d10",
+      "Encerrar": "Encerrar travessia",
+      "Iniciar": "Iniciar travessia",
+      "Regra": "A cada rodada, rola 2d10: iguais ou com 1 de diferença, equilibra; senão, cai. Começa com dados de equilíbrio (d4) iguais à metade da Acrobacia; caindo, pode rolar um e somar a um dos d10. Os gastos não voltam até o fim da travessia."
+    },
+    "Relacoes": {
+      "Titulo": "Relacionamentos",
+      "Ajuda": "Nome da pessoa, grau da relação (clique nos círculos), como o personagem chama essa relação e uma descrição curta.",
+      "Nome": "Nome",
+      "Grau": "Grau",
+      "Grau1": "Grau 1: Afinidade",
+      "Grau2": "Grau 2: Vínculo",
+      "Grau3": "Grau 3: Devoção",
+      "Rotulo": "Como chama (ex.: Confiança, Dever)",
+      "Descricao": "Descrição",
+      "Remover": "Remover relação",
+      "Vazio": "Nenhuma relação.",
+      "Adicionar": "Nova relação",
+      "Beneficios": "Benefícios por grau",
+      "Beneficio1": "+1d6 em um teste ligado à pessoa; ao ajudá-la, fornece +1d6 além do aumento de passo.",
+      "Beneficio2": "+1d8 em um teste ligado à pessoa; ao ajudá-la, +1d8; gastar uma ação para motivá-la: ela recupera 2d4 PD.",
+      "Beneficio3": "+1d12 em um teste ligado à pessoa; ao ajudá-la, +1d12; motivá-la recupera 2d6 PD; se ela estiver em perigo, uma ação extra no turno para ajudá-la."
+    },
+    "Armadura": {
+      "Titulo": "Pontos de armadura",
+      "Pergunta": "{nome} vai sofrer {dano} de dano e tem {pontos} ponto(s) de armadura. Gastar 1 ponto para reduzir o dano em 10?",
+      "Pontos": "Pontos de armadura"
     }
   }
 }

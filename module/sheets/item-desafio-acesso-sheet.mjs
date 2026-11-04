@@ -6,6 +6,7 @@ import { PERICIAS } from "../config.mjs";
 import { rotuloDePericia } from "../dice/teste.mjs";
 import { OP2ItemSheet } from "./item-sheet.mjs";
 import { gerarSenhaDestrancar, posicoesDoPalpite } from "../cena/acoes-desafio.mjs";
+import { facesDasPosicoes } from "../cena/desafios.mjs";
 import { iniciarHackTecnico } from "../cena/timer-hack.mjs";
 
 export class DesafioAcessoSheet extends OP2ItemSheet {
@@ -25,6 +26,8 @@ export class DesafioAcessoSheet extends OP2ItemSheet {
       adicionarLinhaHack: DesafioAcessoSheet.#adicionarLinhaHack,
       gerarSenha: DesafioAcessoSheet.#gerarSenha,
       limparSenha: DesafioAcessoSheet.#limparSenha,
+      salvarSenhaManual: DesafioAcessoSheet.#salvarSenhaManual,
+      salvarDados: DesafioAcessoSheet.#salvarDados,
     },
   };
 
@@ -41,6 +44,39 @@ export class DesafioAcessoSheet extends OP2ItemSheet {
     });
   }
 
+  /** Lê os dados por posição e os valores digitados na seção de senha manual. */
+  #lerPosicoes() {
+    const faces = [...this.element.querySelectorAll("[data-faces-pos]")].map((el) => Number(el.value));
+    const valores = [...this.element.querySelectorAll("[data-valor-pos]")].map((el) => Number(el.value) || null);
+    return { faces, valores };
+  }
+
+  /** Só os dados de cada posição (a senha sai no sorteio). */
+  static async #salvarDados() {
+    if (!this.isEditable) return;
+    const { faces } = this.#lerPosicoes();
+    await this.item.update({ "system.facesPorPosicao": faces });
+  }
+
+  /** Senha digitada pelo mestre: cada valor dentro do dado da posição. Zera o histórico. */
+  static async #salvarSenhaManual() {
+    if (!this.isEditable) return;
+    const { faces, valores } = this.#lerPosicoes();
+    if (valores.some((v, i) => !v || v < 1 || v > faces[i])) {
+      ui.notifications.warn(game.i18n.localize("OP2.Desafio.SenhaManualInvalida"));
+      return;
+    }
+    await this.item.update({
+      "system.facesPorPosicao": faces,
+      "system.senha": valores,
+      "system.historicoDestrancar": [],
+      "system.destrancarTentativas": 0,
+      "system.destrancado": false,
+      "system.quebrado": false,
+    });
+    ui.notifications.info(game.i18n.localize("OP2.Desafio.SenhaManualSalva"));
+  }
+
   async _prepareContext(opcoes) {
     const contexto = await super._prepareContext(opcoes);
     const { pontuacaoAtual, pontuacaoAlvo } = this.item.system;
@@ -54,6 +90,10 @@ export class DesafioAcessoSheet extends OP2ItemSheet {
       // cadastro do desafio, não na tela de ações do jogador (achado em uso real).
       senha,
       temSenha: senha.length > 0,
+      opcoesFaces: [2, 3, 4, 6, 8, 10, 12, 20],
+      posicoesSenha: facesDasPosicoes(this.item.system).map((faces, indice) => ({
+        indice, numero: indice + 1, faces, valor: senha[indice] ?? "",
+      })),
       historicoDestrancar: historicoDestrancar.map((linha, indice) => ({
         numero: indice + 1,
         posicoes: posicoesDoPalpite(linha.palpite, linha.resultado),

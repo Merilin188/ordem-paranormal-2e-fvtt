@@ -35,6 +35,14 @@ export class OP2Roll extends Roll {
     });
   }
 
+  /** Depois de rolar: aplica o dado de pavor e acerta o total (modificador incluso). */
+  async evaluate(opcoes = {}) {
+    await super.evaluate(opcoes);
+    this.aplicarPavor();
+    this._total = this.resultado.total;
+    return this;
+  }
+
   /** @returns {ComponenteTeste[]} */
   get componentes() {
     return this.options.componentes ?? [];
@@ -55,27 +63,80 @@ export class OP2Roll extends Roll {
    */
   get dados() {
     if (!this._evaluated) return [];
-    return this.dice.map((termo, i) => ({
-      indice: i,
-      dado: `d${termo.faces}`,
-      resultado: termo.results[0].result,
-      contado: termo.results[0].active !== false,
-      componente: this.componentes[i] ?? { rotulo: `d${termo.faces}`, tipo: "extra" },
-    }));
+    const consumidos = new Set(this.options.consumidos ?? []);
+    return this.dice.map((termo, i) => {
+      const componente = this.componentes[i] ?? { rotulo: `d${termo.faces}`, tipo: "extra" };
+      const pavor = componente.tipo === "pavor";
+      const consumido = consumidos.has(i);
+      return {
+        indice: i,
+        dado: `d${termo.faces}`,
+        resultado: termo.results[0].result,
+        contado: termo.results[0].active !== false && !pavor && !consumido,
+        pavor,
+        consumido,
+        componente,
+      };
+    });
+  }
+
+  /** Os dados que valem para o teste: sem o dado de pavor e sem os que ele consumiu. */
+  get dadosDoTeste() {
+    return this.dados.filter((d) => !d.pavor && !d.consumido);
   }
 
   get contados() {
-    return this.dados.filter((d) => d.contado);
+    return this.dadosDoTeste.filter((d) => d.contado);
   }
 
   /** Rolou mais dados do que pode somar? Então o jogador precisa escolher (spec §4.5). */
   get precisaSelecao() {
-    return this.dados.length > MAX_DADOS_CONTADOS && this.contados.length === this.dados.length;
+    const dados = this.dadosDoTeste;
+    return dados.length > MAX_DADOS_CONTADOS && this.contados.length === dados.length;
+  }
+
+  /** Modificador fixo (lesões/traumas). */
+  get modificador() {
+    return this.options.modificador ?? 0;
   }
 
   /** @returns {ReturnType<typeof analise.analisar>} */
   get resultado() {
-    return analise.analisar(this.dados, { dt: this.dt, escopoCritico: this.escopoCritico });
+    const r = analise.analisar(this.dadosDoTeste, { dt: this.dt, escopoCritico: this.escopoCritico });
+    const mod = this.modificador;
+    if (mod) {
+      r.total += mod;
+      r.modificador = mod;
+      if (!r.critico && !r.falhaCritica && r.dt !== null) {
+        r.sucesso = r.total >= r.dt;
+        r.desfecho = r.sucesso ? "sucesso" : "falha";
+      }
+    }
+    r.pavor = this.dados.find((d) => d.pavor) ?? null;
+    r.consumidos = this.dados.filter((d) => d.consumido).length;
+    return r;
+  }
+
+  /**
+   * Dado de pavor: os dados do teste que tiraram MENOS que ele são consumidos.
+   * Chamar logo depois do `evaluate`.
+   */
+  aplicarPavor() {
+    const indicePavor = this.componentes.findIndex((c) => c.tipo === "pavor");
+    if (indicePavor < 0) return this;
+    const valorPavor = this.dice[indicePavor].results[0].result;
+    for (const r of this.dice[indicePavor].results) { r.active = false; r.discarded = true; }
+    const consumidos = [];
+    this.dice.forEach((termo, i) => {
+      if (i === indicePavor) return;
+      if (termo.results[0].result < valorPavor) {
+        consumidos.push(i);
+        for (const r of termo.results) { r.active = false; r.discarded = true; }
+      }
+    });
+    this.options.consumidos = consumidos;
+    this._total = this.resultado.total;
+    return this;
   }
 
   get ra() { return this.resultado.ra; }
@@ -91,19 +152,21 @@ export class OP2Roll extends Roll {
    * @param {number[]} indices
    */
   aplicarSelecao(indices) {
-    const escolhidos = new Set(indices.slice(0, MAX_DADOS_CONTADOS));
+    const validos = new Set(this.dadosDoTeste.map((d) => d.indice));
+    const escolhidos = new Set(indices.filter((i) => validos.has(i)).slice(0, MAX_DADOS_CONTADOS));
     this.dice.forEach((termo, i) => {
+      if (!validos.has(i)) return;
       const ativo = escolhidos.has(i);
       for (const r of termo.results) {
         r.active = ativo;
         r.discarded = !ativo;
       }
     });
-    this._total = analise.soma(this.dados);
+    this._total = this.resultado.total;
     return this;
   }
 
   selecaoSugerida() {
-    return analise.selecaoSugerida(this.dados);
+    return analise.selecaoSugerida(this.dadosDoTeste);
   }
 }

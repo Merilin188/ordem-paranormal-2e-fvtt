@@ -14,7 +14,7 @@ import { SYSTEM_ID, CUSTO_PV_ARROMBAR, CUSTO_PV_SUSTENTAR, BONUS_DT_ALCANCAR_ARR
 import {
   acumularArrombar, arrombou, excedeuTentativas, danoDeAlcancar, avaliarPalpite, venceuDestrancar,
   podeTentarHackNestaRodada, chancesDeErroHackSocial, linhaDaTabelaDeHack,
-  tentativasPorRodadaDeDestrancar, tentativasDeDestrancarNaRodada,
+  tentativasPorRodadaDeDestrancar, tentativasDeDestrancarNaRodada, facesDasPosicoes,
 } from "./desafios.mjs";
 import { rolarTeste, renderizar, enviarParaChat, rotuloDePericia } from "../dice/teste.mjs";
 import { enviarCardAoMestre } from "../ui/card-mestre.mjs";
@@ -124,6 +124,8 @@ export async function arrombar(ator, desafioUuid, { rapido = false } = {}) {
 
   await enviarCard(ator, "arrombar", {
     titulo: game.i18n.localize("OP2.Desafio.Arrombar"),
+    ocultarProgresso: desafio.system.ocultarProgresso,
+    ocultarTentativas: desafio.system.ocultarTentativas,
     desafioNome: desafio.name,
     atorId: ator.id,
     componentes: roll.dados,
@@ -312,8 +314,9 @@ export async function gerarSenhaDestrancar(desafioUuid, { tamanho, facesSenha } 
 
   const tam = tamanho ?? desafio.system.tamanhoSenha;
   const faces = facesSenha ?? desafio.system.facesSenha;
-  const roll = await new Roll(`${tam}d${faces}`).evaluate();
-  const senha = roll.dice[0].results.map((r) => r.result);
+  const porPosicao = facesDasPosicoes({ ...desafio.system, tamanhoSenha: tam, facesSenha: faces });
+  const roll = await new Roll(porPosicao.map((f) => `1d${f}`).join(" + ")).evaluate();
+  const senha = roll.dice.map((d) => d.results[0].result);
 
   await gravarNoDesafio(desafio, {
     "system.tamanhoSenha": tam,
@@ -392,6 +395,7 @@ export async function tentarDestrancar(ator, desafioUuid, palpite) {
   // A senha NÃO vai no card: ele nasce no cliente do jogador. O mestre a vê no app.
   await enviarCard(ator, "destrancar", {
     titulo: game.i18n.localize("OP2.Desafio.Destrancar"),
+    ocultarTentativas: desafio.system.ocultarTentativas,
     desafioNome: desafio.name,
     venceu,
     quebrado,

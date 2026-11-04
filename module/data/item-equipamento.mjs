@@ -15,6 +15,10 @@ export class EquipamentoData extends foundry.abstract.TypeDataModel {
 
       /** Armas mudam o dano de RB para RA no combate corpo a corpo (spec §8.1). */
       arma: new BooleanField({ required: true, initial: false }),
+      /** Modificador de dano da arma: dano = RA + modificador. */
+      danoBonus: new NumberField({ required: true, initial: 0, integer: true, nullable: false }),
+      /** Pontos de armadura que o item fornece. */
+      armadura: new NumberField({ required: true, initial: 0, min: 0, integer: true, nullable: false }),
 
       /** Ferramentas com carga limitada: UV tem 3, Pó Revelador tem 5 (spec §9). */
       cargas: new SchemaField({

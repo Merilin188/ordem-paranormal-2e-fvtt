@@ -56,6 +56,18 @@
       <input type="number" name="system.dtObjeto" value="{{sistema.dtObjeto}}" min="0"
         {{#unless editavel}}disabled{{/unless}}>
     </label>
+    {{!-- O que os jogadores NÃO veem (cards do chat, painel e janela do Destrancar). --}}
+    <fieldset>
+      <legend>{{localize "OP2.Desafio.VisivelJogadores"}}</legend>
+      <label class="op2-campo op2-campo--inline">
+        <input type="checkbox" name="system.ocultarTentativas" {{#if sistema.ocultarTentativas}}checked{{/if}} {{#unless editavel}}disabled{{/unless}}>
+        <span>{{localize "OP2.Desafio.OcultarTentativas"}}</span>
+      </label>
+      <label class="op2-campo op2-campo--inline">
+        <input type="checkbox" name="system.ocultarProgresso" {{#if sistema.ocultarProgresso}}checked{{/if}} {{#unless editavel}}disabled{{/unless}}>
+        <span>{{localize "OP2.Desafio.OcultarProgresso"}}</span>
+      </label>
+    </fieldset>
   {{/if}}
 
   {{#if sistema.abordagens.arrombar}}
@@ -153,6 +165,35 @@
         {{/if}}
       </div>
       <p class="op2-ajuda">{{localize "OP2.Desafio.SenhaAjuda"}}</p>
+
+      {{!-- Senha manual e dado por posição (ex.: d8 + d6 + d12). --}}
+      {{#if editavel}}
+        <span class="op2-acoes__subtitulo">{{localize "OP2.Desafio.SenhaManual"}}</span>
+        <div class="op2-senha-manual">
+          {{#each posicoesSenha}}
+            <div class="op2-senha-manual__pos">
+              <span class="op2-senha-manual__num">{{numero}}</span>
+              <label>{{localize "OP2.Desafio.DadoPosicao"}}
+                <select data-faces-pos="{{indice}}">
+                  {{#each ../opcoesFaces}}<option value="{{this}}" {{#if (op2Eq this ../faces)}}selected{{/if}}>d{{this}}</option>{{/each}}
+                </select>
+              </label>
+              <label>{{localize "OP2.Desafio.ValorPosicao"}}
+                <input type="number" data-valor-pos="{{indice}}" value="{{valor}}" min="1" placeholder="?">
+              </label>
+            </div>
+          {{/each}}
+        </div>
+        <div class="op2-desafio-senha">
+          <button type="button" class="op2-botao op2-botao--pequeno" data-action="salvarDados">
+            <i class="fa-solid fa-dice-d20" aria-hidden="true"></i> {{localize "OP2.Desafio.SalvarDados"}}
+          </button>
+          <button type="button" class="op2-botao op2-botao--pequeno" data-action="salvarSenhaManual">
+            <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> {{localize "OP2.Desafio.SalvarSenhaManual"}}
+          </button>
+        </div>
+        <p class="op2-ajuda">{{localize "OP2.Desafio.SenhaManualAjuda"}}</p>
+      {{/if}}
       {{#if historicoDestrancar.length}}
         <span class="op2-acoes__subtitulo">{{localize "OP2.Desafio.HistoricoDestrancar"}}</span>
         <table class="op2-destrancar__historico">

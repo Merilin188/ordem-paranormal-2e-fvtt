@@ -12,7 +12,6 @@
 import { SYSTEM_ID } from "../config.mjs";
 import { dtDaQueda } from "./queda.mjs";
 import { rolarTeste, renderizar } from "../dice/teste.mjs";
-import { lerConfig } from "../settings/register.mjs";
 
 /** @typedef {"ferimento"|"trauma"} TipoDeQueda */
 
@@ -28,6 +27,13 @@ const CONFIGURACAO = {
     contador: "testesTrauma",
     pericia: "disciplina",
     i18n: "OP2.Trauma",
+  },
+  // Moribundo: no fim de cada rodada, teste de morte (Físico + Vigor, DT +3 por teste).
+  morte: {
+    recurso: "pv",
+    contador: "testesMorte",
+    pericia: "vigor",
+    i18n: "OP2.Morte",
   },
 };
 
@@ -48,16 +54,13 @@ export async function pedirTesteDeQueda(ator, tipo) {
       pericia: game.i18n.localize(`OP2.Pericia.${config.pericia}`),
       dt: dtDaQueda(testes),
     }),
-    consequencia: game.i18n.localize(tipo === "trauma"
-      ? `OP2.Trauma.Consequencia.${lerConfig("falhaTrauma")}`
-      : "OP2.Ferimento.Consequencia"),
+    consequencia: game.i18n.localize(`${config.i18n}.Consequencia`),
     rotuloBotao: game.i18n.format(`${config.i18n}.Rolar`, { dt: dtDaQueda(testes) }),
   });
 
   return ChatMessage.create({
     content: conteudo,
     speaker: ChatMessage.getSpeaker({ actor: ator }),
-    whisper: sussurro(ator),
     flags: { [SYSTEM_ID]: { tipo: "queda", atorId: ator.id } },
   });
 }
@@ -85,25 +88,52 @@ export async function rolarTesteDeQueda(ator, tipo, { rapido = false } = {}) {
 
   await ator.update({ [`system.estado.${config.contador}`]: testes + 1 });
 
-  const consequencia = tipo === "trauma" ? lerConfig("falhaTrauma") : "morte";
+  // Resultado pela tabela do teste (lesão/morte: Físico + Vigor; trauma: Emoção + Disciplina).
+  const desfecho = roll.desfecho;
+  let tabela = null;
+  let chaveTexto;
+  if (tipo === "trauma") {
+    chaveTexto = roll.sucesso ? "Sucesso" : "Falha";
+    if (!roll.sucesso) tabela = "traumas";
+  } else if (desfecho === "critico") {
+    chaveTexto = "Critico";
+    await recuperar(ator, "pv", 1);
+    await definirCondicao(ator, "inconsciente", false);
+    await definirCondicao(ator, "moribundo", false);
+  } else if (desfecho === "falha-critica") {
+    chaveTexto = "FalhaCritica";
+    await definirCondicao(ator, "morto", true);
+  } else if (roll.sucesso) {
+    chaveTexto = "Sucesso";
+    await definirCondicao(ator, "inconsciente", true);
+    if (!ator.statuses?.has("moribundo")) {
+      await definirCondicao(ator, "moribundo", true);
+      await ator.update({ "system.estado.moribundoDesde": 1 });
+    }
+  } else {
+    chaveTexto = "Falha";
+    tabela = "lesoes";
+  }
+
   const conteudo = await renderizar(`systems/${SYSTEM_ID}/templates/chat/queda-resultado.hbs`, {
     sucesso: roll.sucesso,
     titulo: game.i18n.localize(`${config.i18n}.Titulo`),
     dt,
     total: roll.total,
-    texto: roll.sucesso
-      ? game.i18n.format(`${config.i18n}.Sucesso`, { ator: ator.name })
-      : game.i18n.format(`${config.i18n}.Falha.${consequencia}`, { ator: ator.name }),
+    texto: game.i18n.format(`${config.i18n}.Resultado.${chaveTexto}`, { ator: ator.name }),
     proximaDt: dtDaQueda(testes + 1),
+    tabela,
+    rotuloTabela: tabela ? game.i18n.localize(`OP2.Tabela.Abrir.${tabela}`) : "",
+    atorId: ator.id,
   });
 
   await ChatMessage.create({
     content: conteudo,
     speaker: ChatMessage.getSpeaker({ actor: ator }),
-    whisper: sussurro(ator),
     flags: { [SYSTEM_ID]: { tipo: "queda-resultado", atorId: ator.id } },
   });
 
+  const consequencia = chaveTexto;
   return { roll, sucesso: roll.sucesso, dt, consequencia };
 }
 
@@ -112,10 +142,18 @@ export async function zerarContadoresDeQueda(ator) {
   await ator.update({
     "system.estado.testesFerimento": 0,
     "system.estado.testesTrauma": 0,
+    "system.estado.testesMorte": 0,
   });
 }
 
-function sussurro(ator) {
-  const donos = game.users.filter((u) => u.isGM || ator.testUserPermission(u, "OWNER"));
-  return donos.map((u) => u.id);
+async function recuperar(ator, recurso, n) {
+  const r = ator.system.recursos[recurso];
+  await ator.update({ [`system.recursos.${recurso}.value`]: Math.min(r.max, r.value + n) });
+}
+
+/** Liga/desliga uma condição do sistema no ator (e nos tokens dele). */
+export async function definirCondicao(ator, id, ativo) {
+  if (!ator?.toggleStatusEffect) return;
+  if (Boolean(ator.statuses?.has(id)) === ativo) return;
+  await ator.toggleStatusEffect(id, { active: ativo });
 }

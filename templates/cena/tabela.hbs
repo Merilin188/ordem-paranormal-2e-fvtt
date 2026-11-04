@@ -1,0 +1,27 @@
+<div class="op2-tabela">
+  <header class="op2-tabela__topo">
+    {{#if ator}}<img src="{{ator.img}}" alt=""><strong>{{ator.nome}}</strong>{{/if}}
+    <span class="op2-tabela__formula">{{formula}}{{#if resultado}} · <strong class="op2-tabela__resultado">{{resultado}}</strong>{{/if}}</span>
+  </header>
+  <div class="op2-tabela__linhas">
+    <table>
+      <thead><tr><th>{{formula}}</th><th>{{localize "OP2.Tabela.Efeito"}}</th></tr></thead>
+      <tbody>
+        {{#each linhas}}
+          <tr class="{{#if sorteada}}op2-tabela__sorteada{{/if}}">
+            <td class="op2-tabela__faixa"><span>{{faixa}}</span></td>
+            <td><strong>{{nome}}.</strong> {{texto}}</td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+  {{#if repetida}}<p class="op2-tabela__aviso">{{localize "OP2.Tabela.Repetida"}}</p>{{/if}}
+  {{#if podeRolar}}
+    <button type="button" class="op2-dt__principal" data-action="rolar"><i class="fa-solid fa-dice-d20"></i> {{localize "OP2.Tabela.Rolar" formula=formula}}</button>
+  {{else if rolando}}
+    <p class="op2-tabela__aviso"><i class="fa-solid fa-spinner fa-spin"></i> {{localize "OP2.Tabela.Rolando"}}</p>
+  {{else if aguardando}}
+    <p class="op2-tabela__aviso">{{localize "OP2.Tabela.Aguardando" nome=ator.nome}}</p>
+  {{/if}}
+</div>

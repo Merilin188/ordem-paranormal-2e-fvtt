@@ -1,0 +1,40 @@
+<section class="op2-painel op2-painel--relacoes tab {{tabs.relacoes.cssClass}}" data-group="principal" data-tab="relacoes">
+  <span class="op2-tag op2-tag--secao">{{localize "OP2.Relacoes.Titulo"}}</span>
+  <p class="op2-ajuda">{{localize "OP2.Relacoes.Ajuda"}}</p>
+  <ol class="op2-relacoes">
+    {{#each relacoes}}
+      <li class="op2-relacao">
+        <input type="text" class="op2-relacao__nome" data-relacao-campo="nome" data-indice="{{indice}}" value="{{nome}}"
+          placeholder="{{localize 'OP2.Relacoes.Nome'}}" {{#unless ../editavel}}disabled{{/unless}}>
+        <span class="op2-relacao__grau" role="group" aria-label="{{localize 'OP2.Relacoes.Grau'}}">
+          {{#each circulos}}
+            <button type="button" class="op2-relacao__circulo {{#if cheio}}cheio{{/if}}" data-action="definirGrau"
+              data-indice="{{../indice}}" data-grau="{{n}}" data-tooltip="{{localize (op2Concat 'OP2.Relacoes.Grau' n)}}"
+              {{#unless @root.editavel}}disabled{{/unless}}></button>
+          {{/each}}
+        </span>
+        <input type="text" class="op2-relacao__rotulo" data-relacao-campo="rotulo" data-indice="{{indice}}" value="{{rotulo}}"
+          placeholder="{{localize 'OP2.Relacoes.Rotulo'}}" {{#unless ../editavel}}disabled{{/unless}}>
+        <input type="text" class="op2-relacao__descricao" data-relacao-campo="descricao" data-indice="{{indice}}" value="{{descricao}}"
+          placeholder="{{localize 'OP2.Relacoes.Descricao'}}" {{#unless ../editavel}}disabled{{/unless}}>
+        {{#if ../editavel}}
+          <button type="button" class="op2-botao-icone" data-action="removerRelacao" data-indice="{{indice}}"
+            aria-label="{{localize 'OP2.Relacoes.Remover'}}"><i class="fa-solid fa-trash"></i></button>
+        {{/if}}
+      </li>
+    {{else}}
+      <li class="op2-ajuda">{{localize "OP2.Relacoes.Vazio"}}</li>
+    {{/each}}
+  </ol>
+  {{#if editavel}}
+    <button type="button" class="op2-botao op2-botao--pequeno" data-action="adicionarRelacao">
+      <i class="fa-solid fa-plus"></i> {{localize "OP2.Relacoes.Adicionar"}}
+    </button>
+  {{/if}}
+  <details class="op2-relacoes__regras">
+    <summary>{{localize "OP2.Relacoes.Beneficios"}}</summary>
+    <p><strong>{{localize "OP2.Relacoes.Grau1"}}:</strong> {{localize "OP2.Relacoes.Beneficio1"}}</p>
+    <p><strong>{{localize "OP2.Relacoes.Grau2"}}:</strong> {{localize "OP2.Relacoes.Beneficio2"}}</p>
+    <p><strong>{{localize "OP2.Relacoes.Grau3"}}:</strong> {{localize "OP2.Relacoes.Beneficio3"}}</p>
+  </details>
+</section>

@@ -18,7 +18,7 @@ import { SYSTEM_ID } from "../config.mjs";
 import {
   gerarSenhaDestrancar, tentarDestrancar, carregarDesafio, posicoesDoPalpite, rodadaDoDesafio,
 } from "./acoes-desafio.mjs";
-import { tentativasPorRodadaDeDestrancar, tentativasDeDestrancarNaRodada } from "./desafios.mjs";
+import { tentativasPorRodadaDeDestrancar, tentativasDeDestrancarNaRodada, facesDasPosicoes } from "./desafios.mjs";
 import { vestirPerfil } from "../ui/perfil.mjs";
 import { paraTodos, registrarAcaoDeTodos } from "../ui/socket.mjs";
 
@@ -105,6 +105,7 @@ export class DestrancarApp extends HandlebarsApplicationMixin(ApplicationV2) {
     const podeAgir = Boolean(ator?.isOwner);
     const completo = this.palpite.every((v) => v !== null);
 
+    const facesPos = facesDasPosicoes(sistema);
     // Ao destrancar, a janela do jogador mostra a senha certa nas caixas.
     const caixas = (destrancadoAgora) => this.palpite.map((valor, indice) => {
       const mostrar = destrancadoAgora ? sistema.senha[indice] : valor;
@@ -112,6 +113,7 @@ export class DestrancarApp extends HandlebarsApplicationMixin(ApplicationV2) {
         : (ultimo && ultimo.palpite[indice] === valor ? ultimo.resultado[indice] : null);
       return {
         indice,
+        faces: facesPos[indice],
         valor: mostrar ?? "—",
         vazio: mostrar === null || mostrar === undefined,
         resposta,
@@ -139,6 +141,8 @@ export class DestrancarApp extends HandlebarsApplicationMixin(ApplicationV2) {
       destrancado: sistema.destrancado,
       encerrado,
       facesSenha: sistema.facesSenha,
+      facesPos,
+      ocultarTentativas: sistema.ocultarTentativas && !modoMestre,
       caixas: caixas(sistema.destrancado),
       travado: encerrado || esgotouRodada || !podeAgir,
       podeTentar: podeAgir && temSenha && !encerrado && !esgotouRodada && completo,

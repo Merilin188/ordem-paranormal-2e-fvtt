@@ -21,8 +21,16 @@ export function vencedorDoOposto(totalAtacante, totalDefensor) {
  * Dano do vencedor: RA empunhando arma, RB desarmado (spec §8.1).
  * @param {{ra: number, rb: number}} leitura
  */
-export function danoDoAtaque(leitura, { armado }) {
-  return armado ? leitura.ra : leitura.rb;
+export function danoDoAtaque(leitura, { armado, bonus = 0 }) {
+  return armado ? leitura.ra + bonus : leitura.rb;
+}
+
+/**
+ * Empate em ataques corpo a corpo opostos: os dois se acertam, desde que cada um
+ * tenha atingido a DT básica (7).
+ */
+export function empateAcertaOsDois(totalA, totalB, dtBasica = 7) {
+  return totalA === totalB && totalA >= dtBasica && totalB >= dtBasica;
 }
 
 /**
@@ -30,17 +38,17 @@ export function danoDoAtaque(leitura, { armado }) {
  * d6 somado. Se vencer, ninguém sofre nem causa dano — não é contra-ataque.
  * @returns {{dano: number, alvo: "atacante"|"defensor"|null}}
  */
-export function resolverAtaque({ vencedor, esquiva, leituraAtacante, leituraDefensor, armadoAtacante, armadoDefensor }) {
+export function resolverAtaque({ vencedor, esquiva, leituraAtacante, leituraDefensor, armadoAtacante, armadoDefensor, bonusAtacante = 0, bonusDefensor = 0 }) {
   if (vencedor === "empate") return { dano: 0, alvo: null };
 
   if (esquiva) {
     // Defesa pura: vencer só anula. Perder deixa o ataque acontecer normalmente.
     if (vencedor === "defensor") return { dano: 0, alvo: null };
-    return { dano: danoDoAtaque(leituraAtacante, { armado: armadoAtacante }), alvo: "defensor" };
+    return { dano: danoDoAtaque(leituraAtacante, { armado: armadoAtacante, bonus: bonusAtacante }), alvo: "defensor" };
   }
 
   // Troca de golpes: quem vencer causa dano no outro.
   return vencedor === "atacante"
-    ? { dano: danoDoAtaque(leituraAtacante, { armado: armadoAtacante }), alvo: "defensor" }
-    : { dano: danoDoAtaque(leituraDefensor, { armado: armadoDefensor }), alvo: "atacante" };
+    ? { dano: danoDoAtaque(leituraAtacante, { armado: armadoAtacante, bonus: bonusAtacante }), alvo: "defensor" }
+    : { dano: danoDoAtaque(leituraDefensor, { armado: armadoDefensor, bonus: bonusDefensor }), alvo: "atacante" };
 }

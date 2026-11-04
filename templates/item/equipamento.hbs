@@ -22,6 +22,14 @@
         {{#unless editavel}}disabled{{/unless}}>
       <span>{{localize "OP2.Equipamento.Arma"}}</span>
     </label>
+    <label class="op2-campo">
+      <span>{{localize "OP2.Equipamento.DanoBonus"}}</span>
+      <input type="number" name="system.danoBonus" value="{{sistema.danoBonus}}" {{#unless editavel}}disabled{{/unless}}>
+    </label>
+    <label class="op2-campo">
+      <span>{{localize "OP2.Equipamento.Armadura"}}</span>
+      <input type="number" name="system.armadura" value="{{sistema.armadura}}" min="0" {{#unless editavel}}disabled{{/unless}}>
+    </label>
   </div>
   <p class="op2-ajuda">{{localize "OP2.Equipamento.ArmaAjuda"}}</p>
 

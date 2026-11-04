@@ -12,4 +12,12 @@
   {{!-- A escalada é por teste feito, não por falha (spec §8.2): quem passou hoje
         enfrenta uma DT maior da próxima vez. --}}
   <p class="op2-ajuda">{{localize "OP2.Ferimento.ProximaDT" dt=proximaDt}}</p>
+  {{#if tabela}}
+    <div class="op2-card__acoes">
+      <button type="button" class="op2-botao op2-botao--pequeno op2-botao--perigo"
+        data-op2-acao="abrir-tabela" data-tabela="{{tabela}}" data-ator-id="{{atorId}}">
+        <i class="fa-solid fa-table-list"></i> {{rotuloTabela}}
+      </button>
+    </div>
+  {{/if}}
 </div>
