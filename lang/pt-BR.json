@@ -11,7 +11,7 @@
       "ponto-interesse": "Ponto de Interesse",
       "desafio-acesso": "Desafio",
       "ferramenta": "Ferramenta",
-      "ocupacao": "Ocupação",
+      "ocupacao": "Vocação",
       "evento": "Evento"
     }
   },
@@ -86,7 +86,7 @@
     },
     "Campo": {
       "Perfil": "Perfil",
-      "Ocupacao": "Ocupação",
+      "Ocupacao": "Vocação",
       "Nivel": "Nível",
       "Nex": "NEX",
       "NexAjuda": "NEX é a progressão paranormal. Sem mecânica publicada no playtest ainda; o campo já existe para quando sair."
@@ -126,7 +126,7 @@
     },
     "Habilidade": {
       "Adicionar": "Nova habilidade",
-      "Vazio": "Nenhuma habilidade. O personagem começa com duas: uma do perfil, uma da ocupação.",
+      "Vazio": "Nenhuma habilidade. O personagem começa com duas: uma do perfil, uma da vocação.",
       "OrigemRotulo": "Origem",
       "Custo": "Custo",
       "SemCusto": "Sem custo",
@@ -143,7 +143,7 @@
       "UsoEmInvestigacaoAjuda": "O padrão sugerido pelo playtest é um aumento de passo no teste em questão.",
       "Origem": {
         "perfil": "Perfil",
-        "ocupacao": "Ocupação",
+        "ocupacao": "Vocação",
         "nivel": "Nível",
         "treino": "Treino",
         "outra": "Outra"
@@ -854,7 +854,7 @@
       "AcaoExtraUsada": "{nome} gasta 3 espaços de ímpeto: faz uma ação extra nesta cena de conflito."
     },
     "Ocupacao": {
-      "Ajuda": "Ocupação é texto livre na ficha e concede uma habilidade (spec §2.1). Arraste esta ocupação para um personagem: ela preenche o campo e traz a habilidade junto.",
+      "Ajuda": "Vocação (antes chamada ocupação) é texto livre na ficha e concede uma habilidade (spec §2.1). Arraste esta vocação para um personagem: ela preenche o campo e traz a habilidade junto.",
       "Habilidade": "Habilidade concedida",
       "HabilidadePlaceholder": "Nome da habilidade",
       "HabilidadeUuid": "De onde puxar a habilidade",
@@ -986,7 +986,7 @@
         "ficha": "Ficha e motor de dados: escada d4→d12, dois dados somados, RA/RB, crítico e falha crítica com a tabela do livro.",
         "investigacao": "Cenas de investigação: pontos de interesse com o quadro Perícia · DT · Informação, Examinar, Interagir, Recapitular, Compartilhar, sobrecarga mental e o painel do mestre.",
         "desafios": "Desafios de acesso (Arrombar, Destrancar, Hackear, Sustentar) e as dez ferramentas da Ordo Realitas, com Laboratório Portátil e Rádio Modificado em janela própria.",
-        "compendios": "{n} compêndios de regras: habilidades, ocupações e ferramentas. Pré-gerados, cena, handouts e trilha entram com a aventura de cada ato."
+        "compendios": "{n} compêndios de regras: habilidades, vocações e ferramentas. Pré-gerados, cena, handouts e trilha entram com a aventura de cada ato."
       },
       "AventurasTitulo": "As aventuras saem do seu PDF",
       "AventurasTexto": "O texto dos atos é do livro, e a Licença da Comunidade não permite redistribuí-lo. Escolha o PDF do playtest que você já tem: o sistema lê o texto aqui no navegador, monta cada ato como uma aventura e guarda no compêndio deste mundo, pronta para importar. O PDF gratuito basta para o Ato I.",

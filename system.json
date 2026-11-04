@@ -167,7 +167,7 @@
     },
     {
       "name": "ocupacoes",
-      "label": "Ocupações",
+      "label": "Vocações",
       "path": "packs/ocupacoes",
       "type": "Item",
       "system": "ordem-paranormal-2e",
