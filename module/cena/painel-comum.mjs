@@ -82,6 +82,8 @@ export function PainelInvestigacaoMixin(Base) {
         adicionarLinhaSobrecarga: PainelInvestigacaoComum.#adicionarLinhaSobrecarga,
         removerLinhaSobrecarga: PainelInvestigacaoComum.#removerLinhaSobrecarga,
         criarEvento: PainelInvestigacaoComum.#criarEvento,
+        criarPoi: PainelInvestigacaoComum.#criarPoi,
+        criarDesafio: PainelInvestigacaoComum.#criarDesafio,
         abrirEvento: PainelInvestigacaoComum.#abrirEvento,
         desvincularEvento: PainelInvestigacaoComum.#desvincularEvento,
         dispararEvento: PainelInvestigacaoComum.#dispararEvento,
@@ -826,6 +828,30 @@ export function PainelInvestigacaoMixin(Base) {
         img: "icons/svg/clockwork.svg",
       }]);
       await vincularEvento(investigacao, item.uuid);
+      item.sheet.render(true);
+    }
+
+    /** Ponto de interesse novo, já vinculado (oculto) — o mestre preenche o quadro na ficha. */
+    static async #criarPoi() {
+      if (!game.user.isGM) return;
+      const investigacao = this.investigacao;
+      if (!investigacao) return void ui.notifications.warn(game.i18n.localize("OP2.Painel.SemInvestigacao"));
+      const [item] = await Item.createDocuments([{
+        name: game.i18n.localize("OP2.Painel.NovoPoi"), type: "ponto-interesse",
+      }]);
+      await vincularPoi(investigacao, item.uuid);
+      item.sheet.render(true);
+    }
+
+    /** Desafio de acesso novo, já vinculado (oculto). */
+    static async #criarDesafio() {
+      if (!game.user.isGM) return;
+      const investigacao = this.investigacao;
+      if (!investigacao) return void ui.notifications.warn(game.i18n.localize("OP2.Painel.SemInvestigacao"));
+      const [item] = await Item.createDocuments([{
+        name: game.i18n.localize("OP2.Painel.NovoDesafio"), type: "desafio-acesso",
+      }]);
+      await vincularDesafio(investigacao, item.uuid);
       item.sheet.render(true);
     }
 

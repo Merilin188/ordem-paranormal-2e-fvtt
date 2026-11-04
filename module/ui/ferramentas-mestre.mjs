@@ -12,11 +12,11 @@ import { lerConfig } from "../settings/register.mjs";
 import { registrarAcaoDeMestre, comoMestre } from "./socket.mjs";
 import { registrarAcaoDeChat } from "./chat.mjs";
 import { abrirAventurasApp } from "../aventura/aventuras-app.mjs";
-import { investigacaoAtiva } from "../cena/investigacao-ativa.mjs";
+import { investigacaoAtiva, todasInvestigacoes, removerDesafio } from "../cena/investigacao-ativa.mjs";
 import {
   arrombar, hackTecnico, hackSocial, desafioGenerico, sustentar,
 } from "../cena/acoes-desafio.mjs";
-import { abrirDestrancar } from "../cena/destrancar-app.mjs";
+import { abrirDestrancar, iniciarDestrancar } from "../cena/destrancar-app.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } = foundry.applications.api;
 const ICONES = `systems/${SYSTEM_ID}/assets/icons/ferramentas-mestre`;
@@ -327,6 +327,8 @@ class DesafiosApp extends HandlebarsApplicationMixin(ApplicationV2) {
       abordagem: DesafiosApp.#abordagem,
       abrir: DesafiosApp.#abrir,
       novo: DesafiosApp.#novo,
+      excluir: DesafiosApp.#excluir,
+      monitorar: DesafiosApp.#monitorar,
       escopo: DesafiosApp.#escopo,
     },
   };
@@ -337,11 +339,16 @@ class DesafiosApp extends HandlebarsApplicationMixin(ApplicationV2) {
   todos = false;
 
   async _prepareContext() {
-    const atores = personagens();
-    if (!this.atorId || !game.actors.get(this.atorId)) {
-      this.atorId = selecionados().find((a) => a.type === "personagem")?.id ?? atores[0]?.id ?? null;
-    }
     const investigacao = investigacaoAtiva();
+    // Participantes da investigação primeiro, depois os demais personagens e NPCs.
+    const daCena = (investigacao?.system.participantes ?? [])
+      .map((uuid) => fromUuidSync(uuid)).filter((a) => a?.documentName === "Actor");
+    const vistos = new Set();
+    const atores = [...daCena, ...personagens(), ...game.actors.filter((a) => a.type === "npc")]
+      .filter((a) => (vistos.has(a.id) ? false : vistos.add(a.id)));
+    if (!this.atorId || !atores.some((a) => a.id === this.atorId)) {
+      this.atorId = selecionados()[0]?.id ?? atores[0]?.id ?? null;
+    }
     let itens;
     if (!this.todos && investigacao) {
       itens = (await Promise.all((investigacao.system.desafios ?? []).map((uuid) => fromUuid(uuid)))).filter(Boolean);
@@ -350,9 +357,17 @@ class DesafiosApp extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     const desafios = itens.map((item) => {
       const ab = item.system.abordagens ?? {};
+      const s = item.system;
+      const sessao = item.getFlag(SYSTEM_ID, "sessao");
+      let estado = "";
+      if (s.destrancado) estado = L("Estado.destrancado");
+      else if (s.quebrado) estado = L("Estado.quebrado");
+      else if (sessao?.ativa) estado = F("Estado.emCurso", { nome: game.actors.get(sessao.atorId)?.name ?? "?" });
       return {
         uuid: item.uuid,
         nome: item.name,
+        estado,
+        emCurso: Boolean(sessao?.ativa) && !s.destrancado && !s.quebrado,
         img: item.img,
         abordagens: ABORDAGENS.filter((chave) => ab[chave]).map((chave) => ({
           chave,
@@ -363,7 +378,9 @@ class DesafiosApp extends HandlebarsApplicationMixin(ApplicationV2) {
       };
     });
     return {
-      atores: atores.map((a) => ({ id: a.id, nome: a.name, selecionado: a.id === this.atorId })),
+      atores: atores.map((a) => ({
+        id: a.id, nome: a.type === "npc" ? `${a.name} (NPC)` : a.name, selecionado: a.id === this.atorId,
+      })),
       desafios,
       investigacao: investigacao?.name ?? null,
       todos: this.todos || !investigacao,
@@ -380,9 +397,9 @@ class DesafiosApp extends HandlebarsApplicationMixin(ApplicationV2) {
 
   static async #abordagem(_evento, alvo) {
     const { uuid, chave } = alvo.dataset;
-    if (chave === "destrancar") return void abrirDestrancar(uuid);
     const ator = game.actors.get(this.atorId);
     if (!ator) return void ui.notifications.warn(L("EscolhaPersonagem"));
+    if (chave === "destrancar") return void await iniciarDestrancar(uuid, ator.id);
     const acoes = { arrombar, hackTecnico, hackSocial, generico: desafioGenerico, sustentar };
     if (chave === "sustentar") await sustentar(ator, { desafioUuid: uuid });
     else await acoes[chave]?.(ator, uuid);
@@ -400,6 +417,24 @@ class DesafiosApp extends HandlebarsApplicationMixin(ApplicationV2) {
     this.render();
   }
 
+  static #monitorar(_evento, alvo) {
+    abrirDestrancar(alvo.dataset.uuid);
+  }
+
+  static async #excluir(_evento, alvo) {
+    const item = await fromUuid(alvo.dataset.uuid);
+    if (!item) return;
+    const ok = await DialogV2.confirm({
+      window: { title: L("ExcluirDesafio") },
+      content: `<p>${F("ExcluirConfirma", { nome: esc(item.name) })}</p>`,
+    });
+    if (!ok) return;
+    for (const investigacao of todasInvestigacoes()) {
+      if (investigacao.system.desafios?.includes(item.uuid)) await removerDesafio(investigacao, item.uuid);
+    }
+    await item.delete();
+  }
+
   static #escopo() {
     this.todos = !this.todos;
     this.render();
@@ -407,6 +442,13 @@ class DesafiosApp extends HandlebarsApplicationMixin(ApplicationV2) {
 }
 
 let appDesafios = null;
+
+// A lista acompanha o mundo: renomear, criar, excluir ou mexer na investigação.
+function rerrenderDesafios(doc) {
+  if (!appDesafios?.rendered) return;
+  if (doc.type === "desafio-acesso" || doc.type === "investigacao") appDesafios.render();
+}
+for (const gancho of ["createItem", "updateItem", "deleteItem", "updateActor"]) Hooks.on(gancho, rerrenderDesafios);
 function abrirDesafios() {
   appDesafios ??= new DesafiosApp();
   appDesafios.render({ force: true });
@@ -502,6 +544,10 @@ export function registrarFerramentasMestre() {
 
   registrarAcaoDeChat("ferr-solicitado", rolarSolicitado);
   registrarAcaoDeChat("ferr-oposto", rolarOposto);
+  registrarAcaoDeChat("ferr-abrir-destrancar", (ator, dataset) => {
+    if (!game.user.isGM && !ator.isOwner) return void ui.notifications.warn(L("SemPermissao"));
+    abrirDestrancar(dataset.desafioUuid);
+  });
   registrarAcaoDeMestre("ferrRegistrarSolicitacao", registrarSolicitacao);
   registrarAcaoDeMestre("ferrRegistrarOposto", registrarOposto);
 

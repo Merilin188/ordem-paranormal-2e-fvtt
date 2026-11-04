@@ -1,77 +1,125 @@
-<div class="op2-destrancar-corpo">
+<div class="op2-destrancar-corpo op2-dt">
   {{#unless existe}}
     <p class="op2-ajuda">{{localize "OP2.Aviso.DesafioAusente"}}</p>
   {{/unless}}
 
   {{#if existe}}
-    <header class="op2-destrancar__topo">
-      <strong>{{nome}}</strong>
-      <span class="op2-ajuda">
-        {{localize "OP2.Desafio.Tentativas"}}: {{tentativas}} / {{#if maxTentativas}}{{maxTentativas}}{{else}}∞{{/if}}
-        · {{localize "OP2.Desafio.DestrancarNaRodada" usadas=naRodada teto=tetoRodada dado=dadoCrime}}
-      </span>
-    </header>
-
-    {{#if ehGM}}
-      <p class="op2-ajuda">{{localize "OP2.Desafio.SenhaNaFicha"}}</p>
+  {{!-- Cabeçalho: participante e o teto por rodada (Crime). --}}
+  <header class="op2-dt__topo">
+    {{#if ator}}<img src="{{ator.img}}" alt="">{{/if}}
+    <strong class="op2-dt__nome">{{#if ator}}{{ator.nome}}{{else}}{{localize "OP2.Ferramentas.Destrancar.SemParticipante"}}{{/if}}</strong>
+    {{#if modoMestre}}
+      <span class="op2-dt__selo">{{localize "OP2.Pericia.crime"}} {{dadoCrime}}</span>
+    {{else if destrancado}}
+      <span class="op2-dt__status op2-dt__status--ok">{{localize "OP2.Ferramentas.Desfecho.sucesso"}}</span>
+    {{else if quebrado}}
+      <span class="op2-dt__status op2-dt__status--falha">{{localize "OP2.Ferramentas.Desfecho.falha"}}</span>
+    {{else}}
+      <span class="op2-dt__info"><i class="fa-solid fa-dice"></i> {{localize "OP2.Ferramentas.Destrancar.PorRodada" teto=tetoRodada}}</span>
     {{/if}}
+  </header>
 
-    {{!-- Histórico: cada palpite com a resposta posição a posição (spec §7.1). --}}
-    {{#if historico.length}}
-      <table class="op2-destrancar__historico">
-        <tbody>
-          {{#each historico}}
-            <tr>
-              <td class="op2-destrancar__numero">{{numero}}</td>
-              <td>
-                <div class="op2-destrancar__linha">
-                  {{#each posicoes}}
-                    <span class="op2-destrancar__pos op2-destrancar__pos--{{valor}}" data-tooltip="{{rotulo}}">
-                      <span class="op2-destrancar__num">{{palpite}}</span>
-                      <i class="fa-solid {{icone}}" aria-hidden="true"></i>
-                    </span>
-                  {{/each}}
-                </div>
-              </td>
-            </tr>
-          {{/each}}
-        </tbody>
-      </table>
-      <p class="op2-ajuda">{{localize "OP2.Desafio.DestrancarLegenda"}}</p>
-    {{/if}}
+  {{#if modoMestre}}
+    {{!-- ===== MONITORAMENTO DO MESTRE ===== --}}
+    <section class="op2-dt__bloco">
+      <span class="op2-dt__rotulo">{{localize "OP2.Ferramentas.Destrancar.Gabarito"}}</span>
+      <div class="op2-dt__gabarito">
+        <div class="op2-dt__caixas op2-dt__caixas--pequenas">
+          {{#each senha}}<span class="op2-dt__caixa op2-dt__caixa--senha">{{this}}</span>{{/each}}
+          {{#unless temSenha}}<em>{{localize "OP2.Desafio.DestrancarGerando"}}</em>{{/unless}}
+        </div>
+        <div class="op2-dt__contadores">
+          <span>{{localize "OP2.Ferramentas.Destrancar.TentativasRodada"}}: {{naRodada}} / {{tetoRodada}}</span>
+          <span>{{localize "OP2.Ferramentas.Destrancar.TentativasTotais"}}: {{tentativas}} / {{maxTentativas}}</span>
+          <span>{{localize "OP2.Ferramentas.Destrancar.Rodada"}} {{rodada}}</span>
+        </div>
+      </div>
+    </section>
+
+    <span class="op2-dt__rotulo">{{localize "OP2.Ferramentas.Destrancar.Historico"}}</span>
+    <section class="op2-dt__bloco op2-dt__historico">
+      {{#each historico}}
+        <div class="op2-dt__tentativa">
+          <div class="op2-dt__tentativa-topo">
+            <strong>{{localize "OP2.Ferramentas.Destrancar.Tentativa"}} #{{numero}}</strong>
+            <span>{{quem}} · {{localize "OP2.Ferramentas.Destrancar.Rodada"}} {{rodada}}</span>
+          </div>
+          <div class="op2-dt__caixas op2-dt__caixas--pequenas">
+            {{#each posicoes}}
+              <div class="op2-dt__posicao">
+                <span class="op2-dt__caixa op2-dt__caixa--{{valor}}">{{palpite}}</span>
+                <span class="op2-dt__resposta op2-dt__resposta--{{valor}}"><i class="fa-solid {{icone}}"></i> {{rotulo}}</span>
+              </div>
+            {{/each}}
+          </div>
+        </div>
+      {{else}}
+        <p class="op2-dt__vazio">{{localize "OP2.Ferramentas.Destrancar.Aguardando"}}</p>
+      {{/each}}
+    </section>
 
     {{#if destrancado}}
-      <p class="op2-card__desfecho op2-card__desfecho--sucesso">
-        <i class="fa-solid fa-lock-open" aria-hidden="true"></i> {{localize "OP2.Desafio.Destrancou"}}
-      </p>
+      <p class="op2-dt__aviso op2-dt__aviso--ok"><strong>{{localize "OP2.Ferramentas.Destrancar.Destrancada"}}</strong></p>
     {{else if quebrado}}
-      <p class="op2-card__desfecho op2-card__desfecho--falha">
-        <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> {{localize "OP2.Desafio.Quebrou"}}
-      </p>
-    {{else if temSenha}}
-      <span class="op2-acoes__subtitulo">{{localize "OP2.Desafio.Palpite"}} · 1–{{facesSenha}}</span>
-      <div class="op2-destrancar__palpite">
-        {{#each palpite}}
-          <div class="op2-destrancar__posicao">
-            <button type="button" class="op2-botao-icone" data-action="incrementar" data-indice="{{@index}}"
-              data-faces="{{../facesSenha}}" aria-label="+">
-              <i class="fa-solid fa-chevron-up" aria-hidden="true"></i>
-            </button>
-            <span class="op2-destrancar__valor">{{this}}</span>
-            <button type="button" class="op2-botao-icone" data-action="decrementar" data-indice="{{@index}}" aria-label="−">
-              <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
-            </button>
-          </div>
-        {{/each}}
-      </div>
-
-      <button type="button" class="op2-botao" data-action="tentar" {{#if esgotouRodada}}disabled{{/if}}>
-        <i class="fa-solid fa-key" aria-hidden="true"></i> {{localize "OP2.Desafio.Tentar"}}
+      <p class="op2-dt__aviso op2-dt__aviso--falha"><strong>{{localize "OP2.Desafio.Quebrou"}}</strong></p>
+    {{else if sessaoAtiva}}
+      <button type="button" class="op2-dt__principal" data-action="avancarRodada">
+        {{localize "OP2.Ferramentas.Destrancar.Avancar" rodada=proximaRodada}}
       </button>
-    {{else if gerando}}
-      <p class="op2-ajuda"><i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> {{localize "OP2.Desafio.DestrancarGerando"}}</p>
-    {{else}}
-      <p class="op2-ajuda">{{localize "OP2.Desafio.SenhaAusente"}}</p>
     {{/if}}
+    <div class="op2-dt__links">
+      <a data-action="alternarVisao">{{localize "OP2.Ferramentas.Destrancar.VerComoJogador"}}</a>
+      <a data-action="novaSenha">{{localize "OP2.Ferramentas.Destrancar.NovaSenha"}}</a>
+      {{#if sessaoAtiva}}<a data-action="cancelar">{{localize "OP2.Ferramentas.Destrancar.Cancelar"}}</a>{{/if}}
+    </div>
+
+  {{else}}
+    {{!-- ===== VISÃO DO JOGADOR ===== --}}
+    <div class="op2-dt__caixas">
+      {{#each caixas}}
+        <div class="op2-dt__posicao">
+          {{#unless ../travado}}
+          <button type="button" class="op2-dt__seta" data-action="incrementar" data-indice="{{indice}}" data-faces="{{../facesSenha}}" aria-label="+">
+            <i class="fa-solid fa-chevron-up"></i></button>
+          {{/unless}}
+          <span class="op2-dt__caixa op2-dt__caixa--grande {{#if resposta}}op2-dt__caixa--{{resposta}}{{/if}} {{#if vazio}}op2-dt__caixa--vazia{{/if}}">{{valor}}</span>
+          {{#unless ../travado}}
+          <button type="button" class="op2-dt__seta" data-action="decrementar" data-indice="{{indice}}" data-faces="{{../facesSenha}}" aria-label="−">
+            <i class="fa-solid fa-chevron-down"></i></button>
+          {{/unless}}
+          {{#if resposta}}<span class="op2-dt__resposta op2-dt__resposta--{{resposta}}">{{rotulo}}</span>{{/if}}
+        </div>
+      {{/each}}
+    </div>
+
+    {{#if destrancado}}
+      <div class="op2-dt__aviso op2-dt__aviso--ok">
+        <strong>{{localize "OP2.Ferramentas.Destrancar.Destrancada"}}</strong>
+        <span>{{localize "OP2.Ferramentas.Destrancar.DestrancadaTexto"}}</span>
+      </div>
+      <p class="op2-dt__rodape-texto">{{localize "OP2.Ferramentas.Destrancar.Superado" rodadas=rodadasUsadas tentativas=tentativas max=maxTentativas}}</p>
+    {{else if quebrado}}
+      <div class="op2-dt__aviso op2-dt__aviso--falha"><strong>{{localize "OP2.Desafio.Quebrou"}}</strong></div>
+    {{else}}
+      {{#if esgotouRodada}}
+        <div class="op2-dt__aviso op2-dt__aviso--falha">
+          <strong>{{localize "OP2.Ferramentas.Destrancar.Esgotadas"}}</strong>
+          <span>{{localize "OP2.Ferramentas.Destrancar.AguardeRodada"}}</span>
+        </div>
+      {{else if gerando}}
+        <p class="op2-dt__vazio"><i class="fa-solid fa-spinner fa-spin"></i> {{localize "OP2.Desafio.DestrancarGerando"}}</p>
+      {{else unless podeAgir}}
+        <p class="op2-dt__vazio">{{localize "OP2.Ferramentas.Destrancar.SoParticipante"}}</p>
+      {{/if}}
+      <div class="op2-dt__contadores op2-dt__contadores--linha">
+        <span>{{localize "OP2.Ferramentas.Destrancar.TentativasRodada"}} <strong>{{naRodada}} / {{tetoRodada}}</strong></span>
+        <span>{{localize "OP2.Ferramentas.Destrancar.TentativasTotais"}} <strong class="op2-dt__perigo">{{tentativas}} / {{maxTentativas}}</strong></span>
+      </div>
+      <button type="button" class="op2-dt__principal" data-action="tentar" {{#unless podeTentar}}disabled{{/unless}}>
+        <i class="fa-solid fa-dice"></i> {{localize "OP2.Desafio.Destrancar"}}
+      </button>
+    {{/if}}
+    {{#if ehGM}}<div class="op2-dt__links"><a data-action="alternarVisao">{{localize "OP2.Ferramentas.Destrancar.VerMonitor"}}</a></div>{{/if}}
+  {{/if}}
   {{/if}}
 </div>

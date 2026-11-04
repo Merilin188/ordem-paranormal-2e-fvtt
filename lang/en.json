@@ -496,7 +496,12 @@
         "OrdemProgresso": "By progress",
         "Limpar": "Clear filters",
         "Contagem": "{visiveis} of {total}"
-      }
+      },
+      "CriarPoi": "Create point of interest",
+      "CriarDesafio": "Create challenge",
+      "NovoPoi": "New point of interest",
+      "NovoDesafio": "New access challenge",
+      "SemPOIsMestre": "No points of interest in this investigation. Use \"Create point of interest\" above, or drag a point-of-interest Item from the Items tab here."
     },
     "Rodada": {
       "Titulo": "Round {rodada}",
@@ -971,7 +976,6 @@
       "Venceu": "{nome} wins the opposed check.",
       "Lado": "Side {n}",
       "Ator": "Character / NPC",
-      "AgirComo": "Act as",
       "SoDaInvestigacao": "Investigation only",
       "TodosDoMundo": "Whole world",
       "ListandoMundo": "Showing every access challenge in the world.",
@@ -998,6 +1002,50 @@
       "Config": {
         "Mostrar": "GM tools",
         "MostrarDica": "Shows the floating bar with Request check, Opposed check, Access challenges and Import adventure (GM only). Shortcut: Shift+G."
+      },
+      "Participante": "Participant",
+      "AbrirFicha": "Open challenge sheet",
+      "Monitorar": "Monitor challenge",
+      "ExcluirDesafio": "Delete challenge",
+      "ExcluirConfirma": "Permanently delete <strong>{nome}</strong>? It is also removed from investigations.",
+      "Estado": {
+        "destrancado": "Unlocked",
+        "quebrado": "Broken",
+        "emCurso": "In progress: {nome}"
+      },
+      "Destrancar": {
+        "TituloMestre": "GM: monitoring",
+        "TituloJogador": "Challenge: unlock",
+        "SemParticipante": "No participant",
+        "PorRodada": "{teto} attempt(s)/round",
+        "Gabarito": "Secret answer (code)",
+        "TentativasRodada": "Attempts this round",
+        "TentativasTotais": "Total attempts",
+        "Rodada": "Round",
+        "Historico": "Attempt history",
+        "Tentativa": "Attempt",
+        "Aguardando": "Waiting for the first attempt.",
+        "Avancar": "Advance to round {rodada}",
+        "VerComoJogador": "View as player",
+        "VerMonitor": "Back to monitoring",
+        "NovaSenha": "Generate new code",
+        "Cancelar": "Cancel challenge",
+        "CancelarConfirma": "End this challenge? The window closes for players.",
+        "Destrancada": "Lock opened",
+        "DestrancadaTexto": "The lock was opened. Access is free.",
+        "Superado": "Challenge cleared in {rodadas} round(s) ({tentativas}/{max} total attempts).",
+        "Esgotadas": "No attempts left this round",
+        "AguardeRodada": "Waiting for the GM to start the next round.",
+        "SoParticipante": "Only the participant's owner can try.",
+        "CardTitulo": "Access challenge: unlock",
+        "CardTexto": "{nome} will try to unlock. Click to open the challenge window.",
+        "Abrir": "Open challenge",
+        "SemJogadorOnline": "No player owning the participant is online. The window opens when they click the chat card.",
+        "Resposta": {
+          "exato": "✓ exact",
+          "alto": "▼ high",
+          "baixo": "▲ low"
+        }
       }
     }
   }

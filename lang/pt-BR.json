@@ -496,7 +496,12 @@
         "OrdemProgresso": "Por progresso",
         "Limpar": "Limpar filtros",
         "Contagem": "{visiveis} de {total}"
-      }
+      },
+      "CriarPoi": "Criar ponto de interesse",
+      "CriarDesafio": "Criar desafio",
+      "NovoPoi": "Novo ponto de interesse",
+      "NovoDesafio": "Novo desafio de acesso",
+      "SemPOIsMestre": "Nenhum ponto de interesse nesta investigação. Use \"Criar ponto de interesse\" acima, ou arraste um Item de ponto de interesse da aba Itens para cá."
     },
     "Rodada": {
       "Titulo": "Rodada {rodada}",
@@ -971,7 +976,6 @@
       "Venceu": "{nome} vence o teste oposto.",
       "Lado": "Lado {n}",
       "Ator": "Personagem / NPC",
-      "AgirComo": "Agir como",
       "SoDaInvestigacao": "Só da investigação",
       "TodosDoMundo": "Todos do mundo",
       "ListandoMundo": "Mostrando todos os desafios de acesso do mundo.",
@@ -998,6 +1002,50 @@
       "Config": {
         "Mostrar": "Ferramentas do mestre",
         "MostrarDica": "Mostra a barra flutuante com Solicitar teste, Teste oposto, Desafios de acesso e Importar aventura (só para o mestre). Atalho: Shift+G."
+      },
+      "Participante": "Participante",
+      "AbrirFicha": "Abrir ficha do desafio",
+      "Monitorar": "Monitorar desafio",
+      "ExcluirDesafio": "Excluir desafio",
+      "ExcluirConfirma": "Excluir o desafio <strong>{nome}</strong> de vez? Ele também sai das investigações.",
+      "Estado": {
+        "destrancado": "Destrancado",
+        "quebrado": "Quebrado",
+        "emCurso": "Em curso: {nome}"
+      },
+      "Destrancar": {
+        "TituloMestre": "Mestre: monitoramento",
+        "TituloJogador": "Desafio: destrancar",
+        "SemParticipante": "Sem participante",
+        "PorRodada": "{teto} tentativa(s)/rodada",
+        "Gabarito": "Gabarito secreto (senha)",
+        "TentativasRodada": "Tentativas da rodada",
+        "TentativasTotais": "Tentativas totais",
+        "Rodada": "Rodada",
+        "Historico": "Histórico de tentativas",
+        "Tentativa": "Tentativa",
+        "Aguardando": "Aguardando a primeira tentativa.",
+        "Avancar": "Avançar para a rodada {rodada}",
+        "VerComoJogador": "Ver como jogador",
+        "VerMonitor": "Voltar ao monitoramento",
+        "NovaSenha": "Gerar nova senha",
+        "Cancelar": "Cancelar desafio",
+        "CancelarConfirma": "Encerrar este desafio? A janela fecha para os jogadores.",
+        "Destrancada": "Fechadura destrancada",
+        "DestrancadaTexto": "A fechadura foi destrancada. O acesso está livre.",
+        "Superado": "Desafio superado em {rodadas} rodada(s) ({tentativas}/{max} tentativas totais).",
+        "Esgotadas": "Tentativas desta rodada esgotadas",
+        "AguardeRodada": "Aguardando o mestre iniciar a próxima rodada.",
+        "SoParticipante": "Só quem controla o participante pode tentar.",
+        "CardTitulo": "Desafio de acesso: destrancar",
+        "CardTexto": "{nome} vai tentar destrancar. Clique para abrir a janela do desafio.",
+        "Abrir": "Abrir desafio",
+        "SemJogadorOnline": "Nenhum jogador dono do participante está online. A janela abre quando ele clicar no card do chat.",
+        "Resposta": {
+          "exato": "✓ exato",
+          "alto": "▼ alto",
+          "baixo": "▲ baixo"
+        }
       }
     }
   }

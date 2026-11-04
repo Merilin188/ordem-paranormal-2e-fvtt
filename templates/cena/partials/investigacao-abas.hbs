@@ -216,13 +216,18 @@
         aria-label="{{localize 'OP2.Painel.ExpandirTodos'}}" data-tooltip="{{localize 'OP2.Painel.ExpandirTodos'}}">
         <i class="fa-solid fa-expand" aria-hidden="true"></i>
       </button>
+      {{#if @root.ehGM}}
+      <button type="button" class="op2-botao op2-botao--pequeno" data-action="criarPoi">
+        <i class="fa-solid fa-plus" aria-hidden="true"></i> {{localize "OP2.Painel.CriarPoi"}}
+      </button>
+      {{/if}}
     </div>
     {{!-- Trinta pontos pedem mais que a busca: chips por visibilidade (mestre),
           progresso e marcador, a perícia do quadro e a ordem (achado em uso real). --}}
     {{> (op2Caminho "cena/partials/painel-filtros") filtros.pontos}}
   </header>
   {{#unless pois.length}}
-    <p class="op2-ajuda">{{localize "OP2.Painel.SemPOIs"}}</p>
+    <p class="op2-ajuda">{{#if ehGM}}{{localize "OP2.Painel.SemPOIsMestre"}}{{else}}{{localize "OP2.Painel.SemPOIs"}}{{/if}}</p>
   {{/unless}}
 
   <ol class="op2-painel-pois">
@@ -391,6 +396,11 @@
         aria-label="{{localize 'OP2.Painel.ExpandirTodos'}}" data-tooltip="{{localize 'OP2.Painel.ExpandirTodos'}}">
         <i class="fa-solid fa-expand" aria-hidden="true"></i>
       </button>
+      {{#if @root.ehGM}}
+      <button type="button" class="op2-botao op2-botao--pequeno" data-action="criarDesafio">
+        <i class="fa-solid fa-plus" aria-hidden="true"></i> {{localize "OP2.Painel.CriarDesafio"}}
+      </button>
+      {{/if}}
     </div>
     {{> (op2Caminho "cena/partials/painel-filtros") filtros.desafios}}
   </header>

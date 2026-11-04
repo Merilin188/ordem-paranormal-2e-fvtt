@@ -1,9 +1,10 @@
 <section class="op2-ferr-desafios-corpo">
   <header class="op2-ferr-topo">
     <div class="form-group">
-      <label>{{localize "OP2.Ferramentas.AgirComo"}}</label>
+      <label>{{localize "OP2.Ferramentas.Participante"}}</label>
       <select name="ator">
-        {{#each atores}}<option value="{{id}}" {{#if selecionado}}selected{{/if}}>{{nome}}</option>{{/each}}
+        {{#each atores}}<option value="{{id}}" {{#if selecionado}}selected{{/if}}>{{nome}}</option>
+        {{else}}<option value="">{{localize "OP2.Ferramentas.SemPersonagens"}}</option>{{/each}}
       </select>
     </div>
     <div class="op2-ferr-escopo">
@@ -19,7 +20,12 @@
   <ul class="op2-ferr-lista-desafios">
     {{#each desafios}}
     <li>
-      <a class="op2-ferr-desafio-nome" data-action="abrir" data-uuid="{{uuid}}"><img src="{{img}}" alt=""> {{nome}}</a>
+      <div class="op2-ferr-desafio-topo">
+        <a class="op2-ferr-desafio-nome" data-action="abrir" data-uuid="{{uuid}}" data-tooltip="{{localize 'OP2.Ferramentas.AbrirFicha'}}"><img src="{{img}}" alt=""> {{nome}}</a>
+        {{#if estado}}<span class="op2-ferr-estado">{{estado}}</span>{{/if}}
+        {{#if emCurso}}<button type="button" class="op2-ferr-icone" data-action="monitorar" data-uuid="{{uuid}}" data-tooltip="{{localize 'OP2.Ferramentas.Monitorar'}}"><i class="fa-solid fa-eye"></i></button>{{/if}}
+        <button type="button" class="op2-ferr-icone" data-action="excluir" data-uuid="{{uuid}}" data-tooltip="{{localize 'OP2.Ferramentas.ExcluirDesafio'}}"><i class="fa-solid fa-trash"></i></button>
+      </div>
       <div class="op2-ferr-abordagens">
         {{#each abordagens}}
         <button type="button" data-action="abordagem" data-uuid="{{../uuid}}" data-chave="{{chave}}">{{rotulo}}</button>

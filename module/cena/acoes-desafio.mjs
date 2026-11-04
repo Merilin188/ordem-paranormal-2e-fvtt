@@ -42,6 +42,15 @@ function gravarNoDesafio(desafio, dados) {
   return comoMestre("atualizarDesafio", { uuid: desafio.uuid, dados });
 }
 
+/**
+ * Rodada que conta para o teto de tentativas: a do desafio iniciado pelo mestre
+ * (ferramentas do mestre), senão a da investigação ativa.
+ */
+export function rodadaDoDesafio(desafio) {
+  const sessao = desafio?.getFlag?.(SYSTEM_ID, "sessao");
+  return sessao?.ativa ? sessao.rodada : rodadaAtual();
+}
+
 /** @returns {Promise<Item|null>} */
 export async function carregarDesafio(desafioUuid) {
   const desafio = await fromUuid(desafioUuid);
@@ -351,7 +360,7 @@ export async function tentarDestrancar(ator, desafioUuid, palpite) {
 
   // Teto por rodada pelo dado de Crime (spec §7.1): d4 = 1 … d12 = 5. O histórico do
   // desafio guarda quem tentou em que rodada, então a contagem é ele mesmo.
-  const rodada = rodadaAtual();
+  const rodada = rodadaDoDesafio(desafio);
   const dadoCrime = ator?.system?.pericias?.crime?.dadoEfetivo ?? "d4";
   const tetoRodada = tentativasPorRodadaDeDestrancar(dadoCrime);
   const naRodada = tentativasDeDestrancarNaRodada(desafio.system.historicoDestrancar, ator?.id, rodada);
