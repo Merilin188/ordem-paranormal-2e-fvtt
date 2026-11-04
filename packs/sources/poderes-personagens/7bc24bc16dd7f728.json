@@ -1,0 +1,35 @@
+{
+  "name": "Esquiva",
+  "img": "systems/ordem-paranormal-2e/assets/icons/poderes/esquiva.svg",
+  "system": {
+    "origem": "outra",
+    "perfil": "",
+    "custo": "",
+    "custoPD": 0,
+    "descricao": "<p><strong>Uma vez por rodada</strong>, quando sofre um ataque, pode fazer um <strong>teste de Acrobacia (+d6)</strong> oposto ao teste de ataque como uma <strong>ação livre</strong>. Se vencer, evita o ataque.</p><p>No card de ataque, use <em>Defender → Esquivar</em>: o +d6 já entra no teste.</p>",
+    "efeito": {
+      "tipo": "nenhum",
+      "passos": 1,
+      "dado": "d6",
+      "chaves": [],
+      "permitirD20": false,
+      "pdAoDescobrir": 0
+    },
+    "usoEmInvestigacao": "",
+    "impeto": {
+      "espacos": 0,
+      "preenchidos": 0
+    },
+    "automacao": "esquiva"
+  },
+  "_id": "7bc24bc16dd7f728",
+  "type": "habilidade",
+  "folder": "92ec2ddb7f5cb328",
+  "sort": 2000,
+  "effects": [],
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_key": "!items!7bc24bc16dd7f728"
+}

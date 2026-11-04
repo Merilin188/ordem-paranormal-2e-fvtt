@@ -1,0 +1,37 @@
+{
+  "name": "Espectro, o Lobo",
+  "img": "systems/ordem-paranormal-2e/assets/icons/poderes/espectro-o-lobo.svg",
+  "system": {
+    "origem": "outra",
+    "perfil": "",
+    "custo": "",
+    "custoPD": 0,
+    "descricao": "<p>Você possui um <strong>parceiro lobo</strong> que fornece <strong>+d6</strong> em testes de <strong>ataque corpo a corpo</strong> (marque no diálogo de Luta). Se o dado do lobo rolar <strong>1</strong>, ele se machuca e não pode mais ajudar pelo resto da cena (automático).</p>",
+    "efeito": {
+      "tipo": "dado-extra",
+      "passos": 1,
+      "dado": "d6",
+      "chaves": [
+        "luta"
+      ],
+      "permitirD20": false,
+      "pdAoDescobrir": 0
+    },
+    "usoEmInvestigacao": "",
+    "impeto": {
+      "espacos": 0,
+      "preenchidos": 0
+    },
+    "automacao": "lobo"
+  },
+  "_id": "8edfb1054e782e96",
+  "type": "habilidade",
+  "folder": "92ec2ddb7f5cb328",
+  "sort": 3000,
+  "effects": [],
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_key": "!items!8edfb1054e782e96"
+}

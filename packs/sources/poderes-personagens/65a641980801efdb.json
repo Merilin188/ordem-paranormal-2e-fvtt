@@ -1,0 +1,33 @@
+{
+  "name": "Arco curto de teixo",
+  "img": "systems/ordem-paranormal-2e/assets/icons/tipos/equipamento.svg",
+  "system": {
+    "quantidade": 1,
+    "equipado": true,
+    "descricao": "<p>Arma à distância, dano RA+1.</p>",
+    "arma": true,
+    "danoBonus": 1,
+    "armadura": 0,
+    "penalidade": {
+      "pericia": "",
+      "passos": 0
+    },
+    "criticoMinimo": 0,
+    "escudo": false,
+    "cargas": {
+      "usa": false,
+      "value": 0,
+      "max": 0
+    }
+  },
+  "_id": "65a641980801efdb",
+  "type": "equipamento",
+  "folder": "92ec2ddb7f5cb328",
+  "sort": 4000,
+  "effects": [],
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_key": "!items!65a641980801efdb"
+}

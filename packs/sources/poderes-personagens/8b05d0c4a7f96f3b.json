@@ -1,0 +1,35 @@
+{
+  "name": "Segredo do Aço",
+  "img": "systems/ordem-paranormal-2e/assets/icons/poderes/segredo-do-aco.svg",
+  "system": {
+    "origem": "outra",
+    "perfil": "",
+    "custo": "",
+    "custoPD": 0,
+    "descricao": "<p>Você sabe usar equipamentos marciais. Se estiver vestindo um item que forneça pontos de armadura, o item <strong>fornece 1 ponto de armadura adicional</strong> (somado sozinho no Inventário).</p>",
+    "efeito": {
+      "tipo": "nenhum",
+      "passos": 1,
+      "dado": "d6",
+      "chaves": [],
+      "permitirD20": false,
+      "pdAoDescobrir": 0
+    },
+    "usoEmInvestigacao": "",
+    "impeto": {
+      "espacos": 0,
+      "preenchidos": 0
+    },
+    "automacao": "segredoAco"
+  },
+  "_id": "8b05d0c4a7f96f3b",
+  "type": "habilidade",
+  "folder": "fb797d798103fe6e",
+  "sort": 3000,
+  "effects": [],
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_key": "!items!8b05d0c4a7f96f3b"
+}

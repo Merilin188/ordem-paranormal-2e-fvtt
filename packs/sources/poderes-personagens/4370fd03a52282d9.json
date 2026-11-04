@@ -1,0 +1,35 @@
+{
+  "name": "Instinto de Sobrevivência",
+  "img": "systems/ordem-paranormal-2e/assets/icons/poderes/instinto-de-sobrevivencia.svg",
+  "system": {
+    "origem": "outra",
+    "perfil": "",
+    "custo": "",
+    "custoPD": 0,
+    "descricao": "<p>Se você estiver com <strong>metade ou menos</strong> de seus PV máximos, recebe um <strong>aumento de passo em todos os testes</strong> (marcado sozinho no diálogo do teste).</p>",
+    "efeito": {
+      "tipo": "passo",
+      "passos": 1,
+      "dado": "d6",
+      "chaves": [],
+      "permitirD20": false,
+      "pdAoDescobrir": 0
+    },
+    "usoEmInvestigacao": "",
+    "impeto": {
+      "espacos": 0,
+      "preenchidos": 0
+    },
+    "automacao": "instinto"
+  },
+  "_id": "4370fd03a52282d9",
+  "type": "habilidade",
+  "folder": "2c577ad5de07f8a1",
+  "sort": 3000,
+  "effects": [],
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_key": "!items!4370fd03a52282d9"
+}

@@ -1,0 +1,35 @@
+{
+  "name": "Ímpeto Fervilhante",
+  "img": "systems/ordem-paranormal-2e/assets/icons/poderes/impeto-fervilhante.svg",
+  "system": {
+    "origem": "outra",
+    "perfil": "",
+    "custo": "",
+    "custoPD": 0,
+    "descricao": "<p>No início de cada cena, você preenche <strong>um espaço</strong> da sua barra de ímpeto (automático ao encerrar a cena anterior).</p>",
+    "efeito": {
+      "tipo": "nenhum",
+      "passos": 1,
+      "dado": "d6",
+      "chaves": [],
+      "permitirD20": false,
+      "pdAoDescobrir": 0
+    },
+    "usoEmInvestigacao": "",
+    "impeto": {
+      "espacos": 0,
+      "preenchidos": 0
+    },
+    "automacao": "impetoFervilhante"
+  },
+  "_id": "5c4387c911aa2d18",
+  "type": "habilidade",
+  "folder": "ebdc14d0f7551778",
+  "sort": 2000,
+  "effects": [],
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_key": "!items!5c4387c911aa2d18"
+}

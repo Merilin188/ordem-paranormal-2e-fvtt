@@ -1,0 +1,35 @@
+{
+  "name": "Prontidão",
+  "img": "systems/ordem-paranormal-2e/assets/icons/poderes/prontidao.svg",
+  "system": {
+    "origem": "perfil",
+    "perfil": "vigilante",
+    "custo": "2 PD",
+    "custoPD": 0,
+    "descricao": "<p><strong>Uma vez por rodada</strong>, quando você ou outro ser em <strong>alcance curto</strong> faz um teste, pode <strong>gastar 2 PD</strong> para rolar novamente <strong>um dos dados</strong> do teste cujo resultado não tenha sido 1 (botão <em>Prontidão</em> no card do teste).</p><p>Além disso, em combates, você pode fazer sua ação <strong>na fase dela ou em fases posteriores</strong>, depois de qualquer ação daquela fase já ter sido rolada.</p>",
+    "efeito": {
+      "tipo": "nenhum",
+      "passos": 1,
+      "dado": "d6",
+      "chaves": [],
+      "permitirD20": false,
+      "pdAoDescobrir": 0
+    },
+    "usoEmInvestigacao": "",
+    "impeto": {
+      "espacos": 0,
+      "preenchidos": 0
+    },
+    "automacao": "prontidao"
+  },
+  "_id": "5029819d6a9573bb",
+  "type": "habilidade",
+  "folder": "2c577ad5de07f8a1",
+  "sort": 1000,
+  "effects": [],
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_key": "!items!5029819d6a9573bb"
+}

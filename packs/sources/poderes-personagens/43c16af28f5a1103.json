@@ -1,0 +1,35 @@
+{
+  "name": "Mentoria",
+  "img": "systems/ordem-paranormal-2e/assets/icons/poderes/mentoria.svg",
+  "system": {
+    "origem": "outra",
+    "perfil": "",
+    "custo": "",
+    "custoPD": 0,
+    "descricao": "<p>Quando ajuda outro personagem, pode fazer um teste da perícia que usou para ajudar contra <strong>DT 7</strong>. Se passar, o personagem ajudado pode <strong>substituir um dos dados</strong> rolados por ele pela sua <strong>rolagem alta</strong> (a troca aparece para ele no próximo teste).</p>",
+    "efeito": {
+      "tipo": "nenhum",
+      "passos": 1,
+      "dado": "d6",
+      "chaves": [],
+      "permitirD20": false,
+      "pdAoDescobrir": 0
+    },
+    "usoEmInvestigacao": "",
+    "impeto": {
+      "espacos": 0,
+      "preenchidos": 0
+    },
+    "automacao": "mentoria"
+  },
+  "_id": "43c16af28f5a1103",
+  "type": "habilidade",
+  "folder": "1759ae1800d79f2f",
+  "sort": 3000,
+  "effects": [],
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_key": "!items!43c16af28f5a1103"
+}

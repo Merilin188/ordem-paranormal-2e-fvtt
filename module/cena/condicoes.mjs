@@ -90,7 +90,7 @@ function rotularFases(app, html) {
   for (const li of raiz.querySelectorAll("[data-combatant-id]")) {
     const combate = app.viewed ?? game.combat;
     const c = combate?.combatants.get(li.dataset.combatantId);
-    const fase = faseDoValor(c?.initiative);
+    const fase = c?.initiative === 4 ? "antecipacao" : faseDoValor(c?.initiative);
     const alvo = li.querySelector(".initiative, .token-initiative span");
     if (fase && alvo) {
       alvo.textContent = ROTULO_FASE(fase);

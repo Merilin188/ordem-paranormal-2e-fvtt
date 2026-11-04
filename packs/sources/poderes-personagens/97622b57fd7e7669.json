@@ -1,0 +1,38 @@
+{
+  "name": "Sorrateiro",
+  "img": "systems/ordem-paranormal-2e/assets/icons/poderes/sorrateiro.svg",
+  "system": {
+    "origem": "outra",
+    "perfil": "",
+    "custo": "3 PD",
+    "custoPD": 3,
+    "descricao": "<p>Quando faz um teste usando <strong>Crime ou Furtividade</strong>, você pode <strong>gastar 3 PD</strong> para receber <strong>+d8</strong> no teste (marque no diálogo do teste).</p>",
+    "efeito": {
+      "tipo": "dado-extra",
+      "passos": 1,
+      "dado": "d8",
+      "chaves": [
+        "crime",
+        "furtividade"
+      ],
+      "permitirD20": false,
+      "pdAoDescobrir": 0
+    },
+    "usoEmInvestigacao": "",
+    "impeto": {
+      "espacos": 0,
+      "preenchidos": 0
+    },
+    "automacao": "sorrateiro"
+  },
+  "_id": "97622b57fd7e7669",
+  "type": "habilidade",
+  "folder": "9eac2504b57f4f71",
+  "sort": 3000,
+  "effects": [],
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_key": "!items!97622b57fd7e7669"
+}

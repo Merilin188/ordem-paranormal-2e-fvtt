@@ -1,0 +1,35 @@
+{
+  "name": "Ímpeto",
+  "img": "systems/ordem-paranormal-2e/assets/icons/habilidades/impeto.svg",
+  "system": {
+    "origem": "perfil",
+    "perfil": "executor",
+    "custo": "",
+    "custoPD": 0,
+    "descricao": "<p>Você possui uma <strong>barra de ímpeto</strong> com <strong>cinco espaços</strong>. Sempre que <strong>faz um teste e falha</strong>, você preenche um espaço na barra de ímpeto. Como uma ação livre, você pode gastar espaços da barra para receber benefícios:</p><ul><li><strong>1 espaço.</strong> Você recebe <strong>+d4</strong> em um teste (no diálogo do teste).</li><li><strong>3 espaços.</strong> Você <strong>aumenta um atributo em um passo</strong> até o fim da cena.</li><li><strong>3 espaços.</strong> Em <strong>cenas de conflito</strong>, você faz <strong>uma ação extra</strong>.</li></ul><p>No fim da cena, sua barra de ímpeto esvazia.</p>",
+    "efeito": {
+      "tipo": "nenhum",
+      "passos": 1,
+      "dado": "d6",
+      "chaves": [],
+      "permitirD20": false,
+      "pdAoDescobrir": 0
+    },
+    "usoEmInvestigacao": "",
+    "impeto": {
+      "espacos": 5,
+      "preenchidos": 0
+    },
+    "automacao": ""
+  },
+  "_id": "faeb0c37d06a6489",
+  "type": "habilidade",
+  "folder": "ebdc14d0f7551778",
+  "sort": 1000,
+  "effects": [],
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_key": "!items!faeb0c37d06a6489"
+}

@@ -58,7 +58,9 @@ export class TesteDialog extends HandlebarsApplicationMixin(ApplicationV2) {
         pericia: ajuda?.alvo === "pericia" ? ajuda.passos : 0,
         atributo: ajuda?.alvo === "atributo" ? ajuda.passos : 0,
       },
-      extras: new Set(),
+      // Instinto de Sobrevivência: com metade ou menos dos PV, o passo já vem marcado.
+      extras: new Set(ator.items.filter((i) => i.type === "habilidade" && i.system.automacao === "instinto"
+        && (ator.system.recursos?.pv?.value ?? 0) <= (ator.system.recursos?.pv?.max ?? 0) / 2).map((i) => i.id)),
       dt: base.dt ?? lerConfig("dtPadrao"),
       oposto: base.oposto ?? false,
       // Examinar não tem DT única: cada informação do quadro tem a sua (spec §6.3.1).
@@ -87,6 +89,8 @@ export class TesteDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     const pd = this.ator.system.recursos?.pd?.value ?? 0;
     return this.ator.items
       .filter((i) => i.type === "habilidade"
+        && !(i.system.automacao === "lobo" && i.system.machucadoNaCena)
+        && !(i.system.automacao === "instinto" && (this.ator.system.recursos?.pv?.value ?? 0) > (this.ator.system.recursos?.pv?.max ?? 0) / 2)
         && i.system.aplicavelA?.(this.base.chavePericia, this.estado.chaveAtributo))
       .map((i) => ({
         id: i.id,

@@ -1,0 +1,35 @@
+{
+  "name": "Curandeiro",
+  "img": "systems/ordem-paranormal-2e/assets/icons/poderes/curandeiro.svg",
+  "system": {
+    "origem": "outra",
+    "perfil": "",
+    "custo": "2 PD",
+    "custoPD": 0,
+    "descricao": "<p>Você pode <strong>gastar uma ação e 2 PD</strong> para curar um aliado: teste de <strong>Medicina (DT 7)</strong>. Se passar, o aliado recupera PV iguais à <strong>RA do teste</strong>. Só pode usar este poder em um mesmo alvo <strong>uma vez por cena</strong> (botão <em>Usar</em>).</p>",
+    "efeito": {
+      "tipo": "nenhum",
+      "passos": 1,
+      "dado": "d6",
+      "chaves": [],
+      "permitirD20": false,
+      "pdAoDescobrir": 0
+    },
+    "usoEmInvestigacao": "",
+    "impeto": {
+      "espacos": 0,
+      "preenchidos": 0
+    },
+    "automacao": "curandeiro"
+  },
+  "_id": "f36e22344efe328c",
+  "type": "habilidade",
+  "folder": "1759ae1800d79f2f",
+  "sort": 2000,
+  "effects": [],
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_key": "!items!f36e22344efe328c"
+}

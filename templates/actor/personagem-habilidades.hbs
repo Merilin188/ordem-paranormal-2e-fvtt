@@ -24,6 +24,22 @@
               <div class="op2-item__descricao">{{{descricao}}}</div>
             {{/if}}
 
+            {{#if marcadores}}
+              <div class="op2-marcadores" role="group" aria-label="{{localize 'OP2.Poder.Marcadores'}}">
+                <span>{{localize "OP2.Poder.Marcadores"}}</span>
+                {{#each marcadores}}
+                  <button type="button" class="op2-marcador{{#if cheio}} cheio{{/if}}" data-action="ajustarMarcadores" data-n="{{n}}"
+                    {{#unless @root.editavel}}disabled{{/unless}} aria-label="{{n}}"></button>
+                {{/each}}
+              </div>
+            {{/if}}
+            {{#if estadoPoder}}<span class="op2-item__meta op2-poder-estado">{{estadoPoder}}</span>{{/if}}
+            {{#if usavel}}
+              <button type="button" class="op2-botao op2-botao--pequeno op2-poder-usar" data-action="usarPoder">
+                <i class="fa-solid fa-play" aria-hidden="true"></i> {{localize "OP2.Poder.Usar"}}
+              </button>
+            {{/if}}
+
             {{!-- A barra É a habilidade: o estado mora no item, então apagar a
                   habilidade leva a barra junto. --}}
             {{#if barra}}
@@ -43,6 +59,12 @@
                     <i class="fa-solid fa-arrow-up-right-dots" aria-hidden="true"></i>
                     {{localize "OP2.Impeto.Passo"}}
                   </button>
+                  {{#if barra.acaoExtra}}
+                    <button type="button" class="op2-botao op2-botao--pequeno op2-impeto__gastar"
+                      data-action="acaoExtraImpeto" data-item-id="{{item.id}}">
+                      <i class="fa-solid fa-person-running" aria-hidden="true"></i> {{localize "OP2.Impeto.AcaoExtra"}}
+                    </button>
+                  {{/if}}
                 {{/if}}
               </div>
             {{/if}}

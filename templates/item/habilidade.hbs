@@ -44,6 +44,13 @@
     <p class="op2-ajuda">{{localize "OP2.Habilidade.EfeitoAjuda"}}</p>
 
     <label class="op2-campo">
+      <span>{{localize "OP2.Poder.Automacao"}}</span>
+      <select name="system.automacao" {{#unless editavel}}disabled{{/unless}}>
+        {{#each automacoes}}<option value="{{v}}" {{#if (op2Eq v @root.sistema.automacao)}}selected{{/if}}>{{rotulo}}</option>{{/each}}
+      </select>
+    </label>
+
+    <label class="op2-campo">
       <span>{{localize "OP2.Habilidade.EfeitoTipo"}}</span>
       <select name="system.efeito.tipo" {{#unless editavel}}disabled{{/unless}}>
         {{#each efeitos}}<option value="{{v}}" {{#if (op2Eq v @root.sistema.efeito.tipo)}}selected{{/if}}>{{rotulo}}</option>{{/each}}

@@ -1,0 +1,35 @@
+{
+  "name": "Guardiã",
+  "img": "systems/ordem-paranormal-2e/assets/icons/poderes/guardia.svg",
+  "system": {
+    "origem": "outra",
+    "perfil": "",
+    "custo": "2 PD",
+    "custoPD": 0,
+    "descricao": "<p>Você recebe <strong>+1 PV por patamar</strong> (já anotado na ficha) e, <strong>uma vez por rodada</strong>, quando um aliado em alcance curto sofre um ataque, pode <strong>gastar 2 PD</strong> para <strong>se tornar o alvo</strong> desse ataque (botão <em>Usar</em>).</p>",
+    "efeito": {
+      "tipo": "nenhum",
+      "passos": 1,
+      "dado": "d6",
+      "chaves": [],
+      "permitirD20": false,
+      "pdAoDescobrir": 0
+    },
+    "usoEmInvestigacao": "",
+    "impeto": {
+      "espacos": 0,
+      "preenchidos": 0
+    },
+    "automacao": "guardia"
+  },
+  "_id": "3bc970608d052aaa",
+  "type": "habilidade",
+  "folder": "2c577ad5de07f8a1",
+  "sort": 2000,
+  "effects": [],
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_key": "!items!3bc970608d052aaa"
+}

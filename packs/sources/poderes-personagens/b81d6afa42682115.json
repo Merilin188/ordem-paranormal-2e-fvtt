@@ -1,0 +1,35 @@
+{
+  "name": "Herança",
+  "img": "systems/ordem-paranormal-2e/assets/icons/poderes/heranca.svg",
+  "system": {
+    "origem": "outra",
+    "perfil": "",
+    "custo": "",
+    "custoPD": 0,
+    "descricao": "<p>Sua categoria de <strong>riqueza</strong> aumenta em 1. (As regras de compra virão em playtests futuros; por ora, o personagem começa com itens melhores.)</p>",
+    "efeito": {
+      "tipo": "nenhum",
+      "passos": 1,
+      "dado": "d6",
+      "chaves": [],
+      "permitirD20": false,
+      "pdAoDescobrir": 0
+    },
+    "usoEmInvestigacao": "",
+    "impeto": {
+      "espacos": 0,
+      "preenchidos": 0
+    },
+    "automacao": "heranca"
+  },
+  "_id": "b81d6afa42682115",
+  "type": "habilidade",
+  "folder": "44f55a0f58bb627e",
+  "sort": 2000,
+  "effects": [],
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_key": "!items!b81d6afa42682115"
+}

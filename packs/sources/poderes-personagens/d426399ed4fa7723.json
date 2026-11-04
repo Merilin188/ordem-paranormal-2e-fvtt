@@ -1,0 +1,35 @@
+{
+  "name": "Plano Estratégico",
+  "img": "systems/ordem-paranormal-2e/assets/icons/poderes/plano-estrategico.svg",
+  "system": {
+    "origem": "outra",
+    "perfil": "",
+    "custo": "3 PD",
+    "custoPD": 0,
+    "descricao": "<p>Você pode <strong>gastar uma ação e 3 PD</strong> para elaborar um plano: teste de <strong>Aptidão (Guerra)</strong> contra <strong>DT 7</strong>. Se passar, você e seus aliados recebem <strong>+d6</strong> para cada 3 pontos pelos quais o resultado exceder a DT, que podem gastar em quaisquer testes até o fim da cena (oferecido antes de cada teste).</p>",
+    "efeito": {
+      "tipo": "nenhum",
+      "passos": 1,
+      "dado": "d6",
+      "chaves": [],
+      "permitirD20": false,
+      "pdAoDescobrir": 0
+    },
+    "usoEmInvestigacao": "",
+    "impeto": {
+      "espacos": 0,
+      "preenchidos": 0
+    },
+    "automacao": "plano"
+  },
+  "_id": "d426399ed4fa7723",
+  "type": "habilidade",
+  "folder": "44f55a0f58bb627e",
+  "sort": 3000,
+  "effects": [],
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_key": "!items!d426399ed4fa7723"
+}

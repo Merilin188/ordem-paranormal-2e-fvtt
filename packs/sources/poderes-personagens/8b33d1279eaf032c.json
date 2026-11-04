@@ -1,0 +1,35 @@
+{
+  "name": "Leitura de Combate",
+  "img": "systems/ordem-paranormal-2e/assets/icons/poderes/leitura-de-combate.svg",
+  "system": {
+    "origem": "outra",
+    "perfil": "",
+    "custo": "",
+    "custoPD": 0,
+    "descricao": "<p>Em combate, sempre que você <strong>gastar uma ação para se defender</strong>, recebe <strong>um marcador de análise</strong> (automático ao usar Defender).</p>",
+    "efeito": {
+      "tipo": "nenhum",
+      "passos": 1,
+      "dado": "d6",
+      "chaves": [],
+      "permitirD20": false,
+      "pdAoDescobrir": 0
+    },
+    "usoEmInvestigacao": "",
+    "impeto": {
+      "espacos": 0,
+      "preenchidos": 0
+    },
+    "automacao": "leituraCombate"
+  },
+  "_id": "8b33d1279eaf032c",
+  "type": "habilidade",
+  "folder": "fb797d798103fe6e",
+  "sort": 2000,
+  "effects": [],
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_key": "!items!8b33d1279eaf032c"
+}

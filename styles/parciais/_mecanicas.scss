@@ -297,4 +297,31 @@
   // Categoria do desafio no painel
   .op2-tag--categoria { background: #2d3a4a; }
   .op2-dlg--categoria footer { flex-wrap: wrap; }
+
+  // Seletor de perfil no cabeçalho da ficha: opções legíveis (antes vinham brancas)
+  .op2-tag--perfil select option, .op2-ficha select option {
+    background-color: var(--op2-painel, #16100e); color: var(--op2-tinta, #f2ede6);
+  }
+  .op2-tag--perfil select option:checked { background-color: var(--op2-vermelho-escuro, #8f2315); color: #fff; }
+
+  // Poderes: marcadores de análise, botão usar, estado
+  .op2-marcadores { display: flex; align-items: center; gap: 0.3rem; margin-top: 0.3rem; font-size: 0.8em; color: var(--op2-tinta-fraca);
+    span { margin-right: 0.2rem; } }
+  .op2-marcador { width: 1rem; height: 1rem; min-width: 0; padding: 0; margin: 0; border: 2px solid #6ba6ec; border-radius: 50% !important;
+    background: transparent; box-shadow: none;
+    &.cheio { background: #367dde; } }
+  .op2-poder-usar { margin-top: 0.3rem; width: auto; }
+  .op2-poder-estado { display: block; color: var(--op2-critico); }
+  .op2-botao--prontidao { border-color: #4b7d20; color: #a5d36b; }
+  .op2-prontidao-nota { margin: 0.3rem 0 0; font-size: 0.85em; color: #a5d36b; }
+
+  // Janela de ajuste (Análise / Mentoria)
+  .op2-analise__dados { display: flex; flex-direction: column; gap: 0.3rem; }
+  .op2-analise__dado { display: flex; align-items: center; gap: 0.4rem;
+    strong { min-width: 2rem; text-align: center; font-family: var(--op2-fonte-mono); font-size: 1.2rem; }
+    button { flex: none; width: auto; min-width: 2rem; padding: 0 0.4rem; }
+  }
+  .op2-analise__rotulo { flex: 1; }
+  .op2-analise__restantes { margin: 0.3rem 0 0; color: #6ba6ec; }
+  .op2-fase--antecipacao { color: #a5d36b; }
 }

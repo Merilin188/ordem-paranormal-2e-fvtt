@@ -1,0 +1,35 @@
+{
+  "name": "Antecipação Tática",
+  "img": "systems/ordem-paranormal-2e/assets/icons/poderes/antecipacao-tatica.svg",
+  "system": {
+    "origem": "outra",
+    "perfil": "",
+    "custo": "2 PD",
+    "custoPD": 0,
+    "descricao": "<p>No <strong>início de qualquer combate</strong>, você pode <strong>gastar 2 PD</strong>. Se fizer isso, ganha uma rodada na qual pode agir <strong>antes dos demais personagens e NPCs</strong> (botão <em>Usar</em>: vai para o topo da ordem).</p>",
+    "efeito": {
+      "tipo": "nenhum",
+      "passos": 1,
+      "dado": "d6",
+      "chaves": [],
+      "permitirD20": false,
+      "pdAoDescobrir": 0
+    },
+    "usoEmInvestigacao": "",
+    "impeto": {
+      "espacos": 0,
+      "preenchidos": 0
+    },
+    "automacao": "antecipacao"
+  },
+  "_id": "58c65801e86c2d27",
+  "type": "habilidade",
+  "folder": "9eac2504b57f4f71",
+  "sort": 2000,
+  "effects": [],
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_key": "!items!58c65801e86c2d27"
+}

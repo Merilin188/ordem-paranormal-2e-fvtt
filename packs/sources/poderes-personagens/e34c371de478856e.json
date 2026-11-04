@@ -1,0 +1,33 @@
+{
+  "name": "Cota de malha",
+  "img": "systems/ordem-paranormal-2e/assets/icons/tipos/equipamento.svg",
+  "system": {
+    "quantidade": 1,
+    "equipado": true,
+    "descricao": "<p>Fornece 2 pontos de armadura, mas reduz Furtividade em um passo.</p>",
+    "arma": false,
+    "danoBonus": 0,
+    "armadura": 2,
+    "penalidade": {
+      "pericia": "furtividade",
+      "passos": 1
+    },
+    "criticoMinimo": 0,
+    "escudo": false,
+    "cargas": {
+      "usa": false,
+      "value": 0,
+      "max": 0
+    }
+  },
+  "_id": "e34c371de478856e",
+  "type": "equipamento",
+  "folder": "44f55a0f58bb627e",
+  "sort": 5000,
+  "effects": [],
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_key": "!items!e34c371de478856e"
+}

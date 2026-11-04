@@ -1,0 +1,35 @@
+{
+  "name": "Arsenal de Herborista",
+  "img": "systems/ordem-paranormal-2e/assets/icons/poderes/arsenal-herborista.svg",
+  "system": {
+    "origem": "outra",
+    "perfil": "",
+    "custo": "",
+    "custoPD": 0,
+    "descricao": "<p>Você possui uma pequena bolsa com <strong>preparados medicinais</strong> feitos com ervas, óleos e mel. Para usar, <strong>escolha um alvo e gaste uma ação</strong> (botão <em>Usar</em>). Cada item é de <strong>uso único</strong>.</p><ul><li><strong>Tônico de urtiga-feroz.</strong> O alvo recebe <strong>aumento de passo no Físico</strong> por uma cena.</li><li><strong>Bálsamo de confrei.</strong> O alvo <strong>recupera 2d4 PV</strong> (se for outro ser, ele precisa ficar parado nesta rodada).</li><li><strong>Pote de vespa.</strong> Teste de <strong>Sobrevivência</strong> como ataque à distância, <strong>dano RA+1</strong>. Se o alvo sobreviver, <strong>perde a próxima ação</strong> espantando as vespas.</li></ul>",
+    "efeito": {
+      "tipo": "nenhum",
+      "passos": 1,
+      "dado": "d6",
+      "chaves": [],
+      "permitirD20": false,
+      "pdAoDescobrir": 0
+    },
+    "usoEmInvestigacao": "",
+    "impeto": {
+      "espacos": 0,
+      "preenchidos": 0
+    },
+    "automacao": "arsenal"
+  },
+  "_id": "f3ad97c37a77941b",
+  "type": "habilidade",
+  "folder": "45cd0157eca13969",
+  "sort": 1000,
+  "effects": [],
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_key": "!items!f3ad97c37a77941b"
+}

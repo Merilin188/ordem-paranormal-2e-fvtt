@@ -16,6 +16,7 @@ import { ligarRodaDoMouse } from "../ui/controle-dado.mjs";
 import { abrirAcoesInvestigacao } from "../cena/acoes-app.mjs";
 import { renderDoPerfil } from "../ui/perfil.mjs";
 import { descreverMarca } from "../cena/tabelas-dados.mjs";
+import { usarPoder, USAVEIS } from "../cena/poderes.mjs";
 import { consultarTabela } from "../cena/tabelas.mjs";
 import { removerPavor } from "../cena/pavor.mjs";
 
@@ -54,6 +55,9 @@ export class PersonagemSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       consultarTabela: PersonagemSheet.#consultarTabela,
       removerPavor: PersonagemSheet.#removerPavor,
       alternarCondicao: PersonagemSheet.#alternarCondicao,
+      usarPoder: PersonagemSheet.#usarPoder,
+      ajustarMarcadores: PersonagemSheet.#ajustarMarcadores,
+      acaoExtraImpeto: PersonagemSheet.#acaoExtraImpeto,
       removerEfeito: PersonagemSheet.#removerEfeito,
       alternarEfeito: PersonagemSheet.#alternarEfeito,
     },
@@ -113,8 +117,16 @@ export class PersonagemSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
           espacos: Array.from({ length: item.system.impeto.espacos }, (_, i) => ({
             n: i + 1, cheio: i < item.system.impeto.preenchidos,
           })),
-          cheia: item.system.impetoCheio,
+          // Gastar 3 espaços (passo de atributo / ação extra); barras de 3 = barra cheia.
+          cheia: item.system.impeto.preenchidos >= Math.min(3, item.system.impeto.espacos),
+          acaoExtra: item.system.impeto.espacos >= 5,
         } : null,
+        usavel: USAVEIS.includes(item.system.automacao),
+        marcadores: item.system.automacao === "analise"
+          ? Array.from({ length: 4 }, (_, i) => ({ n: i + 1, cheio: i < item.system.marcadores })) : null,
+        estadoPoder: item.system.automacao === "lobo" && item.system.machucadoNaCena ? game.i18n.localize("OP2.Poder.LoboFerido")
+          : item.system.automacao === "arsenal" ? ["tonico", "balsamo", "vespa"].filter((p) => !item.system.arsenal[p]).map((p) => game.i18n.localize(`OP2.Poder.Arsenal.${p}`)).join(" · ") || game.i18n.localize("OP2.Poder.ArsenalVazio")
+            : "",
       }))),
       equipamentos: this.actor.items.filter((i) => i.type === "equipamento"),
       ferramentas: this.actor.items.filter((i) => i.type === "ferramenta"),
@@ -211,6 +223,31 @@ export class PersonagemSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
   static #consultarTabela(_evento, alvo) {
     consultarTabela(alvo.dataset.tabela, this.actor.id);
+  }
+
+  static async #usarPoder(_evento, alvo) {
+    const item = this.actor.items.get(alvo.closest("[data-item-id]")?.dataset.itemId);
+    if (item) await usarPoder(this.actor, item);
+  }
+
+  static async #ajustarMarcadores(_evento, alvo) {
+    if (!this.isEditable) return;
+    const item = this.actor.items.get(alvo.closest("[data-item-id]")?.dataset.itemId);
+    if (!item) return;
+    const n = Number(alvo.dataset.n);
+    await item.update({ "system.marcadores": item.system.marcadores === n ? n - 1 : n });
+  }
+
+  /** Ímpeto: 3 espaços = uma ação extra em cena de conflito. */
+  static async #acaoExtraImpeto(_evento, alvo) {
+    const item = this.actor.items.get(alvo.dataset.itemId);
+    if (!item || item.system.impeto.preenchidos < 3) return;
+    await item.update({ "system.impeto.preenchidos": item.system.impeto.preenchidos - 3 });
+    await ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+      content: `<div class="op2 op2-card"><header class="op2-card__topo"><span class="op2-tag op2-tag--pequena">${item.name}</span></header>
+        <p class="op2-card__texto">${game.i18n.format("OP2.Impeto.AcaoExtraUsada", { nome: this.actor.name })}</p></div>`,
+    });
   }
 
   static async #alternarCondicao(_evento, alvo) {
@@ -494,7 +531,7 @@ export class PersonagemSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
    */
   static async #gastarImpetoAtributo(_evento, alvo) {
     const item = this.actor.items.get(alvo.dataset.itemId);
-    if (!item?.system.impetoCheio) return;
+    if (!item || item.system.impeto.preenchidos < Math.min(3, item.system.impeto.espacos)) return;
 
     const opcoes = Object.keys(ATRIBUTOS)
       .map((chave) => `<option value="${chave}">${game.i18n.localize(`OP2.Atributo.${chave}`)}</option>`)
@@ -513,7 +550,7 @@ export class PersonagemSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     if (!escolhido) return;
 
     const atual = this.actor.system.estado.aumentosTemporarios[escolhido] ?? 0;
-    await item.update({ "system.impeto.preenchidos": 0 });
+    await item.update({ "system.impeto.preenchidos": Math.max(0, item.system.impeto.preenchidos - 3) });
     await this.actor.update({ [`system.estado.aumentosTemporarios.${escolhido}`]: atual + 1 });
     ui.notifications.info(game.i18n.format("OP2.Impeto.PassoAplicado", {
       atributo: game.i18n.localize(`OP2.Atributo.${escolhido}`),

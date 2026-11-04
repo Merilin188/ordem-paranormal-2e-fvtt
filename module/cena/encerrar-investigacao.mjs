@@ -39,6 +39,9 @@ export async function encerrarCena({ atores, avisar = true, investigacao = inves
 
   const atualizacoes = alvos.map((ator) => ({ _id: ator.id, ...zerado }));
   await Actor.updateDocuments(atualizacoes);
+  // Poderes "até o fim da cena": Ímpeto esvazia, marcadores e lobo machucado zeram.
+  const { encerrarCenaDosPoderes } = await import("./poderes.mjs");
+  await encerrarCenaDosPoderes(alvos);
 
   // O contador de rodadas alimenta a sobrecarga mental (spec §7.6) e reinicia junto.
   // Travas de 1×-por-investigação e a ordem das rodadas também são da sessão que

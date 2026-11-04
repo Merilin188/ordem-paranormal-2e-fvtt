@@ -11,6 +11,7 @@ import { stepDie } from "./escada.mjs";
 import { consumirAjuda } from "../cena/acoes-ajuda.mjs";
 import { gastarImpeto, podePreencherImpeto } from "../cena/impeto.mjs";
 import { modificadorDoTeste } from "../cena/tabelas-dados.mjs";
+import { ajustarDepoisDaRolagem, conferirLobo, escolherBonusPlano } from "../cena/poderes.mjs";
 import {
   escolherUsoDoPavor, controlarPavor, abracarPavor, vencerPavor, pedirDadoDePavor, vestirDadoDePavor,
 } from "../cena/pavor.mjs";
@@ -97,7 +98,16 @@ export async function rolarTeste(ator, {
       pavorAbracado = true;
     }
   }
+  // Plano Estratégico: d6 bônus guardados entram agora, se o jogador quiser.
+  const bonusPlano = await escolherBonusPlano(ator, 4 - componentes.length);
+  for (let i = 0; i < bonusPlano; i++) {
+    componentes.push({ chave: `plano.${i}`, rotulo: game.i18n.localize("OP2.Poder.PlanoTitulo"), tipo: "extra", dado: "d6" });
+  }
+  // Arma com crítico facilitado (espada: dois valores 5+) nos testes de ataque.
+  const armaCritico = ["luta", "pontaria"].includes(chavePericia) ? melhorArma(ator)?.system?.criticoMinimo : 0;
+
   const roll = OP2Roll.paraComponentes(componentes, {
+    criticoMinimo: armaCritico || 0,
     dt: config.dt,
     escopoCritico: lerConfig("escopoCritico"),
     rotulo: contexto ?? base.rotuloPericia,
@@ -110,6 +120,13 @@ export async function rolarTeste(ator, {
 
   // 1) Os dados do jogador rolam em 3D primeiro (todos veem).
   await mostrarDados3D(roll);
+
+  // 1b) Análise (marcadores ±1) e Mentoria (trocar um dado pela RA) — depois de rolar.
+  if (ator.type === "personagem") {
+    await ajustarDepoisDaRolagem(ator, roll);
+    roll._total = roll.resultado.total;
+    await conferirLobo(ator, roll);
+  }
 
   // 2) Com pavor: depois de ver os próprios dados, o jogador é obrigado a rolar o
   //    dado de pavor, antes da soma e do resultado. Ele rola em 3D com aparência

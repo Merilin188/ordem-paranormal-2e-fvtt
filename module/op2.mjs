@@ -57,6 +57,7 @@ import { registrarTabelas, abrirTabelaParaTodos } from "./cena/tabelas.mjs";
 import { registrarEquilibrio, iniciarEquilibrio } from "./cena/equilibrio.mjs";
 import { registrarCondicoes } from "./cena/condicoes.mjs";
 import { registrarDeclaracao } from "./cena/declaracao.mjs";
+import { registrarPoderes } from "./cena/poderes.mjs";
 import { registrarAparenciaDoPavor } from "./cena/pavor.mjs";
 import { registrarGuiaCombate, alternarGuiaCombate } from "./ui/guia-combate.mjs";
 import { aplicarPavor, removerPavor, abrirPavor } from "./cena/pavor.mjs";
@@ -125,6 +126,7 @@ Hooks.once("init", () => {
   CONFIG.Combat.initiative = { formula: "0", decimals: 0 };
   registrarCondicoes();
   registrarDeclaracao();
+  registrarPoderes();
   registrarAparenciaDoPavor();
 
   game.op2 = {

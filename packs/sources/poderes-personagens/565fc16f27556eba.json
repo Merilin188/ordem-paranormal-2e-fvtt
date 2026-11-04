@@ -1,0 +1,33 @@
+{
+  "name": "Elmo aberto",
+  "img": "systems/ordem-paranormal-2e/assets/icons/tipos/equipamento.svg",
+  "system": {
+    "quantidade": 1,
+    "equipado": true,
+    "descricao": "<p>Fornece 1 ponto de armadura, mas reduz Percepção em um passo.</p>",
+    "arma": false,
+    "danoBonus": 0,
+    "armadura": 1,
+    "penalidade": {
+      "pericia": "percepcao",
+      "passos": 1
+    },
+    "criticoMinimo": 0,
+    "escudo": false,
+    "cargas": {
+      "usa": false,
+      "value": 0,
+      "max": 0
+    }
+  },
+  "_id": "565fc16f27556eba",
+  "type": "equipamento",
+  "folder": "2c577ad5de07f8a1",
+  "sort": 6000,
+  "effects": [],
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_key": "!items!565fc16f27556eba"
+}

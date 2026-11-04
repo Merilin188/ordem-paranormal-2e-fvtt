@@ -172,7 +172,10 @@
       "DiminuirCarga": "Spend one charge (decrease)",
       "DanoBonus": "Modificador de dano (RA + mod.)",
       "Armadura": "Pontos de armadura que fornece",
-      "ArmaduraDica": "conta quando o item está equipado"
+      "ArmaduraDica": "conta quando o item está equipado",
+      "CriticoMinimo": "Crítico a partir de (0 = padrão)",
+      "Escudo": "Escudo (reduz a RB do dano quando perde com 7+)",
+      "Penalidade": "Reduz a perícia (passos)"
     },
     "Item": {
       "Novo": "New {tipo}",
@@ -823,7 +826,8 @@
       "Fase": {
         "geral": "Geral",
         "distancia": "Distância",
-        "corpo": "Corpo a corpo"
+        "corpo": "Corpo a corpo",
+        "antecipacao": "Antecipação"
       },
       "EscolherFase": "Declarar fase da rodada",
       "FaseAjuda": "Em que fase cada um age nesta rodada? Geral (qualquer ação, exceto ataques) → Ataques à distância → Ataques corpo a corpo. Quem age numa fase não age nas seguintes.",
@@ -841,7 +845,9 @@
       "Preencher": "Fill momentum",
       "Preenchido": "{ator} filled one momentum slot ({preenchidos}/{espacos}).",
       "Cheia": "The momentum bar is already full.",
-      "Gastar": "Spend 1 momentum: +d4"
+      "Gastar": "Spend 1 momentum: +d4",
+      "AcaoExtra": "Ação extra (3)",
+      "AcaoExtraUsada": "{nome} gasta 3 espaços de ímpeto: faz uma ação extra nesta cena de conflito."
     },
     "Ocupacao": {
       "Ajuda": "Occupation is free text on the sheet and grants one ability (spec §2.1). Drag this occupation onto a character: it fills the field and brings the ability along.",
@@ -1265,6 +1271,81 @@
       "Outros": "Outros efeitos",
       "Alternar": "Ativar/desativar",
       "Excluir": "Excluir efeito"
+    },
+    "Poder": {
+      "Tipo": {
+        "nenhuma": "Nenhuma (só texto)",
+        "analise": "Análise (marcadores)",
+        "leituraCombate": "Leitura de Combate",
+        "segredoAco": "Segredo do Aço",
+        "prontidao": "Prontidão (rerrolar)",
+        "esquiva": "Esquiva",
+        "lobo": "Espectro, o Lobo",
+        "curandeiro": "Curandeiro",
+        "mentoria": "Mentoria",
+        "impetoFervilhante": "Ímpeto Fervilhante",
+        "antecipacao": "Antecipação Tática",
+        "sorrateiro": "Sorrateiro",
+        "guardia": "Guardiã",
+        "instinto": "Instinto de Sobrevivência",
+        "heranca": "Herança",
+        "plano": "Plano Estratégico",
+        "arsenal": "Arsenal de Herborista"
+      },
+      "Automacao": "Automação",
+      "Usar": "Usar",
+      "Marcadores": "Marcadores de análise",
+      "Confirmar": "Confirmar",
+      "SemPD": "PD insuficiente (precisa de {custo}).",
+      "Aliado": "Aliado",
+      "Alvo": "Alvo",
+      "AplicarDano": "Aplicar {dano} de dano",
+      "AnaliseAcao": "gastou uma ação analisando",
+      "LeituraMotivo": "Leitura de Combate (defendeu-se)",
+      "MarcadoresGanhos": "{nome} recebe {n} marcador(es) de análise ({motivo}). Total: {total}/4.",
+      "AjustarTitulo": "Ajustar dados",
+      "AnaliseAjuda": "Você tem {n} marcador(es) de análise: cada um muda um dado em +1 ou −1.",
+      "MarcadoresRestantes": "Marcadores restantes: {n}",
+      "MentoriaAjuda": "Mentoria: você pode trocar um dado por {ra}.",
+      "MentoriaTrocar": "Trocar este dado por {ra} (Mentoria)",
+      "MentoriaPericia": "Perícia usada para ajudar",
+      "MentoriaFalhou": "A mentoria para {nome} não funcionou.",
+      "MentoriaSucesso": "{nome} pode trocar um dado do próximo teste por {ra} (rolagem alta do mentor).",
+      "GuardiaUso": "{nome} gasta 2 PD e se coloca na frente: passa a ser o alvo do ataque.",
+      "AntecipacaoUso": "{nome} gasta 2 PD: nesta rodada age antes de todos os personagens e NPCs.",
+      "LoboMachucado": "O lobo de {nome} tirou 1 e se machucou: não ajuda mais até o fim da cena.",
+      "LoboFerido": "Lobo machucado nesta cena",
+      "PlanoTitulo": "Plano Estratégico",
+      "PlanoPergunta": "Você tem {n} d6 do Plano Estratégico. Quantos usar neste teste?",
+      "PlanoFalhou": "O plano de {nome} não se sustentou.",
+      "PlanoSemBonus": "{nome} passou, mas sem margem para bônus.",
+      "PlanoSucesso": "Plano de {nome}: o grupo todo recebe {n} d6 bônus para usar até o fim da cena.",
+      "CurandeiroSemAlvo": "Nenhum aliado disponível (cada um só pode ser curado uma vez por cena).",
+      "CurandeiroFalhou": "O tratamento em {nome} não funcionou.",
+      "CurandeiroCurou": "{nome} recupera {n} PV.",
+      "ArsenalVazio": "Nenhum preparado restante",
+      "ArsenalPergunta": "Qual preparado usar? Cada um é de uso único.",
+      "Arsenal": {
+        "tonico": "Tônico de urtiga-feroz",
+        "balsamo": "Bálsamo de confrei",
+        "vespa": "Pote de vespa",
+        "tonicoTexto": "aumento de passo no Físico por uma cena.",
+        "balsamoTexto": "o alvo recupera 2d4 PV.",
+        "vespaTexto": "Sobrevivência como ataque à distância, dano RA+1.",
+        "tonicoUso": "{alvo} bebe o tônico: Físico aumenta um passo até o fim da cena.",
+        "balsamoUso": "{alvo} recupera {n} PV.",
+        "balsamoParado": "{alvo} precisa ficar parado nesta rodada.",
+        "vespaErrou": "O pote de vespa erra {alvo}.",
+        "vespaAcertou": "O pote acerta {alvo}: {dano} de dano. Se sobreviver, perde a próxima ação espantando as vespas."
+      },
+      "Prontidao": "Prontidão",
+      "ProntidaoDica": "Prontidão: gaste 2 PD para rolar novamente um dado (não 1) deste teste. Uma vez por rodada.",
+      "ProntidaoSem": "Nenhum personagem seu tem Prontidão.",
+      "ProntidaoJaUsou": "Prontidão já foi usada nesta rodada.",
+      "ProntidaoSemDado": "Nenhum dado pode ser rolado de novo (resultados 1 não contam).",
+      "ProntidaoPergunta": "{nome} gasta 2 PD. Qual dado rolar de novo?",
+      "ProntidaoRerrolar": "Rolar de novo",
+      "ProntidaoNota": "Prontidão de {nome}: um dado foi de {antes} para {depois}."
     }
   }
 }

@@ -1,0 +1,35 @@
+{
+  "name": "Análise",
+  "img": "systems/ordem-paranormal-2e/assets/icons/poderes/analise.svg",
+  "system": {
+    "origem": "perfil",
+    "perfil": "analista",
+    "custo": "",
+    "custoPD": 0,
+    "descricao": "<p>Você pode <strong>gastar uma ação</strong> para receber <strong>2 marcadores de análise</strong> (botão <em>Usar</em>).</p><ul><li>Ao fazer um teste, depois de rolar os dados, pode gastar quantos marcadores quiser: cada um muda o resultado de um dado em <strong>+1 ou −1</strong> (até o máximo do dado). A janela aparece sozinha.</li><li>Acumula no máximo <strong>4 marcadores</strong>; no fim da cena, os não usados se perdem.</li></ul>",
+    "efeito": {
+      "tipo": "nenhum",
+      "passos": 1,
+      "dado": "d6",
+      "chaves": [],
+      "permitirD20": false,
+      "pdAoDescobrir": 0
+    },
+    "usoEmInvestigacao": "",
+    "impeto": {
+      "espacos": 0,
+      "preenchidos": 0
+    },
+    "automacao": "analise"
+  },
+  "_id": "2ef59a9931a5e105",
+  "type": "habilidade",
+  "folder": "fb797d798103fe6e",
+  "sort": 1000,
+  "effects": [],
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_key": "!items!2ef59a9931a5e105"
+}

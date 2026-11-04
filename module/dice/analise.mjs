@@ -45,11 +45,11 @@ export function rb(dados) {
  * @param {DadoRolado[]} dados
  * @param {"todos"|"contados"} [escopo] o playtest não define se descartados contam (spec §4.5)
  */
-export function valorCritico(dados, escopo = "todos") {
+export function valorCritico(dados, escopo = "todos", minimo = VALOR_MINIMO_CRITICO) {
   const alvo = escopo === "contados" ? contados(dados) : dados;
   const contagem = new Map();
   for (const d of alvo) {
-    if (d.resultado < VALOR_MINIMO_CRITICO) continue;
+    if (d.resultado < minimo) continue;
     contagem.set(d.resultado, (contagem.get(d.resultado) ?? 0) + 1);
   }
   const repetidos = [...contagem.entries()].filter(([, n]) => n >= 2).map(([v]) => v);
@@ -67,8 +67,8 @@ export function ehFalhaCritica(dados, escopo = "todos") {
  * @param {DadoRolado[]} dados
  * @param {{dt?: number|null, escopoCritico?: "todos"|"contados"}} [opcoes]
  */
-export function analisar(dados, { dt = null, escopoCritico = "todos" } = {}) {
-  const critico = valorCritico(dados, escopoCritico);
+export function analisar(dados, { dt = null, escopoCritico = "todos", minimoCritico = VALOR_MINIMO_CRITICO } = {}) {
+  const critico = valorCritico(dados, escopoCritico, minimoCritico || VALOR_MINIMO_CRITICO);
   const falhaCritica = ehFalhaCritica(dados, escopoCritico);
   const total = soma(dados);
 

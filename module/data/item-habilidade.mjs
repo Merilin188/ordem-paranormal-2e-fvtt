@@ -57,6 +57,23 @@ export class HabilidadeData extends foundry.abstract.TypeDataModel {
         preenchidos: new NumberField({ required: true, initial: 0, min: 0, max: 6, integer: true, nullable: false }),
       }),
 
+      /** Automação do poder (module/cena/poderes.mjs). Vazio = só texto. */
+      automacao: new StringField({ required: true, initial: "", blank: true }),
+      /** Análise: marcadores guardados (máx. 4). */
+      marcadores: new NumberField({ required: true, initial: 0, min: 0, max: 4, integer: true, nullable: false }),
+      /** Espectro, o lobo: machucado até o fim da cena. */
+      machucadoNaCena: new BooleanField({ required: true, initial: false }),
+      /** Curandeiro: quem já foi curado nesta cena. */
+      alvosNaCena: new foundry.data.fields.ArrayField(new StringField(), { initial: [] }),
+      /** Prontidão: em que rodada já foi usada. */
+      usadoNaRodada: new StringField({ required: true, initial: "", blank: true }),
+      /** Arsenal de Herborista: preparados já usados (cada um é de uso único). */
+      arsenal: new SchemaField({
+        tonico: new BooleanField({ required: true, initial: false }),
+        balsamo: new BooleanField({ required: true, initial: false }),
+        vespa: new BooleanField({ required: true, initial: false }),
+      }),
+
       /** Habilidades podem ter uso próprio em cenas de investigação (spec §6.6). */
       usoEmInvestigacao: new HTMLField({ required: true, initial: "", blank: true }),
     };

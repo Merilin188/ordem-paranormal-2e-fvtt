@@ -63,6 +63,10 @@
       data-ator-id="{{atorId}}" data-tooltip="{{localize 'OP2.Chat.DanoNosSelecionados'}}">
       {{localize "OP2.Chat.DanoRB"}} ({{rb}})
     </button>
+    <button type="button" class="op2-botao op2-botao--pequeno op2-botao--prontidao" data-op2-acao="prontidao"
+      data-ator-id="{{atorId}}" data-tooltip="{{localize 'OP2.Poder.ProntidaoDica'}}">
+      <i class="fa-solid fa-bolt" aria-hidden="true"></i> {{localize "OP2.Poder.Prontidao"}}
+    </button>
     {{#if arma}}
       <button type="button" class="op2-botao op2-botao--pequeno" data-op2-gm
         data-op2-acao="aplicar-dano-selecionado" data-quantidade="{{arma.dano}}" data-recurso="pv"

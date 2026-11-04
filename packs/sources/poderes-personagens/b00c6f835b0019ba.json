@@ -1,0 +1,33 @@
+{
+  "name": "Porrete",
+  "img": "systems/ordem-paranormal-2e/assets/icons/tipos/equipamento.svg",
+  "system": {
+    "quantidade": 1,
+    "equipado": true,
+    "descricao": "<p>Arma corpo a corpo, dano RA+1.</p>",
+    "arma": true,
+    "danoBonus": 1,
+    "armadura": 0,
+    "penalidade": {
+      "pericia": "",
+      "passos": 0
+    },
+    "criticoMinimo": 0,
+    "escudo": false,
+    "cargas": {
+      "usa": false,
+      "value": 0,
+      "max": 0
+    }
+  },
+  "_id": "b00c6f835b0019ba",
+  "type": "equipamento",
+  "folder": "1759ae1800d79f2f",
+  "sort": 4000,
+  "effects": [],
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_key": "!items!b00c6f835b0019ba"
+}

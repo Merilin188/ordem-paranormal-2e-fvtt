@@ -110,7 +110,7 @@ export class OP2Roll extends Roll {
 
   /** @returns {ReturnType<typeof analise.analisar>} */
   get resultado() {
-    const r = analise.analisar(this.dadosDoTeste, { dt: this.dt, escopoCritico: this.escopoCritico });
+    const r = analise.analisar(this.dadosDoTeste, { dt: this.dt, escopoCritico: this.escopoCritico, minimoCritico: this.options.criticoMinimo });
     // O dado de pavor anulou todos os dados: o valor do teste é 0, falha crítica.
     if (this._evaluated && this.options.pavor && this.dadosDoTeste.length === 0) {
       Object.assign(r, { total: 0, ra: 0, rb: 0, critico: false, valorCritico: null, falhaCritica: true, sucesso: false, desfecho: "falha-critica" });

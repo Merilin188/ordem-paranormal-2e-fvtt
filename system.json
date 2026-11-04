@@ -175,6 +175,17 @@
         "PLAYER": "OBSERVER",
         "ASSISTANT": "OWNER"
       }
+    },
+    {
+      "name": "poderes-personagens",
+      "label": "Playtest 2 — Poderes de Personagens",
+      "path": "packs/poderes-personagens",
+      "type": "Item",
+      "system": "ordem-paranormal-2e",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
     }
   ],
   "packFolders": [
@@ -184,6 +195,14 @@
       "color": "#c8321e",
       "packs": [],
       "folders": [
+        {
+          "name": "Playtest 2",
+          "sorting": "m",
+          "color": "#8f2315",
+          "packs": [
+            "poderes-personagens"
+          ]
+        },
         {
           "name": "Regras",
           "sorting": "m",

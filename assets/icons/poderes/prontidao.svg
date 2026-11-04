@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Glifo: Font Awesome Free 6.5.2 (bolt), CC BY 4.0, https://fontawesome.com/license/free -->
+  <polygon points="2,5 62,2 61,60 3,62" fill="#16100e"/>
+  <polygon points="2,5 62,2 61,60 3,62" fill="none" stroke="#4b7d20" stroke-width="2"/>
+  <path d="M10 54 L54 54" stroke="#86b943" stroke-width="2.5" stroke-linecap="square"/>
+  <svg x="14" y="11" width="36" height="36" viewBox="0 0 448 512" preserveAspectRatio="xMidYMid meet">
+    <path d="M349.4 44.6c5.9-13.7 1.5-29.7-10.6-38.5s-28.6-8-39.9 1.8l-256 224c-10 8.8-13.6 22.9-8.9 35.3S50.7 288 64 288H175.5L98.6 467.4c-5.9 13.7-1.5 29.7 10.6 38.5s28.6 8 39.9-1.8l256-224c10-8.8 13.6-22.9 8.9-35.3s-16.6-20.7-30-20.7H272.5L349.4 44.6z" fill="#f2ede6"/>
+  </svg>
+</svg>

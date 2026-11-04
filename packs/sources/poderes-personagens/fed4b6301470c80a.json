@@ -1,0 +1,33 @@
+{
+  "name": "Lança",
+  "img": "systems/ordem-paranormal-2e/assets/icons/tipos/equipamento.svg",
+  "system": {
+    "quantidade": 1,
+    "equipado": true,
+    "descricao": "<p>Arma corpo a corpo, dano RA+2; no primeiro ataque contra um inimigo que ainda não o atacou, você recebe um aumento de passo.</p>",
+    "arma": true,
+    "danoBonus": 2,
+    "armadura": 0,
+    "penalidade": {
+      "pericia": "",
+      "passos": 0
+    },
+    "criticoMinimo": 0,
+    "escudo": false,
+    "cargas": {
+      "usa": false,
+      "value": 0,
+      "max": 0
+    }
+  },
+  "_id": "fed4b6301470c80a",
+  "type": "equipamento",
+  "folder": "2c577ad5de07f8a1",
+  "sort": 4000,
+  "effects": [],
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_key": "!items!fed4b6301470c80a"
+}

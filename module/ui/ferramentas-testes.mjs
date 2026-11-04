@@ -392,3 +392,14 @@ export function registrarTestesDoMestre() {
   registrarAcaoDeMestre("ferrRegistrarSolicitacao", registrarSolicitacao);
   registrarAcaoDeMestre("ferrRegistrarOposto", registrarOposto);
 }
+
+/** Escolhe uma perícia/atributo do ator (Mentoria usa a perícia com que ajudou). */
+export async function escolherPericiaSimples(ator, titulo) {
+  return DialogV2.prompt({
+    window: { title: titulo },
+    classes: ["op2", "op2-ferr-dialogo"],
+    content: `<div class="form-group"><label>${L("Pericia")}</label><select name="p">${opcoesDePericia(chavesDoAtor(ator), ator)}</select></div>`,
+    ok: { callback: (_e, b) => b.form.elements.p.value },
+    rejectClose: false,
+  });
+}

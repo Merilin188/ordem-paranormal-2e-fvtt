@@ -1,0 +1,33 @@
+{
+  "name": "Lança de javali",
+  "img": "systems/ordem-paranormal-2e/assets/icons/tipos/equipamento.svg",
+  "system": {
+    "quantidade": 1,
+    "equipado": true,
+    "descricao": "<p>Arma corpo a corpo, dano RA+2; fornece um aumento de passo no primeiro ataque da cena.</p>",
+    "arma": true,
+    "danoBonus": 2,
+    "armadura": 0,
+    "penalidade": {
+      "pericia": "",
+      "passos": 0
+    },
+    "criticoMinimo": 0,
+    "escudo": false,
+    "cargas": {
+      "usa": false,
+      "value": 0,
+      "max": 0
+    }
+  },
+  "_id": "57c80f548f42a59f",
+  "type": "equipamento",
+  "folder": "92ec2ddb7f5cb328",
+  "sort": 5000,
+  "effects": [],
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_key": "!items!57c80f548f42a59f"
+}

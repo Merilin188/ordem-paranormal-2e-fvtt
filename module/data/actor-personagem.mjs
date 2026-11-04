@@ -60,6 +60,10 @@ export class PersonagemData extends foundry.abstract.TypeDataModel {
         testesMorte: campoContador(),
         // Rodada da investigação em que ficou moribundo (não testa morte nela).
         moribundoDesde: new NumberField({ required: false, initial: null, integer: true, nullable: true }),
+        // Plano Estratégico: d6 bônus guardados até o fim da cena.
+        bonusPlano: new NumberField({ required: true, initial: 0, min: 0, integer: true, nullable: false }),
+        // Mentoria recebida: pode trocar um dado do próximo teste por este valor (RA do mentor).
+        mentoria: new NumberField({ required: true, initial: 0, min: 0, integer: true, nullable: false }),
         // Dado de pavor ativo ("" = nenhum): rola junto e consome os dados menores.
         pavor: new StringField({ required: true, initial: "", blank: true }),
         // Ajuda recebida e ainda não usada (spec §4.7). Fica no personagem, não em
@@ -124,8 +128,14 @@ export class PersonagemData extends foundry.abstract.TypeDataModel {
       atributo.aumentado = passos > 0;
     }
 
+    // Itens equipados que pesam numa perícia (elmo → Percepção, cota de malha → Furtividade).
+    const penalidades = {};
+    for (const item of this.parent?.items ?? []) {
+      const p = item.type === "equipamento" && item.system.equipado ? item.system.penalidade : null;
+      if (p?.pericia && p.passos) penalidades[p.pericia] = (penalidades[p.pericia] ?? 0) + p.passos;
+    }
     for (const [chave, pericia] of Object.entries(this.pericias)) {
-      pericia.dadoEfetivo = stepDie(pericia.die, pericia.stepMod ?? 0);
+      pericia.dadoEfetivo = stepDie(pericia.die, (pericia.stepMod ?? 0) - (penalidades[chave] ?? 0));
       // O tamanho do dado é comparado direto contra a DT ao Investigar, sem rolagem (spec §6.3).
       pericia.valor = faces(pericia.dadoEfetivo);
       pericia.especializada = PERICIAS[chave]?.especializada ?? false;
@@ -138,7 +148,9 @@ export class PersonagemData extends foundry.abstract.TypeDataModel {
 
     // Pontos de armadura fornecidos pelos itens equipados, menos os já gastos.
     const itensDeArmadura = this.parent?.items?.filter((i) => i.type === "equipamento" && i.system.equipado && i.system.armadura > 0) ?? [];
-    this.armadura.max = itensDeArmadura.reduce((t, i) => t + i.system.armadura, 0);
+    // Segredo do Aço: cada item que fornece armadura dá 1 ponto a mais.
+    const segredoDoAco = this.parent?.items?.some((i) => i.type === "habilidade" && i.system.automacao === "segredoAco");
+    this.armadura.max = itensDeArmadura.reduce((t, i) => t + i.system.armadura + (segredoDoAco ? 1 : 0), 0);
     this.armadura.value = Math.max(0, this.armadura.max - this.armadura.gastos);
     this.armadura.fontes = itensDeArmadura.map((i) => `${i.name} (${i.system.armadura})`).join(", ");
 

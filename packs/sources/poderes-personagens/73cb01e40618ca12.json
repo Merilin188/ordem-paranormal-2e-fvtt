@@ -1,0 +1,33 @@
+{
+  "name": "Espada forjada em castelo",
+  "img": "systems/ordem-paranormal-2e/assets/icons/tipos/equipamento.svg",
+  "system": {
+    "quantidade": 1,
+    "equipado": true,
+    "descricao": "<p>Arma corpo a corpo, dano RA+3; ao atacar com ela, o sucesso crítico acontece com dois valores 5 ou mais.</p>",
+    "arma": true,
+    "danoBonus": 3,
+    "armadura": 0,
+    "penalidade": {
+      "pericia": "",
+      "passos": 0
+    },
+    "criticoMinimo": 5,
+    "escudo": false,
+    "cargas": {
+      "usa": false,
+      "value": 0,
+      "max": 0
+    }
+  },
+  "_id": "73cb01e40618ca12",
+  "type": "equipamento",
+  "folder": "44f55a0f58bb627e",
+  "sort": 4000,
+  "effects": [],
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_key": "!items!73cb01e40618ca12"
+}
