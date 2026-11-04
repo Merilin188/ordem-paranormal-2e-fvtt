@@ -1,0 +1,28 @@
+<div class="op2-declaracao-corpo">
+  <header class="op2-declaracao__topo">
+    <span class="op2-dt__rotulo">{{localize "OP2.Declaracao.Rodada" rodada=rodada}}</span>
+    <strong class="op2-declaracao__relogio" data-relogio>--</strong>
+  </header>
+  <div class="op2-declaracao__trilho"><div class="op2-declaracao__barra {{#if pausado}}pausada{{/if}}" data-barra></div></div>
+  <p class="op2-ajuda">{{localize "OP2.Declaracao.Ajuda"}}</p>
+  <ul class="op2-declaracao__lista">
+    {{#each combatentes}}
+      <li class="{{#if declarado}}declarado{{/if}}">
+        <img src="{{img}}" alt="">
+        <span class="op2-declaracao__nome">{{nome}}</span>
+        <span class="op2-declaracao__fases">
+          {{#each fases}}
+            <button type="button" class="op2-fase-botao op2-fase-botao--{{chave}} {{#if ativa}}ativa{{/if}}" data-action="fase" data-id="{{../id}}" data-fase="{{chave}}">{{rotulo}}</button>
+          {{/each}}
+        </span>
+      </li>
+    {{/each}}
+  </ul>
+  {{#if ehGM}}
+    <div class="op2-declaracao__mestre">
+      <button type="button" data-action="pausar"><i class="fa-solid {{#if pausado}}fa-play{{else}}fa-pause{{/if}}"></i> {{#if pausado}}{{localize "OP2.Declaracao.Retomar"}}{{else}}{{localize "OP2.Declaracao.Pausar"}}{{/if}}</button>
+      <button type="button" data-action="mais"><i class="fa-solid fa-plus"></i> 15s</button>
+      <button type="button" data-action="encerrar"><i class="fa-solid fa-stop"></i> {{localize "OP2.Declaracao.Encerrar"}}</button>
+    </div>
+  {{/if}}
+</div>

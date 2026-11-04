@@ -11,7 +11,7 @@
  */
 import { ESCADA, SYSTEM_ID } from "../config.mjs";
 import { sequenciaLaboratorio, rerrolagensLaboratorio, sequenciaValida } from "./ferramentas.mjs";
-import { renderizar } from "../dice/teste.mjs";
+import { renderizar, mostrarDados3D } from "../dice/teste.mjs";
 import { vestirPerfil } from "../ui/perfil.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -60,6 +60,7 @@ export class LaboratorioApp extends HandlebarsApplicationMixin(ApplicationV2) {
   async rolarTudo() {
     const formula = this.sequenciaAlvo.map((d) => `1${d}`).join(" + ");
     const roll = await new Roll(formula).evaluate();
+    await mostrarDados3D(roll);
     this.resultados = roll.dice.map((termo) => termo.results[0].result);
     this.selecionados.clear();
   }
@@ -107,6 +108,7 @@ export class LaboratorioApp extends HandlebarsApplicationMixin(ApplicationV2) {
     const indices = [...this.selecionados];
     const formula = indices.map((i) => `1${this.sequenciaAlvo[i]}`).join(" + ");
     const roll = await new Roll(formula).evaluate();
+    await mostrarDados3D(roll);
     roll.dice.forEach((termo, k) => { this.resultados[indices[k]] = termo.results[0].result; });
 
     this.rerrolagensRestantes -= indices.length;

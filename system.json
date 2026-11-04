@@ -53,6 +53,11 @@
         "id": "pt-BR",
         "type": "module",
         "reason": "Traduz a interface do próprio Foundry para português. O sistema já vem em pt-BR; o core, não."
+      },
+      {
+        "id": "dice-so-nice",
+        "type": "module",
+        "reason": "Dados 3D em todas as rolagens do sistema, com o dado de pavor sombrio."
       }
     ]
   },

@@ -4,6 +4,7 @@
  */
 import { FASES_COMBATE, faseDoValor } from "./tabelas-dados.mjs";
 import { pedirTesteDeQueda } from "./ferimentos.mjs";
+import { iniciarDeclaracao } from "./declaracao.mjs";
 
 const C = (id, img) => ({ id, img, name: `OP2.Condicao.${id}`, _id: `op2${id}`.padEnd(16, "0").slice(0, 16) });
 
@@ -60,13 +61,24 @@ export function criarClasseDeCombate(Base) {
       return this;
     }
 
-    /** Nova rodada: todo mundo declara a fase de novo. */
+    /** Início do combate: zera a iniciativa e abre a declaração de fases. */
+    async startCombat() {
+      const r = await super.startCombat();
+      await this.#novaDeclaracao();
+      return r;
+    }
+
+    /** Nova rodada: ninguém fica como turno atual; todo mundo declara a fase de novo. */
     async nextRound() {
       const r = await super.nextRound();
-      if (game.user.isGM) {
-        await this.updateEmbeddedDocuments("Combatant", this.combatants.map((c) => ({ _id: c.id, initiative: null })));
-      }
+      await this.#novaDeclaracao();
       return r;
+    }
+
+    async #novaDeclaracao() {
+      if (!game.user.isGM) return;
+      await this.updateEmbeddedDocuments("Combatant", this.combatants.map((c) => ({ _id: c.id, initiative: null })));
+      await iniciarDeclaracao(this);
     }
   };
 }

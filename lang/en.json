@@ -114,7 +114,7 @@
       "inventario": "Inventory",
       "notas": "Notes",
       "relacoes": "Relações",
-      "marcas": "Lesões e traumas"
+      "marcas": "Lesões"
     },
     "Dado": {
       "Alterar": "Change the die"
@@ -408,7 +408,8 @@
       "AplicarDano": "Apply damage",
       "DanoNosSelecionados": "Applies to the tokens selected on the scene; with no selection, to whoever rolled.",
       "FalhaCriticaExplica": "All dice on 1: roll 1d8 on the critical failure table (spec §4.4). The GM decides the effect.",
-      "SoMestre": "Only you can see this."
+      "SoMestre": "Only you can see this.",
+      "DanoArma": "Dano com {nome}"
     },
     "Cena": {
       "Encerrar": "End scene",
@@ -1117,7 +1118,10 @@
       "Pergunta": "{nome} está com dado de pavor {dado} ({pd} PD). Antes do teste, você pode controlá-lo (1 PD: reduz um passo) ou abraçá-lo (5 PD: vira dado bônus e o pavor acaba).",
       "Controlou": "{nome} gasta 1 PD e controla o pavor: agora é {dado}.",
       "Abracou": "{nome} gasta 5 PD e abraça o pavor: o {dado} vira dado bônus neste teste.",
-      "Venceu": "O dado de pavor de {nome} tirou 1: o medo termina."
+      "Venceu": "O dado de pavor de {nome} tirou 1: o medo termina.",
+      "AgoraRole": "{nome} já viu os próprios dados. Agora, obrigatoriamente, role o dado de pavor ({dado}) antes da soma.",
+      "Lembrete": "Os dados que tirarem menos que o dado de pavor são anulados. Se anular todos, é falha crítica.",
+      "RolarPavor": "Rolar dado de pavor ({dado})"
     },
     "Marcas": {
       "Modificador": "Modificadores de lesões e traumas",
@@ -1193,7 +1197,7 @@
       "Grau1": "Grau 1: Afinidade",
       "Grau2": "Grau 2: Vínculo",
       "Grau3": "Grau 3: Devoção",
-      "Rotulo": "Como chama (ex.: Confiança, Dever)",
+      "Rotulo": "Como chama",
       "Descricao": "Descrição",
       "Remover": "Remover relação",
       "Vazio": "Nenhuma relação.",
@@ -1204,7 +1208,9 @@
       "Beneficio3": "+1d12 em um teste ligado à pessoa; ao ajudá-la, +1d12; motivá-la recupera 2d6 PD; se ela estiver em perigo, uma ação extra no turno para ajudá-la.",
       "Invocada": "Invocada",
       "InvocadaDica": "Cada relação só pode ser invocada uma vez por missão. Desmarque ao começar uma missão nova.",
-      "Invocar": "Invocar uma relação: descreva o que sente pela pessoa e como isso o ajuda a perseverar, e escolha um benefício do grau. Cada relação, uma vez por missão."
+      "Invocar": "Invocar uma relação: descreva o que sente pela pessoa e como isso o ajuda a perseverar, e escolha um benefício do grau. Cada relação, uma vez por missão.",
+      "RotuloExemplo": "Ex.: Confiança, Dever",
+      "DescricaoExemplo": "Ex.: Não tem medo do lobo, ao contrário do resto da vila."
     },
     "Armadura": {
       "Titulo": "Pontos de armadura",
@@ -1214,6 +1220,17 @@
       "Fontes": "Vêm de",
       "SemItens": "Nenhum item equipado fornece armadura.",
       "Regra": "Os itens equipados fornecem pontos de armadura. Ao sofrer dano, gaste 1 ponto (ação livre) para reduzir esse dano em 10. Pontos gastos não voltam neste playtest."
+    },
+    "Declaracao": {
+      "Titulo": "Defina a sua ação para o próximo turno",
+      "Rodada": "Rodada {rodada}",
+      "Ajuda": "Escolha em que fase seu personagem age: Geral (qualquer ação, exceto ataques), Distância ou Corpo a corpo.",
+      "Pausar": "Pausar",
+      "Retomar": "Retomar",
+      "Encerrar": "Encerrar",
+      "Faltaram": "Não declararam a fase: {nomes}.",
+      "Config": "Tempo para declarar a fase (segundos)",
+      "ConfigDica": "Tempo da janela de declaração aberta a cada rodada de combate."
     }
   }
 }

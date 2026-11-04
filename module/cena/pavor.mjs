@@ -44,6 +44,56 @@ export async function receberPavor(ator) {
   await aplicarPavor(ator, atual ? stepDie(atual, 1) : DADO_PAVOR_PADRAO);
 }
 
+/** Colorset do Dice So Nice para o dado de pavor (registrado no diceSoNiceReady). */
+export const COLORSET_PAVOR = "op2-pavor";
+
+export function registrarAparenciaDoPavor() {
+  Hooks.once("diceSoNiceReady", (dice3d) => {
+    dice3d.addColorset({
+      name: COLORSET_PAVOR,
+      description: "Ordem Paranormal — Dado de pavor",
+      category: "Ordem Paranormal",
+      foreground: "#ff2d55",
+      background: ["#0b0006", "#1a0010", "#26000f"],
+      outline: "#000000",
+      edge: "#3d0018",
+      texture: "fire",
+      material: "metal",
+      font: "Georgia",
+      visibility: "visible",
+    }, "default");
+  });
+}
+
+/** Faz o dado sair com a aparência sombria no Dice So Nice. */
+export function vestirDadoDePavor(roll) {
+  for (const termo of roll.dice) {
+    termo.options.colorset = COLORSET_PAVOR;
+    termo.options.appearance = {
+      colorset: COLORSET_PAVOR, foreground: "#ff2d55", background: "#0b0006", outline: "#000000",
+      edge: "#3d0018", material: "metal", texture: "fire",
+    };
+  }
+  return roll;
+}
+
+/**
+ * Depois de ver os próprios dados, o jogador precisa rolar o dado de pavor (não dá
+ * para pular: fechar a janela também rola).
+ */
+export async function pedirDadoDePavor(roll, ator, dado) {
+  const dados = roll.dados.map((d) => `<span class="op2-pavor-previa__dado">${d.resultado}</span>`).join("");
+  await foundry.applications.api.DialogV2.wait({
+    window: { title: game.i18n.localize("OP2.Pavor.Titulo"), icon: "fa-solid fa-ghost" },
+    classes: ["op2", "op2-pavor-previa"],
+    content: `<p>${game.i18n.format("OP2.Pavor.AgoraRole", { nome: esc(ator.name), dado })}</p>
+      <div class="op2-pavor-previa__dados">${dados}</div>
+      <p class="op2-ajuda">${game.i18n.localize("OP2.Pavor.Lembrete")}</p>`,
+    buttons: [{ action: "rolar", label: game.i18n.format("OP2.Pavor.RolarPavor", { dado }), icon: "fa-solid fa-ghost", default: true }],
+    rejectClose: false,
+  });
+}
+
 /** Pergunta, antes do teste, se quer controlar ou abraçar o pavor. null = cancelou. */
 export async function escolherUsoDoPavor(ator, dado) {
   const pd = ator.system.recursos?.pd?.value ?? 0;

@@ -56,6 +56,8 @@ import { registrarAtalhos } from "./ui/atalhos.mjs";
 import { registrarTabelas, abrirTabelaParaTodos } from "./cena/tabelas.mjs";
 import { registrarEquilibrio, iniciarEquilibrio } from "./cena/equilibrio.mjs";
 import { registrarCondicoes } from "./cena/condicoes.mjs";
+import { registrarDeclaracao } from "./cena/declaracao.mjs";
+import { registrarAparenciaDoPavor } from "./cena/pavor.mjs";
 import { registrarGuiaCombate, alternarGuiaCombate } from "./ui/guia-combate.mjs";
 import { aplicarPavor, removerPavor, abrirPavor } from "./cena/pavor.mjs";
 import { registrarFerramentasMestre, alternarFerramentasMestre, solicitarTeste, testeOposto, abrirDesafios } from "./ui/ferramentas-mestre.mjs";
@@ -122,6 +124,8 @@ Hooks.once("init", () => {
   // Sem iniciativa rolada: os jogadores decidem a ordem entre si (spec §5.2).
   CONFIG.Combat.initiative = { formula: "0", decimals: 0 };
   registrarCondicoes();
+  registrarDeclaracao();
+  registrarAparenciaDoPavor();
 
   game.op2 = {
     migrarLinhasDoQuadro,

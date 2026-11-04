@@ -8,6 +8,18 @@
     {{/if}}
   </div>
 
+  <div class="op2-armadura-inv">
+    <div class="op2-armadura">
+      <span>{{localize "OP2.Armadura.Pontos"}}</span>
+      <strong class="op2-armadura__valor">{{sistema.armadura.value}} / {{sistema.armadura.max}}</strong>
+      <label class="op2-armadura__gastos">{{localize "OP2.Armadura.Gastos"}}
+        <input type="number" name="system.armadura.gastos" value="{{sistema.armadura.gastos}}" min="0" {{#unless editavel}}disabled{{/unless}}>
+      </label>
+      <small>{{#if sistema.armadura.fontes}}{{localize "OP2.Armadura.Fontes"}}: {{sistema.armadura.fontes}}{{else}}{{localize "OP2.Armadura.SemItens"}}{{/if}}</small>
+    </div>
+    <p class="op2-ajuda">{{localize "OP2.Armadura.Regra"}}</p>
+  </div>
+
   {{#if equipamentos.length}}
     <ul class="op2-lista-itens op2-lista-itens--inventario">
       {{#each equipamentos}}

@@ -11,7 +11,9 @@ import { stepDie } from "./escada.mjs";
 import { consumirAjuda } from "../cena/acoes-ajuda.mjs";
 import { gastarImpeto, podePreencherImpeto } from "../cena/impeto.mjs";
 import { modificadorDoTeste } from "../cena/tabelas-dados.mjs";
-import { escolherUsoDoPavor, controlarPavor, abracarPavor, vencerPavor } from "../cena/pavor.mjs";
+import {
+  escolherUsoDoPavor, controlarPavor, abracarPavor, vencerPavor, pedirDadoDePavor, vestirDadoDePavor,
+} from "../cena/pavor.mjs";
 
 /**
  * @param {Actor} ator
@@ -95,35 +97,37 @@ export async function rolarTeste(ator, {
       pavorAbracado = true;
     }
   }
-  if (pavor && !pavorAbracado) {
-    componentes.push({ chave: "pavor", rotulo: game.i18n.localize("OP2.Pavor.Dado"), tipo: "pavor", dado: pavor });
-  }
-
   const roll = OP2Roll.paraComponentes(componentes, {
     dt: config.dt,
     escopoCritico: lerConfig("escopoCritico"),
     rotulo: contexto ?? base.rotuloPericia,
     atorId: ator.id,
+    chavePericia,
     modificador,
   });
 
   await roll.evaluate();
 
-  // Rolou mais do que soma: mostra os dados 3D antes de pedir a escolha, senão o
-  // jogador escolheria às cegas e veria a animação depois do resultado.
-  // `semCard`: quem chamou publica o próprio card com os dados dentro. É o caso
-  // de Examinar — o card genérico não tinha o que dizer (rola sem DT, então nem
-  // sucesso nem falha) e ainda oferecia "Dano RA/RB", que não existe ali. A
-  // animação dos dados continua acontecendo, só o card não sai.
-  if (roll.precisaSelecao) {
-    await mostrarDados3D(roll);
-    roll.aplicarSelecao(await SelecaoDados.abrir(roll, ator));
-    if (!semCard) await enviarParaChat(roll, ator, { pularDados3D: true });
-  } else if (semCard) {
-    await mostrarDados3D(roll);
-  } else {
-    await enviarParaChat(roll, ator);
+  // 1) Os dados do jogador rolam em 3D primeiro (todos veem).
+  await mostrarDados3D(roll);
+
+  // 2) Com pavor: depois de ver os próprios dados, o jogador é obrigado a rolar o
+  //    dado de pavor, antes da soma e do resultado. Ele rola em 3D com aparência
+  //    sombria e anula os resultados menores.
+  if (pavor && !pavorAbracado) {
+    await pedirDadoDePavor(roll, ator, pavor);
+    const rollPavor = await new Roll(`1${pavor}`).evaluate();
+    vestirDadoDePavor(rollPavor);
+    await mostrarDados3D(rollPavor);
+    roll.definirPavor(pavor, rollPavor.total);
   }
+
+  // 3) Rolou mais do que soma: o jogador escolhe quais contam (já sem os anulados).
+  if (roll.precisaSelecao) roll.aplicarSelecao(await SelecaoDados.abrir(roll, ator));
+
+  // `semCard`: quem chamou publica o próprio card com os dados dentro (Examinar,
+  // solicitação do mestre). A animação já aconteceu; o card não repete.
+  if (!semCard) await enviarParaChat(roll, ator, { pularDados3D: true });
 
   // Ajuda é para UMA rolagem: usada, acabou (spec §4.7 — custa a ação do aliado
   // para aquele teste, não é um efeito com duração).
@@ -190,13 +194,23 @@ export async function mostrarDados3D(roll) {
  * @param {OP2Roll} roll
  * @param {Actor} ator
  */
+/** Arma equipada com o maior modificador de dano. */
+export function melhorArma(ator) {
+  const armas = ator?.items?.filter((i) => i.type === "equipamento" && i.system.arma && i.system.equipado) ?? [];
+  return armas.sort((a, b) => (b.system.danoBonus ?? 0) - (a.system.danoBonus ?? 0))[0] ?? null;
+}
+
 /** HTML do card de resultado de um teste (o mesmo do chat). */
 export function htmlDoTeste(roll, ator) {
   const resultado = roll.resultado;
+  // Teste de ataque (Luta/Pontaria): oferece o dano com o modificador da arma equipada.
+  const ehAtaque = ["luta", "pontaria"].includes(roll.options.chavePericia);
+  const arma = ehAtaque ? melhorArma(ator) : null;
   return renderizar("systems/ordem-paranormal-2e/templates/chat/teste.hbs", {
     rotulo: roll.options.rotulo,
     componentes: roll.dados,
     ...resultado,
+    arma: arma ? { nome: arma.name, bonus: arma.system.danoBonus, dano: resultado.ra + arma.system.danoBonus } : null,
     atorId: ator.id,
     ehGM: game.user.isGM,
     // "Sempre que falha em um teste, você preenche um espaço" (ficha do Ato I).

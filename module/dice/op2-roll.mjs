@@ -64,20 +64,28 @@ export class OP2Roll extends Roll {
   get dados() {
     if (!this._evaluated) return [];
     const consumidos = new Set(this.options.consumidos ?? []);
-    return this.dice.map((termo, i) => {
+    const lista = this.dice.map((termo, i) => {
       const componente = this.componentes[i] ?? { rotulo: `d${termo.faces}`, tipo: "extra" };
-      const pavor = componente.tipo === "pavor";
       const consumido = consumidos.has(i);
       return {
         indice: i,
         dado: `d${termo.faces}`,
         resultado: termo.results[0].result,
-        contado: termo.results[0].active !== false && !pavor && !consumido,
-        pavor,
+        contado: termo.results[0].active !== false && !consumido,
+        pavor: false,
         consumido,
         componente,
       };
     });
+    // O dado de pavor rola à parte (depois dos dados do jogador) e entra só na leitura.
+    const p = this.options.pavor;
+    if (p) {
+      lista.push({
+        indice: lista.length, dado: p.dado, resultado: p.resultado, contado: false, pavor: true, consumido: false,
+        componente: { chave: "pavor", rotulo: game.i18n?.localize?.("OP2.Pavor.Dado") ?? "Pavor", tipo: "pavor" },
+      });
+    }
+    return lista;
   }
 
   /** Os dados que valem para o teste: sem o dado de pavor e sem os que ele consumiu. */
@@ -104,7 +112,7 @@ export class OP2Roll extends Roll {
   get resultado() {
     const r = analise.analisar(this.dadosDoTeste, { dt: this.dt, escopoCritico: this.escopoCritico });
     // O dado de pavor anulou todos os dados: o valor do teste é 0, falha crítica.
-    if (this._evaluated && this.componentes.some((c) => c.tipo === "pavor") && this.dadosDoTeste.length === 0) {
+    if (this._evaluated && this.options.pavor && this.dadosDoTeste.length === 0) {
       Object.assign(r, { total: 0, ra: 0, rb: 0, critico: false, valorCritico: null, falhaCritica: true, sucesso: false, desfecho: "falha-critica" });
     }
     const mod = this.modificador;
@@ -126,14 +134,11 @@ export class OP2Roll extends Roll {
    * Chamar logo depois do `evaluate`.
    */
   aplicarPavor() {
-    const indicePavor = this.componentes.findIndex((c) => c.tipo === "pavor");
-    if (indicePavor < 0) return this;
-    const valorPavor = this.dice[indicePavor].results[0].result;
-    for (const r of this.dice[indicePavor].results) { r.active = false; r.discarded = true; }
+    const p = this.options.pavor;
+    if (!p) return this;
     const consumidos = [];
     this.dice.forEach((termo, i) => {
-      if (i === indicePavor) return;
-      if (termo.results[0].result < valorPavor) {
+      if (termo.results[0].result < p.resultado) {
         consumidos.push(i);
         for (const r of termo.results) { r.active = false; r.discarded = true; }
       }
@@ -142,6 +147,13 @@ export class OP2Roll extends Roll {
     this._total = this.resultado.total;
     return this;
   }
+
+  /** Registra o dado de pavor rolado à parte e anula os dados menores. */
+  definirPavor(dado, resultado) {
+    this.options.pavor = { dado, resultado };
+    return this.aplicarPavor();
+  }
+
 
   get ra() { return this.resultado.ra; }
   get rb() { return this.resultado.rb; }

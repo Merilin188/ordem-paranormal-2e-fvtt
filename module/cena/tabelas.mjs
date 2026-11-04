@@ -79,6 +79,8 @@ class TabelaApp extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!this.podeRolar() || this.rolando) return;
     this.rolando = true;
     this.render();
+    paraTodos("op2TabelaRolando", { tabela: this.tabela, atorId: this.atorId });
+    // O dado gira em 3D para todos; só quando ele para a linha acende (em todas as telas).
     const roll = await new Roll(TABELAS[this.tabela].formula).evaluate();
     await mostrarDados3D(roll);
     const resultado = roll.total;
@@ -192,6 +194,11 @@ export function consultarTabela(tabela, atorId) {
 
 export function registrarTabelas() {
   registrarAcaoDeTodos("op2TabelaAbrir", abrirLocal);
+  registrarAcaoDeTodos("op2TabelaRolando", ({ tabela, atorId }) => {
+    const app = abertas.get(`${tabela}.${atorId}`) ?? abrirLocal({ tabela, atorId });
+    app.rolando = true;
+    app.render({ force: true });
+  });
   registrarAcaoDeTodos("op2TabelaResultado", ({ tabela, atorId, resultado, repetida }) => {
     const app = abertas.get(`${tabela}.${atorId}`) ?? abrirLocal({ tabela, atorId });
     app.mostrarResultado(resultado, repetida);
