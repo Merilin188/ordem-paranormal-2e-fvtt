@@ -53,13 +53,16 @@ export function registrarAparenciaDoPavor() {
       name: COLORSET_PAVOR,
       description: "Ordem Paranormal — Dado de pavor",
       category: "Ordem Paranormal",
-      foreground: "#ffffff",
-      background: ["#3a0016", "#4a0a1e", "#2c0010"],
-      outline: "#ff1f4f",
-      edge: "#12000a",
-      texture: "none",
-      material: "glass",
-      font: "Arial Black",
+      // Meio-termo: o clima escuro da primeira versão (fogo, metal), com o número
+      // em rosa-claro e contorno escuro para continuar legível sem gritar.
+      foreground: "#ffc2d1",
+      background: ["#12000a", "#1f0010", "#2a0012"],
+      outline: "#3d0018",
+      edge: "#3d0018",
+      texture: "fire",
+      material: "metal",
+      font: "Georgia",
+      fontScale: { d4: 0.9, d6: 0.8, d8: 0.8, d10: 0.75, d12: 0.75, d20: 0.7 },
       visibility: "visible",
     }, "default");
   });
@@ -70,8 +73,9 @@ export function vestirDadoDePavor(roll) {
   for (const termo of roll.dice) {
     termo.options.colorset = COLORSET_PAVOR;
     termo.options.appearance = {
-      colorset: COLORSET_PAVOR, foreground: "#ffffff", background: "#3a0016", outline: "#ff1f4f",
-      edge: "#12000a", material: "glass", texture: "none", font: "Arial Black",
+      colorset: COLORSET_PAVOR, foreground: "#ffc2d1", background: "#1f0010", outline: "#3d0018",
+      edge: "#3d0018", material: "metal", texture: "fire", font: "Georgia",
+      fontScale: { d4: 0.9, d6: 0.8, d8: 0.8, d10: 0.75, d12: 0.75, d20: 0.7 },
     };
   }
   return roll;

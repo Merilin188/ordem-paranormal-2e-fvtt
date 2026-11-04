@@ -1,12 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Glifo: Font Awesome Free 6.5.2 (person-falling), CC BY 4.0, https://fontawesome.com/license/free -->
   <polygon points="2,5 62,2 61,60 3,62" fill="#16100e"/>
   <polygon points="2,5 62,2 61,60 3,62" fill="none" stroke="#c8321e" stroke-width="2"/>
-  <g fill="none" stroke="#f2ede6" stroke-width="2.4" stroke-linecap="square" stroke-linejoin="miter">
-    <circle cx="32" cy="14" r="4"/>
-    <path d="M32 19 L32 36"/>
-    <path d="M14 24 L32 26 L50 22"/>
-    <path d="M32 36 L25 47 M32 36 L39 47"/>
-    <path d="M8 50 L56 50" stroke="#c8321e" stroke-width="3.5"/>
-    <path d="M12 56 L18 50 M46 50 L52 56" stroke="#c8321e" stroke-width="2"/>
-  </g>
+  <path d="M10 53 L54 53" stroke="#c8321e" stroke-width="3.5" stroke-linecap="square"/>
+  <svg x="14" y="8" width="40" height="40" viewBox="0 0 512 512" preserveAspectRatio="xMidYMid meet">
+    <path d="M288 0c17.7 0 32 14.3 32 32l0 9.8c0 54.6-27.9 104.6-72.5 133.6l.2 .3L304.5 256l87.5 0c15.1 0 29.3 7.1 38.4 19.2l43.2 57.6c10.6 14.1 7.7 34.2-6.4 44.8s-34.2 7.7-44.8-6.4L384 320l-96 0h-1.4l92.3 142.6c9.6 14.8 5.4 34.6-9.5 44.3s-34.6 5.4-44.3-9.5L164.5 249.2c-2.9 9.2-4.5 19-4.5 29l0 73.8c0 17.7-14.3 32-32 32s-32-14.3-32-32V278.2c0-65.1 39.6-123.7 100.1-147.9C232.3 115.8 256 80.8 256 41.8l0-9.8c0-17.7 14.3-32 32-32zM112 32a48 48 0 1 1 0 96 48 48 0 1 1 0-96z" fill="#f2ede6"/>
+  </svg>
 </svg>
