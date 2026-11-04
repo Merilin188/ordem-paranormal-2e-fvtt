@@ -947,6 +947,58 @@
       "Acoes": "Janela de ações",
       "AcoesDica": "Abre e fecha a janela de ações do personagem: o do token selecionado, senão o seu.",
       "SemPersonagem": "Escolha um personagem, ou selecione o token dele, para abrir as ações."
+    },
+    "Ferramentas": {
+      "Titulo": "Ferramentas do mestre",
+      "Arrastar": "Arrastar",
+      "SolicitarTeste": "Solicitar teste",
+      "TesteOposto": "Teste oposto",
+      "DesafiosAcesso": "Desafios de acesso",
+      "ImportarAventura": "Importar aventura / arquivos do playtest",
+      "Personagens": "Personagens",
+      "Pericia": "Perícia ou atributo",
+      "SemDT": "Sem DT",
+      "Motivo": "Motivo",
+      "MotivoDica": "Opcional — aparece no card",
+      "Enviar": "Enviar ao chat",
+      "Rolar": "Rolar",
+      "Rolado": "Rolado",
+      "Mestre": "Mestre",
+      "SemPersonagens": "Nenhum personagem no mundo.",
+      "NenhumSelecionado": "Marque pelo menos um personagem.",
+      "SemPermissao": "Você não controla este personagem.",
+      "Empate": "Empate.",
+      "Venceu": "{nome} vence o teste oposto.",
+      "Lado": "Lado {n}",
+      "Ator": "Personagem / NPC",
+      "AgirComo": "Agir como",
+      "SoDaInvestigacao": "Só da investigação",
+      "TodosDoMundo": "Todos do mundo",
+      "ListandoMundo": "Mostrando todos os desafios de acesso do mundo.",
+      "ListandoInvestigacao": "Desafios da investigação",
+      "NovoDesafio": "Novo desafio",
+      "SemAbordagem": "Nenhuma abordagem ligada",
+      "SemDesafios": "Nenhum desafio de acesso. Crie um novo ou importe uma aventura.",
+      "EscolhaPersonagem": "Escolha um personagem para agir.",
+      "Atalho": "Mostrar/esconder ferramentas do mestre",
+      "Desfecho": {
+        "critico": "Crítico",
+        "falhaCritica": "Falha crítica",
+        "sucesso": "Sucesso",
+        "falha": "Falha"
+      },
+      "Abordagem": {
+        "arrombar": "Arrombar",
+        "destrancar": "Destrancar",
+        "hackTecnico": "Hack técnico",
+        "hackSocial": "Hack social",
+        "sustentar": "Sustentar",
+        "generico": "Teste genérico"
+      },
+      "Config": {
+        "Mostrar": "Ferramentas do mestre",
+        "MostrarDica": "Mostra a barra flutuante com Solicitar teste, Teste oposto, Desafios de acesso e Importar aventura (só para o mestre). Atalho: Shift+G."
+      }
     }
   }
 }

@@ -1,0 +1,8 @@
+<nav class="op2-ferr-barra" aria-label="{{localize 'OP2.Ferramentas.Titulo'}}">
+  <span class="op2-ferr-alca" data-alca aria-hidden="true" title="{{localize 'OP2.Ferramentas.Arrastar'}}"></span>
+  {{#each botoes}}
+  <button type="button" data-action="{{acao}}" data-tooltip="{{rotulo}}" aria-label="{{rotulo}}" {{#if grande}}class="op2-ferr-grande"{{/if}}>
+    <img src="{{icone}}" alt="" aria-hidden="true">
+  </button>
+  {{/each}}
+</nav>

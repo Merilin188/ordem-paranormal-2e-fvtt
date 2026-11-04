@@ -1,0 +1,112 @@
+// Ferramentas do mestre: barra flutuante (ideia do sistema ordemparanormal2) e seus diálogos.
+@layer system {
+  #op2-ferramentas-mestre.op2-ferramentas-mestre {
+    position: fixed;
+    width: max-content;
+    min-width: 0;
+    min-height: 0;
+    padding: 0.2rem;
+    border: 1px solid var(--op2-linha-forte, rgb(255 255 255 / 16%));
+    border-radius: 0.35rem;
+    background: rgb(14 15 18 / 96%);
+    box-shadow: 0 0.2rem 0.6rem rgb(0 0 0 / 42%);
+    backdrop-filter: none;
+    z-index: 70;
+  }
+
+  .op2-ferr-barra {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-columns: 10px;
+    grid-auto-columns: 36px;
+    align-items: stretch;
+    gap: 0.2rem;
+
+    .op2-ferr-alca {
+      width: 10px;
+      border-radius: 0.2rem;
+      background: radial-gradient(circle, rgb(241 242 244 / 58%) 1px, transparent 1.5px) center / 5px 5px;
+      cursor: grab;
+      touch-action: none;
+
+      &:active { cursor: grabbing; }
+    }
+
+    button {
+      display: grid;
+      width: 36px;
+      height: 36px;
+      min-width: 0;
+      margin: 0;
+      padding: 0.22rem;
+      place-items: center;
+      border: 1px solid rgb(181 71 79 / 72%);
+      border-radius: 0.3rem;
+      background: rgb(34 24 28 / 88%);
+      box-shadow: none;
+      cursor: pointer;
+
+      &:hover, &:focus-visible {
+        border-color: #d05a63;
+        background: rgb(127 37 43 / 55%);
+        box-shadow: 0 0 0.35rem rgb(181 71 79 / 48%);
+      }
+
+      &:focus-visible { outline: 2px solid #e36a72; outline-offset: 1px; }
+    }
+
+    img {
+      display: block;
+      width: 1.62rem;
+      height: 1.62rem;
+      border: 0;
+      pointer-events: none;
+    }
+
+    .op2-ferr-grande img { transform: scale(1.3); }
+  }
+
+  .op2-ferr-dialogo {
+    .op2-ferr-form { display: flex; flex-direction: column; gap: 0.5rem; }
+    fieldset { border: 1px solid var(--op2-linha); padding: 0.4rem 0.6rem; }
+    .op2-ferr-checks { display: flex; flex-wrap: wrap; gap: 0.3rem 0.8rem; max-height: 12rem; overflow-y: auto; }
+    .op2-ferr-check { display: flex; align-items: center; gap: 0.3rem; }
+    .op2-ferr-check img { width: 24px; height: 24px; border: 0; object-fit: cover; }
+  }
+
+  .op2-ferr-card {
+    header { font-family: var(--op2-fonte-display); text-transform: uppercase; letter-spacing: 0.04em; }
+    .op2-ferr-sub, .op2-ferr-motivo { margin: 0.25rem 0; }
+    .op2-ferr-motivo { font-style: italic; color: var(--op2-tinta-fraca); }
+    .op2-ferr-veredito { margin: 0.4rem 0 0; font-weight: bold; text-align: center; }
+  }
+
+  .op2-ferr-lista {
+    margin: 0.3rem 0 0;
+    padding: 0;
+    list-style: none;
+
+    li { display: flex; align-items: center; gap: 0.4rem; padding: 0.2rem 0; }
+    img { width: 28px; height: 28px; border: 0; object-fit: cover; flex: none; }
+    .op2-ferr-nome { flex: 1; display: flex; flex-direction: column; }
+    small { color: var(--op2-tinta-fraca); }
+    button { flex: none; width: auto; padding: 0 0.6rem; border-radius: 0; }
+    .op2-ferr-vs { justify-content: center; font-family: var(--op2-fonte-display); color: var(--op2-acento-claro); }
+    .op2-ferr-res { font-weight: bold; }
+    .op2-ferr-sucesso, .op2-ferr-critico { color: var(--op2-sucesso); }
+    .op2-ferr-falha, .op2-ferr-falha-critica { color: var(--op2-perigo); }
+  }
+
+  .op2-ferr-desafios {
+    .op2-ferr-topo { display: flex; flex-direction: column; gap: 0.4rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--op2-linha); }
+    .op2-ferr-escopo { display: flex; gap: 0.4rem; }
+    .op2-ferr-escopo button { border-radius: 0; }
+    .op2-ferr-lista-desafios { margin: 0; padding: 0; list-style: none; }
+    .op2-ferr-lista-desafios > li { padding: 0.45rem 0; border-bottom: 1px solid var(--op2-linha); }
+    .op2-ferr-desafio-nome { display: flex; align-items: center; gap: 0.4rem; font-weight: bold; cursor: pointer; }
+    .op2-ferr-desafio-nome img { width: 24px; height: 24px; border: 0; }
+    .op2-ferr-abordagens { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.3rem; }
+    .op2-ferr-abordagens button { flex: none; width: auto; padding: 0 0.6rem; border-radius: 0; }
+    .op2-ferr-vazio { color: var(--op2-tinta-fraca); font-style: italic; }
+  }
+}

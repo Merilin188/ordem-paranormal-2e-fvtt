@@ -1,0 +1,33 @@
+<section class="op2-ferr-desafios-corpo">
+  <header class="op2-ferr-topo">
+    <div class="form-group">
+      <label>{{localize "OP2.Ferramentas.AgirComo"}}</label>
+      <select name="ator">
+        {{#each atores}}<option value="{{id}}" {{#if selecionado}}selected{{/if}}>{{nome}}</option>{{/each}}
+      </select>
+    </div>
+    <div class="op2-ferr-escopo">
+      {{#if temInvestigacao}}
+      <button type="button" data-action="escopo">
+        {{#if todos}}{{localize "OP2.Ferramentas.SoDaInvestigacao"}}{{else}}{{localize "OP2.Ferramentas.TodosDoMundo"}}{{/if}}
+      </button>
+      {{/if}}
+      <button type="button" data-action="novo"><i class="fa-solid fa-plus"></i> {{localize "OP2.Ferramentas.NovoDesafio"}}</button>
+    </div>
+    <p class="op2-ferr-sub">{{#if todos}}{{localize "OP2.Ferramentas.ListandoMundo"}}{{else}}{{localize "OP2.Ferramentas.ListandoInvestigacao"}} <strong>{{investigacao}}</strong>{{/if}}</p>
+  </header>
+  <ul class="op2-ferr-lista-desafios">
+    {{#each desafios}}
+    <li>
+      <a class="op2-ferr-desafio-nome" data-action="abrir" data-uuid="{{uuid}}"><img src="{{img}}" alt=""> {{nome}}</a>
+      <div class="op2-ferr-abordagens">
+        {{#each abordagens}}
+        <button type="button" data-action="abordagem" data-uuid="{{../uuid}}" data-chave="{{chave}}">{{rotulo}}</button>
+        {{else}}<em>{{localize "OP2.Ferramentas.SemAbordagem"}}</em>{{/each}}
+      </div>
+    </li>
+    {{else}}
+    <li class="op2-ferr-vazio">{{localize "OP2.Ferramentas.SemDesafios"}}</li>
+    {{/each}}
+  </ul>
+</section>

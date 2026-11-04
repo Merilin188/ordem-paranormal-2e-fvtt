@@ -53,6 +53,7 @@ import { abrirLaboratorio } from "./cena/laboratorio-app.mjs";
 import { abrirRadio } from "./cena/radio-app.mjs";
 import { abrirAcoesInvestigacao } from "./cena/acoes-app.mjs";
 import { registrarAtalhos } from "./ui/atalhos.mjs";
+import { registrarFerramentasMestre, alternarFerramentasMestre, solicitarTeste, testeOposto, abrirDesafios } from "./ui/ferramentas-mestre.mjs";
 import { rolarTesteDeQueda, zerarContadoresDeQueda } from "./cena/ferimentos.mjs";
 import { ajudar } from "./cena/acoes-ajuda.mjs";
 import { registrarMarcadores, marcarNoMapa, desmarcarDoMapa, abrirMarcador } from "./cena/marcadores.mjs";
@@ -108,12 +109,14 @@ Hooks.once("init", () => {
   registrarExtrasDeAventura();
   registrarBoasVindas();
   registrarAtalhos();
+  registrarFerramentasMestre();
 
   // Sem iniciativa rolada: os jogadores decidem a ordem entre si (spec §5.2).
   CONFIG.Combat.initiative = { formula: "0", decimals: 0 };
 
   game.op2 = {
     migrarLinhasDoQuadro,
+    ferramentasMestre: alternarFerramentasMestre, solicitarTeste, testeOposto, desafiosDeAcesso: abrirDesafios,
     rolarTeste, encerrarCena, stepDie, faces, OP2Roll,
     examinar, interagir, recapitular, compartilhar, dialogoExaminar, cicloVisibilidadeInfo,
     limparRevelacao, contarAoGrupo,

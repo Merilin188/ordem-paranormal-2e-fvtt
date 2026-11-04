@@ -947,6 +947,58 @@
       "Acoes": "Actions window",
       "AcoesDica": "Opens and closes the character's actions window: the selected token's, else yours.",
       "SemPersonagem": "Choose a character, or select their token, to open the actions."
+    },
+    "Ferramentas": {
+      "Titulo": "GM tools",
+      "Arrastar": "Drag",
+      "SolicitarTeste": "Request check",
+      "TesteOposto": "Opposed check",
+      "DesafiosAcesso": "Access challenges",
+      "ImportarAventura": "Import adventure / playtest files",
+      "Personagens": "Characters",
+      "Pericia": "Skill or attribute",
+      "SemDT": "No DC",
+      "Motivo": "Reason",
+      "MotivoDica": "Optional — shown on the card",
+      "Enviar": "Send to chat",
+      "Rolar": "Roll",
+      "Rolado": "Rolled",
+      "Mestre": "GM",
+      "SemPersonagens": "No characters in this world.",
+      "NenhumSelecionado": "Select at least one character.",
+      "SemPermissao": "You don't control this character.",
+      "Empate": "Tie.",
+      "Venceu": "{nome} wins the opposed check.",
+      "Lado": "Side {n}",
+      "Ator": "Character / NPC",
+      "AgirComo": "Act as",
+      "SoDaInvestigacao": "Investigation only",
+      "TodosDoMundo": "Whole world",
+      "ListandoMundo": "Showing every access challenge in the world.",
+      "ListandoInvestigacao": "Challenges of investigation",
+      "NovoDesafio": "New challenge",
+      "SemAbordagem": "No approach enabled",
+      "SemDesafios": "No access challenges. Create one or import an adventure.",
+      "EscolhaPersonagem": "Pick a character to act.",
+      "Atalho": "Toggle GM tools",
+      "Desfecho": {
+        "critico": "Critical",
+        "falhaCritica": "Critical failure",
+        "sucesso": "Success",
+        "falha": "Failure"
+      },
+      "Abordagem": {
+        "arrombar": "Force",
+        "destrancar": "Unlock",
+        "hackTecnico": "Technical hack",
+        "hackSocial": "Social hack",
+        "sustentar": "Hold",
+        "generico": "Generic check"
+      },
+      "Config": {
+        "Mostrar": "GM tools",
+        "MostrarDica": "Shows the floating bar with Request check, Opposed check, Access challenges and Import adventure (GM only). Shortcut: Shift+G."
+      }
     }
   }
 }

@@ -153,12 +153,18 @@ function atoresSelecionados(padrao) {
 }
 
 /** @param {HTMLElement} elemento */
+/** Outros módulos do sistema registram ações de botão de card (ferramentas do mestre). */
+export function registrarAcaoDeChat(nome, executar) {
+  ACOES[nome] = executar;
+}
+
 function ligar(elemento) {
   for (const botao of elemento.querySelectorAll("[data-op2-acao]")) {
     botao.addEventListener("click", async (evento) => {
       evento.preventDefault();
       // currentTarget zera ao fim do dispatch: guardamos o botão antes do primeiro await.
       const clicado = evento.currentTarget;
+      clicado.dataset.mensagemId ??= clicado.closest("[data-message-id]")?.dataset.messageId;
       const { op2Acao, atorId } = clicado.dataset;
       const acao = ACOES[op2Acao];
       if (!acao) return;
