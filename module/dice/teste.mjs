@@ -86,9 +86,9 @@ export async function rolarTeste(ator, {
   // (5 PD, vira dado bônus e o pavor acaba). Sem isso, rola junto e anula os menores.
   let pavor = sistema.estado?.pavor;
   let pavorAbracado = false;
-  if (pavor && !rapido) {
+  if (pavor) {
+    // Antes de rolar: janela obrigatória para controlar, abraçar ou só rolar.
     const escolha = await escolherUsoDoPavor(ator, pavor);
-    if (escolha === null) return null;
     if (escolha === "controlar") {
       pavor = await controlarPavor(ator);
     } else if (escolha === "abracar") {

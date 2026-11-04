@@ -1,0 +1,28 @@
+<section class="op2-painel op2-painel--efeitos tab {{tabs.efeitos.cssClass}}" data-group="principal" data-tab="efeitos">
+  <span class="op2-tag op2-tag--secao">{{localize "OP2.Efeitos.Titulo"}}</span>
+  <p class="op2-ajuda">{{localize "OP2.Efeitos.Ajuda"}}</p>
+  <div class="op2-efeitos__grade">
+    {{#each condicoes}}
+      <button type="button" class="op2-efeito {{#if ativa}}ativa{{/if}}" data-action="alternarCondicao" data-condicao="{{id}}"
+        aria-pressed="{{ativa}}" {{#unless @root.editavel}}disabled{{/unless}}
+        data-tooltip="{{#if ativa}}{{localize 'OP2.Efeitos.Remover'}}{{else}}{{localize 'OP2.Efeitos.Aplicar'}}{{/if}}">
+        <img src="{{img}}" alt=""><span>{{nome}}</span>
+        {{#if ativa}}<i class="fa-solid fa-xmark op2-efeito__x" aria-hidden="true"></i>{{/if}}
+      </button>
+    {{/each}}
+  </div>
+  {{#if outrosEfeitos.length}}
+    <h4 class="op2-marcas__titulo">{{localize "OP2.Efeitos.Outros"}}</h4>
+    <ul class="op2-efeitos__outros">
+      {{#each outrosEfeitos}}
+        <li class="{{#if desativado}}desativado{{/if}}">
+          <img src="{{img}}" alt=""><span>{{nome}}</span>
+          {{#if proprio}}{{#if @root.editavel}}
+            <button type="button" class="op2-botao-icone" data-action="alternarEfeito" data-efeito="{{id}}" data-tooltip="{{localize 'OP2.Efeitos.Alternar'}}"><i class="fa-solid {{#if desativado}}fa-toggle-off{{else}}fa-toggle-on{{/if}}"></i></button>
+            <button type="button" class="op2-botao-icone" data-action="removerEfeito" data-efeito="{{id}}" data-tooltip="{{localize 'OP2.Efeitos.Excluir'}}"><i class="fa-solid fa-trash"></i></button>
+          {{/if}}{{/if}}
+        </li>
+      {{/each}}
+    </ul>
+  {{/if}}
+</section>

@@ -53,13 +53,13 @@ export function registrarAparenciaDoPavor() {
       name: COLORSET_PAVOR,
       description: "Ordem Paranormal — Dado de pavor",
       category: "Ordem Paranormal",
-      foreground: "#ff2d55",
-      background: ["#0b0006", "#1a0010", "#26000f"],
-      outline: "#000000",
-      edge: "#3d0018",
-      texture: "fire",
-      material: "metal",
-      font: "Georgia",
+      foreground: "#ffffff",
+      background: ["#3a0016", "#4a0a1e", "#2c0010"],
+      outline: "#ff1f4f",
+      edge: "#12000a",
+      texture: "none",
+      material: "glass",
+      font: "Arial Black",
       visibility: "visible",
     }, "default");
   });
@@ -70,8 +70,8 @@ export function vestirDadoDePavor(roll) {
   for (const termo of roll.dice) {
     termo.options.colorset = COLORSET_PAVOR;
     termo.options.appearance = {
-      colorset: COLORSET_PAVOR, foreground: "#ff2d55", background: "#0b0006", outline: "#000000",
-      edge: "#3d0018", material: "metal", texture: "fire",
+      colorset: COLORSET_PAVOR, foreground: "#ffffff", background: "#3a0016", outline: "#ff1f4f",
+      edge: "#12000a", material: "glass", texture: "none", font: "Arial Black",
     };
   }
   return roll;
@@ -97,20 +97,36 @@ export async function pedirDadoDePavor(roll, ator, dado) {
 /** Pergunta, antes do teste, se quer controlar ou abraçar o pavor. null = cancelou. */
 export async function escolherUsoDoPavor(ator, dado) {
   const pd = ator.system.recursos?.pd?.value ?? 0;
-  const botoes = [
-    { action: "normal", label: game.i18n.localize("OP2.Pavor.RolarNormal"), icon: "fa-solid fa-ghost", default: true },
-  ];
-  if (pd >= 1 && dado !== "d4") botoes.push({ action: "controlar", label: game.i18n.format("OP2.Pavor.Controlar", { dado: stepDie(dado, -1) }), icon: "fa-solid fa-hand" });
-  if (pd >= 5) botoes.push({ action: "abracar", label: game.i18n.localize("OP2.Pavor.Abracar"), icon: "fa-solid fa-fire" });
-  if (botoes.length === 1) return "normal";
-  const escolha = await foundry.applications.api.DialogV2.wait({
-    window: { title: game.i18n.localize("OP2.Pavor.Titulo"), icon: "fa-solid fa-ghost" },
-    classes: ["op2", "op2-ferr-dialogo"],
-    content: `<p>${game.i18n.format("OP2.Pavor.Pergunta", { nome: esc(ator.name), dado, pd })}</p>`,
-    buttons: botoes,
-    rejectClose: false,
+  const podeControlar = pd >= 1 && dado !== "d4";
+  const podeAbracar = pd >= 5;
+  const opcao = (acao, icone, titulo, texto, pode, motivo) => `
+    <button type="button" class="op2-pavor-opcao" data-escolha="${acao}" ${pode ? "" : "disabled"}>
+      <i class="fa-solid ${icone}"></i><strong>${titulo}</strong><span>${pode ? texto : motivo}</span>
+    </button>`;
+  // Obrigatória: aparece antes de TODO teste de quem tem pavor. Fechar = rolar com o pavor.
+  const escolha = await new Promise((resolver) => {
+    const dialogo = new foundry.applications.api.DialogV2({
+      window: { title: game.i18n.localize("OP2.Pavor.Titulo"), icon: "fa-solid fa-ghost" },
+      classes: ["op2", "op2-pavor-escolha"],
+      position: { width: 460 },
+      content: `<p>${game.i18n.format("OP2.Pavor.Pergunta", { nome: esc(ator.name), dado, pd })}</p>
+        <div class="op2-pavor-opcoes">
+          ${opcao("normal", "fa-ghost", game.i18n.localize("OP2.Pavor.RolarNormal"), game.i18n.format("OP2.Pavor.RolarNormalTexto", { dado }), true, "")}
+          ${opcao("controlar", "fa-hand", game.i18n.localize("OP2.Pavor.ControlarTitulo"), game.i18n.format("OP2.Pavor.ControlarTexto", { dado: stepDie(dado, -1) }), podeControlar, game.i18n.localize(dado === "d4" ? "OP2.Pavor.JaMinimo" : "OP2.Pavor.SemPD1"))}
+          ${opcao("abracar", "fa-fire", game.i18n.localize("OP2.Pavor.AbracarTitulo"), game.i18n.localize("OP2.Pavor.AbracarTexto"), podeAbracar, game.i18n.localize("OP2.Pavor.SemPD5"))}
+        </div>`,
+      buttons: [{ action: "fechar", label: game.i18n.localize("OP2.Pavor.RolarNormal"), default: true }],
+      submit: () => resolver("normal"),
+    });
+    dialogo.addEventListener("close", () => resolver("normal"), { once: true });
+    dialogo.render({ force: true }).then(() => {
+      for (const b of dialogo.element.querySelectorAll("[data-escolha]")) {
+        b.addEventListener("click", () => { resolver(b.dataset.escolha); void dialogo.close(); });
+      }
+      dialogo.element.querySelector(".form-footer")?.classList.add("op2-oculto");
+    });
   });
-  return escolha ?? null;
+  return escolha;
 }
 
 /** Controlando o pavor: 1 PD, o dado de pavor reduz um passo (mínimo d4). */

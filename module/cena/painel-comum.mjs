@@ -15,6 +15,7 @@
  * quem revelou o quê. Nenhum dado de regra (DT, reação de ferramenta) vaza para o
  * lado do jogador.
  */
+import { escolherCategoria, criarDesafioDaCategoria, rotuloCategoria } from "./categorias-desafio.mjs";
 import { SYSTEM_ID } from "../config.mjs";
 import { periciasDoQuadro, chaveInfo, danoSobrecarga } from "./investigacao.mjs";
 import { semPrefixoDoPonto, desafioResolvido } from "./desafios.mjs";
@@ -84,6 +85,7 @@ export function PainelInvestigacaoMixin(Base) {
         criarEvento: PainelInvestigacaoComum.#criarEvento,
         criarPoi: PainelInvestigacaoComum.#criarPoi,
         criarDesafio: PainelInvestigacaoComum.#criarDesafio,
+        iniciarTravessia: PainelInvestigacaoComum.#iniciarTravessia,
         abrirEvento: PainelInvestigacaoComum.#abrirEvento,
         desvincularEvento: PainelInvestigacaoComum.#desvincularEvento,
         dispararEvento: PainelInvestigacaoComum.#dispararEvento,
@@ -416,6 +418,10 @@ export function PainelInvestigacaoMixin(Base) {
           notasAbertas: notas.has(desafio.uuid),
           abordagens: Object.entries(ROTULOS_ABORDAGEM).filter(([chave]) => abordagens[chave]).map(([, chave]) => game.i18n.localize(chave))
             .concat(abordagens.generico ? [generico.rotulo || game.i18n.localize("OP2.Desafio.Generico")] : []),
+          categoria: desafio.system.categoria,
+          categoriaRotulo: desafio.system.categoria !== "acesso" ? rotuloCategoria(desafio.system.categoria) : "",
+          ehEquilibrio: desafio.system.categoria === "equilibrio",
+          ehAlcancar: desafio.system.categoria === "alcancar",
           temArrombar: abordagens.arrombar,
           ocultarProgresso: desafio.system.ocultarProgresso,
           ocultarTentativas: desafio.system.ocultarTentativas,
@@ -845,14 +851,21 @@ export function PainelInvestigacaoMixin(Base) {
       item.sheet.render(true);
     }
 
-    /** Desafio de acesso novo, já vinculado (oculto). */
+    /** Desafio de equilíbrio: o mestre escolhe quem atravessa. */
+    static async #iniciarTravessia() {
+      if (!game.user.isGM) return;
+      const { testeDeEquilibrio } = await import("../ui/ferramentas-testes.mjs");
+      await testeDeEquilibrio();
+    }
+
+    /** Desafio novo (o mestre escolhe o tipo), já vinculado (oculto). */
     static async #criarDesafio() {
       if (!game.user.isGM) return;
       const investigacao = this.investigacao;
       if (!investigacao) return void ui.notifications.warn(game.i18n.localize("OP2.Painel.SemInvestigacao"));
-      const [item] = await Item.createDocuments([{
-        name: game.i18n.localize("OP2.Painel.NovoDesafio"), type: "desafio-acesso",
-      }]);
+      const categoria = await escolherCategoria();
+      if (!categoria) return;
+      const item = await criarDesafioDaCategoria(categoria);
       await vincularDesafio(investigacao, item.uuid);
       item.sheet.render(true);
     }

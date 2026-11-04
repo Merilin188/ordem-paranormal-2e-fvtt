@@ -130,7 +130,7 @@ function abrirLocal({ atorId }) {
 
 /** Mestre começa a travessia de um personagem: abre a janela para ele e para o mestre. */
 export async function iniciarEquilibrio(ator) {
-  if (!ator || !game.user.isGM) return;
+  if (!ator?.isOwner) return;
   const acrobacia = ator.system?.pericias?.acrobacia?.dadoEfetivo ?? "d4";
   const restantes = dadosDeEquilibrio(acrobacia);
   await ator.setFlag(SYSTEM_ID, FLAG, { ativo: true, rodada: 0, restantes, dados: [], d4Pendente: null, historico: [] });

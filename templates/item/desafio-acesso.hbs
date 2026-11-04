@@ -8,6 +8,14 @@
     <input type="text" class="op2-nome" name="name" value="{{item.name}}" {{#unless editavel}}disabled{{/unless}}>
   </header>
 
+  <label class="op2-campo">
+    <span>{{localize "OP2.Desafio.CategoriaRotulo"}}</span>
+    <select name="system.categoria" {{#unless editavel}}disabled{{/unless}}>
+      {{#each categorias}}<option value="{{chave}}" {{#if selecionada}}selected{{/if}}>{{rotulo}}</option>{{/each}}
+    </select>
+  </label>
+  {{#if categoriaAjuda}}<p class="op2-ajuda">{{categoriaAjuda}}</p>{{/if}}
+
   <fieldset class="op2-desafio-abordagens">
     <legend>{{localize "OP2.Desafio.Abordagens"}}</legend>
     <p class="op2-ajuda">{{localize "OP2.Desafio.AbordagensAjuda"}}</p>

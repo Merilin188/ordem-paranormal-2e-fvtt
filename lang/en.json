@@ -114,7 +114,8 @@
       "inventario": "Inventory",
       "notas": "Notes",
       "relacoes": "Relações",
-      "marcas": "Lesões"
+      "marcas": "Lesões",
+      "efeitos": "Efeitos"
     },
     "Dado": {
       "Alterar": "Change the die"
@@ -697,7 +698,22 @@
       "SalvarSenhaManual": "Salvar senha digitada",
       "SenhaManualAjuda": "Escolha o dado de cada posição (ex.: d8 + d6 + d12). \"Salvar só os dados\" mantém o sorteio automático com esses dados; \"Salvar senha digitada\" usa os valores que você escreveu (zera o histórico).",
       "SenhaManualInvalida": "Preencha todas as posições com valores dentro do dado de cada uma.",
-      "SenhaManualSalva": "Senha salva."
+      "SenhaManualSalva": "Senha salva.",
+      "Categoria": {
+        "acesso": "Acesso",
+        "equilibrio": "Equilíbrio",
+        "sustentar": "Sustentação",
+        "alcancar": "Alcançar"
+      },
+      "CategoriaRotulo": "Tipo de desafio",
+      "NovoTipo": "Novo desafio",
+      "NovoTipoAjuda": "Que tipo de desafio você quer criar?",
+      "NovoNome": "Novo desafio: {tipo}",
+      "CategoriaAjuda": {
+        "equilibrio": "Travessia: o personagem rola 2d10 por rodada e usa dados de equilíbrio (metade da Acrobacia).",
+        "sustentar": "Alguém segura o obstáculo (Atletismo, 1 PV) enquanto os outros passam; o teste se repete a cada rodada, cada vez mais difícil.",
+        "alcancar": "Alcançar algo de difícil acesso: seguro (dois testes de Acrobacia) ou arriscado (um teste, DT +3). Usa a DT do objeto."
+      }
     },
     "Ferramenta": {
       "Rotulo": "Tool",
@@ -908,7 +924,8 @@
       "SemCena": "Open the map scene before placing the marker.",
       "SemPersonagem": "Pick a character to act from this marker.",
       "IrAoMarcador": "Center the map on the marker",
-      "SemMarcadorNaCena": "This marker is not on the open scene."
+      "SemMarcadorNaCena": "This marker is not on the open scene.",
+      "CliqueNoMapa": "Clique no mapa onde o marcador de «{nome}» deve ficar (Esc cancela). Depois, na camada de notas, arraste para ajustar."
     },
     "Aventuras": {
       "Titulo": "Playtest adventures",
@@ -1112,16 +1129,24 @@
       "Remover": "Remover dado de pavor",
       "Nenhum": "Nenhum",
       "Abracado": "Pavor abraçado (dado bônus)",
-      "RolarNormal": "Rolar com o pavor",
+      "RolarNormal": "Apenas rolar",
       "Controlar": "Controlar (1 PD → {dado})",
       "Abracar": "Abraçar (5 PD → dado bônus)",
-      "Pergunta": "{nome} está com dado de pavor {dado} ({pd} PD). Antes do teste, você pode controlá-lo (1 PD: reduz um passo) ou abraçá-lo (5 PD: vira dado bônus e o pavor acaba).",
+      "Pergunta": "{nome} está com dado de pavor {dado} ({pd} PD). Antes de rolar, escolha:",
       "Controlou": "{nome} gasta 1 PD e controla o pavor: agora é {dado}.",
       "Abracou": "{nome} gasta 5 PD e abraça o pavor: o {dado} vira dado bônus neste teste.",
       "Venceu": "O dado de pavor de {nome} tirou 1: o medo termina.",
       "AgoraRole": "{nome} já viu os próprios dados. Agora, obrigatoriamente, role o dado de pavor ({dado}) antes da soma.",
       "Lembrete": "Os dados que tirarem menos que o dado de pavor são anulados. Se anular todos, é falha crítica.",
-      "RolarPavor": "Rolar dado de pavor ({dado})"
+      "RolarPavor": "Rolar dado de pavor ({dado})",
+      "RolarNormalTexto": "Rola o teste; depois, o dado de pavor ({dado}) anula os resultados menores.",
+      "ControlarTitulo": "Controlar o pavor (1 PD)",
+      "ControlarTexto": "Gasta 1 PD: o dado de pavor reduz um passo, para {dado}.",
+      "AbracarTitulo": "Abraçar o pavor (5 PD)",
+      "AbracarTexto": "Gasta 5 PD: o dado de pavor vira um dado bônus neste teste e o pavor acaba.",
+      "JaMinimo": "O dado de pavor já está no mínimo (d4).",
+      "SemPD1": "PD insuficiente (precisa de 1).",
+      "SemPD5": "PD insuficiente (precisa de 5)."
     },
     "Marcas": {
       "Modificador": "Modificadores de lesões e traumas",
@@ -1231,6 +1256,15 @@
       "Faltaram": "Não declararam a fase: {nomes}.",
       "Config": "Tempo para declarar a fase (segundos)",
       "ConfigDica": "Tempo da janela de declaração aberta a cada rodada de combate."
+    },
+    "Efeitos": {
+      "Titulo": "Efeitos e condições",
+      "Ajuda": "Clique numa condição para aplicar ou remover. As mesmas condições aparecem no HUD do token.",
+      "Aplicar": "Aplicar",
+      "Remover": "Remover",
+      "Outros": "Outros efeitos",
+      "Alternar": "Ativar/desativar",
+      "Excluir": "Excluir efeito"
     }
   }
 }

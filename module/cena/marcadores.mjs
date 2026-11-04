@@ -71,14 +71,18 @@ export async function marcarNoMapa(uuid, { x, y, cena = canvas?.scene } = {}) {
   }
   const ponto = await fromUuid(uuid);
   if (!["ponto-interesse", "desafio-acesso"].includes(ponto?.type)) return null;
+  const nomeDoPonto = ponto.name;
 
-  // Pelo botão não há posição: cai no meio do que o mestre está vendo, e ele arrasta
-  // dali. Arrastando o ponto para o mapa, a posição é a do cursor.
-  x ??= canvas?.stage?.pivot?.x ?? cena.width / 2;
-  y ??= canvas?.stage?.pivot?.y ?? cena.height / 2;
+  // Pelo botão não há posição: o mestre clica no mapa onde o marcador deve ficar.
+  if (x === undefined || y === undefined) {
+    const local = await escolherPosicaoNoMapa(nomeDoPonto);
+    if (!local) return null;
+    ({ x, y } = local);
+  }
 
   const existente = marcadoresDoPonto(cena, uuid)[0];
   if (existente) {
+    ativarCamadaDeNotas();
     await existente.update({ x: Math.round(x), y: Math.round(y) });
     ui.notifications.info(game.i18n.format("OP2.Marcador.Movido", { nome: ponto.name }));
     return existente;
@@ -99,7 +103,44 @@ export async function marcarNoMapa(uuid, { x, y, cena = canvas?.scene } = {}) {
     flags: { [SYSTEM_ID]: { [CHAVE_MARCADOR]: uuid } },
   }]);
   ui.notifications.info(game.i18n.format("OP2.Marcador.Criado", { nome: ponto.name }));
+  ativarCamadaDeNotas();
   return nota;
+}
+
+/** Deixa a camada de notas ativa: é nela que o mestre arrasta o marcador depois. */
+function ativarCamadaDeNotas() {
+  try { canvas?.notes?.activate?.(); } catch { /* sem canvas */ }
+}
+
+/**
+ * Espera um clique no mapa e devolve a posição (coordenadas da cena). Esc cancela.
+ * @returns {Promise<{x: number, y: number}|null>}
+ */
+function escolherPosicaoNoMapa(nome) {
+  const view = canvas?.app?.view;
+  if (!view) return Promise.resolve(null);
+  ui.notifications.info(game.i18n.format("OP2.Marcador.CliqueNoMapa", { nome: nome ?? "" }));
+  document.body.classList.add("op2-posicionando");
+  return new Promise((resolver) => {
+    const fim = (valor) => {
+      view.removeEventListener("pointerdown", clique, true);
+      document.removeEventListener("keydown", tecla, true);
+      document.body.classList.remove("op2-posicionando");
+      resolver(valor);
+    };
+    const clique = (evento) => {
+      if (evento.button !== 0) return fim(null);
+      evento.stopPropagation();
+      evento.preventDefault();
+      const p = canvas.canvasCoordinatesFromClient
+        ? canvas.canvasCoordinatesFromClient({ x: evento.clientX, y: evento.clientY })
+        : canvas.stage.worldTransform.applyInverse({ x: evento.clientX, y: evento.clientY });
+      fim({ x: p.x, y: p.y });
+    };
+    const tecla = (evento) => { if (evento.key === "Escape") { evento.stopPropagation(); fim(null); } };
+    view.addEventListener("pointerdown", clique, true);
+    document.addEventListener("keydown", tecla, true);
+  });
 }
 
 /** Tira o marcador do ponto (em todas as cenas). */

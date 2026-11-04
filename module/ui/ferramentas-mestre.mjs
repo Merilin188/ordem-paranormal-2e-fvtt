@@ -125,7 +125,10 @@ class DesafiosApp extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   static async #novo() {
-    const item = await Item.create({ name: L("NovoDesafio"), type: "desafio-acesso" });
+    const { escolherCategoria, criarDesafioDaCategoria } = await import("../cena/categorias-desafio.mjs");
+    const categoria = await escolherCategoria();
+    if (!categoria) return;
+    const item = await criarDesafioDaCategoria(categoria);
     item?.sheet.render(true);
     this.todos = true;
     this.render();

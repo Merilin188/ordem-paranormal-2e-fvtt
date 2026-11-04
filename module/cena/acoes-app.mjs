@@ -70,7 +70,10 @@ function contextoDoDesafio(desafio, investigacao, indice) {
     sustentarDt: desafio.system.sustentar.dt,
     genericoRotulo: desafio.system.generico.rotulo?.trim() || game.i18n.localize("OP2.Desafio.Generico"),
     abordagens,
-    temAlgumaAbordagem: Object.values(abordagens).some(Boolean),
+    dtObjeto: desafio.system.dtObjeto,
+    ehEquilibrio: desafio.system.categoria === "equilibrio",
+    ehAlcancar: desafio.system.categoria === "alcancar",
+    temAlgumaAbordagem: Object.values(abordagens).some(Boolean) || ["equilibrio", "alcancar"].includes(desafio.system.categoria),
   };
 }
 
@@ -113,6 +116,7 @@ export class AcoesInvestigacaoApp extends HandlebarsApplicationMixin(Application
       recapitular: fechaDepois(AcoesInvestigacaoApp.#recapitular),
       compartilhar: fechaDepois(AcoesInvestigacaoApp.#compartilhar),
       alcancar: fechaDepois(AcoesInvestigacaoApp.#alcancar),
+      atravessar: fechaDepois(AcoesInvestigacaoApp.#atravessar),
       sustentar: fechaDepois(AcoesInvestigacaoApp.#sustentar),
       sustentarDesafio: fechaDepois(AcoesInvestigacaoApp.#sustentarDesafio),
       pararDeSustentar: AcoesInvestigacaoApp.#pararDeSustentar,
@@ -363,7 +367,15 @@ export class AcoesInvestigacaoApp extends HandlebarsApplicationMixin(Application
   static async #usarRecurso() { return usarHabilidadeOuItem(this.ator); }
   static async #recapitular() { return recapitular(this.ator); }
   static async #compartilhar() { return compartilhar(this.ator); }
-  static async #alcancar(_evento, alvo) { return alcancar(this.ator, { modo: alvo.dataset.modo }); }
+  static async #alcancar(_evento, alvo) {
+    const dt = alvo.dataset.dt ? Number(alvo.dataset.dt) : undefined;
+    return alcancar(this.ator, { modo: alvo.dataset.modo, dt });
+  }
+
+  static async #atravessar() {
+    const { iniciarEquilibrio } = await import("./equilibrio.mjs");
+    await iniciarEquilibrio(this.ator);
+  }
   static async #sustentar() { const r = await sustentar(this.ator); this.render(); return r; }
 
   /** Sustentar um obstáculo da cena: a DT é a dele (a estante-porta do Ato I). */

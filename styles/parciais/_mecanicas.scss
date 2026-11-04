@@ -261,4 +261,40 @@
     &--corpo.ativa { background: #7a2016; border-color: #e0472f; }
   }
   .op2-declaracao__mestre { display: flex; gap: 0.4rem; button { flex: 1; border-radius: 0.3rem; } }
+
+  // Escolha do pavor antes do teste
+  .op2-pavor-escolha .op2-oculto { display: none; }
+  .op2-pavor-opcoes { display: flex; flex-direction: column; gap: 0.45rem; margin-top: 0.5rem; }
+  .op2-pavor-opcao {
+    display: grid; grid-template-columns: 2rem 1fr; grid-template-rows: auto auto; column-gap: 0.5rem; text-align: left;
+    width: 100%; height: auto; padding: 0.55rem 0.7rem; border-radius: 0.4rem; border: 1px solid #8b1d3a;
+    background: linear-gradient(90deg, rgb(60 6 20 / 70%), rgb(20 2 8 / 60%)); color: #f2ede6;
+    i { grid-row: 1 / 3; align-self: center; font-size: 1.4rem; color: #ff5c80; }
+    strong { text-transform: uppercase; letter-spacing: 0.04em; }
+    span { font-size: 0.85em; color: #e6a3b8; }
+    &:hover:not(:disabled) { border-color: #ff5c80; box-shadow: 0 0 0.5rem rgb(255 40 90 / 35%); }
+    &:disabled { opacity: 0.45; cursor: not-allowed; }
+  }
+
+  // Posicionando marcador: cursor de mira no mapa
+  body.op2-posicionando #board { cursor: crosshair !important; }
+
+  // Aba Efeitos
+  .op2-efeitos__grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr)); gap: 0.4rem; margin-top: 0.4rem; }
+  .op2-efeito {
+    position: relative; display: flex; align-items: center; gap: 0.4rem; width: 100%; height: auto; padding: 0.35rem 0.5rem;
+    border: 1px solid var(--op2-linha-forte); border-radius: 0.35rem; background: rgb(255 255 255 / 2%); color: var(--op2-tinta-fraca); text-align: left;
+    img { width: 26px; height: 26px; border: 0; opacity: 0.55; filter: grayscale(1); }
+    &.ativa { border-color: var(--op2-vermelho-claro); background: rgb(200 50 30 / 22%); color: var(--op2-tinta);
+      img { opacity: 1; filter: none; } }
+  }
+  .op2-efeito__x { position: absolute; top: 0.2rem; right: 0.3rem; font-size: 0.75em; color: var(--op2-vermelho-claro); }
+  .op2-efeitos__outros { margin: 0; padding: 0; list-style: none;
+    li { display: flex; align-items: center; gap: 0.4rem; padding: 0.25rem 0; border-bottom: 1px solid var(--op2-linha); }
+    li span { flex: 1; } li.desativado { opacity: 0.5; }
+    img { width: 24px; height: 24px; border: 0; } }
+
+  // Categoria do desafio no painel
+  .op2-tag--categoria { background: #2d3a4a; }
+  .op2-dlg--categoria footer { flex-wrap: wrap; }
 }

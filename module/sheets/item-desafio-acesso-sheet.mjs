@@ -7,6 +7,7 @@ import { rotuloDePericia } from "../dice/teste.mjs";
 import { OP2ItemSheet } from "./item-sheet.mjs";
 import { gerarSenhaDestrancar, posicoesDoPalpite } from "../cena/acoes-desafio.mjs";
 import { facesDasPosicoes } from "../cena/desafios.mjs";
+import { CATEGORIAS_DESAFIO, rotuloCategoria } from "../cena/categorias-desafio.mjs";
 import { iniciarHackTecnico } from "../cena/timer-hack.mjs";
 
 export class DesafioAcessoSheet extends OP2ItemSheet {
@@ -91,6 +92,10 @@ export class DesafioAcessoSheet extends OP2ItemSheet {
       senha,
       temSenha: senha.length > 0,
       opcoesFaces: [2, 3, 4, 6, 8, 10, 12, 20],
+      categorias: Object.keys(CATEGORIAS_DESAFIO).map((chave) => ({
+        chave, rotulo: rotuloCategoria(chave), selecionada: chave === this.item.system.categoria,
+      })),
+      categoriaAjuda: this.item.system.categoria === "acesso" ? "" : game.i18n.localize(`OP2.Desafio.CategoriaAjuda.${this.item.system.categoria}`),
       posicoesSenha: facesDasPosicoes(this.item.system).map((faces, indice) => ({
         indice, numero: indice + 1, faces, valor: senha[indice] ?? "",
       })),

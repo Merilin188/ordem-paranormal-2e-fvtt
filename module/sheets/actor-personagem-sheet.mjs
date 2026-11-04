@@ -53,6 +53,9 @@ export class PersonagemSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       removerMarca: PersonagemSheet.#removerMarca,
       consultarTabela: PersonagemSheet.#consultarTabela,
       removerPavor: PersonagemSheet.#removerPavor,
+      alternarCondicao: PersonagemSheet.#alternarCondicao,
+      removerEfeito: PersonagemSheet.#removerEfeito,
+      alternarEfeito: PersonagemSheet.#alternarEfeito,
     },
   };
 
@@ -64,12 +67,13 @@ export class PersonagemSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     notas: { template: "systems/ordem-paranormal-2e/templates/actor/personagem-notas.hbs" },
     relacoes: { template: "systems/ordem-paranormal-2e/templates/actor/personagem-relacoes.hbs" },
     marcas: { template: "systems/ordem-paranormal-2e/templates/actor/personagem-marcas.hbs" },
+    efeitos: { template: "systems/ordem-paranormal-2e/templates/actor/personagem-efeitos.hbs" },
     pericias: { template: "systems/ordem-paranormal-2e/templates/actor/personagem-pericias.hbs" },
   };
 
   static TABS = {
     principal: {
-      tabs: [{ id: "habilidades" }, { id: "inventario" }, { id: "relacoes" }, { id: "marcas" }, { id: "notas" }],
+      tabs: [{ id: "habilidades" }, { id: "inventario" }, { id: "relacoes" }, { id: "efeitos" }, { id: "marcas" }, { id: "notas" }],
       initial: "habilidades",
       labelPrefix: "OP2.Aba",
     },
@@ -135,6 +139,13 @@ export class PersonagemSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       lesoes: sistema.lesoes.map((m, indice) => ({ indice, ...descreverMarca(m.chave) })),
       traumas: sistema.traumas.map((m, indice) => ({ indice, ...descreverMarca(m.chave) })),
       pavor: sistema.estado.pavor,
+      condicoes: CONFIG.statusEffects.map((c) => ({
+        id: c.id, img: c.img, nome: game.i18n.localize(c.name), ativa: this.actor.statuses.has(c.id),
+      })),
+      // Efeitos que não são uma condição simples do sistema (de itens, módulos ou do core).
+      outrosEfeitos: [...this.actor.allApplicableEffects?.() ?? this.actor.effects]
+        .filter((e) => !(e.statuses?.size === 1 && CONFIG.statusEffects.some((c) => e.statuses.has(c.id))))
+        .map((e) => ({ id: e.id, nome: e.name, img: e.img, desativado: e.disabled, proprio: e.parent === this.actor })),
       modificadoresTexto: Object.entries(sistema.modificadores?.pericia ?? {})
         .map(([k, v]) => `${game.i18n.localize(`OP2.Pericia.${k}`)} ${v > 0 ? "+" : ""}${v}`)
         .concat(Object.entries(sistema.modificadores?.atributo ?? {})
@@ -200,6 +211,26 @@ export class PersonagemSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
   static #consultarTabela(_evento, alvo) {
     consultarTabela(alvo.dataset.tabela, this.actor.id);
+  }
+
+  static async #alternarCondicao(_evento, alvo) {
+    if (!this.isEditable) return;
+    const id = alvo.dataset.condicao;
+    const ativa = !this.actor.statuses.has(id);
+    await this.actor.toggleStatusEffect(id, { active: ativa });
+    if (id === "moribundo") await this.actor.update({ "system.estado.moribundoDesde": ativa ? 1 : null });
+    if (id === "apavorado" && !ativa && this.actor.system.estado.pavor) await this.actor.update({ "system.estado.pavor": "" });
+  }
+
+  static async #removerEfeito(_evento, alvo) {
+    if (!this.isEditable) return;
+    await this.actor.effects.get(alvo.dataset.efeito)?.delete();
+  }
+
+  static async #alternarEfeito(_evento, alvo) {
+    if (!this.isEditable) return;
+    const efeito = this.actor.effects.get(alvo.dataset.efeito);
+    await efeito?.update({ disabled: !efeito.disabled });
   }
 
   static async #removerPavor() {

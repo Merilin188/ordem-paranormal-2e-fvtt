@@ -436,6 +436,7 @@
           </div>
           {{#if oculto}}<span class="op2-tag op2-tag--pequena op2-poi-card__oculto-tag">{{localize "OP2.Painel.OcultoTag"}}</span>{{/if}}
           <span class="op2-poi-card__tags">
+            {{#if categoriaRotulo}}<span class="op2-tag op2-tag--pequena op2-tag--categoria">{{categoriaRotulo}}</span>{{/if}}
             {{#each abordagens}}<span class="op2-tag op2-tag--pequena">{{this}}</span>{{/each}}
             {{#if resolvido}}<span class="op2-tag op2-tag--pequena op2-tag--ok">{{localize "OP2.Desafio.Resolvido"}}</span>{{/if}}
           </span>
@@ -518,6 +519,17 @@
           {{/if}}
           {{#if temSustentar}}
             <p class="op2-ajuda">{{localize "OP2.Desafio.Sustentar"}} · DT {{sustentarDt}}</p>
+          {{/if}}
+          {{#if ehEquilibrio}}
+            <p class="op2-ajuda">{{localize "OP2.Desafio.CategoriaAjuda.equilibrio"}}</p>
+            {{#if @root.ehGM}}
+              <button type="button" class="op2-botao op2-botao--pequeno" data-action="iniciarTravessia">
+                <i class="fa-solid fa-person-falling" aria-hidden="true"></i> {{localize "OP2.Equilibrio.Iniciar"}}
+              </button>
+            {{/if}}
+          {{/if}}
+          {{#if ehAlcancar}}
+            <p class="op2-ajuda">{{localize "OP2.Desafio.Alcancar"}} · DT {{dtObjeto}} ({{localize "OP2.Desafio.Modo.arriscado"}}: DT +3)</p>
           {{/if}}
           {{#if temGenerico}}
             <p class="op2-ajuda">{{genericoRotulo}}{{#if genericoResolvido}} — {{localize "OP2.Desafio.Resolvido"}}{{/if}}</p>

@@ -18,6 +18,9 @@ export class DesafioAcessoData extends foundry.abstract.TypeDataModel {
       // hackeia, um painel eletrônico não se arromba no braço (achado em uso
       // real — os quatro botões apareciam em todo desafio, sem sentido). O
       // mestre liga o que faz sentido naquele objeto.
+      // Tipo do desafio: acesso (arrombar/destrancar/hackear), equilíbrio, sustentação ou alcançar.
+      categoria: new StringField({ required: true, initial: "acesso", choices: ["acesso", "equilibrio", "sustentar", "alcancar"], blank: false }),
+
       abordagens: new SchemaField({
         arrombar: new BooleanField({ required: true, initial: true }),
         destrancar: new BooleanField({ required: true, initial: true }),
