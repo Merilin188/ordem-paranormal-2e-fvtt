@@ -37,6 +37,8 @@ export function campoPericia(atributoBase) {
       required: true, initial: atributoBase, blank: false, choices: Object.keys(ATRIBUTOS),
     }),
     stepMod: new NumberField({ required: true, initial: 0, integer: true, nullable: false }),
+    // Especialidade escrita pelo jogador (só nas perícias com `campoLivre`, ex.: Ofício).
+    campo: new StringField({ required: true, initial: "", blank: true }),
   });
 }
 

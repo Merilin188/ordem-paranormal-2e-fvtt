@@ -314,6 +314,8 @@ export class PersonagemSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       rotulo: chaveAptidao
         ? (sistema.aptidoes[chaveAptidao].rotulo || game.i18n.localize(`OP2.Aptidao.${chaveAptidao}`))
         : game.i18n.localize(`OP2.Pericia.${chave}`),
+      campoLivre: !chaveAptidao && PERICIAS[chave]?.campoLivre
+        ? { valor: pericia.campo ?? "", caminho: `system.pericias.${chave}.campo` } : null,
       die: pericia.die,
       dadoEfetivo: pericia.dadoEfetivo ?? pericia.die,
       valor: pericia.valor,

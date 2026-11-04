@@ -324,4 +324,10 @@
   .op2-analise__rotulo { flex: 1; }
   .op2-analise__restantes { margin: 0.3rem 0 0; color: #6ba6ec; }
   .op2-fase--antecipacao { color: #a5d36b; }
+
+  // Ofício: a especialidade é digitada ao lado do nome
+  .op2-pericia:has(.op2-pericia__campo) { grid-template-columns: auto minmax(0, 1fr) 1.6rem 0.7rem 1.6rem 3.4rem 1.4rem; }
+  .op2-pericia__campo { min-width: 0; height: 1.5rem; padding: 0 0.3rem; font-size: 0.85em;
+    background: transparent; border: none; border-bottom: 1px dashed var(--op2-tinta-fraca, #888); border-radius: 0;
+    color: inherit; }
 }

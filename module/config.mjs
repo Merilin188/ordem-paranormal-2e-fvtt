@@ -18,9 +18,15 @@ export const ATRIBUTOS = {
   emocao: { ordem: 3 },
 };
 
-/** As 20 perícias, com o atributo-base sugerido (trocável no teste — spec §2.3). */
+/**
+ * As perícias, com o atributo-base sugerido (trocável no teste — spec §2.3).
+ * Playtest 2 trouxe Animais e Ofício; "Pesquisar" passou a se chamar Inspecionar (a chave
+ * fica `pesquisar` para não quebrar extrator, investigação e configurações).
+ * `campoLivre`: o jogador escreve a especialidade (Ofício: Metalurgia).
+ */
 export const PERICIAS = {
   acrobacia: { atributo: "fisico" },
+  animais: { atributo: "emocao" },
   aptidao: { atributo: "mente", especializada: true },
   atletismo: { atributo: "fisico" },
   crime: { atributo: "fisico" },
@@ -32,6 +38,7 @@ export const PERICIAS = {
   luta: { atributo: "fisico" },
   maquinas: { atributo: "mente" },
   medicina: { atributo: "mente" },
+  oficio: { atributo: "mente", campoLivre: true },
   ocultismo: { atributo: "mente" },
   percepcao: { atributo: "mente" },
   persuasao: { atributo: "emocao" },

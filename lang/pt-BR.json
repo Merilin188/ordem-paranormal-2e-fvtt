@@ -50,7 +50,7 @@
       "ocultismo": "Ocultismo",
       "percepcao": "Percepção",
       "persuasao": "Persuasão",
-      "pesquisar": "Pesquisar",
+      "pesquisar": "Inspecionar",
       "pontaria": "Pontaria",
       "sobrevivencia": "Sobrevivência",
       "tecnologia": "Tecnologia",
@@ -58,7 +58,11 @@
       "Rolar": "Clique para rolar · Shift para abrir o diálogo",
       "Buscar": "Buscar",
       "Dica": "O atributo pareado é sugestão — troque no diálogo de teste.",
-      "AbrirDialogo": "Abrir diálogo de teste — atributo, passos e habilidades"
+      "AbrirDialogo": "Abrir diálogo de teste — atributo, passos e habilidades",
+      "animais": "Animais",
+      "oficio": "Ofício",
+      "OficioCampo": "Especialidade do ofício",
+      "OficioExemplo": "ex.: Metalurgia"
     },
     "Aptidao": {
       "artes": "Artes",

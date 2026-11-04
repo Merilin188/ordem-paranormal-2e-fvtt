@@ -50,7 +50,7 @@
       "ocultismo": "Occultism",
       "percepcao": "Perception",
       "persuasao": "Persuasion",
-      "pesquisar": "Research",
+      "pesquisar": "Inspect",
       "pontaria": "Marksmanship",
       "sobrevivencia": "Survival",
       "tecnologia": "Technology",
@@ -58,7 +58,11 @@
       "Rolar": "Click to roll · Shift to open the dialog",
       "Buscar": "Search",
       "Dica": "The paired attribute is a suggestion — swap it in the check dialog.",
-      "AbrirDialogo": "Open the check dialog — attribute, steps and abilities"
+      "AbrirDialogo": "Open the check dialog — attribute, steps and abilities",
+      "animais": "Animals",
+      "oficio": "Craft",
+      "OficioCampo": "Craft specialty",
+      "OficioExemplo": "e.g. Metalworking"
     },
     "Aptidao": {
       "artes": "Arts",

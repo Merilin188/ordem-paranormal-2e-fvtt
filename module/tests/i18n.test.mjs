@@ -66,13 +66,13 @@ test("pt-BR e en têm exatamente as mesmas chaves", () => {
   assert.deepEqual([...en].filter((c) => !ptBR.has(c)), [], "sobrando em en.json");
 });
 
-test("os 3 atributos, as 20 perícias e as 6 aptidões estão traduzidos", async () => {
+test("os 3 atributos, as 22 perícias e as 6 aptidões estão traduzidos", async () => {
   const { ATRIBUTOS, PERICIAS, APTIDOES_PADRAO, PERFIS } = await import("../config.mjs");
   for (const chave of Object.keys(ATRIBUTOS)) assert.ok(ptBR.has(`OP2.Atributo.${chave}`), chave);
   for (const chave of Object.keys(PERICIAS)) assert.ok(ptBR.has(`OP2.Pericia.${chave}`), chave);
   for (const chave of APTIDOES_PADRAO) assert.ok(ptBR.has(`OP2.Aptidao.${chave}`), chave);
   for (const chave of PERFIS) assert.ok(ptBR.has(`OP2.Perfil.${chave}`), chave);
-  assert.equal(Object.keys(PERICIAS).length, 20, "o playtest define exatamente 20 perícias");
+  assert.equal(Object.keys(PERICIAS).length, 22, "o playtest 2 define 22 perícias (com Animais e Ofício)");
 });
 
 test("cada linha da tabela de falha crítica tem nome e texto", async () => {

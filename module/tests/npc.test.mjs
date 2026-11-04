@@ -21,7 +21,7 @@ test("NPC: 'Outra' vira slug com o nome digitado; vazio ou dado inválido não p
   assert.equal(periciaNpcEscolhida({ chave: "__outra", rotulo: "   ", die: "d6" }), null);
   assert.equal(periciaNpcEscolhida({ chave: "nao-existe", rotulo: "", die: "d6" }), null);
   const opcoes = opcoesDePericiaNpc();
-  assert.equal(opcoes.pericias.length, 19);
+  assert.equal(opcoes.pericias.length, 21);
   assert.equal(opcoes.aptidoes.length, 6);
   assert.ok(!opcoes.pericias.some((o) => o.chave === "aptidao"));
 });

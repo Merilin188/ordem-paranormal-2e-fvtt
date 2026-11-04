@@ -35,6 +35,9 @@ export function rotuloDeChave(chave, ator = null) {
     const proprio = ator?.system?.aptidoes?.[sub]?.rotulo;
     return proprio ? `${game.i18n.localize("OP2.Pericia.aptidao")} (${proprio})` : rotuloDePericia(chave);
   }
+  if (PERICIAS[chave]?.campoLivre && ator?.system?.pericias?.[chave]?.campo) {
+    return `${rotuloDePericia(chave)} (${ator.system.pericias[chave].campo})`;
+  }
   if (PERICIAS[chave]) return rotuloDePericia(chave);
   return ator?.system?.pericias?.[chave]?.rotulo || chave;
 }
