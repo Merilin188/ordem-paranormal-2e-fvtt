@@ -6,6 +6,7 @@
  * seletor de texto. É a leitura que o livro usa e a que torna a ficha escaneável.
  */
 import { ESCADA, ATRIBUTOS, PERICIAS, PERFIS, APTIDOES_PADRAO } from "../config.mjs";
+import { periciaVisivel } from "../settings/pericias.mjs";
 import { stepDie } from "../dice/escada.mjs";
 import { rolarTeste } from "../dice/teste.mjs";
 import { iconeDado } from "../ui/dice-icons.mjs";
@@ -297,7 +298,7 @@ export class PersonagemSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
   #pericias(sistema) {
     return Object.keys(PERICIAS)
-      .filter((chave) => !PERICIAS[chave].especializada)
+      .filter((chave) => !PERICIAS[chave].especializada && periciaVisivel(chave))
       .map((chave) => this.#linhaDePericia(sistema, chave))
       .sort((a, b) => a.rotulo.localeCompare(b.rotulo, "pt-BR"));
   }

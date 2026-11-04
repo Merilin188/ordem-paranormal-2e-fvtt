@@ -1350,6 +1350,34 @@
       "ProntidaoPergunta": "{nome} gasta 2 PD. Qual dado rolar de novo?",
       "ProntidaoRerrolar": "Rolar de novo",
       "ProntidaoNota": "Prontidão de {nome}: um dado foi de {antes} para {depois}."
+    },
+    "PericiasMundo": {
+      "MenuNome": "World skills",
+      "MenuBotao": "Configure skills",
+      "MenuAjuda": "Hide, rename or create skills (e.g. Occultism as Witchcraft in a medieval campaign).",
+      "Titulo": "World skills",
+      "Ajuda": "Uncheck to hide a skill from sheets and test lists (its data is kept). Type a name to rename it at this table. Saving reloads everyone.",
+      "Exibir": "Show",
+      "Pericia": "Skill",
+      "NomeNaMesa": "Name at this table",
+      "Atributo": "Attribute",
+      "Novas": "Created skills",
+      "Nenhuma": "No skills created.",
+      "NovoNome": "New skill name",
+      "Adicionar": "Create",
+      "Remover": "Delete skill",
+      "Restaurar": "Reset to default",
+      "Salvar": "Save",
+      "SemNome": "Give the skill a name.",
+      "JaExiste": "A skill named {nome} already exists.",
+      "Recarregar": "Reload (F5) to apply the skills.",
+      "Treino": {
+        "d4": "Untrained",
+        "d6": "Trained",
+        "d8": "Expert",
+        "d10": "Master",
+        "d12": "Grandmaster"
+      }
     }
   }
 }

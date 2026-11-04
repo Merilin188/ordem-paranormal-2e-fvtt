@@ -330,4 +330,18 @@
   .op2-pericia__campo { min-width: 0; height: 1.5rem; padding: 0 0.3rem; font-size: 0.85em;
     background: transparent; border: none; border-bottom: 1px dashed var(--op2-tinta-fraca, #888); border-radius: 0;
     color: inherit; }
+
+  // Configuração de perícias do mundo
+  .op2-pericias-mundo__tabela { width: 100%; border-collapse: collapse; margin: 0.3rem 0;
+    td, th { padding: 0.15rem 0.3rem; text-align: left; }
+    th { font-size: 0.8em; color: var(--op2-tinta-fraca); }
+    tr:nth-child(even) td { background: rgba(255, 255, 255, 0.03); }
+    input[type=text] { width: 100%; }
+    td:first-child { width: 2.5rem; text-align: center; }
+  }
+  .op2-pericias-mundo__fixo { color: var(--op2-tinta-fraca); font-size: 0.85em; }
+  .op2-pericias-mundo__nova { display: flex; gap: 0.3rem; flex-wrap: wrap; align-items: center;
+    input { flex: 1 1 10rem; } select { flex: 0 1 auto; width: auto; } button { flex: none; width: auto; } }
+  .op2-pericias-mundo__rodape { display: flex; justify-content: space-between; gap: 0.5rem; margin-top: 0.8rem;
+    button { flex: none; width: auto; } }
 }

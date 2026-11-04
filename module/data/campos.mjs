@@ -29,10 +29,10 @@ export function campoRecurso(inicial = 0) {
  * vindos de itens e efeitos. O atributo é gravado porque o mestre pode reparear
  * a perícia de forma permanente na ficha (spec §2.3).
  */
-export function campoPericia(atributoBase) {
+export function campoPericia(atributoBase, dadoInicial = "d4") {
   const { SchemaField, StringField, NumberField } = f();
   return new SchemaField({
-    die: campoDado(),
+    die: campoDado(dadoInicial),
     atributo: new StringField({
       required: true, initial: atributoBase, blank: false, choices: Object.keys(ATRIBUTOS),
     }),
@@ -46,7 +46,7 @@ export function campoPericia(atributoBase) {
 export function campoPericias() {
   const { SchemaField } = f();
   const schema = {};
-  for (const [chave, def] of Object.entries(PERICIAS)) schema[chave] = campoPericia(def.atributo);
+  for (const [chave, def] of Object.entries(PERICIAS)) schema[chave] = campoPericia(def.atributo, def.die);
   return new SchemaField(schema);
 }
 

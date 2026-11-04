@@ -9,6 +9,7 @@
 import { SYSTEM_ID, PERICIAS, APTIDOES_PADRAO, ATRIBUTOS } from "../config.mjs";
 import { rolarTeste, rotuloDePericia, htmlDoTeste } from "../dice/teste.mjs";
 import { lerConfig } from "../settings/register.mjs";
+import { periciaVisivel } from "../settings/pericias.mjs";
 import { registrarAcaoDeMestre, comoMestre } from "./socket.mjs";
 import { registrarAcaoDeChat } from "./chat.mjs";
 import { iniciarEquilibrio } from "../cena/equilibrio.mjs";
@@ -49,7 +50,7 @@ export function chavesDoAtor(ator) {
   }
   const chaves = [...Object.keys(ATRIBUTOS)];
   for (const chave of Object.keys(PERICIAS)) {
-    if (chave !== "aptidao") chaves.push(chave);
+    if (chave !== "aptidao" && periciaVisivel(chave)) chaves.push(chave);
   }
   const aptidoes = Object.keys(ator?.system?.aptidoes ?? {});
   chaves.push(...(aptidoes.length ? aptidoes : APTIDOES_PADRAO).map((a) => `aptidao.${a}`));

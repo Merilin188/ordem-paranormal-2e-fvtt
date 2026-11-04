@@ -70,6 +70,7 @@ import { abrirBoasVindas, abrirBoasVindasSeConfigurado, registrarBoasVindas } fr
 import { atacar, defender } from "./cena/acoes-combate.mjs";
 import { usarHabilidadeOuItem, concederPasso } from "./cena/acoes-recurso.mjs";
 import { migrarLinhasDoQuadro } from "./cena/texto-linha.mjs";
+import { registrarPericiasDoMundo, abrirPericiasMundo } from "./settings/pericias.mjs";
 
 Hooks.once("init", () => {
   console.log(`${SYSTEM_ID} | inicializando`);
@@ -105,6 +106,7 @@ Hooks.once("init", () => {
   }
 
   registrarSettings();
+  registrarPericiasDoMundo();
   aplicarIdiomaPadrao();
   registrarHelpersDeDado();
   registrarHelpers();
@@ -132,7 +134,7 @@ Hooks.once("init", () => {
   game.op2 = {
     migrarLinhasDoQuadro,
     ferramentasMestre: alternarFerramentasMestre, abrirTabelaParaTodos, iniciarEquilibrio,
-    aplicarPavor, removerPavor, abrirPavor, guiaCombate: alternarGuiaCombate, solicitarTeste, testeOposto, desafiosDeAcesso: abrirDesafios,
+    aplicarPavor, removerPavor, abrirPavor, periciasDoMundo: abrirPericiasMundo, guiaCombate: alternarGuiaCombate, solicitarTeste, testeOposto, desafiosDeAcesso: abrirDesafios,
     rolarTeste, encerrarCena, stepDie, faces, OP2Roll,
     examinar, interagir, recapitular, compartilhar, dialogoExaminar, cicloVisibilidadeInfo,
     limparRevelacao, contarAoGrupo,

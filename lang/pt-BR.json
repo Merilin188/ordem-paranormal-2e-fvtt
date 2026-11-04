@@ -1350,6 +1350,34 @@
       "ProntidaoPergunta": "{nome} gasta 2 PD. Qual dado rolar de novo?",
       "ProntidaoRerrolar": "Rolar de novo",
       "ProntidaoNota": "Prontidão de {nome}: um dado foi de {antes} para {depois}."
+    },
+    "PericiasMundo": {
+      "MenuNome": "Perícias do mundo",
+      "MenuBotao": "Configurar perícias",
+      "MenuAjuda": "Esconda, renomeie ou crie perícias (ex.: Ocultismo como Bruxaria numa campanha medieval).",
+      "Titulo": "Perícias do mundo",
+      "Ajuda": "Desmarque para esconder a perícia das fichas e das listas de teste (os dados ficam guardados). Escreva um nome para renomear na mesa. Ao salvar, todos recarregam.",
+      "Exibir": "Exibir",
+      "Pericia": "Perícia",
+      "NomeNaMesa": "Nome nesta mesa",
+      "Atributo": "Atributo",
+      "Novas": "Perícias criadas",
+      "Nenhuma": "Nenhuma perícia criada.",
+      "NovoNome": "Nome da perícia nova",
+      "Adicionar": "Criar",
+      "Remover": "Apagar perícia",
+      "Restaurar": "Voltar ao padrão",
+      "Salvar": "Salvar",
+      "SemNome": "Dê um nome à perícia.",
+      "JaExiste": "Já existe uma perícia chamada {nome}.",
+      "Recarregar": "Recarregue (F5) para aplicar as perícias.",
+      "Treino": {
+        "d4": "Destreinado",
+        "d6": "Treinado",
+        "d8": "Especialista",
+        "d10": "Mestre",
+        "d12": "Grão-mestre"
+      }
     }
   }
 }
