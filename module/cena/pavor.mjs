@@ -1,14 +1,18 @@
 /**
- * Dado de pavor.
+ * Dado de pavor (Outras Regras do playtest).
  *
- * Enquanto o personagem tem um dado de pavor, ele rola junto em TODO teste; os dados
- * do teste que tirarem MENOS que o dado de pavor são consumidos (não contam). O
- * card do teste mostra o dado de pavor e os consumidos com animação
+ * Começa em d6 e sobe um passo se o efeito vier de novo. Rola junto em todo teste,
+ * não soma e anula os resultados menores que ele (anulou todos: falha crítica).
+ * Tirou 1: o pavor termina. Antes do teste: 1 PD reduz um passo (controlar) ou
+ * 5 PD o convertem em dado bônus (abraçar).
+ *
+ * O card do teste mostra o dado de pavor e os anulados com animação
  * (`OP2Roll.aplicarPavor`). O mestre aplica e remove por uma janela própria; o
  * trauma "Pânico" aplica sozinho.
  */
 import { SYSTEM_ID, ESCADA } from "../config.mjs";
 import { definirCondicao } from "./ferimentos.mjs";
+import { stepDie } from "../dice/escada.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 export const DADO_PAVOR_PADRAO = "d6";
@@ -30,6 +34,63 @@ export async function aplicarPavor(ator, dado = DADO_PAVOR_PADRAO) {
   await ator.update({ "system.estado.pavor": dado });
   await definirCondicao(ator, "apavorado", true);
   await cardPavor(ator, game.i18n.format("OP2.Pavor.Aplicado", { nome: esc(ator.name), dado }), dado);
+}
+
+/**
+ * Recebe o efeito de pavor: começa em d6; se já tinha, o dado aumenta um passo.
+ */
+export async function receberPavor(ator) {
+  const atual = ator?.system?.estado?.pavor;
+  await aplicarPavor(ator, atual ? stepDie(atual, 1) : DADO_PAVOR_PADRAO);
+}
+
+/** Pergunta, antes do teste, se quer controlar ou abraçar o pavor. null = cancelou. */
+export async function escolherUsoDoPavor(ator, dado) {
+  const pd = ator.system.recursos?.pd?.value ?? 0;
+  const botoes = [
+    { action: "normal", label: game.i18n.localize("OP2.Pavor.RolarNormal"), icon: "fa-solid fa-ghost", default: true },
+  ];
+  if (pd >= 1 && dado !== "d4") botoes.push({ action: "controlar", label: game.i18n.format("OP2.Pavor.Controlar", { dado: stepDie(dado, -1) }), icon: "fa-solid fa-hand" });
+  if (pd >= 5) botoes.push({ action: "abracar", label: game.i18n.localize("OP2.Pavor.Abracar"), icon: "fa-solid fa-fire" });
+  if (botoes.length === 1) return "normal";
+  const escolha = await foundry.applications.api.DialogV2.wait({
+    window: { title: game.i18n.localize("OP2.Pavor.Titulo"), icon: "fa-solid fa-ghost" },
+    classes: ["op2", "op2-ferr-dialogo"],
+    content: `<p>${game.i18n.format("OP2.Pavor.Pergunta", { nome: esc(ator.name), dado, pd })}</p>`,
+    buttons: botoes,
+    rejectClose: false,
+  });
+  return escolha ?? null;
+}
+
+/** Controlando o pavor: 1 PD, o dado de pavor reduz um passo (mínimo d4). */
+export async function controlarPavor(ator) {
+  const novo = stepDie(ator.system.estado.pavor, -1);
+  await ator.update({
+    "system.estado.pavor": novo,
+    "system.recursos.pd.value": Math.max(0, ator.system.recursos.pd.value - 1),
+  });
+  await cardPavor(ator, game.i18n.format("OP2.Pavor.Controlou", { nome: esc(ator.name), dado: novo }), novo);
+  return novo;
+}
+
+/** Abraçando o pavor: 5 PD, o dado de pavor vira dado bônus deste teste e o pavor acaba. */
+export async function abracarPavor(ator) {
+  const dado = ator.system.estado.pavor;
+  await ator.update({
+    "system.estado.pavor": "",
+    "system.recursos.pd.value": Math.max(0, ator.system.recursos.pd.value - 5),
+  });
+  await definirCondicao(ator, "apavorado", false);
+  await cardPavor(ator, game.i18n.format("OP2.Pavor.Abracou", { nome: esc(ator.name), dado }), null);
+}
+
+/** Vencendo o pavor: o dado de pavor tirou 1. */
+export async function vencerPavor(ator) {
+  if (!ator?.system?.estado?.pavor) return;
+  await ator.update({ "system.estado.pavor": "" });
+  await definirCondicao(ator, "apavorado", false);
+  await cardPavor(ator, game.i18n.format("OP2.Pavor.Venceu", { nome: esc(ator.name) }), null);
 }
 
 export async function removerPavor(ator) {

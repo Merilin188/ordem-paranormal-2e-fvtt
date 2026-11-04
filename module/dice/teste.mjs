@@ -11,6 +11,7 @@ import { stepDie } from "./escada.mjs";
 import { consumirAjuda } from "../cena/acoes-ajuda.mjs";
 import { gastarImpeto, podePreencherImpeto } from "../cena/impeto.mjs";
 import { modificadorDoTeste } from "../cena/tabelas-dados.mjs";
+import { escolherUsoDoPavor, controlarPavor, abracarPavor, vencerPavor } from "../cena/pavor.mjs";
 
 /**
  * @param {Actor} ator
@@ -79,8 +80,22 @@ export async function rolarTeste(ator, {
   const atributoUsado = config.componentes.find((c) => c.tipo === "atributo")?.chave?.split(".")[1] ?? null;
   const modificador = modificadorDoTeste(sistema.modificadores, chavePericia, atributoUsado);
   const componentes = [...config.componentes];
-  const pavor = sistema.estado?.pavor;
-  if (pavor) {
+  // Dado de pavor: antes do teste dá para controlá-lo (1 PD, −1 passo) ou abraçá-lo
+  // (5 PD, vira dado bônus e o pavor acaba). Sem isso, rola junto e anula os menores.
+  let pavor = sistema.estado?.pavor;
+  let pavorAbracado = false;
+  if (pavor && !rapido) {
+    const escolha = await escolherUsoDoPavor(ator, pavor);
+    if (escolha === null) return null;
+    if (escolha === "controlar") {
+      pavor = await controlarPavor(ator);
+    } else if (escolha === "abracar") {
+      await abracarPavor(ator);
+      componentes.push({ chave: "pavorAbracado", rotulo: game.i18n.localize("OP2.Pavor.Abracado"), tipo: "extra", dado: pavor });
+      pavorAbracado = true;
+    }
+  }
+  if (pavor && !pavorAbracado) {
     componentes.push({ chave: "pavor", rotulo: game.i18n.localize("OP2.Pavor.Dado"), tipo: "pavor", dado: pavor });
   }
 
@@ -113,6 +128,9 @@ export async function rolarTeste(ator, {
   // Ajuda é para UMA rolagem: usada, acabou (spec §4.7 — custa a ação do aliado
   // para aquele teste, não é um efeito com duração).
   if (base.ajuda) await consumirAjuda(ator);
+
+  // Vencendo o pavor: tirou 1 no dado de pavor, o medo termina.
+  if (roll.resultado.pavor?.resultado === 1) await vencerPavor(ator);
 
   return roll;
 }

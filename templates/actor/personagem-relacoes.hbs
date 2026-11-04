@@ -17,6 +17,10 @@
           placeholder="{{localize 'OP2.Relacoes.Rotulo'}}" {{#unless ../editavel}}disabled{{/unless}}>
         <input type="text" class="op2-relacao__descricao" data-relacao-campo="descricao" data-indice="{{indice}}" value="{{descricao}}"
           placeholder="{{localize 'OP2.Relacoes.Descricao'}}" {{#unless ../editavel}}disabled{{/unless}}>
+        <label class="op2-relacao__invocada" data-tooltip="{{localize 'OP2.Relacoes.InvocadaDica'}}">
+          <input type="checkbox" data-action="alternarInvocada" data-indice="{{indice}}" {{#if invocada}}checked{{/if}} {{#unless ../editavel}}disabled{{/unless}}>
+          {{localize "OP2.Relacoes.Invocada"}}
+        </label>
         {{#if ../editavel}}
           <button type="button" class="op2-botao-icone" data-action="removerRelacao" data-indice="{{indice}}"
             aria-label="{{localize 'OP2.Relacoes.Remover'}}"><i class="fa-solid fa-trash"></i></button>
@@ -33,6 +37,7 @@
   {{/if}}
   <details class="op2-relacoes__regras">
     <summary>{{localize "OP2.Relacoes.Beneficios"}}</summary>
+    <p>{{localize "OP2.Relacoes.Invocar"}}</p>
     <p><strong>{{localize "OP2.Relacoes.Grau1"}}:</strong> {{localize "OP2.Relacoes.Beneficio1"}}</p>
     <p><strong>{{localize "OP2.Relacoes.Grau2"}}:</strong> {{localize "OP2.Relacoes.Beneficio2"}}</p>
     <p><strong>{{localize "OP2.Relacoes.Grau3"}}:</strong> {{localize "OP2.Relacoes.Beneficio3"}}</p>

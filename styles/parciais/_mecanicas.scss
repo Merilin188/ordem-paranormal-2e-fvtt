@@ -185,4 +185,13 @@
 
   // Ícones Font Awesome na barra flutuante do mestre
   .op2-ferr-barra button i { font-size: 1.15rem; color: #f2ede6; }
+
+  .op2-armadura {
+    display: grid; grid-template-columns: auto auto; gap: 0.15rem 0.6rem; align-items: center;
+    small { grid-column: 1 / -1; color: var(--op2-tinta-fraca); }
+  }
+  .op2-armadura__valor { font-family: var(--op2-fonte-display); font-size: 1.4em; }
+  .op2-armadura__gastos { display: flex; align-items: center; gap: 0.3rem; font-size: 0.85em; input { width: 3.5rem; } }
+  .op2-relacao { grid-template-columns: 9rem auto 10rem 1fr auto auto; }
+  .op2-relacao__invocada { display: flex; align-items: center; gap: 0.2rem; font-size: 0.75em; white-space: nowrap; color: var(--op2-tinta-fraca); }
 }

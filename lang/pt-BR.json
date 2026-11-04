@@ -170,7 +170,8 @@
       "AumentarCarga": "Usar uma carga a mais (aumentar)",
       "DiminuirCarga": "Gastar uma carga (diminuir)",
       "DanoBonus": "Modificador de dano (RA + mod.)",
-      "Armadura": "Pontos de armadura que fornece"
+      "Armadura": "Pontos de armadura que fornece",
+      "ArmaduraDica": "conta quando o item está equipado"
     },
     "Item": {
       "Novo": "Novo {tipo}",
@@ -1098,17 +1099,25 @@
     },
     "Pavor": {
       "Dado": "Dado de pavor",
-      "Consumido": "consumido pelo pavor",
-      "ConsumiuN": "O pavor consumiu {n} dado(s).",
-      "NadaConsumido": "O pavor não consumiu nenhum dado.",
+      "Consumido": "anulado pelo pavor",
+      "ConsumiuN": "O pavor anulou {n} dado(s).",
+      "NadaConsumido": "O pavor não anulou nenhum dado.",
       "Titulo": "Dado de pavor",
-      "Aplicado": "{nome} recebe um dado de pavor ({dado}). Em todo teste ele rola junto e consome os dados menores.",
+      "Aplicado": "{nome} está com um dado de pavor ({dado}). Em todo teste ele rola junto, não soma e anula os resultados menores que ele; se anular todos, é falha crítica.",
       "Removido": "{nome} se livra do pavor.",
       "Janela": "Dado de pavor",
-      "Ajuda": "Aplique ou remova o dado de pavor de cada personagem. Enquanto ativo, ele rola junto em todo teste e consome os dados do teste que tirarem menos que ele.",
+      "Ajuda": "Aplique ou remova o dado de pavor de cada personagem. Ele rola junto em todo teste, não soma e anula os resultados menores que ele (anulou todos: falha crítica). Tirou 1: o pavor termina. Receber de novo: sobe um passo.",
       "Aplicar": "Aplicar dado de pavor",
       "Remover": "Remover dado de pavor",
-      "Nenhum": "Nenhum"
+      "Nenhum": "Nenhum",
+      "Abracado": "Pavor abraçado (dado bônus)",
+      "RolarNormal": "Rolar com o pavor",
+      "Controlar": "Controlar (1 PD → {dado})",
+      "Abracar": "Abraçar (5 PD → dado bônus)",
+      "Pergunta": "{nome} está com dado de pavor {dado} ({pd} PD). Antes do teste, você pode controlá-lo (1 PD: reduz um passo) ou abraçá-lo (5 PD: vira dado bônus e o pavor acaba).",
+      "Controlou": "{nome} gasta 1 PD e controla o pavor: agora é {dado}.",
+      "Abracou": "{nome} gasta 5 PD e abraça o pavor: o {dado} vira dado bônus neste teste.",
+      "Venceu": "O dado de pavor de {nome} tirou 1: o medo termina."
     },
     "Marcas": {
       "Modificador": "Modificadores de lesões e traumas",
@@ -1192,12 +1201,19 @@
       "Beneficios": "Benefícios por grau",
       "Beneficio1": "+1d6 em um teste ligado à pessoa; ao ajudá-la, fornece +1d6 além do aumento de passo.",
       "Beneficio2": "+1d8 em um teste ligado à pessoa; ao ajudá-la, +1d8; gastar uma ação para motivá-la: ela recupera 2d4 PD.",
-      "Beneficio3": "+1d12 em um teste ligado à pessoa; ao ajudá-la, +1d12; motivá-la recupera 2d6 PD; se ela estiver em perigo, uma ação extra no turno para ajudá-la."
+      "Beneficio3": "+1d12 em um teste ligado à pessoa; ao ajudá-la, +1d12; motivá-la recupera 2d6 PD; se ela estiver em perigo, uma ação extra no turno para ajudá-la.",
+      "Invocada": "Invocada",
+      "InvocadaDica": "Cada relação só pode ser invocada uma vez por missão. Desmarque ao começar uma missão nova.",
+      "Invocar": "Invocar uma relação: descreva o que sente pela pessoa e como isso o ajuda a perseverar, e escolha um benefício do grau. Cada relação, uma vez por missão."
     },
     "Armadura": {
       "Titulo": "Pontos de armadura",
-      "Pergunta": "{nome} vai sofrer {dano} de dano e tem {pontos} ponto(s) de armadura. Gastar 1 ponto para reduzir o dano em 10?",
-      "Pontos": "Pontos de armadura"
+      "Pergunta": "{nome} vai sofrer {dano} de dano e tem {pontos} ponto(s) de armadura. Gastar 1 ponto (ação livre) para reduzir o dano em 10?",
+      "Pontos": "Pontos de armadura",
+      "Gastos": "Gastos",
+      "Fontes": "Vêm de",
+      "SemItens": "Nenhum item equipado fornece armadura.",
+      "Regra": "Os itens equipados fornecem pontos de armadura. Ao sofrer dano, gaste 1 ponto (ação livre) para reduzir esse dano em 10. Pontos gastos não voltam neste playtest."
     }
   }
 }

@@ -92,7 +92,7 @@ export async function aplicarDano(ator, quantidade, recurso = "pv") {
     });
     if (usar) {
       quantidade = Math.max(0, quantidade - 10);
-      await ator.update({ "system.armadura.value": armadura - 1 });
+      await ator.update({ "system.armadura.gastos": (ator.system.armadura.gastos ?? 0) + 1 });
     }
   }
 

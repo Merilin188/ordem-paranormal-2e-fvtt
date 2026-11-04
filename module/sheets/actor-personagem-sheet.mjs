@@ -49,6 +49,7 @@ export class PersonagemSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       adicionarRelacao: PersonagemSheet.#adicionarRelacao,
       removerRelacao: PersonagemSheet.#removerRelacao,
       definirGrau: PersonagemSheet.#definirGrau,
+      alternarInvocada: PersonagemSheet.#alternarInvocada,
       removerMarca: PersonagemSheet.#removerMarca,
       consultarTabela: PersonagemSheet.#consultarTabela,
       removerPavor: PersonagemSheet.#removerPavor,
@@ -161,6 +162,16 @@ export class PersonagemSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     const n = Number(alvo.dataset.grau);
     const lista = foundry.utils.deepClone(this.actor.system.relacoes);
     lista[i].grau = lista[i].grau === n ? n - 1 : n;
+    await this.actor.update({ "system.relacoes": lista });
+  }
+
+  static async #alternarInvocada(evento, alvo) {
+    evento.stopPropagation();
+    if (!this.isEditable) return;
+    const lista = foundry.utils.deepClone(this.actor.system.relacoes);
+    const i = Number(alvo.dataset.indice);
+    if (!lista[i]) return;
+    lista[i].invocada = !lista[i].invocada;
     await this.actor.update({ "system.relacoes": lista });
   }
 

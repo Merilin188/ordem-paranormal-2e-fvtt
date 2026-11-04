@@ -30,9 +30,10 @@ export class PersonagemData extends foundry.abstract.TypeDataModel {
       // Sem fórmula publicada — vem preenchido nas fichas prontas (spec §11).
       recursos: new SchemaField({ pv: campoRecurso(0), pd: campoRecurso(0) }),
 
-      // Pontos de armadura (fornecidos por itens): 1 ponto reduz um dano em 10.
+      // Pontos de armadura: o total vem dos itens equipados (derivado); aqui fica só
+      // quanto já foi gasto — gastos não voltam neste playtest.
       armadura: new SchemaField({
-        value: new NumberField({ required: true, initial: 0, min: 0, integer: true, nullable: false }),
+        gastos: new NumberField({ required: true, initial: 0, min: 0, integer: true, nullable: false }),
       }),
 
       // Lesões (permanentes) e traumas (até serem curados): a chave da tabela.
@@ -49,6 +50,8 @@ export class PersonagemData extends foundry.abstract.TypeDataModel {
         grau: new NumberField({ required: true, initial: 0, min: 0, max: 3, integer: true, nullable: false }),
         rotulo: new StringField({ required: true, initial: "", blank: true }),
         descricao: new StringField({ required: true, initial: "", blank: true }),
+        // Cada relação só pode ser invocada uma vez por missão.
+        invocada: new BooleanField({ required: true, initial: false }),
       }), { initial: [] }),
 
       estado: new SchemaField({
@@ -132,6 +135,12 @@ export class PersonagemData extends foundry.abstract.TypeDataModel {
       aptidao.dadoEfetivo = aptidao.die;
       aptidao.valor = faces(aptidao.die);
     }
+
+    // Pontos de armadura fornecidos pelos itens equipados, menos os já gastos.
+    const itensDeArmadura = this.parent?.items?.filter((i) => i.type === "equipamento" && i.system.equipado && i.system.armadura > 0) ?? [];
+    this.armadura.max = itensDeArmadura.reduce((t, i) => t + i.system.armadura, 0);
+    this.armadura.value = Math.max(0, this.armadura.max - this.armadura.gastos);
+    this.armadura.fontes = itensDeArmadura.map((i) => `${i.name} (${i.system.armadura})`).join(", ");
 
     // Lesões e traumas: modificadores fixos por perícia/atributo e ajustes de PV/PD.
     this.modificadores = modificadoresDasMarcas(this.lesoes, this.traumas);

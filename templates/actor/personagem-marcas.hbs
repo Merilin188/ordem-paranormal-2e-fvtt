@@ -2,10 +2,14 @@
   <span class="op2-tag op2-tag--secao">{{localize "OP2.Marcas.Titulo"}}</span>
 
   <div class="op2-marcas__linha">
-    <label class="op2-campo">
+    <div class="op2-armadura">
       <span>{{localize "OP2.Armadura.Pontos"}}</span>
-      <input type="number" name="system.armadura.value" value="{{sistema.armadura.value}}" min="0" {{#unless editavel}}disabled{{/unless}}>
-    </label>
+      <strong class="op2-armadura__valor">{{sistema.armadura.value}} / {{sistema.armadura.max}}</strong>
+      <label class="op2-armadura__gastos">{{localize "OP2.Armadura.Gastos"}}
+        <input type="number" name="system.armadura.gastos" value="{{sistema.armadura.gastos}}" min="0" {{#unless editavel}}disabled{{/unless}}>
+      </label>
+      <small>{{#if sistema.armadura.fontes}}{{localize "OP2.Armadura.Fontes"}}: {{sistema.armadura.fontes}}{{else}}{{localize "OP2.Armadura.SemItens"}}{{/if}}</small>
+    </div>
     <div class="op2-marcas__pavor {{#if pavor}}ativo{{/if}}">
       <span>{{localize "OP2.Pavor.Dado"}}</span>
       {{#if pavor}}
@@ -14,6 +18,7 @@
       {{else}}<em>{{localize "OP2.Pavor.Nenhum"}}</em>{{/if}}
     </div>
   </div>
+  <p class="op2-ajuda">{{localize "OP2.Armadura.Regra"}}</p>
   {{#if modificadoresTexto}}<p class="op2-ajuda"><strong>{{localize "OP2.Marcas.Modificador"}}:</strong> {{modificadoresTexto}}</p>{{/if}}
 
   <h4 class="op2-marcas__titulo">{{localize "OP2.Marcas.Lesoes"}}

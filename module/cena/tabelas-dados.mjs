@@ -118,8 +118,8 @@ export function modificadorDoTeste(mods, chavePericia, chaveAtributo) {
 /* ---------------- Dado de pavor ---------------- */
 
 /**
- * O dado de pavor "consome" os dados do teste que tiraram MENOS que ele: esses não
- * contam (nem para soma, RA/RB ou crítico).
+ * O dado de pavor anula os dados do teste que tiraram MENOS que ele: esses não
+ * contam (nem para soma, RA/RB ou crítico). Se anular todos, falha crítica.
  * @param {number[]} resultados  resultados dos dados do teste
  * @param {number} pavor         resultado do dado de pavor
  * @returns {boolean[]} consumido por posição

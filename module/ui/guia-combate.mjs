@@ -45,6 +45,11 @@ const GUIA = [
     ["Ocultação total", "Escuridão total: duas reduções de passo nos ataques contra você. Se os dois tiverem ocultação, ambos sofrem as reduções."],
     ["Vantagem tática", "Posição favorável (alvo caído, terreno elevado…): um aumento de passo no ataque."],
   ] },
+  { secao: "Defesa e medo", itens: [
+    ["Pontos de armadura", "Vêm dos itens. Ao sofrer dano, gaste 1 ponto (ação livre, só 1 por vez) para reduzir esse dano em 10. Gastos não voltam neste playtest."],
+    ["Levantar-se", "Caído levanta gastando uma ação, ou como ação livre sofrendo uma redução de passo em todos os testes da rodada."],
+    ["Dado de pavor", "Começa em d6 (receber de novo: sobe um passo). Rola junto em todo teste, não soma e anula os resultados menores que ele; anulou todos, falha crítica. Tirou 1: o pavor termina. Antes do teste: 1 PD reduz um passo; 5 PD o convertem em dado bônus."],
+  ] },
 ];
 
 class GuiaCombate extends ApplicationV2 {

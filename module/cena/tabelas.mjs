@@ -13,7 +13,7 @@ import { registrarAcaoDeChat } from "../ui/chat.mjs";
 import { definirCondicao } from "./ferimentos.mjs";
 import { mostrarDados3D } from "../dice/teste.mjs";
 import { cartaoFalhaCritica } from "../dice/falha-critica.mjs";
-import { aplicarPavor, DADO_PAVOR_PADRAO } from "./pavor.mjs";
+import { receberPavor } from "./pavor.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const esc = (t) => foundry.utils.escapeHTML(String(t ?? ""));
@@ -129,7 +129,7 @@ async function aplicarLinha(ator, tabela, linha, resultado) {
       await somarRecurso(ator, linha.efeito, linha.quantidade ?? 1);
       break;
     case "pavor":
-      await aplicarPavor(ator, ator.system.estado.pavor || DADO_PAVOR_PADRAO);
+      await receberPavor(ator);
       break;
     case "narrativo":
       if (linha.chave === "estupor") await definirCondicao(ator, "atordoado", true);
