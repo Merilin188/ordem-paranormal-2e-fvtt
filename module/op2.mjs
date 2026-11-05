@@ -11,6 +11,7 @@ import { SYSTEM_ID, OP2, ICONES_PADRAO } from "./config.mjs";
 import { PersonagemData } from "./data/actor-personagem.mjs";
 import { NpcData } from "./data/actor-npc.mjs";
 import { CriaturaData } from "./data/actor-criatura.mjs";
+import { registrarTokenDeCriatura } from "./data/criatura-token.mjs";
 import { HabilidadeData } from "./data/item-habilidade.mjs";
 import { EquipamentoData } from "./data/item-equipamento.mjs";
 import { FerramentaData } from "./data/item-ferramenta.mjs";
@@ -138,6 +139,7 @@ Hooks.once("init", () => {
   registrarGuiaCombate();
   registrarFurtividade();
   registrarPerseguicao();
+  registrarTokenDeCriatura();
   registrarVinhetaLoucura();
 
   // Sem iniciativa rolada: os jogadores decidem a ordem entre si (spec §5.2).
