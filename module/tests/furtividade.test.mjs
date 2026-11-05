@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   dtPorUsos, formulaPeloMaiorDado, aplicarBusca, perderDado, limparPerdidos, encontrado, dadosAtivos, TABELA_CRIATURAS,
 } from "../cena/furtividade-regras.mjs";
+import { nivelDeLoucura } from "../ui/vinheta-loucura.mjs";
 
 const pj = (uuid, valores) => ({ uuid, testou: true, dados: valores.map((v, i) => ({ id: `${uuid}${i}`, dado: "d8", valor: v })) });
 
@@ -40,4 +41,11 @@ test("perdidos de eventos antigos saem; os do atual ficam para a animação", ()
 
 test("quem ainda não testou não conta como encontrado", () => {
   assert.equal(encontrado({ uuid: "x", dados: [], testou: false }), false);
+});
+
+test("loucura começa abaixo da metade dos PD e chega a 1 no zero", () => {
+  assert.equal(nivelDeLoucura({ value: 10, max: 20 }), 0);
+  assert.equal(nivelDeLoucura({ value: 5, max: 20 }), 0.5);
+  assert.equal(nivelDeLoucura({ value: 0, max: 20 }), 1);
+  assert.equal(nivelDeLoucura({ value: 3, max: 0 }), 0);
 });

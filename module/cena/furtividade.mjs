@@ -59,7 +59,7 @@ async function gravar(estado, eventoId = null) {
 const OPS = {
   iniciar(e) {
     Object.assign(e, { ativa: true, rodada: 1, fase: "personagens", usosDistrair: 0, acaoRolada: false, evento: null });
-    e.participantes = e.participantes.map((p) => ({ ...p, dados: [], testou: false, usosEsconder: 0 }));
+    e.participantes = e.participantes.map((p) => ({ ...p, dados: [], testou: false, usosEsconder: 0, agiu: false }));
   },
   encerrar(e) { e.ativa = false; e.evento = null; },
   adicionar(e, { uuid, papel }) {
@@ -70,6 +70,10 @@ const OPS = {
   remover(e, { uuid }) {
     e.participantes = e.participantes.filter((p) => p.uuid !== uuid);
     e.criaturas = e.criaturas.filter((c) => c.uuid !== uuid);
+  },
+  agiu(e, { uuid }) {
+    const p = e.participantes.find((x) => x.uuid === uuid);
+    if (p) p.agiu = !p.agiu;
   },
   ocultar(e, { uuid }) {
     const c = e.criaturas.find((x) => x.uuid === uuid);
@@ -140,10 +144,10 @@ const pedir = (op, dados = {}) => comoMestre("op2Furtividade", { op, ...dados })
 
 /* -- criaturas (cliente do mestre) ------------------------------------------- */
 
-async function rolar(formula) {
+async function rolar(formula, opcoes = {}) {
   const roll = await new Roll(formula).evaluate();
   const { mostrarDados3D } = await import("../dice/teste.mjs");
-  await mostrarDados3D(roll);
+  await mostrarDados3D(roll, opcoes);
   return roll;
 }
 
@@ -196,6 +200,7 @@ async function executarTabela(valor) {
   if (!linha) return;
   estado.acaoRolada = true;
   await gravar(estado);
+  mostrarTabelaMestre(valor);
   await card(`<h3>${esc(L("AcaoTitulo", { valor }))}</h3><p>${esc(L(`Tabela.${valor}`))}</p>`);
 
   if (linha.tipo === "todos") return buscar(linha.formula);
@@ -228,6 +233,25 @@ async function executarTabela(valor) {
   }
 }
 
+/** A tabela Ações das Criaturas, só na tela do mestre, com a linha rolada acesa. */
+let janelaTabela = null;
+export function mostrarTabelaMestre(valor = null) {
+  if (!game.user.isGM) return;
+  const linhas = Object.keys(TABELA_CRIATURAS).map((n) => `
+    <tr class="${Number(n) === valor ? "op2-tabela__sorteada" : ""}">
+      <td class="op2-tabela__faixa">${n}</td><td>${esc(L(`Tabela.${n}`))}</td></tr>`).join("");
+  janelaTabela?.close();
+  janelaTabela = new DialogV2({
+    window: { title: L("TabelaTitulo"), icon: "fa-solid fa-dice-d10" },
+    classes: ["op2", "op2-furt-tabela"],
+    position: { width: 560 },
+    content: `<p class="op2-dica">${esc(valor ? L("TabelaRolado", { valor }) : L("TabelaAjuda"))}</p>
+      <div class="op2-tabela__linhas"><table><thead><tr><th>d10</th><th>${esc(L("TabelaAcao"))}</th></tr></thead><tbody>${linhas}</tbody></table></div>`,
+    buttons: [{ action: "ok", label: L("Fechar"), default: true }],
+  });
+  janelaTabela.render({ force: true });
+}
+
 async function procurar({ formula, alvo }) {
   if (!formula || !Roll.validate(formula)) return void ui.notifications.warn(L("FormulaInvalida"));
   await buscar(formula, alvo ? [alvo] : null);
@@ -250,6 +274,7 @@ async function avancarFase() {
     await card(`<p class="op2-furt-card__encontrado"><i class="fa-solid fa-hand-back-fist"></i> ${esc(L("DanoEncontrado", { nome: doc.name, n: roll.total }))}</p>`);
   }
   Object.assign(estado, { fase: "personagens", rodada: estado.rodada + 1, acaoRolada: false });
+  estado.participantes = estado.participantes.map((p) => ({ ...p, agiu: false }));
   await gravar(estado);
 }
 
@@ -286,14 +311,14 @@ async function testeDeEsconderijo(doc) {
   const chave = await escolherPericia(doc, { titulo: L("TesteEsconderijo"), ajuda: L("TesteEsconderijoAjuda"), mostrarAtributo: true });
   if (!chave) return;
   const { rolarTeste } = await import("../dice/teste.mjs");
-  const roll = await rolarTeste(doc, { chavePericia: chave, semDT: true, contexto: L("TesteEsconderijo") });
+  const roll = await rolarTeste(doc, { chavePericia: chave, semDT: true, contexto: L("TesteEsconderijo"), ocultoDoMestre: true });
   if (!roll) return;
   const dados = dadosDoRoll(roll);
   // Crítico: rola mais um dado igual a um dos do teste e ele também vira esconderijo.
   if (roll.resultado?.critico) {
     const { dadoDoCritico } = await import("../dice/critico-extra.mjs");
     const faces = dadoDoCritico(roll.dados);
-    const extra = await rolar(`1d${faces}`);
+    const extra = await rolar(`1d${faces}`, { ocultoDoMestre: true });
     dados.push({ dado: `d${faces}`, valor: extra.total });
   }
   await pedir("esconderijo", { uuid: doc.uuid, dados });
@@ -301,7 +326,7 @@ async function testeDeEsconderijo(doc) {
 
 async function acaoComTeste(doc, { chave, dt, uso, titulo }) {
   const { rolarTeste } = await import("../dice/teste.mjs");
-  const roll = await rolarTeste(doc, { chavePericia: chave, dt, contexto: titulo });
+  const roll = await rolarTeste(doc, { chavePericia: chave, dt, contexto: titulo, ocultoDoMestre: true });
   if (!roll) return null;
   await pedir("uso", { uuid: doc.uuid, tipo: uso });
   return roll.resultado?.sucesso ? roll : null;
@@ -375,6 +400,8 @@ export class FurtividadeApp extends HandlebarsApplicationMixin(ApplicationV2) {
       descartar: FurtividadeApp.#descartar,
       ficha: (_e, alvo) => ator(alvo.dataset.uuid)?.sheet?.render(true),
       jogador: FurtividadeApp.#jogador,
+      agiu: (_e, alvo) => pedir("agiu", { uuid: alvo.dataset.uuid }),
+      tabela: () => mostrarTabelaMestre(),
     },
   };
 
@@ -396,12 +423,14 @@ export class FurtividadeApp extends HandlebarsApplicationMixin(ApplicationV2) {
     });
     const participantes = e.participantes.map((p) => {
       const doc = ator(p.uuid);
-      const dados = p.dados
+      // O mestre não vê valor, forma nem quantidade dos dados de esconderijo.
+      const dados = gm ? [] : p.dados
         .filter((d) => !d.perdido || (animar && d.perdido === eventoId))
         .map((d) => ({ id: d.id, sumindo: !!d.perdido, html: iconeResultado({ dado: d.dado, resultado: d.valor }) }));
       return {
         uuid: p.uuid, nome: doc?.name ?? "?", img: doc?.img ?? ANONIMO,
-        dono: gm || !!doc?.isOwner, dados, testou: p.testou,
+        dono: !gm && !!doc?.isOwner, podeMarcar: gm || !!doc?.isOwner, agiu: !!p.agiu,
+        dados, testou: p.testou,
         encontrado: encontrado(p), dtEsconder: dtPorUsos(p.usosEsconder),
       };
     });
@@ -532,7 +561,62 @@ function mostrarEncontrado(uuid) {
     </div>
     <div class="op2-encontrado__texto"><small>${esc(L("Encontrado"))}</small><strong>${esc(doc.name)}</strong></div>`;
   document.body.append(el);
+  tocarAviso();
   setTimeout(() => el.remove(), 4600);
+}
+
+/**
+ * Som de aviso gerado na hora (sem arquivo): duas batidas graves de coração e um
+ * alarme dissonante quando as garras rasgam o retrato. Volume baixo, seguindo o
+ * volume de interface do Foundry.
+ */
+function tocarAviso() {
+  try {
+    const Contexto = window.AudioContext ?? window.webkitAudioContext;
+    if (!Contexto) return;
+    let volume = 0.5;
+    try { volume = game.settings.get("core", "globalInterfaceVolume") ?? 0.5; } catch { /* sem o setting */ }
+    if (volume <= 0) return;
+    const ctx = new Contexto();
+    const mestre = ctx.createGain();
+    mestre.gain.value = 0.16 * volume;
+    mestre.connect(ctx.destination);
+    const t = ctx.currentTime;
+    const envelope = (g, inicio, pico, fim, alvo = 1) => {
+      g.gain.setValueAtTime(0.0001, t + inicio);
+      g.gain.exponentialRampToValueAtTime(alvo, t + pico);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + fim);
+    };
+    for (const [inicio, freq] of [[0.05, 60], [0.33, 52]]) {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = "sine";
+      o.frequency.setValueAtTime(freq * 2, t + inicio);
+      o.frequency.exponentialRampToValueAtTime(freq, t + inicio + 0.2);
+      envelope(g, inicio, inicio + 0.02, inicio + 0.45);
+      o.connect(g).connect(mestre);
+      o.start(t + inicio);
+      o.stop(t + inicio + 0.5);
+    }
+    const filtro = ctx.createBiquadFilter();
+    filtro.type = "lowpass";
+    filtro.frequency.value = 1200;
+    filtro.connect(mestre);
+    for (const freq of [233, 330, 466]) {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = "sawtooth";
+      o.frequency.setValueAtTime(freq, t + 0.85);
+      o.frequency.linearRampToValueAtTime(freq * 0.94, t + 2.4);
+      envelope(g, 0.85, 0.95, 2.4, 0.22);
+      o.connect(g).connect(filtro);
+      o.start(t + 0.85);
+      o.stop(t + 2.5);
+    }
+    setTimeout(() => ctx.close(), 3200);
+  } catch (erro) {
+    console.warn(`${SYSTEM_ID} | som de aviso`, erro);
+  }
 }
 
 let ultimoEvento = null;

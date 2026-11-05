@@ -202,6 +202,11 @@ export function registrarChat() {
     if (msg.getFlag(SYSTEM_ID, "tipo") && !game.user.isGM) {
       for (const botao of html.querySelectorAll("[data-op2-gm]")) botao.remove();
     }
+    // Dados de esconderijo: o mestre não pode ver (ele "adivinha" números na tabela das criaturas).
+    if (game.user.isGM && msg.getFlag(SYSTEM_ID, "ocultoDoMestre")) {
+      const corpo = html.querySelector(".message-content");
+      if (corpo) corpo.innerHTML = `<div class="op2 op2-card op2-furt-card"><p><i class="fa-solid fa-eye-slash"></i> ${game.i18n.localize("OP2.Furtividade.OcultoDoMestre")}</p></div>`;
+    }
     teatralizarEnvelope(html);
     ligar(html);
   });

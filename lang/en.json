@@ -1525,7 +1525,23 @@
       "Procurar": "Search",
       "FormulaInvalida": "Invalid dice formula.",
       "VinhetaNome": "Stealth scene vignette",
-      "VinhetaDica": "Darkens the screen edges with fog while a hiding scene is active (this computer only)."
+      "VinhetaDica": "Darkens the screen edges with fog while a hiding scene is active (this computer only).",
+      "JaAgiu": "Acted",
+      "JaAgiuDica": "Check when the character has acted this round. Clears itself on the next round.",
+      "Aguardando": "Already acted. Waiting for the round to end.",
+      "DadosOcultos": "Dice hidden from the GM",
+      "OcultoDoMestre": "Hiding test: the dice are shown to players only.",
+      "TabelaBotao": "Table",
+      "TabelaTitulo": "Creature actions (d10)",
+      "TabelaAcao": "Action",
+      "TabelaRolado": "Rolled {valor}. The lit row applies.",
+      "TabelaAjuda": "Ask a player to roll 1d10. High results are better for the characters.",
+      "Fechar": "Close"
+    },
+    "Loucura": {
+      "Nome": "Madness vignette (low SP)",
+      "Dica": "With SP below half, the screen edges darken and crack, stronger as SP drops (this computer only).",
+      "Vinculados": "{n} character token(s) linked to their sheet: the token bar and the sheet are now the same."
     }
   }
 }

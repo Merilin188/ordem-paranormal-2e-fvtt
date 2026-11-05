@@ -1525,7 +1525,23 @@
       "Procurar": "Procurar",
       "FormulaInvalida": "Fórmula de dados inválida.",
       "VinhetaNome": "Vinheta da cena de furtividade",
-      "VinhetaDica": "Escurece as bordas da tela com névoa enquanto uma cena de esconder estiver ativa (só neste computador)."
+      "VinhetaDica": "Escurece as bordas da tela com névoa enquanto uma cena de esconder estiver ativa (só neste computador).",
+      "JaAgiu": "Já agiu",
+      "JaAgiuDica": "Marque quando o personagem já agiu nesta rodada. Desmarca sozinho na próxima rodada.",
+      "Aguardando": "Já agiu. Aguardando o fim da rodada.",
+      "DadosOcultos": "Dados ocultos do mestre",
+      "OcultoDoMestre": "Teste de esconderijo: os dados só aparecem para os jogadores.",
+      "TabelaBotao": "Tabela",
+      "TabelaTitulo": "Ações das criaturas (d10)",
+      "TabelaAcao": "Ação",
+      "TabelaRolado": "Saiu {valor}. A linha acesa é a que vale.",
+      "TabelaAjuda": "Peça a um jogador para rolar 1d10. Resultados altos são melhores para os personagens.",
+      "Fechar": "Fechar"
+    },
+    "Loucura": {
+      "Nome": "Vinheta de loucura (PD baixo)",
+      "Dica": "Com os PD abaixo da metade, a borda da tela escurece e racha, cada vez mais forte (só neste computador).",
+      "Vinculados": "{n} token(s) de personagem ligados à ficha: barra do token e ficha agora são a mesma coisa."
     }
   }
 }

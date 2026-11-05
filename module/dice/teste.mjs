@@ -31,7 +31,7 @@ import {
  */
 export async function rolarTeste(ator, {
   chavePericia, chaveAtributo, dt, oposto = false, semDT = false, contexto, rapido = false,
-  semCard = false, dadosExtras = [],
+  semCard = false, dadosExtras = [], ocultoDoMestre = false,
 } = {}) {
   const sistema = ator.system;
   const pericia = sistema.resolverChave(chavePericia);
@@ -119,7 +119,7 @@ export async function rolarTeste(ator, {
   await roll.evaluate();
 
   // 1) Os dados do jogador rolam em 3D primeiro (todos veem).
-  await mostrarDados3D(roll);
+  await mostrarDados3D(roll, { ocultoDoMestre });
 
   // 1b) Análise (marcadores ±1) e Mentoria (trocar um dado pela RA) — depois de rolar.
   if (ator.type === "personagem") {
@@ -135,7 +135,7 @@ export async function rolarTeste(ator, {
     await pedirDadoDePavor(roll, ator, pavor);
     const rollPavor = await new Roll(`1${pavor}`).evaluate();
     vestirDadoDePavor(rollPavor);
-    await mostrarDados3D(rollPavor);
+    await mostrarDados3D(rollPavor, { ocultoDoMestre });
     roll.definirPavor(pavor, rollPavor.total);
   }
 
@@ -144,7 +144,7 @@ export async function rolarTeste(ator, {
 
   // `semCard`: quem chamou publica o próprio card com os dados dentro (Examinar,
   // solicitação do mestre). A animação já aconteceu; o card não repete.
-  if (!semCard) await enviarParaChat(roll, ator, { pularDados3D: true });
+  if (!semCard) await enviarParaChat(roll, ator, { pularDados3D: true, ocultoDoMestre });
 
   // Ajuda é para UMA rolagem: usada, acabou (spec §4.7 — custa a ação do aliado
   // para aquele teste, não é um efeito com duração).
@@ -198,9 +198,14 @@ export function rotuloDePericia(chave) {
   return `${game.i18n.localize("OP2.Pericia.aptidao")} (${rotuloSub})`;
 }
 
-export async function mostrarDados3D(roll) {
+export async function mostrarDados3D(roll, { ocultoDoMestre = false } = {}) {
   if (!game.dice3d) return;
   try {
+    // Furtividade: os dados de esconderijo só aparecem para os jogadores.
+    if (ocultoDoMestre) {
+      const jogadores = game.users.filter((u) => u.active && !u.isGM).map((u) => u.id);
+      return void await game.dice3d.showForRoll(roll, game.user, true, jogadores);
+    }
     await game.dice3d.showForRoll(roll, game.user, true);
   } catch (erro) {
     console.warn(`${SYSTEM_ID} | Dice So Nice falhou, seguindo sem animação`, erro);
@@ -247,7 +252,7 @@ export function htmlDoTeste(roll, ator) {
   });
 }
 
-export async function enviarParaChat(roll, ator, { pularDados3D = false } = {}) {
+export async function enviarParaChat(roll, ator, { pularDados3D = false, ocultoDoMestre = false } = {}) {
   const conteudo = await htmlDoTeste(roll, ator);
 
   return roll.toMessage(
@@ -255,7 +260,7 @@ export async function enviarParaChat(roll, ator, { pularDados3D = false } = {}) 
       speaker: ChatMessage.getSpeaker({ actor: ator }),
       content: conteudo,
       flags: {
-        [SYSTEM_ID]: { tipo: "teste", atorId: ator.id, desfecho: roll.desfecho },
+        [SYSTEM_ID]: { tipo: "teste", atorId: ator.id, desfecho: roll.desfecho, ...(ocultoDoMestre ? { ocultoDoMestre: true } : {}) },
         // Quando os dados já rolaram em 3D antes da escolha (4 rolados → 3 contados),
         // a mensagem não pode animar de novo. O Dice So Nice decide isso pela flag
         // `skip` — `dsnHide` nas opções do `toMessage` não existe e era ignorada em

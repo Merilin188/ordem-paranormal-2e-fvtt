@@ -4,6 +4,7 @@
  */
 import { registrarEfeitosDoMundo } from "./cena/efeitos-mundo.mjs";
 import { registrarFurtividade, abrirFurtividade } from "./cena/furtividade.mjs";
+import { registrarVinhetaLoucura } from "./ui/vinheta-loucura.mjs";
 import { registrarExcluirDesafio } from "./cena/excluir-desafio.mjs";
 import { SYSTEM_ID, OP2, ICONES_PADRAO } from "./config.mjs";
 import { PersonagemData } from "./data/actor-personagem.mjs";
@@ -132,6 +133,7 @@ Hooks.once("init", () => {
   registrarEquilibrio();
   registrarGuiaCombate();
   registrarFurtividade();
+  registrarVinhetaLoucura();
 
   // Sem iniciativa rolada: os jogadores decidem a ordem entre si (spec §5.2).
   CONFIG.Combat.initiative = { formula: "0", decimals: 0 };

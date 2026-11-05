@@ -13,6 +13,7 @@
         {{#if gm}}
           <button type="button" class="op2-botao" data-action="avancar"><i class="fa-solid fa-forward-step"></i>
             {{#if criaturasFase}}{{localize "OP2.Furtividade.ProximaRodada"}}{{else}}{{localize "OP2.Furtividade.IrCriaturas"}}{{/if}}</button>
+          <button type="button" class="op2-botao op2-botao--fantasma" data-action="tabela"><i class="fa-solid fa-table-list"></i> {{localize "OP2.Furtividade.TabelaBotao"}}</button>
           <button type="button" class="op2-botao op2-botao--fantasma" data-action="encerrar"><i class="fa-solid fa-flag-checkered"></i> {{localize "OP2.Furtividade.Encerrar"}}</button>
         {{/if}}
       </div>
@@ -48,17 +49,28 @@
             <strong>{{nome}}</strong>
             {{#if encontrado}}<span class="op2-furt__estado op2-furt__estado--encontrado"><i class="fa-solid fa-skull"></i> {{localize "OP2.Furtividade.Encontrado"}}</span>
             {{else if testou}}<span class="op2-furt__estado"><i class="fa-solid fa-eye-slash"></i> {{localize "OP2.Furtividade.Escondido"}}</span>{{/if}}
+            {{#if ../ativa}}{{#if testou}}
+              <label class="op2-furt__agiu {{#if agiu}}op2-furt__agiu--sim{{/if}}" data-tooltip="{{localize 'OP2.Furtividade.JaAgiuDica'}}">
+                <input type="checkbox" data-action="agiu" data-uuid="{{uuid}}" {{#if agiu}}checked{{/if}} {{#unless podeMarcar}}disabled{{/unless}}>
+                {{localize "OP2.Furtividade.JaAgiu"}}</label>
+            {{/if}}{{/if}}
             {{#if ../gm}}<button type="button" class="op2-botao-icone" data-action="remover" data-uuid="{{uuid}}" data-tooltip="{{localize 'OP2.Furtividade.Remover'}}"><i class="fa-solid fa-xmark"></i></button>{{/if}}
           </div>
           <div class="op2-furt__dados">
-            {{#each dados}}
-              <span class="op2-furt__dado {{#if sumindo}}op2-furt__dado--sumindo{{/if}}"
-                {{#if ../../gm}}data-action="descartar" data-uuid="{{../uuid}}" data-id="{{id}}" data-tooltip="{{localize 'OP2.Furtividade.Descartar'}}"{{/if}}>{{{html}}}</span>
+            {{#if ../gm}}
+              {{#if testou}}{{#unless encontrado}}<em class="op2-dica"><i class="fa-solid fa-mask"></i> {{localize "OP2.Furtividade.DadosOcultos"}}</em>{{/unless}}
+              {{else}}<em class="op2-dica">{{localize "OP2.Furtividade.SemTeste"}}</em>{{/if}}
             {{else}}
-              {{#unless testou}}<em class="op2-dica">{{localize "OP2.Furtividade.SemTeste"}}</em>{{/unless}}
-            {{/each}}
+              {{#each dados}}
+                <span class="op2-furt__dado {{#if sumindo}}op2-furt__dado--sumindo{{/if}}">{{{html}}}</span>
+              {{else}}
+                {{#unless testou}}<em class="op2-dica">{{localize "OP2.Furtividade.SemTeste"}}</em>{{/unless}}
+              {{/each}}
+            {{/if}}
           </div>
-          {{#if dono}}{{#if ../ativa}}
+          {{#if dono}}{{#if ../ativa}}{{#if agiu}}
+            <p class="op2-dica op2-furt__aguardando"><i class="fa-solid fa-hourglass-half"></i> {{localize "OP2.Furtividade.Aguardando"}}</p>
+          {{else}}
             <div class="op2-furt__acoes">
               {{#unless testou}}
                 <button type="button" class="op2-botao op2-botao--pequeno" data-action="jogador" data-acao="teste" data-uuid="{{uuid}}"><i class="fa-solid fa-dice"></i> {{localize "OP2.Furtividade.TesteEsconderijo"}}</button>
@@ -69,7 +81,7 @@
                 <button type="button" class="op2-botao op2-botao--pequeno op2-botao--fantasma" data-action="jogador" data-acao="chamativa" data-uuid="{{uuid}}" data-tooltip="{{localize 'OP2.Furtividade.ChamativaDica'}}">{{localize "OP2.Furtividade.Chamativa"}}</button>
               {{/unless}}{{/unless}}
             </div>
-          {{/if}}{{/if}}
+          {{/if}}{{/if}}{{/if}}
         </div>
       </article>
     {{else}}
