@@ -96,7 +96,7 @@ const OPS = {
     p.dados.push({ id: foundry.utils.randomID(), dado, valor });
     p.testou = true;
   },
-  transferir(e, { de, para, dadoId }) {
+  transferir(e, { de, para, dadoId }, eventoId) {
     const origem = e.participantes.find((x) => x.uuid === de);
     const destino = e.participantes.find((x) => x.uuid === para);
     const dado = origem?.dados.find((d) => d.id === dadoId && !d.perdido);
@@ -104,6 +104,11 @@ const OPS = {
     origem.dados = origem.dados.filter((d) => d.id !== dadoId);
     destino.dados.push({ ...dado, id: foundry.utils.randomID() });
     destino.testou = true;
+    // Deu o último dado: quem chamou a atenção foi encontrado.
+    if (!dadosAtivos(origem).length) {
+      e.evento = { id: eventoId, perdas: [], descobertos: [de] };
+      return true;
+    }
   },
   perder(e, { uuid, dadoId }, eventoId) {
     const i = e.participantes.findIndex((x) => x.uuid === uuid);
@@ -136,7 +141,7 @@ function executar({ op, ...dados }) {
     const eventoId = foundry.utils.randomID();
     const novoEvento = OPS[op]?.(estado, dados, eventoId);
     await gravar(estado, novoEvento ? eventoId : null);
-    if (op === "perder" && estado.evento?.descobertos?.length) await cardDescobertos(estado.evento.descobertos);
+    if (novoEvento && ["perder", "transferir"].includes(op) && estado.evento?.descobertos?.length) await cardDescobertos(estado.evento.descobertos);
   });
   fila = resultado.catch((erro) => console.error(`${SYSTEM_ID} | furtividade`, erro));
   return resultado.catch(() => false);
@@ -452,15 +457,26 @@ const ACOES_JOGADOR = {
 
 async function soproNaNuca(doc, dataset) {
   if (!doc.isOwner) return void ui.notifications.warn(L("SoproNaoEhVoce", { nome: doc.name }));
-  if (dataset.escolha === "parado") {
-    const roll = await rolar("2d6");
-    const { aplicarDano } = await import("../dice/falha-critica.mjs");
-    await aplicarDano(doc, roll.total, "pd");
-    return void card(`<p>${esc(L("SoproPerdeuPD", { nome: doc.name, n: roll.total }))}</p>`);
+  const sair = dataset.escolha === "sair";
+  // Sair de perto: escolhe o dado antes; fechar a janela não gasta a escolha.
+  let dado = null;
+  if (sair) {
+    const p = estadoFurtividade().participantes.find((x) => x.uuid === doc.uuid);
+    dado = await escolherDado(dadosAtivos(p), L("SoproSair"));
+    if (!dado) return;
   }
-  const p = estadoFurtividade().participantes.find((x) => x.uuid === doc.uuid);
-  const dado = await escolherDado(dadosAtivos(p), L("SoproSair"));
-  if (dado) await pedir("perder", { uuid: doc.uuid, dadoId: dado.id });
+  // O card do sopro vira "Ação executada" (mensagem do mestre: passa pela ponte).
+  const mensagem = game.messages.get(dataset.mensagemId);
+  if (mensagem) {
+    const feito = `<p class="op2-dica"><i class="fa-solid fa-check"></i> ${esc(L("Executada"))}</p></div>`;
+    await comoMestre("op2AtualizarMensagem", { id: mensagem.id, content: mensagem.content.replace(/<div class="op2-furt-card__botoes">[\s\S]*$/, feito) });
+  }
+  await card(`<p><strong>${esc(L(sair ? "SoproEscolheuSair" : "SoproEscolheuParado", { nome: doc.name }))}</strong></p>`);
+  if (sair) return void await pedir("perder", { uuid: doc.uuid, dadoId: dado.id });
+  const roll = await rolar("2d6");
+  const { aplicarDano } = await import("../dice/falha-critica.mjs");
+  await aplicarDano(doc, roll.total, "pd");
+  await card(`<p>${esc(L("SoproPerdeuPD", { nome: doc.name, n: roll.total }))}</p>`);
 }
 
 /* -- painel ------------------------------------------------------------------- */

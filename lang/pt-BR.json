@@ -1550,7 +1550,9 @@
       "Sortear": "Sortear",
       "SoproNaoEhVoce": "Só quem a criatura alcançou ({nome}) pode escolher aqui.",
       "SoproPara": "{nome}, escolha:",
-      "Cancelar": "Cancelar"
+      "Cancelar": "Cancelar",
+      "SoproEscolheuParado": "{nome} escolheu ficar parado.",
+      "SoproEscolheuSair": "{nome} escolheu sair de perto."
     },
     "Loucura": {
       "Nome": "Vinheta de loucura (PD baixo)",

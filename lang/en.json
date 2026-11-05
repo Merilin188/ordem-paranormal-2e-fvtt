@@ -1550,7 +1550,9 @@
       "Sortear": "Draw",
       "SoproNaoEhVoce": "Only the one the creature reached ({nome}) can choose here.",
       "SoproPara": "{nome}, choose:",
-      "Cancelar": "Cancel"
+      "Cancelar": "Cancel",
+      "SoproEscolheuParado": "{nome} chose to stay still.",
+      "SoproEscolheuSair": "{nome} chose to move away."
     },
     "Loucura": {
       "Nome": "Madness vignette (low SP)",

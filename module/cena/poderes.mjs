@@ -386,7 +386,7 @@ export function registrarPoderes() {
     if (a?.system?.estado) await a.update({ "system.estado.mentoria": ra });
   });
   registrarAcaoDeMestre("op2AtualizarMensagem", async ({ id, content, rolls }) => {
-    await game.messages.get(id)?.update({ content, rolls });
+    await game.messages.get(id)?.update(rolls ? { content, rolls } : { content });
   });
   registrarAcaoDeMestre("op2DefinirIniciativa", async ({ combateId, id, valor }) => {
     await game.combats.get(combateId)?.combatants.get(id)?.update({ initiative: valor });
