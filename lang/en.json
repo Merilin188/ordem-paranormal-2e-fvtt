@@ -1521,7 +1521,11 @@
       "DaFicha": "From the creature's sheet",
       "DaTabela": "From the table",
       "OuFormula": "Or free formula",
-      "Alvo": "Who is searched",
+      "Alvo": {
+        "2": "A creature gets very close to {nome}!",
+        "8": "A creature leaps toward {nome}!",
+        "9": "A creature searches for {nome}."
+      },
       "Procurar": "Search",
       "FormulaInvalida": "Invalid dice formula.",
       "VinhetaNome": "Stealth scene vignette",
@@ -1536,7 +1540,14 @@
       "TabelaAcao": "Action",
       "TabelaRolado": "Rolled {valor}. The lit row applies.",
       "TabelaAjuda": "Ask a player to roll 1d10. High results are better for the characters.",
-      "Fechar": "Close"
+      "Fechar": "Close",
+      "Executar": "Run action",
+      "AguardandoMestre": "Waiting for the GM to run the action.",
+      "Executada": "Action done.",
+      "NinguemEscondido": "Nobody is hidden to be searched.",
+      "SorteioTitulo": "Draw the target",
+      "SorteioAjuda": "Only characters still hidden are included.",
+      "Sortear": "Draw"
     },
     "Loucura": {
       "Nome": "Madness vignette (low SP)",

@@ -1521,7 +1521,11 @@
       "DaFicha": "Da ficha da criatura",
       "DaTabela": "Da tabela",
       "OuFormula": "Ou fórmula livre",
-      "Alvo": "Quem é procurado",
+      "Alvo": {
+        "2": "Uma criatura chega muito perto de {nome}!",
+        "8": "Uma criatura salta na direção de {nome}!",
+        "9": "Uma criatura procura {nome}."
+      },
       "Procurar": "Procurar",
       "FormulaInvalida": "Fórmula de dados inválida.",
       "VinhetaNome": "Vinheta da cena de furtividade",
@@ -1536,7 +1540,14 @@
       "TabelaAcao": "Ação",
       "TabelaRolado": "Saiu {valor}. A linha acesa é a que vale.",
       "TabelaAjuda": "Peça a um jogador para rolar 1d10. Resultados altos são melhores para os personagens.",
-      "Fechar": "Fechar"
+      "Fechar": "Fechar",
+      "Executar": "Executar ação",
+      "AguardandoMestre": "Aguardando o mestre executar a ação.",
+      "Executada": "Ação executada.",
+      "NinguemEscondido": "Ninguém está escondido para ser procurado.",
+      "SorteioTitulo": "Sortear o alvo",
+      "SorteioAjuda": "Só entram os personagens que ainda estão escondidos.",
+      "Sortear": "Sortear"
     },
     "Loucura": {
       "Nome": "Vinheta de loucura (PD baixo)",

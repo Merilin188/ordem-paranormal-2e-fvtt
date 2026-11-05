@@ -172,12 +172,13 @@
     opacity: calc(var(--op2-loucura) * 0.9);
     animation: op2-loucura-descolar 5s steps(1) infinite;
   }
-  .op2-loucura__rachas {
-    position: absolute; inset: 0; width: 100%; height: 100%; color: rgb(220 200 255 / 75%);
-    filter: drop-shadow(0 0 2px rgb(150 60 220 / 80%));
-    path { stroke-dasharray: 60; stroke-dashoffset: calc(60 - 60 * var(--op2-loucura)); transition: stroke-dashoffset 2s ease; }
-    .r2, .r4 { opacity: clamp(0, calc((var(--op2-loucura) - 0.3) * 3), 1); }
+  .op2-loucura__veias {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    opacity: calc(0.25 + 0.75 * var(--op2-loucura));
+    filter: drop-shadow(0 0 3px rgb(70 10 110 / 70%));
+    animation: op2-loucura-pulsar-veias 7s ease-in-out infinite;
   }
+  @keyframes op2-loucura-pulsar-veias { 50% { opacity: calc(0.15 + 0.6 * var(--op2-loucura)); } }
   .op2-loucura--forte {
     .op2-loucura__borda { animation: op2-loucura-respirar 3.5s ease-in-out infinite, op2-loucura-falha 6s steps(1) infinite; }
   }
@@ -188,4 +189,17 @@
   @media (prefers-reduced-motion: reduce) {
     .op2-loucura__borda, .op2-loucura__fantasma { animation: none !important; }
   }
+
+  // Sorteio do alvo (tela do mestre)
+  .op2-furt-sorteio__lista {
+    margin: 0.4rem 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 0.25rem;
+    li {
+      display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.5rem; border-left: 3px solid var(--op2-linha-forte);
+      background: rgb(0 0 0 / 25%); transition: background 0.08s, border-color 0.08s;
+    }
+    img { width: 32px; height: 32px; border: 0; border-radius: 50%; object-fit: cover; }
+    .aceso { background: rgb(160 28 70 / 45%); border-left-color: #d0537a; }
+    .escolhido { background: rgb(190 20 40 / 70%); border-left-color: #ff4a4a; animation: op2-pulsar 0.9s ease-in-out infinite; font-weight: bold; }
+  }
+  .op2-furt-card__alvo { color: #ff8a8a !important; }
 }

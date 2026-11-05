@@ -23,13 +23,28 @@ function atorAlvo() {
   return !game.user.isGM && meu?.type === "personagem" ? meu : null;
 }
 
-const RACHADURAS = `<svg class="op2-loucura__rachas" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-  <g fill="none" stroke="currentColor" stroke-width="0.25" stroke-linecap="round">
-    <path class="r1" d="M0 8 L9 12 L13 7 L21 15 L27 13 M9 12 L7 21 L14 27 M13 7 L16 0"/>
-    <path class="r2" d="M100 14 L92 17 L88 11 L80 19 L74 16 M92 17 L95 26 L89 31 M88 11 L85 0"/>
-    <path class="r3" d="M0 88 L8 84 L12 91 L20 83 L27 86 M8 84 L6 76 L13 70 M12 91 L15 100"/>
-    <path class="r4" d="M100 91 L91 86 L87 93 L79 84 L71 88 M91 86 L94 77 L88 71 M87 93 L84 100"/>
-  </g></svg>`;
+// Veias escuras que crescem da borda: isolinhas de um ruído fractal (orgânico,
+// nada de traço desenhado). A máscara radial encolhe conforme os PD caem.
+const VEIAS = `<svg class="op2-loucura__veias" width="100%" height="100%" aria-hidden="true">
+  <defs>
+    <filter id="op2-veias-filtro" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.006 0.011" numOctaves="5" seed="13" result="ruido"/>
+      <feColorMatrix in="ruido" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1 0 0 0 0" result="nivel"/>
+      <feComponentTransfer in="nivel" result="linhas">
+        <feFuncA type="discrete" tableValues="0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0"/>
+      </feComponentTransfer>
+      <feGaussianBlur in="linhas" stdDeviation="0.7" result="suave"/>
+      <feFlood flood-color="#0c0216"/>
+      <feComposite in2="suave" operator="in"/>
+    </filter>
+    <radialGradient id="op2-veias-gradiente" cx="50%" cy="50%" r="72%">
+      <stop class="op2-veias-inicio" offset="70%" stop-color="#000"/>
+      <stop offset="100%" stop-color="#fff"/>
+    </radialGradient>
+    <mask id="op2-veias-mascara"><rect width="100%" height="100%" fill="url(#op2-veias-gradiente)"/></mask>
+  </defs>
+  <rect width="100%" height="100%" filter="url(#op2-veias-filtro)" mask="url(#op2-veias-mascara)"/>
+</svg>`;
 
 function elemento() {
   let el = document.getElementById("op2-vinheta-loucura");
@@ -37,7 +52,7 @@ function elemento() {
   el = document.createElement("div");
   el.id = "op2-vinheta-loucura";
   el.className = "op2-loucura";
-  el.innerHTML = `<span class="op2-loucura__borda"></span><span class="op2-loucura__fantasma"></span>${RACHADURAS}`;
+  el.innerHTML = `<span class="op2-loucura__borda"></span><span class="op2-loucura__fantasma"></span>${VEIAS}`;
   const board = document.getElementById("board");
   if (board) board.after(el);
   else document.body.prepend(el);
@@ -54,6 +69,8 @@ function atualizar() {
   el.style.setProperty("--op2-loucura", nivel.toFixed(3));
   el.classList.toggle("ativa", nivel > 0);
   el.classList.toggle("op2-loucura--forte", nivel >= 0.6);
+  // As veias avançam da borda para o centro conforme a loucura cresce.
+  el.querySelector(".op2-veias-inicio")?.setAttribute("offset", `${Math.round(78 - 40 * nivel)}%`);
 }
 
 /** Uma vez por mundo: liga ficha e token dos personagens. */

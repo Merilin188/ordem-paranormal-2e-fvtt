@@ -129,6 +129,7 @@ const OPS = {
 function executar({ op, ...dados }) {
   fila = fila.then(async () => {
     if (op === "acaoCriaturas") return executarTabela(dados.valor);
+    if (op === "linha") return executarLinha(dados.valor);
     if (op === "avancar") return avancarFase();
     if (op === "procurar") return procurar(dados);
     const estado = estadoFurtividade();
@@ -188,12 +189,7 @@ async function buscar(formula, alvos = null, valoresProntos = null) {
   await cardDescobertos(r.descobertos);
 }
 
-/** Um personagem ainda escondido, sorteado (o livro manda o mestre sortear). */
-function sortearEscondido(estado) {
-  const vivos = estado.participantes.filter((p) => dadosAtivos(p).length);
-  return vivos.length ? vivos[Math.floor(Math.random() * vivos.length)] : null;
-}
-
+/** Anuncia o resultado do d10. A ação só acontece quando o mestre clica no card. */
 async function executarTabela(valor) {
   const estado = estadoFurtividade();
   const linha = TABELA_CRIATURAS[valor];
@@ -201,14 +197,61 @@ async function executarTabela(valor) {
   estado.acaoRolada = true;
   await gravar(estado);
   mostrarTabelaMestre(valor);
-  await card(`<h3>${esc(L("AcaoTitulo", { valor }))}</h3><p>${esc(L(`Tabela.${valor}`))}</p>`);
+  const botao = linha.tipo === "nada" ? "" : `
+    <div class="op2-furt-card__botoes">
+      <button type="button" class="op2-botao op2-botao--pequeno op2-botao--perigo" data-op2-gm data-op2-furt-executar="${valor}">
+        <i class="fa-solid fa-play"></i> ${esc(L("Executar"))}</button>
+      <p class="op2-dica">${esc(L("AguardandoMestre"))}</p>
+    </div>`;
+  await card(`<h3>${esc(L("AcaoTitulo", { valor }))}</h3><p>${esc(L(`Tabela.${valor}`))}</p>${botao}`);
+}
 
+const espera = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * Sorteio do alvo na tela do mestre: a luz desce pela lista dos personagens ainda
+ * escondidos, desacelera e para em um. Só nomes: nada de dados.
+ */
+async function sortearAlvo(estado) {
+  const candidatos = estado.participantes.filter((p) => dadosAtivos(p).length);
+  if (!candidatos.length) return void ui.notifications.info(L("NinguemEscondido"));
+  const lista = candidatos.map((p, i) => {
+    const doc = ator(p.uuid);
+    return `<li data-sorteio="${i}"><img src="${esc(doc?.img ?? ANONIMO)}" alt=""><span>${esc(doc?.name ?? "?")}</span></li>`;
+  }).join("");
+  const indice = await DialogV2.wait({
+    window: { title: L("SorteioTitulo"), icon: "fa-solid fa-shuffle" },
+    classes: ["op2", "op2-furt-sorteio"],
+    position: { width: 380 },
+    content: `<p class="op2-dica">${esc(L("SorteioAjuda"))}</p><ul class="op2-furt-sorteio__lista">${lista}</ul>`,
+    buttons: [{
+      action: "sortear", label: L("Sortear"), icon: "fa-solid fa-dice", default: true,
+      callback: async (_evento, botao, dialogo) => {
+        if (botao) botao.disabled = true;
+        const itens = [...(dialogo?.element ?? document).querySelectorAll("[data-sorteio]")];
+        const n = itens.length;
+        const final = Math.floor(Math.random() * n);
+        const passos = n * Math.max(3, Math.ceil(12 / n)) + final + 1;
+        for (let passo = 0; passo < passos; passo++) {
+          itens.forEach((el, j) => el.classList.toggle("aceso", j === passo % n));
+          await espera(50 + 330 * (passo / passos) ** 2.4);
+        }
+        itens[final]?.classList.add("escolhido");
+        await espera(1400);
+        return final;
+      },
+    }],
+    rejectClose: false,
+  });
+  return Number.isInteger(indice) ? candidatos[indice] : null;
+}
+
+/** Executa a linha da tabela (clique do mestre no card). */
+async function executarLinha(valor) {
+  const linha = TABELA_CRIATURAS[valor];
+  if (!linha) return;
+  const estado = estadoFurtividade();
   if (linha.tipo === "todos") return buscar(linha.formula);
-  if (linha.tipo === "um") {
-    const alvo = sortearEscondido(estado);
-    if (!alvo) return;
-    return buscar(formulaPeloMaiorDado(dadosAtivos(alvo), linha.formulas), [alvo.uuid]);
-  }
   if (linha.tipo === "numeros") {
     const valores = await DialogV2.prompt({
       window: { title: L("DoisNumeros") },
@@ -218,18 +261,33 @@ async function executarTabela(valor) {
       ok: { callback: (_e, b) => [Number(b.form.elements.a.value), Number(b.form.elements.b.value)] },
       rejectClose: false,
     });
-    if (valores) return buscar(null, null, valores.filter(Boolean));
+    if (valores) await buscar(null, null, valores.filter(Boolean));
     return;
   }
-  if (linha.tipo === "sopro") {
-    const alvo = sortearEscondido(estado);
-    if (!alvo) return;
-    const doc = ator(alvo.uuid);
-    await card(`<h3>${esc(L("SoproTitulo", { nome: doc?.name }))}</h3><p>${esc(L("SoproAjuda"))}</p>
-      <div class="op2-furt-card__botoes">
-        <button type="button" class="op2-botao op2-botao--pequeno" data-op2-acao="furtividade-sopro" data-ator-id="${doc?.id}" data-escolha="parado">${esc(L("SoproParado"))}</button>
-        <button type="button" class="op2-botao op2-botao--pequeno" data-op2-acao="furtividade-sopro" data-ator-id="${doc?.id}" data-escolha="sair">${esc(L("SoproSair"))}</button>
-      </div>`);
+  if (linha.tipo !== "um" && linha.tipo !== "sopro") return;
+  const alvo = await sortearAlvo(estado);
+  if (!alvo) return;
+  const doc = ator(alvo.uuid);
+  await card(`<h3 class="op2-furt-card__alvo">${esc(L(`Alvo.${valor}`, { nome: doc?.name ?? "?" }))}</h3>`);
+  if (linha.tipo === "um") return buscar(formulaPeloMaiorDado(dadosAtivos(alvo), linha.formulas), [alvo.uuid]);
+  await card(`<p>${esc(L("SoproAjuda"))}</p>
+    <div class="op2-furt-card__botoes">
+      <button type="button" class="op2-botao op2-botao--pequeno" data-op2-acao="furtividade-sopro" data-ator-id="${doc?.id}" data-escolha="parado">${esc(L("SoproParado"))}</button>
+      <button type="button" class="op2-botao op2-botao--pequeno" data-op2-acao="furtividade-sopro" data-ator-id="${doc?.id}" data-escolha="sair">${esc(L("SoproSair"))}</button>
+    </div>`);
+}
+
+/** Botão "Executar ação" do card da tabela: só o mestre, uma vez. */
+function ligarBotaoExecutar(msg, html) {
+  for (const botao of html.querySelectorAll("[data-op2-furt-executar]")) {
+    botao.addEventListener("click", async (evento) => {
+      evento.preventDefault();
+      if (!game.user.isGM) return;
+      botao.disabled = true;
+      const feito = `<p class="op2-dica"><i class="fa-solid fa-check"></i> ${esc(L("Executada"))}</p></div>`;
+      await msg.update({ content: msg.content.replace(/<div class="op2-furt-card__botoes">[\s\S]*$/, feito) });
+      await executar({ op: "linha", valor: Number(botao.dataset.op2FurtExecutar) });
+    });
   }
 }
 
@@ -566,9 +624,8 @@ function mostrarEncontrado(uuid) {
 }
 
 /**
- * Som de aviso gerado na hora (sem arquivo): duas batidas graves de coração e um
- * alarme dissonante quando as garras rasgam o retrato. Volume baixo, seguindo o
- * volume de interface do Foundry.
+ * Batimento cardíaco gerado na hora (sem arquivo), acelerando durante a animação.
+ * Volume baixo, seguindo o volume de interface do Foundry.
  */
 function tocarAviso() {
   try {
@@ -579,41 +636,40 @@ function tocarAviso() {
     if (volume <= 0) return;
     const ctx = new Contexto();
     const mestre = ctx.createGain();
-    mestre.gain.value = 0.16 * volume;
-    mestre.connect(ctx.destination);
     const t = ctx.currentTime;
-    const envelope = (g, inicio, pico, fim, alvo = 1) => {
-      g.gain.setValueAtTime(0.0001, t + inicio);
-      g.gain.exponentialRampToValueAtTime(alvo, t + pico);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + fim);
-    };
-    for (const [inicio, freq] of [[0.05, 60], [0.33, 52]]) {
+    const fim = 4.3;
+    mestre.gain.setValueAtTime(0.24 * volume, t);
+    mestre.gain.setValueAtTime(0.24 * volume, t + fim - 0.6);
+    mestre.gain.linearRampToValueAtTime(0.0001, t + fim);
+    mestre.connect(ctx.destination);
+    const filtro = ctx.createBiquadFilter();
+    filtro.type = "lowpass";
+    filtro.frequency.value = 180;
+    filtro.connect(mestre);
+    const pulsar = (inicio, freq, forca) => {
       const o = ctx.createOscillator();
       const g = ctx.createGain();
       o.type = "sine";
-      o.frequency.setValueAtTime(freq * 2, t + inicio);
-      o.frequency.exponentialRampToValueAtTime(freq, t + inicio + 0.2);
-      envelope(g, inicio, inicio + 0.02, inicio + 0.45);
-      o.connect(g).connect(mestre);
-      o.start(t + inicio);
-      o.stop(t + inicio + 0.5);
-    }
-    const filtro = ctx.createBiquadFilter();
-    filtro.type = "lowpass";
-    filtro.frequency.value = 1200;
-    filtro.connect(mestre);
-    for (const freq of [233, 330, 466]) {
-      const o = ctx.createOscillator();
-      const g = ctx.createGain();
-      o.type = "sawtooth";
-      o.frequency.setValueAtTime(freq, t + 0.85);
-      o.frequency.linearRampToValueAtTime(freq * 0.94, t + 2.4);
-      envelope(g, 0.85, 0.95, 2.4, 0.22);
+      o.frequency.setValueAtTime(freq * 1.8, t + inicio);
+      o.frequency.exponentialRampToValueAtTime(freq, t + inicio + 0.12);
+      g.gain.setValueAtTime(0.0001, t + inicio);
+      g.gain.exponentialRampToValueAtTime(forca, t + inicio + 0.015);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + inicio + 0.32);
       o.connect(g).connect(filtro);
-      o.start(t + 0.85);
-      o.stop(t + 2.5);
+      o.start(t + inicio);
+      o.stop(t + inicio + 0.35);
+    };
+    // "Tum-tum": cada batida mais perto da outra (de ~63 para ~180 bpm).
+    let inicio = 0.05;
+    let intervalo = 0.95;
+    while (inicio < fim - 0.3) {
+      const forca = 0.7 + 0.3 * (inicio / fim);
+      pulsar(inicio, 58, forca);
+      pulsar(inicio + Math.min(0.2, intervalo * 0.28), 48, forca * 0.65);
+      inicio += intervalo;
+      intervalo = Math.max(0.33, intervalo * 0.82);
     }
-    setTimeout(() => ctx.close(), 3200);
+    setTimeout(() => ctx.close(), (fim + 0.5) * 1000);
   } catch (erro) {
     console.warn(`${SYSTEM_ID} | som de aviso`, erro);
   }
@@ -684,6 +740,7 @@ export function registrarFurtividade() {
   });
   registrarAcaoDeMestre("op2Furtividade", executar);
   registrarAcaoDeChat("furtividade-sopro", soproNaNuca);
+  Hooks.on("renderChatMessageHTML", ligarBotaoExecutar);
 
   Hooks.once("ready", () => {
     const e = estadoFurtividade();
