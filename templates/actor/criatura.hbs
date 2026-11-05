@@ -7,6 +7,8 @@
       <input type="text" class="op2-nome" name="name" value="{{actor.name}}" {{#unless editavel}}disabled{{/unless}}>
       <input type="text" class="op2-ocupacao" name="system.categoria" value="{{sistema.categoria}}"
         placeholder="{{localize 'OP2.Criatura.Categoria'}}" {{#unless editavel}}disabled{{/unless}}>
+      {{#if editavel}}<button type="button" class="op2-botao op2-botao--pequeno op2-botao--fantasma op2-criatura-importar" data-action="importarFicha"
+        data-tooltip="{{localize 'OP2.Criatura.ImportarDica'}}"><i class="fa-solid fa-file-import"></i> {{localize "OP2.Criatura.Importar"}}</button>{{/if}}
       <div class="op2-recursos">
         {{> (op2Caminho "partials/trilha-recurso") chave="pv" rotulo="OP2.Recurso.pv"
             value=sistema.recursos.pv.value max=sistema.recursos.pv.max

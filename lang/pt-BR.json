@@ -1583,7 +1583,12 @@
       "Estrategia": "Estratégia",
       "Remover": "Remover",
       "RemoverPergunta": "Remover este item da ficha da criatura?",
-      "DadosInvalidos": "Dados do ataque inválidos: {dados}. Use algo como 2d6 ou d8+d6."
+      "DadosInvalidos": "Dados do ataque inválidos: {dados}. Use algo como 2d6 ou d8+d6.",
+      "Importar": "Importar ficha (JSON)",
+      "ImportarDica": "Preenche esta criatura com um arquivo Ficha-*.json. Substitui ataques, habilidades e perícias.",
+      "ImportarInvalido": "Arquivo JSON inválido.",
+      "ImportarTipo": "Este arquivo é de um ator do tipo {tipo}, não de uma criatura.",
+      "Importada": "{nome} importada."
     },
     "Perseguicao": {
       "Titulo": "Perseguição",

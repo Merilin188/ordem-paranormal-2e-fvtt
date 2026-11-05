@@ -24,6 +24,7 @@ export class CriaturaSheet extends NpcSheet {
       adicionarHabilidade: CriaturaSheet.#adicionarHabilidade,
       removerHabilidade: CriaturaSheet.#remover,
       mostrarHabilidade: CriaturaSheet.#mostrarHabilidade,
+      importarFicha: CriaturaSheet.#importarFicha,
     },
   };
 
@@ -90,6 +91,33 @@ export class CriaturaSheet extends NpcSheet {
     await enviarParaChat(roll, this.actor, { pularDados3D: true });
   }
 
+  /**
+   * Importa uma ficha de criatura em JSON (os arquivos Ficha-*.json). O "Importar
+   * dados" do core espera um export completo do Foundry (_id, _stats…) e não
+   * aplicava nada nesses arquivos. Aqui: nome, sistema e token, e o que sobrou da
+   * ficha antiga (ataques, habilidades, perícias) é apagado.
+   */
+  static async #importarFicha() {
+    const arquivo = await escolherArquivo(".json");
+    if (!arquivo) return;
+    let dados;
+    try { dados = JSON.parse(await arquivo.text()); } catch { return void ui.notifications.error(L("ImportarInvalido")); }
+    if (dados?.type && dados.type !== "criatura") return void ui.notifications.error(L("ImportarTipo", { tipo: dados.type }));
+    const sistema = foundry.utils.deepClone(dados?.system ?? {});
+    for (const colecao of ["ataques", "habilidades", "pericias"]) {
+      sistema[colecao] ??= {};
+      for (const chave of Object.keys(this.actor.system[colecao] ?? {})) {
+        if (!(chave in sistema[colecao])) sistema[colecao][`-=${chave}`] = null;
+      }
+    }
+    const mudancas = { system: sistema };
+    if (dados.name) mudancas.name = dados.name;
+    if (dados.img) mudancas.img = dados.img;
+    if (dados.prototypeToken) mudancas.prototypeToken = { ...dados.prototypeToken, name: dados.prototypeToken.name ?? dados.name };
+    await this.actor.update(mudancas);
+    ui.notifications.info(L("Importada", { nome: this.actor.name }));
+  }
+
   static async #mostrarHabilidade(_evento, alvo) {
     const h = this.actor.system.habilidades?.[alvo.dataset.id];
     if (!h) return;
@@ -99,4 +127,16 @@ export class CriaturaSheet extends NpcSheet {
       flags: { [SYSTEM_ID]: { tipo: "criatura-habilidade" } },
     });
   }
+}
+
+/** Abre o seletor de arquivo do navegador e devolve o arquivo (ou null). */
+function escolherArquivo(aceitar) {
+  return new Promise((resolver) => {
+    const campo = document.createElement("input");
+    campo.type = "file";
+    campo.accept = aceitar;
+    campo.addEventListener("change", () => resolver(campo.files?.[0] ?? null), { once: true });
+    campo.addEventListener("cancel", () => resolver(null), { once: true });
+    campo.click();
+  });
 }

@@ -1583,7 +1583,12 @@
       "Estrategia": "Strategy",
       "Remover": "Remove",
       "RemoverPergunta": "Remove this entry from the creature sheet?",
-      "DadosInvalidos": "Invalid attack dice: {dados}. Use something like 2d6 or d8+d6."
+      "DadosInvalidos": "Invalid attack dice: {dados}. Use something like 2d6 or d8+d6.",
+      "Importar": "Import sheet (JSON)",
+      "ImportarDica": "Fills this creature from a Ficha-*.json file. Replaces attacks, abilities and skills.",
+      "ImportarInvalido": "Invalid JSON file.",
+      "ImportarTipo": "This file is for a {tipo} actor, not a creature.",
+      "Importada": "{nome} imported."
     },
     "Perseguicao": {
       "Titulo": "Chase",
