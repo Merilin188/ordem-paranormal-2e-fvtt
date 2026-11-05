@@ -6,6 +6,8 @@
  * jogador vira botão (Usar), janela antes/depois do teste ou botão no card do chat;
  * o que é passivo entra sozinho no cálculo (armadura, passo, crítico com 5…).
  */
+import { estadoFurtividade } from "./furtividade.mjs";
+import { investigacaoAtiva } from "./investigacao-ativa.mjs";
 import { SYSTEM_ID } from "../config.mjs";
 import { comoMestre, registrarAcaoDeMestre } from "../ui/socket.mjs";
 import { registrarAcaoDeChat } from "../ui/chat.mjs";
@@ -284,9 +286,17 @@ async function usarArsenal(ator, item) {
 
 /* ================== Prontidão: rerrolar um dado (2 PD, 1×/rodada) ================== */
 
+/**
+ * A rodada que vale agora: combate iniciado, senão cena de furtividade ativa,
+ * senão a investigação ativa. Cada cena entra na chave pelo id, para a rodada 1
+ * de uma cena nova não parecer a rodada 1 da anterior.
+ */
 function chaveDaRodada() {
   if (game.combat?.started) return `c${game.combat.id}.${game.combat.round}`;
-  return `i${game.actors.find((a) => a.type === "investigacao")?.system?.rodada ?? 0}`;
+  const furtividade = estadoFurtividade();
+  if (furtividade.ativa) return `f${furtividade.cenaId ?? ""}.${furtividade.rodada}`;
+  const investigacao = investigacaoAtiva();
+  return `i${investigacao?.id ?? ""}.${investigacao?.system?.rodada ?? 0}`;
 }
 
 async function usarProntidao(_autor, dataset) {

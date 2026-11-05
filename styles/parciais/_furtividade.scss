@@ -202,4 +202,25 @@
     .escolhido { background: rgb(190 20 40 / 70%); border-left-color: #ff4a4a; animation: op2-pulsar 0.9s ease-in-out infinite; font-weight: bold; }
   }
   .op2-furt-card__alvo { color: #ff8a8a !important; }
+
+  .op2-furt-card__executar {
+    display: flex; flex-direction: column; align-items: flex-start; gap: 0.25rem; margin-top: 0.35rem;
+    button { flex: none; width: auto; white-space: nowrap; writing-mode: horizontal-tb; }
+    p { margin: 0; }
+  }
+  .op2-furt-card__botoes button { white-space: normal; }
+
+  // Sorteio na tela de todos
+  .op2-sorteio-tela {
+    position: fixed; inset: 0; z-index: 9000; display: grid; place-items: center; pointer-events: none;
+    background: radial-gradient(ellipse at center, rgb(0 0 0 / 35%), rgb(0 0 0 / 75%));
+    animation: op2-sorteio-entrar 0.4s ease-out both;
+    &.saindo { animation: op2-enc-sair 0.6s ease-in forwards; }
+  }
+  .op2-sorteio-tela__caixa {
+    width: min(360px, 90vw); padding: 0.8rem 1rem; background: #0d0508; border: 1px solid #5a1020;
+    box-shadow: 0 0 40px rgb(120 0 20 / 50%);
+    h3 { margin: 0 0 0.4rem; border: 0; text-align: center; font-family: var(--op2-fonte-display); text-transform: uppercase; color: #e6a3b8; }
+  }
+  @keyframes op2-sorteio-entrar { from { opacity: 0; } to { opacity: 1; } }
 }

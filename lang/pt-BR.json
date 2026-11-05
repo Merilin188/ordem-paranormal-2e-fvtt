@@ -1547,7 +1547,10 @@
       "NinguemEscondido": "Ninguém está escondido para ser procurado.",
       "SorteioTitulo": "Sortear o alvo",
       "SorteioAjuda": "Só entram os personagens que ainda estão escondidos.",
-      "Sortear": "Sortear"
+      "Sortear": "Sortear",
+      "SoproNaoEhVoce": "Só quem a criatura alcançou ({nome}) pode escolher aqui.",
+      "SoproPara": "{nome}, escolha:",
+      "Cancelar": "Cancelar"
     },
     "Loucura": {
       "Nome": "Vinheta de loucura (PD baixo)",

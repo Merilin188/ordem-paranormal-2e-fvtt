@@ -1547,7 +1547,10 @@
       "NinguemEscondido": "Nobody is hidden to be searched.",
       "SorteioTitulo": "Draw the target",
       "SorteioAjuda": "Only characters still hidden are included.",
-      "Sortear": "Draw"
+      "Sortear": "Draw",
+      "SoproNaoEhVoce": "Only the one the creature reached ({nome}) can choose here.",
+      "SoproPara": "{nome}, choose:",
+      "Cancelar": "Cancel"
     },
     "Loucura": {
       "Nome": "Madness vignette (low SP)",
