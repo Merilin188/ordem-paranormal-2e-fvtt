@@ -24,6 +24,7 @@ import { OP2Roll } from "../dice/op2-roll.mjs";
 import { lerConfig } from "../settings/register.mjs";
 import { rodadaAtual } from "./rodada.mjs";
 import { comoMestre, registrarAcaoDeMestre } from "../ui/socket.mjs";
+import { registrarAcaoDeChat } from "../ui/chat.mjs";
 
 const CHAT = "systems/ordem-paranormal-2e/templates/chat";
 
@@ -219,9 +220,17 @@ async function publicarAlcancar(ator, modo, rolls, sucesso) {
  * final" (o que se solta ao falhar) não é modelado — descrição textual, mesa resolve.
  */
 export async function sustentar(ator, { rapido = false, desafioUuid = null } = {}) {
-  if (ator.system.estado.sustentando?.ativo) {
-    ui.notifications.warn(game.i18n.localize("OP2.Desafio.JaSustentando"));
-    return null;
+  // Já segurando algo: pergunta se solta para fazer a nova ação (antes só barrava,
+  // e quem tirou sucesso ficava preso — achado em uso real).
+  const atual = ator.system.estado.sustentando;
+  if (atual?.ativo) {
+    const soltar = await foundry.applications.api.DialogV2.confirm({
+      window: { title: game.i18n.localize("OP2.Desafio.Sustentar") },
+      content: `<p>${game.i18n.format("OP2.Desafio.SoltarParaContinuar", { nome: foundry.utils.escapeHTML(atual.nome || game.i18n.localize("OP2.Desafio.Algo")) })}</p>`,
+      rejectClose: false,
+    });
+    if (!soltar) return null;
+    await pararDeSustentar(ator);
   }
 
   // Sustentar um obstáculo concreto (a estante-porta do Ato I) usa a DT dele; solto,
@@ -251,18 +260,39 @@ export async function sustentar(ator, { rapido = false, desafioUuid = null } = {
     return { roll, sustentando: false };
   }
 
-  await ator.update({ "system.estado.sustentando": { ativo: true, fadiga: 0 } });
+  await ator.update({ "system.estado.sustentando": {
+    ativo: true, fadiga: 0, desafioUuid: desafio?.uuid ?? "", nome: desafio?.name ?? "",
+  } });
   await enviarCard(ator, "acao-cena", {
     titulo: contexto,
-    texto: game.i18n.format("OP2.Desafio.SustentarSucesso", { ator: ator.name }),
+    texto: [
+      roll.critico ? game.i18n.localize("OP2.Critico") + "!" : "",
+      game.i18n.format("OP2.Desafio.SustentarSucesso", { ator: ator.name }),
+      game.i18n.localize("OP2.Desafio.SustentarComoContinua"),
+    ].filter(Boolean).join(" "),
     atorId: ator.id,
+    botaoSoltar: true,
   });
   return { roll, sustentando: true };
 }
 
+/** Nomes de quem está sustentando este desafio agora. */
+export function quemSustenta(uuid) {
+  return game.actors.filter((a) => a.type === "personagem" && a.system.estado?.sustentando?.ativo
+    && a.system.estado.sustentando.desafioUuid === uuid).map((a) => a.name);
+}
+
 /** Para de sustentar por decisão do jogador — sem teste, sem custo. */
 export async function pararDeSustentar(ator) {
-  await ator.update({ "system.estado.sustentando": { ativo: false, fadiga: 0 } });
+  const nome = ator.system.estado.sustentando?.nome;
+  if (ator.system.estado.sustentando?.ativo) {
+    await enviarCard(ator, "acao-cena", {
+      titulo: game.i18n.localize("OP2.Desafio.Sustentar"),
+      texto: game.i18n.format("OP2.Desafio.SoltouPorVontade", { ator: ator.name, nome: nome || game.i18n.localize("OP2.Desafio.Algo") }),
+      atorId: ator.id,
+    });
+  }
+  await ator.update({ "system.estado.sustentando": { ativo: false, fadiga: 0, desafioUuid: "", nome: "" } });
 }
 
 /**
@@ -290,7 +320,7 @@ export async function testarFadigaDeSustentar(ator) {
   await enviarParaChat(roll, ator);
 
   if (!roll.sucesso) {
-    await ator.update({ "system.estado.sustentando": { ativo: false, fadiga: 0 } });
+    await ator.update({ "system.estado.sustentando": { ativo: false, fadiga: 0, desafioUuid: "", nome: "" } });
     await enviarCard(ator, "acao-cena", {
       titulo: game.i18n.localize("OP2.Desafio.Sustentar"),
       texto: game.i18n.format("OP2.Desafio.SustentarSoltou", { ator: ator.name }),
@@ -623,4 +653,16 @@ export async function desafioGenerico(ator, desafioUuid, { rapido = false } = {}
   }, { whisper: sussurroPara(ator) });
 
   return { roll, sucesso: roll.sucesso };
+}
+
+/** "Soltar" no card de sustentar: só quem controla o personagem. Chamado no init. */
+export function registrarSoltarSustentar() {
+  registrarAcaoDeChat("soltar-sustentar", soltarPeloCard);
+}
+
+async function soltarPeloCard(_autor, dataset) {
+  const ator = game.actors.get(dataset.atorId);
+  if (!ator?.isOwner) return;
+  if (!ator.system.estado.sustentando?.ativo) return void ui.notifications.info(game.i18n.localize("OP2.Desafio.NadaSustentado"));
+  await pararDeSustentar(ator);
 }

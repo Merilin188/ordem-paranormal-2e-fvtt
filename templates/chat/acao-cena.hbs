@@ -12,6 +12,11 @@
         {{botaoAliado.rotulo}}
       </button>
     {{/if}}
+    {{#if botaoSoltar}}
+      <button type="button" class="op2-botao op2-botao--pequeno" data-op2-acao="soltar-sustentar" data-ator-id="{{atorId}}">
+        <i class="fa-solid fa-hand" aria-hidden="true"></i> {{localize "OP2.Desafio.Soltar"}}
+      </button>
+    {{/if}}
     {{#if acaoGM}}
       <button type="button" class="op2-botao op2-botao--pequeno" data-op2-gm
         data-op2-acao="{{acaoGM}}" data-ator-id="{{atorId}}">{{rotuloGM}}</button>

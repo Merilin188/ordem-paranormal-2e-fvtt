@@ -223,11 +223,16 @@ export function htmlDoTeste(roll, ator) {
   // Teste de ataque (Luta/Pontaria): oferece o dano com o modificador da arma equipada.
   const ehAtaque = ["luta", "pontaria"].includes(roll.options.chavePericia);
   const arma = ehAtaque ? melhorArma(ator) : null;
+  // Dado extra do crítico (botão no card): soma no total e no dano da arma.
+  const bonusCritico = roll.options.bonusCritico ?? null;
+  const extra = bonusCritico?.valor ?? 0;
   return renderizar("systems/ordem-paranormal-2e/templates/chat/teste.hbs", {
     rotulo: roll.options.rotulo,
     componentes: roll.dados,
     ...resultado,
-    arma: arma ? { nome: arma.name, bonus: arma.system.danoBonus, dano: resultado.ra + arma.system.danoBonus } : null,
+    total: resultado.total + extra,
+    bonusCritico,
+    arma: arma ? { nome: arma.name, bonus: arma.system.danoBonus, dano: resultado.ra + extra + arma.system.danoBonus } : null,
     atorId: ator.id,
     ehGM: game.user.isGM,
     // "Sempre que falha em um teste, você preenche um espaço" (ficha do Ato I).

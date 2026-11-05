@@ -71,6 +71,8 @@ import { atacar, defender } from "./cena/acoes-combate.mjs";
 import { usarHabilidadeOuItem, concederPasso } from "./cena/acoes-recurso.mjs";
 import { migrarLinhasDoQuadro } from "./cena/texto-linha.mjs";
 import { registrarPericiasDoMundo, abrirPericiasMundo } from "./settings/pericias.mjs";
+import { registrarCriticoExtra } from "./dice/critico-extra.mjs";
+import { registrarSoltarSustentar } from "./cena/acoes-desafio.mjs";
 
 Hooks.once("init", () => {
   console.log(`${SYSTEM_ID} | inicializando`);
@@ -112,6 +114,8 @@ Hooks.once("init", () => {
   registrarHelpers();
   registrarSheets();
   registrarChat();
+  registrarCriticoExtra();
+  registrarSoltarSustentar();
   registrarSocket();
   registrarPainelInvestigacao();
   registrarMarcadores();

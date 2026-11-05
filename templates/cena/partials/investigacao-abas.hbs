@@ -518,7 +518,8 @@
             <p class="op2-ajuda">{{localize "OP2.Desafio.HackSocial"}}: {{#if hackSocialResolvido}}{{localize "OP2.Desafio.Resolvido"}}{{else}}{{localize "OP2.Desafio.Pendente"}}{{/if}}</p>
           {{/if}}
           {{#if temSustentar}}
-            <p class="op2-ajuda">{{localize "OP2.Desafio.Sustentar"}} · DT {{sustentarDt}}</p>
+            <p class="op2-ajuda">{{localize "OP2.Desafio.Sustentar"}} · DT {{sustentarDt}} ·
+              {{#if sustentadoPor}}{{localize "OP2.Desafio.SustentadoPor" nome=sustentadoPor}}{{else}}{{localize "OP2.Desafio.NinguemSustenta"}}{{/if}}</p>
           {{/if}}
           {{#if ehEquilibrio}}
             <p class="op2-ajuda">{{localize "OP2.Desafio.CategoriaAjuda.equilibrio"}}</p>

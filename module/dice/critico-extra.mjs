@@ -1,0 +1,41 @@
+/**
+ * Sucesso crítico: botão no card para rolar mais um dado e somar ao total
+ * ("soma mais uma rolagem à pontuação ou ao dano" — usado em testes estendidos e
+ * ataques). O dado é o maior entre os que formaram o crítico. Uma vez por card.
+ */
+import { comoMestre } from "../ui/socket.mjs";
+import { registrarAcaoDeChat } from "../ui/chat.mjs";
+
+/** O dado do crítico: o maior entre os dados com o valor repetido (>= 6). */
+export function dadoDoCritico(dados) {
+  const validos = (dados ?? []).filter((d) => !d.pavor && !d.consumido);
+  const contagem = {};
+  for (const d of validos) contagem[d.resultado] = (contagem[d.resultado] ?? 0) + 1;
+  const valor = Math.max(...Object.entries(contagem).filter(([v, n]) => Number(v) >= 6 && n >= 2).map(([v]) => Number(v)), 0);
+  const faces = (d) => Number(String(d.dado ?? "").replace("d", "")) || 0;
+  const doPar = validos.filter((d) => d.resultado === valor);
+  const base = doPar.length ? doPar : validos;
+  return Math.max(...base.map(faces), 6);
+}
+
+async function rolarDadoDoCritico(_autor, dataset) {
+  const mensagem = game.messages.get(dataset.mensagemId);
+  const roll = mensagem?.rolls?.[0];
+  if (!roll?.dados || !roll.resultado?.critico) return;
+  const ator = game.actors.get(roll.options.atorId ?? dataset.atorId);
+  if (!game.user.isGM && !ator?.isOwner) return;
+  if (roll.options.bonusCritico) return void ui.notifications.info(game.i18n.localize("OP2.CriticoExtra.JaRolado"));
+
+  const faces = dadoDoCritico(roll.dados);
+  const extra = await new Roll(`1d${faces}`).evaluate();
+  const { mostrarDados3D, htmlDoTeste } = await import("./teste.mjs");
+  await mostrarDados3D(extra);
+  roll.options.bonusCritico = { dado: `d${faces}`, valor: extra.total };
+  const html = await htmlDoTeste(roll, ator);
+  await comoMestre("op2AtualizarMensagem", { id: mensagem.id, content: html, rolls: [JSON.stringify(roll.toJSON())] });
+}
+
+/** Chamado no init. */
+export function registrarCriticoExtra() {
+  registrarAcaoDeChat("dado-critico", rolarDadoDoCritico);
+}

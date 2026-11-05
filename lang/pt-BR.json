@@ -720,7 +720,15 @@
         "equilibrio": "Travessia: o personagem rola 2d10 por rodada e usa dados de equilíbrio (metade da Acrobacia).",
         "sustentar": "Alguém segura o obstáculo (Atletismo, 1 PV) enquanto os outros passam; o teste se repete a cada rodada, cada vez mais difícil.",
         "alcancar": "Alcançar algo de difícil acesso: seguro (dois testes de Acrobacia) ou arriscado (um teste, DT +3). Usa a DT do objeto."
-      }
+      },
+      "SoltarParaContinuar": "Você está sustentando {nome}. Soltar para fazer esta ação?",
+      "Algo": "algo",
+      "Soltar": "Soltar",
+      "NadaSustentado": "Este personagem não está sustentando nada.",
+      "SoltouPorVontade": "{ator} solta {nome}.",
+      "SustentarComoContinua": "Ao fim de cada rodada, testa Atletismo de novo (com fadiga). Use Soltar quando o grupo não precisar mais.",
+      "SustentadoPor": "Sustentado por {nome}",
+      "NinguemSustenta": "ninguém sustentando"
     },
     "Ferramenta": {
       "Rotulo": "Ferramenta",
@@ -1383,6 +1391,12 @@
       "Campo": "Campo",
       "NovoCampo": "Nome do campo novo (ex.: Folclore)",
       "RemoverCampo": "Apagar campo"
+    },
+    "CriticoExtra": {
+      "Botao": "Dado do crítico",
+      "Rotulo": "Dado extra do crítico",
+      "JaRolado": "O dado do crítico já foi rolado neste teste.",
+      "Dica": "Rola mais um dado (o maior do crítico) e soma ao total e ao dano."
     }
   }
 }

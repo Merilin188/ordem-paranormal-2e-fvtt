@@ -720,7 +720,15 @@
         "equilibrio": "Travessia: o personagem rola 2d10 por rodada e usa dados de equilíbrio (metade da Acrobacia).",
         "sustentar": "Alguém segura o obstáculo (Atletismo, 1 PV) enquanto os outros passam; o teste se repete a cada rodada, cada vez mais difícil.",
         "alcancar": "Alcançar algo de difícil acesso: seguro (dois testes de Acrobacia) ou arriscado (um teste, DT +3). Usa a DT do objeto."
-      }
+      },
+      "SoltarParaContinuar": "You are holding {nome}. Let go to take this action?",
+      "Algo": "something",
+      "Soltar": "Let go",
+      "NadaSustentado": "This character is not holding anything.",
+      "SoltouPorVontade": "{ator} lets go of {nome}.",
+      "SustentarComoContinua": "At the end of each round, test Athletics again (with fatigue). Use Let go when the group no longer needs it.",
+      "SustentadoPor": "Held by {nome}",
+      "NinguemSustenta": "nobody holding"
     },
     "Ferramenta": {
       "Rotulo": "Tool",
@@ -1383,6 +1391,12 @@
       "Campo": "Field",
       "NovoCampo": "New field name (e.g. Folklore)",
       "RemoverCampo": "Delete field"
+    },
+    "CriticoExtra": {
+      "Botao": "Critical die",
+      "Rotulo": "Extra critical die",
+      "JaRolado": "The critical die was already rolled for this test.",
+      "Dica": "Rolls one more die (the largest of the critical) and adds it to the total and damage."
     }
   }
 }

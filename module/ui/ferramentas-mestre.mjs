@@ -15,7 +15,7 @@ import { registrarAcaoDeChat } from "./chat.mjs";
 import { abrirAventurasApp } from "../aventura/aventuras-app.mjs";
 import { investigacaoAtiva, todasInvestigacoes, removerDesafio } from "../cena/investigacao-ativa.mjs";
 import {
-  arrombar, hackTecnico, hackSocial, desafioGenerico, sustentar,
+  arrombar, hackTecnico, hackSocial, desafioGenerico, sustentar, quemSustenta,
 } from "../cena/acoes-desafio.mjs";
 import { abrirDestrancar, iniciarDestrancar } from "../cena/destrancar-app.mjs";
 
@@ -77,6 +77,7 @@ class DesafiosApp extends HandlebarsApplicationMixin(ApplicationV2) {
       if (s.destrancado) estado = L("Estado.destrancado");
       else if (s.quebrado) estado = L("Estado.quebrado");
       else if (sessao?.ativa) estado = F("Estado.emCurso", { nome: game.actors.get(sessao.atorId)?.name ?? "?" });
+      else if (ab.sustentar && quemSustenta(item.uuid).length) estado = game.i18n.format("OP2.Desafio.SustentadoPor", { nome: quemSustenta(item.uuid).join(", ") });
       return {
         uuid: item.uuid,
         nome: item.name,

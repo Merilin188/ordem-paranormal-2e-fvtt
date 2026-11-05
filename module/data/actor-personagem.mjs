@@ -104,6 +104,9 @@ export class PersonagemData extends foundry.abstract.TypeDataModel {
         sustentando: new SchemaField({
           ativo: new BooleanField({ required: true, initial: false }),
           fadiga: new NumberField({ required: true, initial: 0, min: 0, integer: true, nullable: false }),
+          // O que está sendo sustentado: o desafio mostra quem segura, e o card oferece soltar.
+          desafioUuid: new StringField({ required: true, initial: "", blank: true }),
+          nome: new StringField({ required: true, initial: "", blank: true }),
         }),
       }),
 

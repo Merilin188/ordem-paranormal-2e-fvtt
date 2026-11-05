@@ -353,4 +353,8 @@
     input { flex: 1 1 10rem; } select { flex: 0 1 auto; width: auto; } button { flex: none; width: auto; } }
   .op2-pericias-mundo__rodape { display: flex; justify-content: space-between; gap: 0.5rem; margin-top: 0.8rem;
     button { flex: none; width: auto; } }
+
+  // Crítico: botão do dado extra e o valor somado no card
+  .op2-botao--critico { border-color: #c9a227; color: #f0d27a; }
+  .op2-card__mod--critico { color: #f0d27a; font-weight: bold; }
 }

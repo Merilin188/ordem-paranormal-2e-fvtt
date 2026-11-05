@@ -15,6 +15,7 @@
  * quem revelou o quê. Nenhum dado de regra (DT, reação de ferramenta) vaza para o
  * lado do jogador.
  */
+import { quemSustenta } from "./acoes-desafio.mjs";
 import { escolherCategoria, criarDesafioDaCategoria, rotuloCategoria } from "./categorias-desafio.mjs";
 import { SYSTEM_ID } from "../config.mjs";
 import { periciasDoQuadro, chaveInfo, danoSobrecarga } from "./investigacao.mjs";
@@ -434,6 +435,7 @@ export function PainelInvestigacaoMixin(Base) {
           genericoResolvido: generico.resolvido,
           dtObjeto: desafio.system.dtObjeto,
           sustentarDt: desafio.system.sustentar?.dt,
+          sustentadoPor: quemSustenta(desafio.uuid).join(", "),
           pontuacaoAtual: desafio.system.pontuacaoAtual,
           pontuacaoAlvo: desafio.system.pontuacaoAlvo,
           destrancarTentativas: desafio.system.destrancarTentativas,
