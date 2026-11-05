@@ -8,6 +8,10 @@
   </div>
   {{#if quebrado}}<span class="op2-painel-trava">· {{localize "OP2.Desafio.Quebrado"}}</span>{{/if}}
   {{#if destrancado}}<span class="op2-painel-trava">· {{localize "OP2.Desafio.Destrancou"}}</span>{{/if}}
+  <button type="button" class="op2-botao-icone op2-acoes__excluir" data-action="excluirDesafio" data-desafio-uuid="{{uuid}}"
+    aria-label="{{localize 'OP2.Ferramentas.ExcluirDesafio'}}" data-tooltip="{{localize 'OP2.Ferramentas.ExcluirDesafio'}}">
+    <i class="fa-solid fa-trash" aria-hidden="true"></i>
+  </button>
 </div>
 {{!-- Só as abordagens que o mestre marcou neste obstáculo. --}}
 <div class="op2-acoes__grupo">

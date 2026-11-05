@@ -357,4 +357,8 @@
   // Crítico: botão do dado extra e o valor somado no card
   .op2-botao--critico { border-color: #c9a227; color: #f0d27a; }
   .op2-card__mod--critico { color: #f0d27a; font-weight: bold; }
+
+  // Lixeira do desafio na janela de ações: no canto direito do topo
+  .op2-acoes__excluir { margin-left: auto; flex: none; width: auto; color: var(--op2-tinta-fraca); }
+  .op2-acoes__excluir:hover { color: var(--op2-vermelho-claro); }
 }

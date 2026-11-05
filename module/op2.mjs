@@ -2,6 +2,7 @@
  * Ordem Paranormal 2 (Playtest Alpha) — sistema não-oficial para Foundry VTT.
  * Compatível com v13 e v14.
  */
+import { registrarExcluirDesafio } from "./cena/excluir-desafio.mjs";
 import { SYSTEM_ID, OP2, ICONES_PADRAO } from "./config.mjs";
 import { PersonagemData } from "./data/actor-personagem.mjs";
 import { NpcData } from "./data/actor-npc.mjs";
@@ -116,6 +117,7 @@ Hooks.once("init", () => {
   registrarChat();
   registrarCriticoExtra();
   registrarSoltarSustentar();
+  registrarExcluirDesafio();
   registrarSocket();
   registrarPainelInvestigacao();
   registrarMarcadores();

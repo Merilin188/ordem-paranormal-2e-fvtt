@@ -15,6 +15,7 @@
  * quem revelou o quê. Nenhum dado de regra (DT, reação de ferramenta) vaza para o
  * lado do jogador.
  */
+import { excluirDesafio } from "./excluir-desafio.mjs";
 import { quemSustenta } from "./acoes-desafio.mjs";
 import { escolherCategoria, criarDesafioDaCategoria, rotuloCategoria } from "./categorias-desafio.mjs";
 import { SYSTEM_ID } from "../config.mjs";
@@ -76,6 +77,7 @@ export function PainelInvestigacaoMixin(Base) {
         desmarcarDoMapa: PainelInvestigacaoComum.#desmarcarDoMapa,
         removerPoi: PainelInvestigacaoComum.#removerPoi,
         abrirDesafio: PainelInvestigacaoComum.#abrirDesafio,
+        excluirDesafio: PainelInvestigacaoComum.#excluirDesafio,
         removerDesafio: PainelInvestigacaoComum.#removerDesafio,
         ajustarPontuacaoDesafio: PainelInvestigacaoComum.#ajustarPontuacaoDesafio,
         novaRodada: PainelInvestigacaoComum.#novaRodada,
@@ -774,6 +776,10 @@ export function PainelInvestigacaoMixin(Base) {
     static async #abrirDesafio(_evento, alvo) {
       const desafio = await fromUuid(alvo.dataset.desafioUuid);
       desafio?.sheet?.render(true);
+    }
+
+    static async #excluirDesafio(_evento, alvo) {
+      await excluirDesafio(alvo.dataset.desafioUuid);
     }
 
     static async #removerDesafio(_evento, alvo) {

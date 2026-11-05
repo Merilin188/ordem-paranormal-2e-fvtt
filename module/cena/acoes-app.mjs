@@ -9,6 +9,7 @@
  * Nada de novo em regra: cada botão chama a mesma função que o painel do mestre já
  * chamava — só o dono da ação mudou de lugar.
  */
+import { excluirDesafio } from "./excluir-desafio.mjs";
 import { FERRAMENTAS_POI } from "../config.mjs";
 import {
   investigacaoAtiva, investigacoesVisiveis, definirInvestigacaoAtiva, pontoDoDesafio,
@@ -119,6 +120,7 @@ export class AcoesInvestigacaoApp extends HandlebarsApplicationMixin(Application
       atravessar: fechaDepois(AcoesInvestigacaoApp.#atravessar),
       sustentar: fechaDepois(AcoesInvestigacaoApp.#sustentar),
       sustentarDesafio: fechaDepois(AcoesInvestigacaoApp.#sustentarDesafio),
+      excluirDesafio: AcoesInvestigacaoApp.#excluirDesafio,
       pararDeSustentar: AcoesInvestigacaoApp.#pararDeSustentar,
       usarLaser: fechaDepois(AcoesInvestigacaoApp.#usarLaser),
       examinar: fechaDepois(AcoesInvestigacaoApp.#examinar),
@@ -379,6 +381,10 @@ export class AcoesInvestigacaoApp extends HandlebarsApplicationMixin(Application
   static async #sustentar() { const r = await sustentar(this.ator); this.render(); return r; }
 
   /** Sustentar um obstáculo da cena: a DT é a dele (a estante-porta do Ato I). */
+  static async #excluirDesafio(_evento, alvo) {
+    if (await excluirDesafio(alvo.dataset.desafioUuid)) this.render();
+  }
+
   static async #sustentarDesafio(_evento, alvo) {
     const r = await sustentar(this.ator, { desafioUuid: alvo.dataset.desafioUuid });
     this.render();
