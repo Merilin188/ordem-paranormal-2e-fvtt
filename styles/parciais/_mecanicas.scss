@@ -331,8 +331,10 @@
     font-family: var(--op2-fonte-mono); font-size: 0.8rem;
     background: rgba(0, 0, 0, 0.25); border: 1px solid var(--op2-linha-forte, #555); border-radius: 0; color: inherit; }
   // Coluna de perícias: o jogador arrasta o canto inferior direito para alargar
-  .op2-ficha--personagem .window-content { grid-template-columns: minmax(0, 1fr) auto; }
-  .op2-ficha--personagem .op2-dock-pericias { width: 280px; min-width: 250px; max-width: 70vw; resize: horizontal; overflow: hidden; }
+  // Largura padrão proporcional à janela (38%), entre 300 e 360 px: cabe o nome mais
+  // longo (Sobrevivência) em qualquer monitor; o jogador ainda pode arrastar.
+  .op2-ficha--personagem .window-content { grid-template-columns: minmax(0, 1fr) auto; container-type: inline-size; }
+  .op2-ficha--personagem .op2-dock-pericias { width: clamp(300px, 38cqi, 360px); min-width: 250px; max-width: 70vw; resize: horizontal; overflow: hidden; }
   .op2-pericias-mundo__acoes { display: flex; gap: 0.3rem; align-items: center; select { flex: 1; } button { flex: none; width: auto; } }
   .op2-pericia__nome--longo { font-size: 0.72rem; letter-spacing: 0; }
   // Seletor de dado perto do fim da lista: abre para cima
