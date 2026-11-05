@@ -5,6 +5,7 @@
  * dados que será rolado — o dado da perícia e o do atributo pareado — em vez de um
  * seletor de texto. É a leitura que o livro usa e a que torna a ficha escaneável.
  */
+import { posicionarMenuDeDado } from "./menu-dado.mjs";
 import { ESCADA, ATRIBUTOS, PERICIAS, PERFIS, APTIDOES_PADRAO } from "../config.mjs";
 import { periciaVisivel } from "../settings/pericias.mjs";
 import { stepDie } from "../dice/escada.mjs";
@@ -300,6 +301,7 @@ export class PersonagemSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     return Object.keys(PERICIAS)
       .filter((chave) => !PERICIAS[chave].especializada && periciaVisivel(chave))
       .map((chave) => this.#linhaDePericia(sistema, chave))
+      .map((linha) => ({ ...linha, longo: linha.rotulo.length > 11 }))
       .sort((a, b) => a.rotulo.localeCompare(b.rotulo, "pt-BR"));
   }
 
@@ -404,6 +406,7 @@ export class PersonagemSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
   static async #abrirSeletor(_evento, alvo) {
     const controle = alvo.closest(".op2-controle-dado");
     controle.classList.toggle("aberto");
+    posicionarMenuDeDado(controle);
     // Alguns navegadores (Safari) não focam botão em clique por padrão; forçamos aqui
     // porque a roda do mouse só ajusta o dado quando o controle está focado.
     alvo.focus();

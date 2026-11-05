@@ -1,4 +1,5 @@
 /** Ficha reduzida de NPC: só os atributos e as perícias que o mestre declarou. */
+import { posicionarMenuDeDado } from "./menu-dado.mjs";
 import { ATRIBUTOS, SYSTEM_ID, PERICIAS, APTIDOES_PADRAO, ESCADA } from "../config.mjs";
 import { stepDie } from "../dice/escada.mjs";
 import { iconeDado } from "../ui/dice-icons.mjs";
@@ -82,6 +83,7 @@ export class NpcSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
   static async #abrirSeletor(_evento, alvo) {
     alvo.closest(".op2-controle-dado")?.classList.toggle("aberto");
+    posicionarMenuDeDado(alvo.closest(".op2-controle-dado"));
     // Alguns navegadores (Safari) não focam botão em clique por padrão; forçamos aqui
     // porque a roda do mouse só ajusta o dado quando o controle está focado.
     alvo.focus();

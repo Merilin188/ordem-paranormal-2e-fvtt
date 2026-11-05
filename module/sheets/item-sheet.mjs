@@ -1,4 +1,5 @@
 /** Ficha de item. Uma classe, um template por tipo. */
+import { posicionarMenuDeDado } from "./menu-dado.mjs";
 import { AUTOMACOES } from "../cena/poderes.mjs";
 import { ESCADA, ATRIBUTOS, PERICIAS, FERRAMENTAS_ORDO } from "../config.mjs";
 import { ORIGENS_HABILIDADE, EFEITOS_HABILIDADE } from "../data/item-habilidade.mjs";
@@ -56,6 +57,7 @@ export class OP2ItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 
   static async #abrirSeletor(_evento, alvo) {
     alvo.closest(".op2-controle-dado")?.classList.toggle("aberto");
+    posicionarMenuDeDado(alvo.closest(".op2-controle-dado"));
   }
 
   static async #escolherDado(_evento, alvo) {
