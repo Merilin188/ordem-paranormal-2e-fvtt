@@ -1396,7 +1396,8 @@
       "Botao": "Dado do crítico",
       "Rotulo": "Dado extra do crítico",
       "JaRolado": "O dado do crítico já foi rolado neste teste.",
-      "Dica": "Rola mais um dado (o maior do crítico) e soma ao total e ao dano."
+      "Dica": "Rola mais um dado (o maior do crítico) e soma ao total e ao dano.",
+      "DuasMaiores": "duas maiores"
     },
     "EfeitosMundo": {
       "MenuNome": "Efeitos do mundo",

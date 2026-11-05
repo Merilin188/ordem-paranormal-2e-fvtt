@@ -77,7 +77,7 @@
     {{#if arma}}
       <button type="button" class="op2-botao op2-botao--pequeno" data-op2-gm
         data-op2-acao="aplicar-dano-selecionado" data-quantidade="{{arma.dano}}" data-recurso="pv"
-        data-ator-id="{{atorId}}" data-tooltip="{{arma.nome}}: RA {{ra}} + {{arma.bonus}}">
+        data-ator-id="{{atorId}}" data-tooltip="{{arma.nome}}: {{#if bonusCritico}}{{localize 'OP2.CriticoExtra.DuasMaiores'}}{{else}}RA{{/if}} {{arma.base}} + {{arma.bonus}}">
         {{localize "OP2.Chat.DanoArma" nome=arma.nome}} ({{arma.dano}})
       </button>
     {{/if}}
