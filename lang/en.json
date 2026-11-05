@@ -1377,7 +1377,12 @@
         "d8": "Expert",
         "d10": "Master",
         "d12": "Grandmaster"
-      }
+      },
+      "Aptidoes": "Aptitude fields",
+      "AptidoesAjuda": "Hide or rename the built-in fields, or create new ones: they are added to every sheet with the chosen die.",
+      "Campo": "Field",
+      "NovoCampo": "New field name (e.g. Folklore)",
+      "RemoverCampo": "Delete field"
     }
   }
 }

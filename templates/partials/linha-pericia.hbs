@@ -15,9 +15,9 @@
 
   {{> (op2Caminho "partials/abrir-dialogo") chave=chave}}
   {{#if campoLivre}}
-    {{!-- Linha própria, largura toda; o canto inferior direito arrasta para aumentar. --}}
-    <textarea class="op2-pericia__campo" name="{{campoLivre.caminho}}" rows="1"
+    {{!-- Linha própria, com a largura toda da coluna. --}}
+    <input type="text" class="op2-pericia__campo" name="{{campoLivre.caminho}}" value="{{campoLivre.valor}}"
       placeholder="{{localize 'OP2.Pericia.OficioExemplo'}}" aria-label="{{localize 'OP2.Pericia.OficioCampo'}}"
-      {{#unless @root.editavel}}disabled{{/unless}}>{{campoLivre.valor}}</textarea>
+      {{#unless @root.editavel}}disabled{{/unless}}>
   {{/if}}
 </div>

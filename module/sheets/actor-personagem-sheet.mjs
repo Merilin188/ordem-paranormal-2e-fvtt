@@ -7,7 +7,7 @@
  */
 import { posicionarMenuDeDado } from "./menu-dado.mjs";
 import { ESCADA, ATRIBUTOS, PERICIAS, PERFIS, APTIDOES_PADRAO } from "../config.mjs";
-import { periciaVisivel } from "../settings/pericias.mjs";
+import { periciaVisivel, aptidaoVisivel } from "../settings/pericias.mjs";
 import { stepDie } from "../dice/escada.mjs";
 import { rolarTeste } from "../dice/teste.mjs";
 import { iconeDado } from "../ui/dice-icons.mjs";
@@ -333,7 +333,7 @@ export class PersonagemSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
   }
 
   #aptidoes(sistema) {
-    const chaves = Object.keys(sistema.aptidoes ?? {});
+    const chaves = Object.keys(sistema.aptidoes ?? {}).filter((sub) => aptidaoVisivel(sub));
     const chaveAtributo = sistema.pericias.aptidao.atributo;
     return {
       rotulo: game.i18n.localize("OP2.Pericia.aptidao"),
@@ -581,11 +581,29 @@ export class PersonagemSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
   /** Filtro da coluna de perícias. Sobrevive ao re-render que o form dispara. */
   #busca = "";
 
+  /** A coluna de perícias tem alça de arrastar; a largura fica salva neste navegador. */
+  #ligarLarguraPericias() {
+    const dock = this.element.querySelector(".op2-dock-pericias");
+    if (!dock) return;
+    const CHAVE = "op2.larguraPericias";
+    try {
+      const salva = Number(localStorage.getItem(CHAVE));
+      if (salva > 0) dock.style.width = `${salva}px`;
+    } catch { /* sem armazenamento: fica o padrão */ }
+    this._observadorPericias?.disconnect();
+    this._observadorPericias = new ResizeObserver(() => {
+      if (!dock.style.width) return;
+      try { localStorage.setItem(CHAVE, String(Math.round(dock.getBoundingClientRect().width))); } catch { /* ignora */ }
+    });
+    this._observadorPericias.observe(dock);
+  }
+
   _onRender(contexto, opcoes) {
     super._onRender(contexto, opcoes);
     // O acento da ficha vem do perfil (as cores do livro): o CSS lê daqui.
     this.element.dataset.perfil = this.actor.system.perfil ?? "";
     this.#ligarRelacoes();
+    this.#ligarLarguraPericias();
 
     const campo = this.element.querySelector(".op2-busca__campo");
     if (campo) {

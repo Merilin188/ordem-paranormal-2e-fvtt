@@ -325,12 +325,15 @@
   .op2-analise__restantes { margin: 0.3rem 0 0; color: #6ba6ec; }
   .op2-fase--antecipacao { color: #a5d36b; }
 
-  // Ofício: a especialidade fica numa segunda linha, largura toda, redimensionável
+  // Ofício: a especialidade fica numa segunda linha, largura toda, tamanho fixo
   .op2-pericia__campo { grid-column: 1 / -1; grid-row: 2; justify-self: stretch; box-sizing: border-box;
-    width: 100%; min-width: 6rem; max-width: 100%; min-height: 1.6rem; height: 1.6rem; margin: 0.1rem 0 0.2rem;
-    padding: 0.15rem 0.35rem; resize: both; overflow: auto; white-space: pre-wrap;
-    font-family: var(--op2-fonte-mono); font-size: 0.8rem; line-height: 1.2rem;
+    width: 100%; height: 1.6rem; margin: 0.1rem 0 0.2rem; padding: 0 0.35rem;
+    font-family: var(--op2-fonte-mono); font-size: 0.8rem;
     background: rgba(0, 0, 0, 0.25); border: 1px solid var(--op2-linha-forte, #555); border-radius: 0; color: inherit; }
+  // Coluna de perícias: o jogador arrasta o canto inferior direito para alargar
+  .op2-ficha--personagem .window-content { grid-template-columns: minmax(0, 1fr) auto; }
+  .op2-ficha--personagem .op2-dock-pericias { width: 280px; min-width: 250px; max-width: 70vw; resize: horizontal; overflow: hidden; }
+  .op2-pericias-mundo__acoes { display: flex; gap: 0.3rem; align-items: center; select { flex: 1; } button { flex: none; width: auto; } }
   .op2-pericia__nome--longo { font-size: 0.72rem; letter-spacing: 0; }
   // Seletor de dado perto do fim da lista: abre para cima
   .op2-controle-dado.acima .op2-controle-dado__menu { top: auto; bottom: 100%; margin-top: 0; margin-bottom: 2px; }

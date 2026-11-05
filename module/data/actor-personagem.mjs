@@ -5,6 +5,7 @@
  * paranormal (NEX) e os contadores de ferimento/trauma já existem porque são citados,
  * mesmo com a mecânica ainda não publicada.
  */
+import { aptidoesDoMundo } from "../settings/pericias.mjs";
 import { PERFIS, TIPOS_PERSONAGEM, PERICIAS, DT_FERIMENTO_BASE, DT_FERIMENTO_INCREMENTO } from "../config.mjs";
 import { stepDie, faces } from "../dice/escada.mjs";
 import { campoAtributos, campoPericias, campoAptidoes, campoRecurso, campoContador } from "./campos.mjs";
@@ -141,6 +142,8 @@ export class PersonagemData extends foundry.abstract.TypeDataModel {
       pericia.especializada = PERICIAS[chave]?.especializada ?? false;
     }
 
+    this.aptidoes ??= {};
+    for (const [sub, die] of Object.entries(aptidoesDoMundo())) this.aptidoes[sub] ??= { rotulo: "", die };
     for (const aptidao of Object.values(this.aptidoes ?? {})) {
       aptidao.dadoEfetivo = aptidao.die;
       aptidao.valor = faces(aptidao.die);

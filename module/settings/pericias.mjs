@@ -7,11 +7,12 @@
  * verdade em `system.pericias` e entra em teste, ficha e listas sem caso especial.
  * Mudou a configuração? Todo mundo recarrega.
  */
-import { SYSTEM_ID, PERICIAS, ATRIBUTOS, ESCADA } from "../config.mjs";
+import { SYSTEM_ID, PERICIAS, ATRIBUTOS, ESCADA, APTIDOES_PADRAO } from "../config.mjs";
 
 const CHAVE = "periciasMundo";
-const VAZIA = { ocultas: [], nomes: {}, novas: {} };
+const VAZIA = { ocultas: [], nomes: {}, novas: {}, aptOcultas: [], aptNomes: {}, aptNovas: {} };
 const ORIGINAIS = new Set(Object.keys(PERICIAS));
+const APT_ORIGINAIS = new Set(APTIDOES_PADRAO);
 
 /** Lê a configuração direto dos dados do mundo: no `init` o setting ainda não responde. */
 function lerBruta() {
@@ -58,6 +59,11 @@ export function registrarPericiasDoMundo() {
       personalizada: true,
     };
   }
+  // Campos de Aptidão criados pelo mestre: viram campos padrão (fichas novas nascem
+  // com eles; as antigas recebem em `prepareDerivedData`, ver `aptidoesDoMundo`).
+  for (const [sub, def] of Object.entries(atual.aptNovas ?? {})) {
+    if (!APT_ORIGINAIS.has(sub) && def?.rotulo && !APTIDOES_PADRAO.includes(sub)) APTIDOES_PADRAO.push(sub);
+  }
   // Os nomes entram nas traduções assim que elas carregam.
   Hooks.once("i18nInit", aplicarNomes);
 }
@@ -75,6 +81,25 @@ function aplicarNomes() {
   for (const [chave, nome] of Object.entries(atual.nomes ?? {})) {
     if (nome?.trim() && PERICIAS[chave]) tr.OP2.Pericia[chave] = nome.trim();
   }
+  tr.OP2.Aptidao ??= {};
+  for (const c of APT_ORIGINAIS) APT_ROTULOS_ORIGINAIS[c] = tr.OP2.Aptidao[c] ?? c;
+  for (const [sub, def] of Object.entries(atual.aptNovas ?? {})) if (def?.rotulo) tr.OP2.Aptidao[sub] = def.rotulo;
+  for (const [sub, nome] of Object.entries(atual.aptNomes ?? {})) {
+    if (nome?.trim() && APT_ORIGINAIS.has(sub)) tr.OP2.Aptidao[sub] = nome.trim();
+  }
+}
+
+const APT_ROTULOS_ORIGINAIS = {};
+
+/** O campo de Aptidão aparece na ficha e nas listas de teste? */
+export function aptidaoVisivel(sub) {
+  return !(atual.aptOcultas ?? []).includes(sub);
+}
+
+/** Campos criados pelo mestre, com o dado inicial: `{ sub: "d6" }`. */
+export function aptidoesDoMundo() {
+  return Object.fromEntries(Object.entries(atual.aptNovas ?? {})
+    .filter(([, d]) => d?.rotulo).map(([sub, d]) => [sub, ESCADA.includes(d.die) ? d.die : "d4"]));
 }
 
 /** A perícia aparece na ficha e nas listas de teste? */
@@ -95,6 +120,8 @@ export class PericiasMundoApp extends HandlebarsApplicationMixin(ApplicationV2) 
     actions: {
       adicionar: PericiasMundoApp.#adicionar,
       remover: PericiasMundoApp.#remover,
+      adicionarApt: PericiasMundoApp.#adicionarApt,
+      removerApt: PericiasMundoApp.#removerApt,
       restaurar: PericiasMundoApp.#restaurar,
     },
   };
@@ -123,7 +150,15 @@ export class PericiasMundoApp extends HandlebarsApplicationMixin(ApplicationV2) 
       atributos: atributos.map((a) => ({ ...a, sel: a.c === d.atributo })),
       dados: dados.map((x) => ({ ...x, sel: x.d === d.die })),
     }));
-    return { linhas, novas, atributos, dados };
+    const aptOriginal = (c) => APT_ROTULOS_ORIGINAIS[c] ?? game.i18n.localize(`OP2.Aptidao.${c}`);
+    const aptLinhas = [...APT_ORIGINAIS].map((c) => ({
+      chave: c, original: aptOriginal(c), nome: r.aptNomes?.[c] ?? "", visivel: !r.aptOcultas?.includes(c),
+    }));
+    const aptNovas = Object.entries(r.aptNovas ?? {}).map(([c, d]) => ({
+      chave: c, rotulo: d.rotulo, visivel: !r.aptOcultas?.includes(c),
+      dados: dados.map((x) => ({ ...x, sel: x.d === d.die })),
+    }));
+    return { linhas, novas, atributos, dados, aptLinhas, aptNovas };
   }
 
   /** Copia o que está digitado na janela para o rascunho (antes de redesenhar). */
@@ -141,6 +176,36 @@ export class PericiasMundoApp extends HandlebarsApplicationMixin(ApplicationV2) 
       d.atributo = linha.querySelector("[name=atributo]").value;
       d.die = linha.querySelector("[name=die]").value;
     }
+    r.aptOcultas = [...f.querySelectorAll("input[data-apt-visivel]")].filter((i) => !i.checked).map((i) => i.dataset.aptVisivel);
+    r.aptNomes = {};
+    for (const i of f.querySelectorAll("input[data-apt-nome]")) if (i.value.trim()) r.aptNomes[i.dataset.aptNome] = i.value.trim();
+    r.aptNovas ??= {};
+    for (const linha of f.querySelectorAll("[data-apt-nova]")) {
+      const d = r.aptNovas[linha.dataset.aptNova];
+      if (!d) continue;
+      d.rotulo = linha.querySelector("[name=rotulo]").value.trim() || d.rotulo;
+      d.die = linha.querySelector("[name=die]").value;
+    }
+  }
+
+  static #adicionarApt() {
+    this.#lerFormulario();
+    const f = this.element;
+    const nome = f.querySelector("[name=novoAptNome]").value.trim();
+    const sub = slugDePericia(nome);
+    if (!sub) return ui.notifications.warn(game.i18n.localize("OP2.PericiasMundo.SemNome"));
+    const existe = APT_ORIGINAIS.has(sub) || this.rascunho.aptNovas?.[sub]
+      || Object.values(APT_ROTULOS_ORIGINAIS).some((r) => slugDePericia(r) === sub);
+    if (existe) return ui.notifications.warn(game.i18n.format("OP2.PericiasMundo.JaExiste", { nome }));
+    this.rascunho.aptNovas ??= {};
+    this.rascunho.aptNovas[sub] = { rotulo: nome, die: f.querySelector("[name=novoAptDado]").value };
+    this.render();
+  }
+
+  static #removerApt(_ev, alvo) {
+    this.#lerFormulario();
+    delete this.rascunho.aptNovas[alvo.dataset.chave];
+    this.render();
   }
 
   static #adicionar() {

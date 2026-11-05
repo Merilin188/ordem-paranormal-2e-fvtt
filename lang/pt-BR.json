@@ -1377,7 +1377,12 @@
         "d8": "Especialista",
         "d10": "Mestre",
         "d12": "Grão-mestre"
-      }
+      },
+      "Aptidoes": "Campos de Aptidão",
+      "AptidoesAjuda": "Esconda ou renomeie os campos que vêm com o sistema, ou crie campos novos: eles entram em todas as fichas com o dado escolhido.",
+      "Campo": "Campo",
+      "NovoCampo": "Nome do campo novo (ex.: Folclore)",
+      "RemoverCampo": "Apagar campo"
     }
   }
 }
