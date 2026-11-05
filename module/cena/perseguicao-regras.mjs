@@ -27,8 +27,8 @@ export const pontosDoAvanco = ({ sucesso, ra, rb }) => (sucesso ? ra : rb);
  * Quem é alcançado no fim da rodada. `alvo` quando há um só com a menor
  * pontuação abaixo do corte; `empate` quando vários dividem a menor (teste oposto).
  */
-export function quemEAlcancado(participantes, rodada) {
-  const corte = CORTES[rodada];
+export function quemEAlcancado(participantes, rodada, marcos = null) {
+  const corte = marcos ? marcos.find((m) => Number(m.rodada) === Number(rodada))?.pa ?? null : CORTES[rodada];
   if (!corte) return { corte: null, alvo: null, empate: [] };
   const abaixo = participantes.filter((p) => !p.morto && (p.pa ?? 0) < corte);
   if (!abaixo.length) return { corte, alvo: null, empate: [] };
@@ -38,7 +38,8 @@ export function quemEAlcancado(participantes, rodada) {
 }
 
 /** Próximo corte a partir da rodada atual (para o painel avisar). */
-export function proximoCorte(rodada) {
-  const r = Object.keys(CORTES).map(Number).find((n) => n >= rodada);
-  return r ? { rodada: r, pa: CORTES[r] } : null;
+export function proximoCorte(rodada, marcos = null) {
+  const lista = marcos ?? Object.entries(CORTES).map(([r, pa]) => ({ rodada: Number(r), pa }));
+  const proximo = [...lista].sort((a, b) => a.rodada - b.rodada).find((m) => Number(m.rodada) >= rodada);
+  return proximo ? { rodada: Number(proximo.rodada), pa: Number(proximo.pa) } : null;
 }

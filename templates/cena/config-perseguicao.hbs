@@ -1,0 +1,77 @@
+<div class="op2-cena-config__corpo">
+  <fieldset>
+    <legend>{{localize "OP2.CenaConfig.Geral"}}</legend>
+    <label>{{localize "OP2.CenaConfig.Nome"}}<input type="text" name="nome" value="{{c.nome}}"></label>
+    <label>{{localize "OP2.CenaConfig.Perseguidor"}}<input type="text" name="perseguidor" value="{{c.perseguidor}}"></label>
+    <div class="op2-cena-config__grade">
+      <label>{{localize "OP2.CenaConfig.Rodadas"}}<input type="number" name="rodadas" value="{{c.rodadas}}" min="1"></label>
+      <label data-tooltip="{{localize 'OP2.CenaConfig.MetaDica'}}">{{localize "OP2.CenaConfig.Meta"}}<input type="number" name="meta" value="{{c.meta}}" min="0"></label>
+      <label>{{localize "OP2.CenaConfig.DtAvanco"}}<input type="number" name="dtAvanco" value="{{c.dtAvanco}}" min="1"></label>
+      <label>{{localize "OP2.CenaConfig.PericiaPadrao"}}<select name="periciaPadrao">{{#each pericias}}<option value="{{k}}" {{#if sel}}selected{{/if}}>{{r}}</option>{{/each}}</select></label>
+    </div>
+    <label class="op2-cena-config__check"><input type="checkbox" name="outrasUmaVez" {{#if c.outrasUmaVez}}checked{{/if}}> {{localize "OP2.CenaConfig.OutrasUmaVez"}}</label>
+    <label class="op2-cena-config__check"><input type="checkbox" name="folego" {{#if c.folego}}checked{{/if}}> {{localize "OP2.CenaConfig.Folego"}}</label>
+  </fieldset>
+
+  <fieldset>
+    <legend>{{localize "OP2.CenaConfig.Marcos"}}</legend>
+    <p class="op2-dica">{{localize "OP2.CenaConfig.MarcosAjuda"}}</p>
+    {{#each marcos}}
+      <div class="op2-cena-config__linha" data-marco>
+        <label>{{localize "OP2.CenaConfig.FimDaRodada"}}<input type="number" name="rodada" value="{{rodada}}" min="1"></label>
+        <label>{{localize "OP2.CenaConfig.MinimoPA"}}<input type="number" name="pa" value="{{pa}}" min="0"></label>
+        <button type="button" class="op2-botao-icone" data-action="remover" data-lista="marcos" data-i="{{i}}"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+    {{/each}}
+    <button type="button" class="op2-botao op2-botao--fantasma" data-action="adicionar" data-lista="marcos"><i class="fa-solid fa-plus"></i> {{localize "OP2.CenaConfig.AdicionarMarco"}}</button>
+  </fieldset>
+
+  <fieldset>
+    <legend>{{localize "OP2.CenaConfig.Eventos"}}</legend>
+    <p class="op2-dica">{{localize "OP2.CenaConfig.EventosAjuda"}}</p>
+    {{#each eventos}}
+      <details class="op2-cena-config__bloco" data-evento open>
+        <summary><strong>{{nome}}</strong>
+          <button type="button" class="op2-botao-icone" data-action="remover" data-lista="eventos" data-i="{{i}}"><i class="fa-solid fa-trash"></i></button></summary>
+        <label>{{localize "OP2.CenaConfig.Nome"}}<input type="text" name="nome" value="{{nome}}"></label>
+        <div class="op2-cena-config__grade">
+          <label data-tooltip="{{localize 'OP2.CenaConfig.GatilhoDica'}}">{{localize "OP2.CenaConfig.Gatilho"}}<input type="number" name="gatilhoPA" value="{{gatilhoPA}}" min="0"></label>
+          <label>DT<input type="number" name="dt" value="{{dt}}" min="1"></label>
+          <label data-tooltip="{{localize 'OP2.CenaConfig.PassosFalhaDica'}}">{{localize "OP2.CenaConfig.PassosFalha"}}<input type="number" name="passosFalha" value="{{passosFalha}}" min="-4" max="4"></label>
+        </div>
+        <label>{{localize "OP2.CenaConfig.Descricao"}}<textarea name="descricao" rows="3">{{descricao}}</textarea></label>
+        <label>{{localize "OP2.CenaConfig.PericiasEvento"}}<select name="pericias" multiple size="5">{{#each periciasEv}}<option value="{{k}}" {{#if sel}}selected{{/if}}>{{r}}</option>{{/each}}</select></label>
+        <label>{{localize "OP2.CenaConfig.TextoPassou"}}<input type="text" name="textoPassou" value="{{textoPassou}}"></label>
+        <label>{{localize "OP2.CenaConfig.TextoFalhou"}}<input type="text" name="textoFalhou" value="{{textoFalhou}}"></label>
+        <div class="op2-cena-config__linha">
+          <label class="op2-cena-config__check"><input type="checkbox" name="avisavel" {{#if avisavel}}checked{{/if}}> {{localize "OP2.CenaConfig.Avisavel"}}</label>
+          <label>{{localize "OP2.CenaConfig.PassosAviso"}}<input type="number" name="passosAviso" value="{{passosAviso}}" min="0" max="4"></label>
+        </div>
+      </details>
+    {{/each}}
+    <button type="button" class="op2-botao op2-botao--fantasma" data-action="adicionar" data-lista="eventos"><i class="fa-solid fa-plus"></i> {{localize "OP2.CenaConfig.AdicionarEvento"}}</button>
+  </fieldset>
+
+  <fieldset>
+    <legend>{{localize "OP2.CenaConfig.InicioRodada"}}</legend>
+    <p class="op2-dica">{{localize "OP2.CenaConfig.InicioRodadaAjuda"}}</p>
+    <label>{{localize "OP2.CenaConfig.NomeDoEvento"}}<input type="text" name="inicioNome" value="{{c.inicioRodada.nome}}"></label>
+    {{#each ataques}}
+      <div class="op2-cena-config__bloco" data-ataque>
+        <div class="op2-cena-config__linha">
+          <input type="text" name="nome" value="{{nome}}" placeholder="{{localize 'OP2.CenaConfig.Nome'}}">
+          <input type="text" name="dano" value="{{dano}}" class="op2-cena-config__curto" placeholder="1d6">
+          <select name="recurso" class="op2-cena-config__curto"><option value="pv" {{#if pv}}selected{{/if}}>PV</option><option value="pd" {{#unless pv}}selected{{/unless}}>PD</option></select>
+          <button type="button" class="op2-botao-icone" data-action="remover" data-lista="ataques" data-i="{{i}}"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <input type="text" name="texto" value="{{texto}}" placeholder="{{localize 'OP2.CenaConfig.TextoAtaque'}}">
+      </div>
+    {{/each}}
+    <button type="button" class="op2-botao op2-botao--fantasma" data-action="adicionar" data-lista="ataques"><i class="fa-solid fa-plus"></i> {{localize "OP2.CenaConfig.AdicionarAtaque"}}</button>
+  </fieldset>
+
+  <footer class="op2-cena-config__rodape">
+    {{#if podeExcluir}}<button type="button" class="op2-botao op2-botao--fantasma" data-action="excluirCena"><i class="fa-solid fa-trash"></i> {{localize "OP2.CenaConfig.Excluir"}}</button>{{/if}}
+    <button type="submit" class="op2-botao"><i class="fa-solid fa-floppy-disk"></i> {{localize "OP2.CenaConfig.Salvar"}}</button>
+  </footer>
+</div>

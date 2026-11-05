@@ -4,6 +4,7 @@
  */
 import { registrarEfeitosDoMundo } from "./cena/efeitos-mundo.mjs";
 import { registrarFurtividade, abrirFurtividade } from "./cena/furtividade.mjs";
+import { registrarCenasConfig } from "./cena/cenas-config.mjs";
 import { registrarPerseguicao, abrirPerseguicao } from "./cena/perseguicao.mjs";
 import { registrarVinhetaLoucura } from "./ui/vinheta-loucura.mjs";
 import { registrarExcluirDesafio } from "./cena/excluir-desafio.mjs";
@@ -137,6 +138,7 @@ Hooks.once("init", () => {
   registrarTabelas();
   registrarEquilibrio();
   registrarGuiaCombate();
+  registrarCenasConfig();
   registrarFurtividade();
   registrarPerseguicao();
   registrarTokenDeCriatura();

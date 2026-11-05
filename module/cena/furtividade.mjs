@@ -17,6 +17,7 @@ import {
   TABELA_CRIATURAS, dtPorUsos, formulaPeloMaiorDado, dadosAtivos, encontrado,
   aplicarBusca, perderDado, limparPerdidos, facesDe,
 } from "./furtividade-regras.mjs";
+import { listarCenas, obterCena, novaCena, ConfigCenaApp, linhaDaTabela } from "./cenas-config.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } = foundry.applications.api;
 const CHAVE = "furtividade";
@@ -34,9 +35,15 @@ const VAZIO = () => ({
 export function estadoFurtividade() {
   let salvo = {};
   try { salvo = game.settings.get(SYSTEM_ID, CHAVE) ?? {}; } catch { /* antes do init */ }
-  return { ...VAZIO(), ...foundry.utils.deepClone(salvo) };
+  const e = { ...VAZIO(), ...foundry.utils.deepClone(salvo) };
+  e.config ??= obterCena("furtividade");
+  return e;
 }
 
+/** DT das ações especiais pela cena configurada. */
+const dtDe = (e, usos) => dtPorUsos(usos, Number(e.config?.dtBase ?? 7), Number(e.config?.dtPasso ?? 3));
+/** Texto da linha da tabela: o configurado ou o padrão traduzido. */
+const textoDaLinha = (config, n) => linhaDaTabela(config, n)?.texto || L(`Tabela.${n}`);
 const ator = (uuid) => fromUuidSync(uuid);
 const nomeDe = (uuid) => ator(uuid)?.name ?? "?";
 
@@ -57,7 +64,8 @@ async function gravar(estado, eventoId = null) {
 }
 
 const OPS = {
-  iniciar(e) {
+  iniciar(e, { configId } = {}) {
+    e.config = obterCena("furtividade", configId);
     Object.assign(e, { ativa: true, cenaId: foundry.utils.randomID(), rodada: 1, fase: "personagens", usosDistrair: 0, acaoRolada: false, evento: null });
     e.participantes = e.participantes.map((p) => ({ ...p, dados: [], testou: false, usosEsconder: 0, agiu: false }));
   },
@@ -198,7 +206,7 @@ async function buscar(formula, alvos = null, valoresProntos = null) {
 /** Anuncia o resultado do d10. A ação só acontece quando o mestre clica no card. */
 async function executarTabela(valor) {
   const estado = estadoFurtividade();
-  const linha = TABELA_CRIATURAS[valor];
+  const linha = linhaDaTabela(estado.config, valor);
   if (!linha) return;
   estado.acaoRolada = true;
   await gravar(estado);
@@ -209,7 +217,7 @@ async function executarTabela(valor) {
         <i class="fa-solid fa-play"></i> ${esc(L("Executar"))}</button>
       <p class="op2-dica">${esc(L("AguardandoMestre"))}</p>
     </div>`;
-  await card(`<h3>${esc(L("AcaoTitulo", { valor }))}</h3><p>${esc(L(`Tabela.${valor}`))}</p>${botao}`);
+  await card(`<h3>${esc(L("AcaoTitulo", { valor }))}</h3><p>${esc(textoDaLinha(estado.config, valor))}</p>${botao}`);
 }
 
 const espera = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -270,9 +278,9 @@ async function sortearAlvo(estado) {
 
 /** Executa a linha da tabela (clique do mestre no card). false = cancelado. */
 async function executarLinha(valor) {
-  const linha = TABELA_CRIATURAS[valor];
-  if (!linha) return false;
   const estado = estadoFurtividade();
+  const linha = linhaDaTabela(estado.config, valor);
+  if (!linha) return false;
   if (linha.tipo === "todos") {
     await buscar(linha.formula);
     return true;
@@ -327,9 +335,10 @@ function ligarBotaoExecutar(msg, html) {
 let janelaTabela = null;
 export function mostrarTabelaMestre(valor = null) {
   if (!game.user.isGM) return;
+  const config = estadoFurtividade().config;
   const linhas = Object.keys(TABELA_CRIATURAS).map((n) => `
     <tr class="${Number(n) === valor ? "op2-tabela__sorteada" : ""}">
-      <td class="op2-tabela__faixa">${n}</td><td>${esc(L(`Tabela.${n}`))}</td></tr>`).join("");
+      <td class="op2-tabela__faixa">${n}</td><td>${esc(textoDaLinha(config, n))}</td></tr>`).join("");
   janelaTabela?.close();
   janelaTabela = new DialogV2({
     window: { title: L("TabelaTitulo"), icon: "fa-solid fa-dice-d10" },
@@ -359,7 +368,7 @@ async function avancarFase() {
   for (const p of estado.participantes.filter(encontrado)) {
     const doc = ator(p.uuid);
     if (!doc) continue;
-    const roll = await rolar("1d6");
+    const roll = await rolar(Roll.validate(estado.config?.danoEncontrado ?? "") ? estado.config.danoEncontrado : "1d6");
     await aplicarDano(doc, roll.total, "pv");
     await card(`<p class="op2-furt-card__encontrado"><i class="fa-solid fa-hand-back-fist"></i> ${esc(L("DanoEncontrado", { nome: doc.name, n: roll.total }))}</p>`);
   }
@@ -425,13 +434,13 @@ async function acaoComTeste(doc, { chave, dt, uso, titulo }) {
 const ACOES_JOGADOR = {
   async teste(doc) { await testeDeEsconderijo(doc); },
   async esconder(doc, estado, p) {
-    const roll = await acaoComTeste(doc, { chave: "furtividade", dt: dtPorUsos(p.usosEsconder), uso: "esconder", titulo: L("Esconder") });
+    const roll = await acaoComTeste(doc, { chave: "furtividade", dt: dtDe(estado, p.usosEsconder), uso: "esconder", titulo: L("Esconder") });
     if (!roll) return;
     const d = await escolherDado(dadosDoRoll(roll), L("Esconder"));
     if (d) await pedir("ganhar", { uuid: doc.uuid, ...d });
   },
   async distrair(doc, estado) {
-    const roll = await acaoComTeste(doc, { chave: "enganacao", dt: dtPorUsos(estado.usosDistrair), uso: "distrair", titulo: L("Distrair") });
+    const roll = await acaoComTeste(doc, { chave: "enganacao", dt: dtDe(estado, estado.usosDistrair), uso: "distrair", titulo: L("Distrair") });
     if (!roll) return;
     const d = await escolherDado(dadosDoRoll(roll), L("Distrair"));
     const alvo = d && await escolherAliado(estado, doc.uuid, true);
@@ -491,7 +500,9 @@ export class FurtividadeApp extends HandlebarsApplicationMixin(ApplicationV2) {
     window: { title: "OP2.Furtividade.Titulo", icon: "fa-solid fa-eye-slash", resizable: true },
     position: { width: 520, height: 620 },
     actions: {
-      iniciar: () => pedir("iniciar"),
+      iniciar: FurtividadeApp.#iniciar,
+      novaCena: FurtividadeApp.#novaCena,
+      configurar: FurtividadeApp.#configurar,
       encerrar: FurtividadeApp.#encerrar,
       avancar: () => pedir("avancar"),
       rolarAcao: FurtividadeApp.#rolarAcao,
@@ -507,6 +518,23 @@ export class FurtividadeApp extends HandlebarsApplicationMixin(ApplicationV2) {
   };
 
   static PARTS = { corpo: { template: "systems/ordem-paranormal-2e/templates/cena/furtividade.hbs" } };
+
+  /** Cena configurada escolhida no seletor (antes de iniciar). */
+  configId = null;
+
+  static async #iniciar() {
+    await pedir("iniciar", { configId: this.configId });
+  }
+
+  static async #novaCena() {
+    const id = await novaCena("furtividade");
+    if (id) this.configId = id;
+    this.render();
+  }
+
+  static #configurar() {
+    new ConfigCenaApp("furtividade", this.configId).render({ force: true });
+  }
 
   async _prepareContext() {
     const e = estadoFurtividade();
@@ -532,13 +560,15 @@ export class FurtividadeApp extends HandlebarsApplicationMixin(ApplicationV2) {
         uuid: p.uuid, nome: doc?.name ?? "?", img: doc?.img ?? ANONIMO,
         dono: !gm && !!doc?.isOwner, podeMarcar: gm || !!doc?.isOwner, agiu: !!p.agiu,
         dados, testou: p.testou,
-        encontrado: encontrado(p), dtEsconder: dtPorUsos(p.usosEsconder),
+        encontrado: encontrado(p), dtEsconder: dtDe(e, p.usosEsconder),
       };
     });
     return {
       gm, ativa: e.ativa, rodada: e.rodada, criaturasFase: e.fase === "criaturas",
       podeRolarAcao: e.ativa && e.fase === "criaturas" && (gm || !e.acaoRolada),
-      dtDistrair: dtPorUsos(e.usosDistrair), criaturas, participantes,
+      dtDistrair: dtDe(e, e.usosDistrair), criaturas, participantes,
+      nomeCena: e.config?.nome,
+      cenas: listarCenas("furtividade").map((c) => ({ id: c.id, nome: c.nome, sel: c.id === (this.configId ??= listarCenas("furtividade")[0]?.id) })),
       vazio: !criaturas.length && !participantes.length,
     };
   }
@@ -554,6 +584,9 @@ export class FurtividadeApp extends HandlebarsApplicationMixin(ApplicationV2) {
   _onRender(contexto, opcoes) {
     super._onRender(contexto, opcoes);
     this._dragDrop.bind(this.element);
+    this.element.querySelector("[data-seletor-cena]")?.addEventListener("change", (ev) => {
+      this.configId = ev.target.value;
+    });
     const eventoId = estadoFurtividade().evento?.id;
     if (eventoId && this.element.querySelector(".op2-furt__dado--sumindo")) {
       setTimeout(() => animados.add(eventoId), 2200);
@@ -827,4 +860,5 @@ export function registrarFurtividade() {
   });
   Hooks.on("collapseSidebar", () => setTimeout(posicionarBotao, 400));
   Hooks.on("updateActor", () => { if (painel?.rendered) painel.render(); });
+  Hooks.on("op2CenasConfig", () => { if (painel?.rendered) painel.render(); });
 }

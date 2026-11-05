@@ -35,3 +35,10 @@ test("ataque de criatura: dados e dano do bloco", () => {
   assert.deepEqual(danoDoAtaque("rb"), { base: "rb", bonus: 0 });
   assert.equal(danoDoAtaque(""), null);
 });
+
+test("marcos configuráveis: corte e próximo corte vêm da configuração", () => {
+  const marcos = [{ rodada: 2, pa: 8 }, { rodada: 4, pa: 25 }];
+  assert.equal(quemEAlcancado([{ uuid: "a", pa: 5 }, { uuid: "b", pa: 9 }], 2, marcos).alvo, "a");
+  assert.equal(quemEAlcancado([{ uuid: "a", pa: 5 }], 3, marcos).corte, null);
+  assert.deepEqual(proximoCorte(3, marcos), { rodada: 4, pa: 25 });
+});

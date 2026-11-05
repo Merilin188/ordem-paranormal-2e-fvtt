@@ -1,0 +1,214 @@
+/**
+ * Sons gerados na hora (sem arquivo) e a tela de "alcançado" da perseguição.
+ * Tudo segue o volume de interface do Foundry.
+ */
+import { SYSTEM_ID } from "../config.mjs";
+
+const esc = (t) => foundry.utils.escapeHTML(String(t ?? ""));
+
+function volumeDeInterface() {
+  try { return game.settings.get("core", "globalInterfaceVolume") ?? 0.5; } catch { return 0.5; }
+}
+
+function novoContexto() {
+  const Contexto = window.AudioContext ?? window.webkitAudioContext;
+  return Contexto ? new Contexto() : null;
+}
+
+function bufferDeRuido(ctx, segundos = 2) {
+  const buffer = ctx.createBuffer(1, ctx.sampleRate * segundos, ctx.sampleRate);
+  const dados = buffer.getChannelData(0);
+  for (let i = 0; i < dados.length; i++) dados[i] = Math.random() * 2 - 1;
+  return buffer;
+}
+
+/* -- ambiente da perseguição: coração acelerado e respiração ofegante ---------- */
+
+let ambiente = null;
+
+/** Liga o fundo (baixo, mas perceptível) até `pararAmbientePerseguicao()`. */
+export function iniciarAmbientePerseguicao() {
+  if (ambiente) return;
+  const volume = volumeDeInterface();
+  if (volume <= 0) return;
+  const ctx = novoContexto();
+  if (!ctx) return;
+  const mestre = ctx.createGain();
+  mestre.gain.setValueAtTime(0.0001, ctx.currentTime);
+  mestre.gain.exponentialRampToValueAtTime(0.22 * volume, ctx.currentTime + 2.5);
+  mestre.connect(ctx.destination);
+
+  const grave = ctx.createBiquadFilter();
+  grave.type = "lowpass";
+  grave.frequency.value = 150;
+  grave.connect(mestre);
+  const ruido = bufferDeRuido(ctx);
+
+  const batida = (t, freq, forca) => {
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = "sine";
+    o.frequency.setValueAtTime(freq * 1.6, t);
+    o.frequency.exponentialRampToValueAtTime(freq, t + 0.09);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(forca, t + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.28);
+    o.connect(g).connect(grave);
+    o.start(t);
+    o.stop(t + 0.3);
+  };
+
+  // Ofego: ruído filtrado na faixa da voz, puxando o ar e soltando.
+  const folego = (t, dur, centro, forca) => {
+    const fonte = ctx.createBufferSource();
+    fonte.buffer = ruido;
+    const banda = ctx.createBiquadFilter();
+    banda.type = "bandpass";
+    banda.frequency.setValueAtTime(centro, t);
+    banda.frequency.linearRampToValueAtTime(centro * 1.25, t + dur);
+    banda.Q.value = 1.1;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(forca, t + dur * 0.35);
+    g.gain.linearRampToValueAtTime(0.0001, t + dur);
+    fonte.connect(banda).connect(g).connect(mestre);
+    fonte.start(t, Math.random());
+    fonte.stop(t + dur + 0.05);
+  };
+
+  let proximaBatida = ctx.currentTime + 0.2;
+  let proximoFolego = ctx.currentTime + 0.4;
+  let puxando = true;
+  const agendar = () => {
+    const limite = ctx.currentTime + 0.3;
+    while (proximaBatida < limite) {
+      batida(proximaBatida, 56, 0.9);
+      batida(proximaBatida + 0.2, 47, 0.55);
+      proximaBatida += 0.5 + (Math.random() - 0.5) * 0.03; // ~120 bpm
+    }
+    while (proximoFolego < limite) {
+      const dur = puxando ? 0.32 + Math.random() * 0.06 : 0.42 + Math.random() * 0.08;
+      folego(proximoFolego, dur, puxando ? 1500 : 900, puxando ? 0.35 : 0.5);
+      proximoFolego += dur + 0.06 + Math.random() * 0.05;
+      puxando = !puxando;
+    }
+  };
+  agendar();
+  ambiente = { ctx, mestre, relogio: setInterval(agendar, 100) };
+}
+
+export function pararAmbientePerseguicao() {
+  if (!ambiente) return;
+  const { ctx, mestre, relogio } = ambiente;
+  ambiente = null;
+  clearInterval(relogio);
+  try {
+    mestre.gain.cancelScheduledValues(ctx.currentTime);
+    mestre.gain.setValueAtTime(mestre.gain.value, ctx.currentTime);
+    mestre.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.5);
+  } catch { /* contexto já fechado */ }
+  setTimeout(() => ctx.close(), 1700);
+}
+
+/* -- rugido da criatura (mais alto, para assustar) ---------------------------- */
+
+export function tocarRugido() {
+  try {
+    const volume = volumeDeInterface();
+    if (volume <= 0) return;
+    const ctx = novoContexto();
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    const mestre = ctx.createGain();
+    mestre.gain.setValueAtTime(0.0001, t);
+    mestre.gain.exponentialRampToValueAtTime(0.55 * volume, t + 0.12);
+    mestre.gain.setValueAtTime(0.55 * volume, t + 1.4);
+    mestre.gain.exponentialRampToValueAtTime(0.0001, t + 2.6);
+    mestre.connect(ctx.destination);
+
+    // Distorção: a garganta rasgada.
+    const distorcao = ctx.createWaveShaper();
+    const curva = new Float32Array(1024);
+    for (let i = 0; i < curva.length; i++) {
+      const x = (i / curva.length) * 2 - 1;
+      curva[i] = Math.tanh(x * 6);
+    }
+    distorcao.curve = curva;
+    const corte = ctx.createBiquadFilter();
+    corte.type = "lowpass";
+    corte.frequency.setValueAtTime(1400, t);
+    corte.frequency.exponentialRampToValueAtTime(500, t + 2.4);
+    distorcao.connect(corte).connect(mestre);
+
+    // Grunhido: duas serras graves com vibrato rápido.
+    for (const [freq, detune] of [[82, 0], [61, 14]]) {
+      const o = ctx.createOscillator();
+      o.type = "sawtooth";
+      o.frequency.setValueAtTime(freq * 1.3, t);
+      o.frequency.exponentialRampToValueAtTime(freq, t + 0.5);
+      o.frequency.exponentialRampToValueAtTime(freq * 0.7, t + 2.5);
+      o.detune.value = detune;
+      const lfo = ctx.createOscillator();
+      const prof = ctx.createGain();
+      lfo.frequency.value = 28;
+      prof.gain.value = 9;
+      lfo.connect(prof).connect(o.frequency);
+      o.connect(distorcao);
+      o.start(t);
+      lfo.start(t);
+      o.stop(t + 2.6);
+      lfo.stop(t + 2.6);
+    }
+    // Ar raspando por cima.
+    const fonte = ctx.createBufferSource();
+    fonte.buffer = bufferDeRuido(ctx, 3);
+    const banda = ctx.createBiquadFilter();
+    banda.type = "bandpass";
+    banda.frequency.value = 650;
+    banda.Q.value = 0.8;
+    const gRuido = ctx.createGain();
+    gRuido.gain.value = 0.6;
+    fonte.connect(banda).connect(gRuido).connect(distorcao);
+    fonte.start(t);
+    fonte.stop(t + 2.6);
+    setTimeout(() => ctx.close(), 3200);
+  } catch (erro) {
+    console.warn(`${SYSTEM_ID} | rugido`, erro);
+  }
+}
+
+/* -- tela de alcançado -------------------------------------------------------- */
+
+/** Escorridos do sangue: cortina no topo com gotas de comprimentos diferentes. */
+function caminhoDoSangue() {
+  let d = "M0 0 H100 V8";
+  for (let x = 100; x > 0; x -= 2.5) {
+    const comp = 8 + Math.random() * (Math.random() < 0.25 ? 70 : 22);
+    const larg = 0.6 + Math.random() * 0.9;
+    d += ` L${x} 8 L${x - 0.3} ${comp - 2} Q${x - larg / 2} ${comp + 2} ${x - larg} ${comp - 2} L${x - larg - 0.2} 9`;
+  }
+  return `${d} L0 9 Z`;
+}
+
+/** Sangue tomando a tela, garras rasgando o retrato ao meio e o rugido. Dura ~5,5 s. */
+export function mostrarAlcancado(uuid, rotulo) {
+  const doc = fromUuidSync(uuid);
+  if (!doc) return;
+  const img = esc(doc.img);
+  const el = document.createElement("div");
+  el.className = "op2 op2-alcancado";
+  el.innerHTML = `
+    <svg class="op2-alcancado__sangue" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+      <path d="${caminhoDoSangue()}"/>
+    </svg>
+    <div class="op2-alcancado__cobertura"></div>
+    <div class="op2-alcancado__retrato">
+      <div class="op2-alcancado__metade op2-alcancado__metade--esq" style="background-image:url('${img}')"></div>
+      <div class="op2-alcancado__metade op2-alcancado__metade--dir" style="background-image:url('${img}')"></div>
+      <span class="op2-alcancado__garra g1"></span><span class="op2-alcancado__garra g2"></span><span class="op2-alcancado__garra g3"></span>
+    </div>
+    <div class="op2-alcancado__texto"><small>${esc(rotulo)}</small><strong>${esc(doc.name)}</strong></div>`;
+  document.body.append(el);
+  setTimeout(tocarRugido, 900);
+  setTimeout(() => el.remove(), 6200);
+}

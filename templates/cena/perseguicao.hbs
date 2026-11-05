@@ -2,26 +2,37 @@
   <header class="op2-furt__topo">
     {{#if ativa}}
       <div class="op2-furt__fase">
-        <small>{{localize "OP2.Perseguicao.Rodada" n=rodada total=total}}</small>
+        <small>{{nomeCena}} · {{localize "OP2.Perseguicao.Rodada" n=rodada total=total}}</small>
         <strong>{{#if fim}}{{localize "OP2.Perseguicao.FimTitulo"}}{{else if corte}}{{localize "OP2.Perseguicao.Corte" rodada=corte.rodada pa=corte.pa}}{{else}}{{localize "OP2.Perseguicao.Titulo"}}{{/if}}</strong>
       </div>
       {{#if gm}}
         <div class="op2-furt__botoes">
           {{#unless fim}}
-            {{#unless cabecas}}<button type="button" class="op2-botao op2-botao--perigo" data-action="cabecas" data-tooltip="{{localize 'OP2.Perseguicao.CabecasDica'}}"><i class="fa-solid fa-dragon"></i> {{localize "OP2.Perseguicao.Cabecas"}}</button>{{/unless}}
+            {{#if inicioNome}}{{#unless cabecas}}<button type="button" class="op2-botao op2-botao--perigo" data-action="cabecas" data-tooltip="{{localize 'OP2.Perseguicao.CabecasDica'}}"><i class="fa-solid fa-dragon"></i> {{inicioNome}}</button>{{/unless}}{{/if}}
             <button type="button" class="op2-botao" data-action="proxima" data-tooltip="{{localize 'OP2.Perseguicao.ProximaDica'}}"><i class="fa-solid fa-forward-step"></i> {{localize "OP2.Perseguicao.FimDaRodada"}}</button>
           {{/unless}}
           <button type="button" class="op2-botao op2-botao--fantasma" data-action="encerrar"><i class="fa-solid fa-flag-checkered"></i> {{localize "OP2.Perseguicao.Encerrar"}}</button>
         </div>
       {{/if}}
     {{else}}
-      <p class="op2-dica">{{localize "OP2.Perseguicao.Inativa"}}</p>
-      {{#if gm}}<button type="button" class="op2-botao" data-action="iniciar"><i class="fa-solid fa-person-running"></i> {{localize "OP2.Perseguicao.Iniciar"}}</button>{{/if}}
+      {{#if gm}}
+        <div class="op2-cena-escolha">
+          <label>{{localize "OP2.CenaConfig.Visualizando"}}
+            <select data-seletor-cena>{{#each cenas}}<option value="{{id}}" {{#if sel}}selected{{/if}}>{{nome}}</option>{{/each}}</select></label>
+          <div class="op2-furt__botoes">
+            <button type="button" class="op2-botao op2-botao--fantasma" data-action="novaCena"><i class="fa-solid fa-plus"></i> {{localize "OP2.CenaConfig.NovaPerseguicao"}}</button>
+            <button type="button" class="op2-botao op2-botao--fantasma" data-action="configurar"><i class="fa-solid fa-sliders"></i> {{localize "OP2.CenaConfig.Preparacao"}}</button>
+            <button type="button" class="op2-botao" data-action="iniciar"><i class="fa-solid fa-person-running"></i> {{localize "OP2.Perseguicao.Iniciar"}}</button>
+          </div>
+        </div>
+      {{else}}
+        <p class="op2-dica">{{localize "OP2.Perseguicao.Inativa"}}</p>
+      {{/if}}
     {{/if}}
   </header>
 
   <div class="op2-furt__criaturas" data-zona="criatura">
-    <span class="op2-tag op2-tag--secao">{{localize "OP2.Perseguicao.Perseguidor"}}</span>
+    <span class="op2-tag op2-tag--secao">{{#if perseguidor}}{{perseguidor}}{{else}}{{localize "OP2.Perseguicao.Perseguidor"}}{{/if}}</span>
     {{#each criaturas}}
       <div class="op2-furt__criatura">
         <img src="{{img}}" alt=""><span>{{nome}}</span>
@@ -49,22 +60,20 @@
           </div>
           <div class="op2-pers__trilha">
             <div class="op2-pers__barra"><span style="width: {{largura}}%"></span>
-              <i class="op2-pers__marca" style="left: 42.86%" data-tooltip="15"></i>
-              <i class="op2-pers__marca" style="left: 57.14%" data-tooltip="20"></i>
-              <i class="op2-pers__marca" style="left: 85.71%" data-tooltip="30"></i>
+              {{#each ../marcos}}<i class="op2-pers__marca" style="left: {{pos}}%" data-tooltip="{{localize 'OP2.Perseguicao.MarcoDica' rodada=rodada pa=pa}}"></i>{{/each}}
             </div>
             {{#if ../gm}}<input type="number" class="op2-pers__pa" data-pa="{{uuid}}" value="{{pa}}" min="0">{{else}}<strong class="op2-pers__pa">{{pa}}</strong>{{/if}}
             <small>PA</small>
           </div>
           <div class="op2-pers__status">
-            <span data-tooltip="{{localize 'OP2.Perseguicao.FolegoDica'}}">{{{folegoIcones}}} {{localize "OP2.Perseguicao.Folego"}}</span>
+            {{#if folegoIcones}}<span data-tooltip="{{localize 'OP2.Perseguicao.FolegoDica'}}">{{{folegoIcones}}} {{localize "OP2.Perseguicao.Folego"}}</span>{{/if}}
             {{#if esforcos}}<span><i class="fa-solid fa-heart-crack"></i> {{localize "OP2.Perseguicao.Esforcos" n=esforcos}}</span>{{/if}}
-            {{#if vala}}<span class="op2-pers__vala--{{vala}}"><i class="fa-solid fa-person-falling"></i> {{localize (concat "OP2.Perseguicao.Vala." vala)}}</span>{{/if}}
+            {{#each eventosP}}<span class="op2-pers__vala--{{resultado}}"><i class="fa-solid fa-person-falling"></i> {{nome}}: {{localize (concat "OP2.Perseguicao.Resultado." resultado)}}</span>{{/each}}
             {{#if sacrificou}}<span><i class="fa-solid fa-hand-fist"></i> {{localize "OP2.Perseguicao.Sacrificio"}}</span>{{/if}}
           </div>
           {{#if podeAgir}}
             <div class="op2-furt__acoes">
-              <button type="button" class="op2-botao op2-botao--pequeno op2-botao--perigo" data-action="jogador" data-acao="avancar" data-uuid="{{uuid}}" data-tooltip="{{localize 'OP2.Perseguicao.AvancarDica'}}">{{localize "OP2.Perseguicao.Avancar"}} <small>DT 10</small></button>
+              <button type="button" class="op2-botao op2-botao--pequeno op2-botao--perigo" data-action="jogador" data-acao="avancar" data-uuid="{{uuid}}" data-tooltip="{{localize 'OP2.Perseguicao.AvancarDica'}}">{{localize "OP2.Perseguicao.Avancar"}} <small>DT {{../dtAvanco}}</small></button>
               <button type="button" class="op2-botao op2-botao--pequeno" data-action="jogador" data-acao="folego" data-uuid="{{uuid}}" data-tooltip="{{localize 'OP2.Perseguicao.RecuperarDica'}}">{{localize "OP2.Perseguicao.Recuperar"}}</button>
               <button type="button" class="op2-botao op2-botao--pequeno" data-action="jogador" data-acao="sacrificio" data-uuid="{{uuid}}" data-tooltip="{{localize 'OP2.Perseguicao.SacrificioDica'}}">{{localize "OP2.Perseguicao.Sacrificio"}}</button>
               <button type="button" class="op2-botao op2-botao--pequeno op2-botao--fantasma" data-action="jogador" data-acao="outra" data-uuid="{{uuid}}" data-tooltip="{{localize 'OP2.Perseguicao.OutraDica'}}">{{localize "OP2.Perseguicao.Outra"}}</button>
@@ -72,9 +81,9 @@
           {{else if dono}}{{#if agiu}}{{#unless morto}}
             <p class="op2-dica op2-furt__aguardando"><i class="fa-solid fa-hourglass-half"></i> {{localize "OP2.Furtividade.Aguardando"}}</p>
           {{/unless}}{{/if}}{{/if}}
-          {{#if podeAvisar}}
-            <button type="button" class="op2-botao op2-botao--pequeno op2-botao--fantasma" data-action="jogador" data-acao="aviso" data-uuid="{{uuid}}"><i class="fa-solid fa-bullhorn"></i> {{localize "OP2.Perseguicao.Avisar"}}</button>
-          {{/if}}
+          {{#each eventosP}}{{#if podeAvisar}}
+            <button type="button" class="op2-botao op2-botao--pequeno op2-botao--fantasma" data-action="jogador" data-acao="aviso" data-uuid="{{../uuid}}" data-evento="{{id}}"><i class="fa-solid fa-bullhorn"></i> {{localize "OP2.Perseguicao.AvisarEvento" evento=nome}}</button>
+          {{/if}}{{/each}}
         </div>
       </article>
     {{else}}

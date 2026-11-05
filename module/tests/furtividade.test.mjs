@@ -8,7 +8,8 @@ import { nivelDeLoucura } from "../ui/vinheta-loucura.mjs";
 const pj = (uuid, valores) => ({ uuid, testou: true, dados: valores.map((v, i) => ({ id: `${uuid}${i}`, dado: "d8", valor: v })) });
 
 test("DT das ações especiais sobe +3 por uso", () => {
-  assert.deepEqual([0, 1, 2].map(dtPorUsos), [7, 10, 13]);
+  assert.deepEqual([0, 1, 2].map((u) => dtPorUsos(u)), [7, 10, 13]);
+  assert.equal(dtPorUsos(1, 5, 2), 7);
 });
 
 test("linha 8 e 9 escolhem a fórmula pelo maior dado", () => {

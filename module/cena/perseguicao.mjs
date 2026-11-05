@@ -1,19 +1,21 @@
 /**
- * Cena de perseguição (Contos da Vigília, p. 73): painel compartilhado com os
- * pontos de avanço (PA), dados de fôlego, ações de perseguição, a vala oculta,
- * o ataque das cabeças no início da rodada e os cortes das rodadas 3, 4 e 5.
+ * Cena de perseguição: painel compartilhado com pontos de avanço (PA), dados de
+ * fôlego, ações de perseguição, eventos no caminho (a vala oculta), o evento de
+ * início de rodada (ataque das cabeças) e os marcos de corte.
  *
- * Mesmo desenho da furtividade: estado num setting de mundo que só o mestre
- * grava; o jogador rola no próprio cliente e pede a gravação por `comoMestre()`.
+ * Tudo que é da aventura vem de uma perseguição configurada (`cenas-config.mjs`);
+ * ao iniciar, uma cópia dela fica em `estado.config`. O estado mora num setting de
+ * mundo que só o mestre grava; o jogador rola no próprio cliente e pede a
+ * gravação por `comoMestre()`.
  */
 import { SYSTEM_ID } from "../config.mjs";
 import { comoMestre, registrarAcaoDeMestre, paraTodos } from "../ui/socket.mjs";
 import { iconeDado } from "../ui/dice-icons.mjs";
-import {
-  RODADAS, DT_AVANCO, DT_VALA, PA_DA_VALA, MAX_BONUS, folegoInicial, formulaDoEsforco,
-  pontosDoAvanco, quemEAlcancado, proximoCorte,
-} from "./perseguicao-regras.mjs";
-import { animarSorteio, mostrarEncontrado, ligarVinheta } from "./furtividade.mjs";
+import { stepDie } from "../dice/escada.mjs";
+import { MAX_BONUS, folegoInicial, formulaDoEsforco, pontosDoAvanco, quemEAlcancado, proximoCorte } from "./perseguicao-regras.mjs";
+import { animarSorteio, ligarVinheta } from "./furtividade.mjs";
+import { listarCenas, obterCena, novaCena, ConfigCenaApp } from "./cenas-config.mjs";
+import { iniciarAmbientePerseguicao, pararAmbientePerseguicao, mostrarAlcancado } from "../ui/terror.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } = foundry.applications.api;
 const CHAVE = "perseguicao";
@@ -22,20 +24,33 @@ const esc = (t) => foundry.utils.escapeHTML(String(t ?? ""));
 const ANONIMO = "icons/svg/mystery-man.svg";
 const ator = (uuid) => fromUuidSync(uuid);
 const nomeDe = (uuid) => ator(uuid)?.name ?? "?";
+const comNome = (texto, nome, extra = {}) => Object.entries({ nome, ...extra })
+  .reduce((t, [k, v]) => t.replaceAll(`{${k}}`, v), String(texto ?? ""));
+/** Tempo da tela de alcançado antes de zerar a vida (ms). */
+const DURACAO_ALCANCADO = 5800;
+
+export const perseguicaoHabilitada = () => {
+  try { return game.settings.get(SYSTEM_ID, "perseguicaoHabilitada"); } catch { return false; }
+};
 
 /* -- estado ----------------------------------------------------------------- */
 
-const VAZIO = () => ({ ativa: false, cenaId: "", rodada: 1, participantes: [], criaturas: [], avisoVala: false, cabecas: false, fim: false, evento: null });
+const VAZIO = () => ({
+  ativa: false, cenaId: "", rodada: 1, participantes: [], criaturas: [], avisos: {}, cabecas: false, fim: false, evento: null, config: null,
+});
 
 export function estadoPerseguicao() {
   let salvo = {};
   try { salvo = game.settings.get(SYSTEM_ID, CHAVE) ?? {}; } catch { /* antes do init */ }
-  return { ...VAZIO(), ...foundry.utils.deepClone(salvo) };
+  const e = { ...VAZIO(), ...foundry.utils.deepClone(salvo) };
+  e.config ??= obterCena("perseguicao");
+  return e;
 }
 
-const novoParticipante = (uuid) => ({
-  uuid, pa: 0, folego: folegoInicial(ator(uuid)?.system?.pericias?.vigor?.dadoEfetivo ?? "d6"),
-  esforcos: 0, periciasUsadas: [], vala: null, agiu: false, sacrificou: false, morto: false,
+const novoParticipante = (uuid, config) => ({
+  uuid, pa: 0,
+  folego: config?.folego === false ? 0 : folegoInicial(ator(uuid)?.system?.pericias?.vigor?.dadoEfetivo ?? "d6"),
+  esforcos: 0, periciasUsadas: [], eventos: {}, agiu: false, sacrificou: false, morto: false,
 });
 
 const vivos = (e) => e.participantes.filter((p) => !p.morto);
@@ -43,76 +58,64 @@ const vivos = (e) => e.participantes.filter((p) => !p.morto);
 async function card(html) {
   await ChatMessage.create({
     content: `<div class="op2 op2-card op2-furt-card op2-pers-card">${html}</div>`,
-    speaker: { alias: L("Titulo") },
+    speaker: { alias: estadoPerseguicao().config?.nome ?? L("Titulo") },
     flags: { [SYSTEM_ID]: { tipo: "perseguicao" } },
   });
 }
 
 /* -- operações do mestre ------------------------------------------------------ */
 
+const acharP = (e, uuid) => e.participantes.find((x) => x.uuid === uuid);
+
 const OPS = {
-  iniciar(e) {
-    Object.assign(e, { ativa: true, cenaId: foundry.utils.randomID(), rodada: 1, avisoVala: false, cabecas: false, fim: false, evento: null });
-    e.participantes = e.participantes.map((p) => novoParticipante(p.uuid));
+  iniciar(e, { configId }) {
+    const config = obterCena("perseguicao", configId);
+    Object.assign(e, { ativa: true, cenaId: foundry.utils.randomID(), rodada: 1, avisos: {}, cabecas: false, fim: false, evento: null, config });
+    e.participantes = e.participantes.map((p) => novoParticipante(p.uuid, config));
   },
   encerrar(e) { e.ativa = false; e.evento = null; },
   adicionar(e, { uuid, papel }) {
     if (e.participantes.some((p) => p.uuid === uuid) || e.criaturas.some((c) => c.uuid === uuid)) return;
     if (papel === "criatura") e.criaturas.push({ uuid });
-    else e.participantes.push(novoParticipante(uuid));
+    else e.participantes.push(novoParticipante(uuid, e.config));
   },
   remover(e, { uuid }) {
     e.participantes = e.participantes.filter((p) => p.uuid !== uuid);
     e.criaturas = e.criaturas.filter((c) => c.uuid !== uuid);
   },
-  agiu(e, { uuid }) {
-    const p = e.participantes.find((x) => x.uuid === uuid);
-    if (p) p.agiu = !p.agiu;
-  },
-  ajustarPA(e, { uuid, pa }) {
-    const p = e.participantes.find((x) => x.uuid === uuid);
-    if (p) p.pa = Math.max(0, Number(pa) || 0);
-  },
-  avanco(e, { uuid, pontos, chave, folegoUsado = 0, esforco = false, vala = null }) {
-    const p = e.participantes.find((x) => x.uuid === uuid);
+  agiu(e, { uuid }) { const p = acharP(e, uuid); if (p) p.agiu = !p.agiu; },
+  ajustarPA(e, { uuid, pa }) { const p = acharP(e, uuid); if (p) p.pa = Math.max(0, Number(pa) || 0); },
+  avanco(e, { uuid, pontos, chave, folegoUsado = 0, esforco = false }) {
+    const p = acharP(e, uuid);
     if (!p) return;
     p.pa += Math.max(0, pontos);
     p.folego = Math.max(0, p.folego - folegoUsado);
     if (esforco) p.esforcos += 1;
-    if (chave !== "atletismo" && !p.periciasUsadas.includes(chave)) p.periciasUsadas.push(chave);
-    if (vala) p.vala = vala;
+    if (chave !== e.config?.periciaPadrao && !p.periciasUsadas.includes(chave)) p.periciasUsadas.push(chave);
     p.agiu = true;
   },
-  folego(e, { uuid }) {
-    const p = e.participantes.find((x) => x.uuid === uuid);
-    if (p) Object.assign(p, { folego: p.folego + 2, agiu: true });
+  evento(e, { uuid, eventoId, resultado }) {
+    const p = acharP(e, uuid);
+    if (p) p.eventos = { ...(p.eventos ?? {}), [eventoId]: resultado };
   },
-  sacrificio(e, { uuid }) {
-    const p = e.participantes.find((x) => x.uuid === uuid);
-    if (p) Object.assign(p, { sacrificou: true, agiu: true });
-  },
-  outra(e, { uuid }) {
-    const p = e.participantes.find((x) => x.uuid === uuid);
-    if (p) p.agiu = true;
-  },
-  vala(e, { uuid, vala }) {
-    const p = e.participantes.find((x) => x.uuid === uuid);
-    if (p) p.vala = vala;
-  },
-  aviso(e) { e.avisoVala = true; },
+  folego(e, { uuid }) { const p = acharP(e, uuid); if (p) Object.assign(p, { folego: p.folego + 2, agiu: true }); },
+  sacrificio(e, { uuid }) { const p = acharP(e, uuid); if (p) Object.assign(p, { sacrificou: true, agiu: true }); },
+  outra(e, { uuid }) { const p = acharP(e, uuid); if (p) p.agiu = true; },
+  aviso(e, { eventoId }) { e.avisos = { ...(e.avisos ?? {}), [eventoId]: true }; },
 };
 
 let fila = Promise.resolve();
 function executar({ op, ...dados }) {
   const resultado = fila.then(async () => {
     if (op === "proxima") return proximaRodada();
-    if (op === "cabecas") return ataqueDasCabecas();
+    if (op === "cabecas") return eventoDeInicio();
     const e = estadoPerseguicao();
     OPS[op]?.(e, dados);
     await game.settings.set(SYSTEM_ID, CHAVE, e);
-    if (op === "aviso") await card(`<p><i class="fa-solid fa-bullhorn"></i> ${esc(L("AvisouVala", { nome: nomeDe(dados.uuid) }))}</p>`);
-    if (op === "sacrificio") await card(`<p><i class="fa-solid fa-hand-fist"></i> ${esc(L("Sacrificou", { nome: nomeDe(dados.uuid) }))}</p>`);
-    if (op === "folego") await card(`<p><i class="fa-solid fa-lungs"></i> ${esc(L("RecuperouFolego", { nome: nomeDe(dados.uuid) }))}</p>`);
+    const nome = nomeDe(dados.uuid);
+    if (op === "aviso") await card(`<p><i class="fa-solid fa-bullhorn"></i> ${esc(L("AvisouEvento", { nome, evento: dados.eventoNome ?? "" }))}</p>`);
+    if (op === "sacrificio") await card(`<p><i class="fa-solid fa-hand-fist"></i> ${esc(L("Sacrificou", { nome, perseguidor: e.config?.perseguidor || L("Perseguidor") }))}</p>`);
+    if (op === "folego") await card(`<p><i class="fa-solid fa-lungs"></i> ${esc(L("RecuperouFolego", { nome }))}</p>`);
     return true;
   });
   fila = resultado.catch((erro) => console.error(`${SYSTEM_ID} | perseguição`, erro));
@@ -139,35 +142,42 @@ async function sortear(candidatos, titulo) {
   return candidatos[final];
 }
 
-/** Início da rodada: dois personagens sorteados; o 1º sofre 1d6 PV, o 2º 1d6 PD. */
-async function ataqueDasCabecas() {
+/** Evento de início de rodada: cada ataque configurado sorteia um alvo diferente. */
+async function eventoDeInicio() {
   const e = estadoPerseguicao();
-  if (e.cabecas) return false;
+  const inicio = e.config?.inicioRodada;
+  if (e.cabecas || !inicio?.ataques?.length) return false;
   const restantes = [...vivos(e)];
-  if (!restantes.length) return false;
   const { aplicarDano } = await import("../dice/falha-critica.mjs");
-  for (const [recurso, titulo] of [["pv", L("CabecaMordida")], ["pd", L("CabecaOlhos")]]) {
+  for (const ataque of inicio.ataques) {
     if (!restantes.length) break;
-    const alvo = await sortear(restantes, titulo);
+    const alvo = await sortear(restantes, ataque.nome || inicio.nome);
     restantes.splice(restantes.indexOf(alvo), 1);
     const doc = ator(alvo.uuid);
-    const roll = await rolar("1d6");
-    if (doc) await aplicarDano(doc, roll.total, recurso);
-    await card(`<h3>${esc(titulo)}</h3><p>${esc(L(recurso === "pv" ? "CabecaDanoPV" : "CabecaDanoPD", { nome: doc?.name ?? "?", n: roll.total }))}</p>`);
+    const roll = await rolar(Roll.validate(ataque.dano) ? ataque.dano : "1d6");
+    if (doc) await aplicarDano(doc, roll.total, ataque.recurso === "pd" ? "pd" : "pv");
+    await card(`<h3>${esc(ataque.nome)}</h3><p>${esc(comNome(ataque.texto, doc?.name ?? "?", { n: roll.total }))}</p>`);
   }
-  e.cabecas = true;
-  await game.settings.set(SYSTEM_ID, CHAVE, estadoComCabecas());
+  await game.settings.set(SYSTEM_ID, CHAVE, { ...estadoPerseguicao(), cabecas: true });
   return true;
 }
-const estadoComCabecas = () => ({ ...estadoPerseguicao(), cabecas: true });
 
-/** Fim da rodada: corte (3, 4, 5), depois a próxima rodada ou o fim da perseguição. */
+/** Zera a vida e marca como morto, depois da tela de alcançado. */
+async function matar(uuid) {
+  const doc = await fromUuid(uuid);
+  if (!doc) return;
+  await doc.update({ "system.recursos.pv.value": 0 }, { op2SemQueda: true });
+  const { definirCondicao } = await import("./ferimentos.mjs");
+  await definirCondicao(doc, "morto", true);
+}
+
+/** Fim da rodada: marco de corte, depois a próxima rodada ou o fim da perseguição. */
 async function proximaRodada() {
   const e = estadoPerseguicao();
-  const { corte, alvo, empate } = quemEAlcancado(e.participantes, e.rodada);
+  const config = e.config;
+  const { corte, alvo, empate } = quemEAlcancado(e.participantes, e.rodada, config.marcos);
   let morto = alvo;
   if (!morto && empate.length) {
-    // Empate na menor pontuação: teste oposto entre eles (Atletismo por padrão); o mestre marca quem perdeu.
     await card(`<p>${esc(L("Empate", { nomes: empate.map(nomeDe).join(", "), corte }))}</p>`);
     morto = await DialogV2.prompt({
       window: { title: L("EmpateTitulo") },
@@ -177,54 +187,100 @@ async function proximaRodada() {
     });
     if (!morto) return false;
   }
-  const eventoId = foundry.utils.randomID();
   if (morto) {
-    const p = e.participantes.find((x) => x.uuid === morto);
+    const p = acharP(e, morto);
     if (p) p.morto = true;
-    e.evento = { id: eventoId, mortos: [morto] };
-    await card(`<p class="op2-furt-card__encontrado"><i class="fa-solid fa-skull"></i> ${esc(L("FoiAlcancado", { nome: nomeDe(morto), corte }))}</p>`);
+    e.evento = { id: foundry.utils.randomID(), mortos: [morto] };
+    await card(`<p class="op2-furt-card__encontrado"><i class="fa-solid fa-skull"></i> ${esc(L("FoiAlcancado", { nome: nomeDe(morto), corte, perseguidor: config.perseguidor || L("Perseguidor") }))}</p>`);
   } else if (corte) {
     await card(`<p>${esc(L("NinguemAlcancado", { corte }))}</p>`);
   }
-  if (e.rodada >= RODADAS) {
+  if (e.rodada >= config.rodadas) {
     e.fim = true;
-    const salvos = vivos(e).filter((p) => p.pa >= 30).map((p) => nomeDe(p.uuid));
-    await card(`<h3>${esc(L("FimTitulo"))}</h3><p>${esc(salvos.length ? L("Salvos", { nomes: salvos.join(", ") }) : L("NinguemSalvo"))}</p>`);
+    const salvos = vivos(e).filter((p) => p.pa >= config.meta).map((p) => nomeDe(p.uuid));
+    await card(`<h3>${esc(L("FimTitulo"))}</h3><p>${esc(salvos.length ? L("Salvos", { nomes: salvos.join(", ") }) : L("NinguemSalvo", { meta: config.meta }))}</p>`);
   } else {
     e.rodada += 1;
     e.cabecas = false;
     e.participantes = e.participantes.map((p) => ({ ...p, agiu: false, sacrificou: false }));
   }
   await game.settings.set(SYSTEM_ID, CHAVE, e);
+  if (morto) setTimeout(() => void matar(morto), DURACAO_ALCANCADO);
   return true;
 }
 
-/* -- ações do jogador --------------------------------------------------------- */
+/* -- avançar: uma janela só, com os dados à vista ---------------------------- */
+
+/** Os dados que o teste vai rolar: perícia (com passos) + atributo pareado. */
+function dadosDaPericia(doc, chave, passos = 0) {
+  const s = doc.system;
+  const p = s.resolverChave?.(chave);
+  if (!p) return [];
+  if (p.tipo === "atributo") return [stepDie(p.dado, passos)];
+  const atributo = s.atributos?.[s.atributoDe?.(chave) ?? "fisico"];
+  return [stepDie(p.dado, passos), atributo?.dadoEfetivo ?? "d6"].filter(Boolean);
+}
+
+const icones = (dados) => dados.map((d) => iconeDado(d)).join("");
+const rotuloPericia = (k) => game.i18n.localize(`OP2.Pericia.${k}`);
 
 async function avancar(doc, e, p) {
-  const sistema = doc.system;
-  const opcoes = Object.keys(sistema.pericias ?? {})
-    .filter((k) => k !== "aptidao" && (k === "atletismo" || !p.periciasUsadas.includes(k)))
-    .map((k) => ({ k, r: game.i18n.localize(`OP2.Pericia.${k}`) }))
-    .sort((a, b) => (a.k === "atletismo" ? -1 : b.k === "atletismo" ? 1 : a.r.localeCompare(b.r)));
-  const sacrificios = e.participantes.filter((x) => x.sacrificou && x.uuid !== p.uuid && !x.morto).length;
-  const maxFolego = Math.min(p.folego, Math.max(0, MAX_BONUS - sacrificios));
+  const config = e.config;
+  const padrao = config.periciaPadrao || "atletismo";
+  const opcoes = Object.keys(doc.system.pericias ?? {})
+    .filter((k) => k !== "aptidao" && (k === padrao || !config.outrasUmaVez || !p.periciasUsadas.includes(k)))
+    .sort((a, b) => (a === padrao ? -1 : b === padrao ? 1 : rotuloPericia(a).localeCompare(rotuloPericia(b))));
+  const sacrificios = Math.min(MAX_BONUS, e.participantes.filter((x) => x.sacrificou && x.uuid !== p.uuid && !x.morto).length);
+  const maxFolego = config.folego ? Math.min(p.folego, Math.max(0, MAX_BONUS - sacrificios)) : 0;
+  const evento = (config.eventos ?? []).find((ev) => ev.pericias?.length && p.pa >= ev.gatilhoPA && !p.eventos?.[ev.id]) ?? null;
+  const avisado = evento && e.avisos?.[evento.id] ? Number(evento.passosAviso) || 0 : 0;
+
+  const blocoEvento = evento ? `
+    <fieldset class="op2-pers-evento">
+      <legend><i class="fa-solid fa-triangle-exclamation"></i> ${esc(evento.nome)}</legend>
+      <p>${esc(comNome(evento.descricao, doc.name))}</p>
+      ${avisado ? `<p class="op2-dica">${esc(L("EventoAvisado", { n: avisado }))}</p>` : ""}
+      <div class="op2-pers-evento__opcoes">${evento.pericias.map((k, i) => `
+        <label><input type="radio" name="eventoPericia" value="${k}" ${i ? "" : "checked"}>
+          ${esc(rotuloPericia(k))} ${icones(dadosDaPericia(doc, k, avisado))}</label>`).join("")}
+      </div>
+      <p class="op2-dica">DT ${evento.dt}. ${esc(L("EventoFalha", { n: evento.passosFalha }))}</p>
+    </fieldset>` : "";
+
   const escolha = await DialogV2.prompt({
     window: { title: L("Avancar"), icon: "fa-solid fa-person-running" },
     classes: ["op2", "op2-pers-dialogo"],
+    position: { width: 460 },
     content: `<div class="op2-furt-procurar">
-      <label>${esc(L("Pericia"))}<select name="chave">${opcoes.map((o) => `<option value="${o.k}">${esc(o.r)}</option>`).join("")}</select></label>
-      <p class="op2-dica">${esc(L("PericiaAjuda"))}</p>
-      <label>${esc(L("UsarFolego", { n: p.folego }))}<input type="number" name="folego" min="0" max="${maxFolego}" value="0"></label>
-      ${sacrificios ? `<p class="op2-dica"><i class="fa-solid fa-hand-fist"></i> ${esc(L("BonusSacrificio", { n: Math.min(sacrificios, MAX_BONUS) }))}</p>` : ""}
+      ${blocoEvento}
+      <label>${esc(L("Pericia"))}<select name="chave">${opcoes.map((k) => `<option value="${k}">${esc(rotuloPericia(k))}</option>`).join("")}</select></label>
+      ${config.outrasUmaVez ? `<p class="op2-dica">${esc(L("PericiaAjuda", { pericia: rotuloPericia(padrao) }))}</p>` : ""}
+      ${config.folego ? `<label>${esc(L("UsarFolego", { n: p.folego }))}<input type="number" name="folego" min="0" max="${maxFolego}" value="0"></label>` : ""}
+      ${sacrificios ? `<p class="op2-dica"><i class="fa-solid fa-hand-fist"></i> ${esc(L("BonusSacrificio", { n: sacrificios }))}</p>` : ""}
       <label class="op2-pers-check"><input type="checkbox" name="esforco"> ${esc(L("EsforcoExtra", { formula: formulaDoEsforco(p.esforcos) }))}</label>
+      <div class="op2-pers-previa"><small>${esc(L("VaiRolar", { dt: config.dtAvanco }))}</small><span data-previa></span></div>
     </div>`,
+    render: (_ev, dialogo) => {
+      const raiz = dialogo.element;
+      const atualizar = () => {
+        const chave = raiz.querySelector("[name=chave]").value;
+        const folego = Math.clamp(Number(raiz.querySelector("[name=folego]")?.value) || 0, 0, maxFolego);
+        const esforco = raiz.querySelector("[name=esforco]").checked ? 1 : 0;
+        const extras = Array(folego + sacrificios).fill("d6");
+        raiz.querySelector("[data-previa]").innerHTML = `${icones(dadosDaPericia(doc, chave, esforco))}${extras.length ? ` + ${icones(extras)}` : ""}`
+          + (evento ? ` <em>${esc(L("SeFalharEvento", { n: evento.passosFalha }))}</em>` : "");
+      };
+      raiz.querySelectorAll("select, input").forEach((el) => el.addEventListener("change", atualizar));
+      raiz.querySelector("[name=folego]")?.addEventListener("input", atualizar);
+      atualizar();
+    },
     ok: {
       label: L("Avancar"),
       callback: (_ev, b) => ({
         chave: b.form.elements.chave.value,
-        folego: Math.clamp(Number(b.form.elements.folego.value) || 0, 0, maxFolego),
+        folego: Math.clamp(Number(b.form.elements.folego?.value) || 0, 0, maxFolego),
         esforco: b.form.elements.esforco.checked,
+        eventoPericia: b.form.elements.eventoPericia?.value ?? null,
       }),
     },
     rejectClose: false,
@@ -232,38 +288,30 @@ async function avancar(doc, e, p) {
   if (!escolha) return;
   const { rolarTeste } = await import("../dice/teste.mjs");
 
-  // A vala oculta: a primeira ação de avanço com 15+ PA testa Percepção ou Sobrevivência.
-  let vala = null;
-  if (p.pa >= PA_DA_VALA && !p.vala) {
-    const chaveVala = await DialogV2.wait({
-      window: { title: L("ValaTitulo") },
-      content: `<p>${esc(L("ValaAjuda"))}</p>${e.avisoVala ? `<p class="op2-dica">${esc(L("ValaAvisado"))}</p>` : ""}`,
-      buttons: [
-        { action: "percepcao", label: game.i18n.localize("OP2.Pericia.percepcao"), default: true },
-        { action: "sobrevivencia", label: game.i18n.localize("OP2.Pericia.sobrevivencia") },
-      ],
-      rejectClose: false,
-    });
-    if (!chaveVala) return;
+  // Evento no caminho: todos leem o aviso, com os dados de cada opção.
+  let resultadoEvento = null;
+  if (evento) {
+    const opcoesTxt = evento.pericias.map((k) => `${esc(rotuloPericia(k))} ${icones(dadosDaPericia(doc, k, avisado))}`).join(` ${esc(L("Ou"))} `);
+    await card(`<h3><i class="fa-solid fa-triangle-exclamation"></i> ${esc(evento.nome)}</h3><p>${esc(comNome(evento.descricao, doc.name))}</p>
+      <p class="op2-pers-card__dados">${esc(L("TesteDoEvento"))} ${opcoesTxt} (DT ${evento.dt})</p>`);
     const teste = await rolarTeste(doc, {
-      chavePericia: chaveVala, dt: DT_VALA, contexto: L("ValaTitulo"), passos: e.avisoVala ? { pericia: 1 } : null,
+      chavePericia: escolha.eventoPericia ?? evento.pericias[0], dt: evento.dt, contexto: evento.nome, rapido: true,
+      passos: avisado ? { pericia: avisado } : null,
     });
     if (!teste) return;
-    vala = teste.resultado?.sucesso ? "passou" : "falhou";
-    await card(`<p>${esc(L(vala === "passou" ? "ValaPassou" : "ValaFalhou", { nome: doc.name }))}</p>`);
+    resultadoEvento = teste.resultado?.sucesso ? "passou" : "falhou";
+    await card(`<p>${esc(comNome(resultadoEvento === "passou" ? evento.textoPassou : evento.textoFalhou, doc.name))}</p>`);
+    await pedir("evento", { uuid: doc.uuid, eventoId: evento.id, resultado: resultadoEvento });
   }
 
   const d6 = (rotulo, n) => Array.from({ length: n }, (_, i) => ({ chave: `${rotulo}.${i}`, rotulo: L(rotulo), tipo: "extra", dado: "d6" }));
-  const extras = [...d6("Folego", escolha.folego), ...d6("Sacrificio", Math.min(sacrificios, MAX_BONUS))];
-  const passos = (escolha.esforco ? 1 : 0) + (vala === "falhou" ? -2 : 0);
+  const passos = (escolha.esforco ? 1 : 0) + (resultadoEvento === "falhou" ? Number(evento.passosFalha) || 0 : 0);
   const roll = await rolarTeste(doc, {
-    chavePericia: escolha.chave, dt: DT_AVANCO, contexto: L("TesteAvanco"), dadosExtras: extras,
+    chavePericia: escolha.chave, dt: config.dtAvanco, contexto: L("TesteAvanco"), rapido: true,
+    dadosExtras: [...d6("Folego", escolha.folego), ...d6("Sacrificio", sacrificios)],
     passos: passos ? { pericia: passos } : null,
   });
-  if (!roll) {
-    if (vala) await pedir("vala", { uuid: doc.uuid, vala });
-    return;
-  }
+  if (!roll) return;
   if (escolha.esforco) {
     const perda = await rolar(formulaDoEsforco(p.esforcos));
     const { aplicarDano } = await import("../dice/falha-critica.mjs");
@@ -272,7 +320,7 @@ async function avancar(doc, e, p) {
   }
   const pontos = pontosDoAvanco(roll.resultado ?? {});
   await card(`<p><i class="fa-solid fa-person-running"></i> ${esc(L("Avancou", { nome: doc.name, n: pontos }))}</p>`);
-  await pedir("avanco", { uuid: doc.uuid, pontos, chave: escolha.chave, folegoUsado: escolha.folego, esforco: escolha.esforco, vala });
+  await pedir("avanco", { uuid: doc.uuid, pontos, chave: escolha.chave, folegoUsado: escolha.folego, esforco: escolha.esforco });
 }
 
 const ACOES = {
@@ -280,7 +328,10 @@ const ACOES = {
   folego: (doc) => pedir("folego", { uuid: doc.uuid }),
   sacrificio: (doc) => pedir("sacrificio", { uuid: doc.uuid }),
   outra: (doc) => pedir("outra", { uuid: doc.uuid }),
-  aviso: (doc) => pedir("aviso", { uuid: doc.uuid }),
+  aviso: (doc, e, _p, alvo) => {
+    const ev = e.config?.eventos?.find((x) => x.id === alvo.dataset.evento);
+    return pedir("aviso", { uuid: doc.uuid, eventoId: alvo.dataset.evento, eventoNome: ev?.nome ?? "" });
+  },
 };
 
 /* -- painel ------------------------------------------------------------------- */
@@ -292,7 +343,9 @@ export class PerseguicaoApp extends HandlebarsApplicationMixin(ApplicationV2) {
     window: { title: "OP2.Perseguicao.Titulo", icon: "fa-solid fa-person-running", resizable: true },
     position: { width: 560, height: 640 },
     actions: {
-      iniciar: () => pedir("iniciar"),
+      iniciar: PerseguicaoApp.#iniciar,
+      novaCena: PerseguicaoApp.#novaCena,
+      configurar: PerseguicaoApp.#configurar,
       encerrar: PerseguicaoApp.#encerrar,
       proxima: () => pedir("proxima"),
       cabecas: () => pedir("cabecas"),
@@ -305,24 +358,36 @@ export class PerseguicaoApp extends HandlebarsApplicationMixin(ApplicationV2) {
 
   static PARTS = { corpo: { template: "systems/ordem-paranormal-2e/templates/cena/perseguicao.hbs" } };
 
+  /** Perseguição escolhida no seletor (só antes de iniciar). */
+  configId = null;
+
   async _prepareContext() {
     const e = estadoPerseguicao();
     const gm = game.user.isGM;
-    const corte = proximoCorte(e.rodada);
+    const config = e.config;
+    const corte = proximoCorte(e.rodada, config.marcos);
+    const cenas = listarCenas("perseguicao");
+    this.configId ??= cenas[0]?.id;
     return {
-      gm, ativa: e.ativa, rodada: e.rodada, total: RODADAS, fim: e.fim, cabecas: e.cabecas,
-      corte, avisoVala: e.avisoVala,
+      gm, ativa: e.ativa, rodada: e.rodada, total: config.rodadas, dtAvanco: config.dtAvanco, fim: e.fim, cabecas: e.cabecas,
+      nomeCena: config.nome, perseguidor: config.perseguidor,
+      inicioNome: config.inicioRodada?.ataques?.length ? config.inicioRodada.nome : null,
+      cenas: cenas.map((c) => ({ id: c.id, nome: c.nome, sel: c.id === this.configId })),
+      corte,
+      marcos: (config.marcos ?? []).map((m) => ({ ...m, pos: Math.min(100, (m.pa / Math.max(config.meta * 1.15, 1)) * 100).toFixed(2) })),
       criaturas: e.criaturas.map((c) => ({ uuid: c.uuid, nome: nomeDe(c.uuid), img: ator(c.uuid)?.img ?? ANONIMO })),
       participantes: e.participantes.map((p) => {
         const doc = ator(p.uuid);
         const dono = !!doc?.isOwner && !gm;
+        const eventos = (config.eventos ?? []).filter((ev) => p.eventos?.[ev.id])
+          .map((ev) => ({ nome: ev.nome, resultado: p.eventos[ev.id], podeAvisar: dono && ev.avisavel && p.eventos[ev.id] === "passou" && !e.avisos?.[ev.id], id: ev.id }));
         return {
           ...p, nome: doc?.name ?? "?", img: doc?.img ?? ANONIMO,
           dono, podeMarcar: gm || !!doc?.isOwner,
-          largura: Math.min(100, Math.round((p.pa / 35) * 100)),
+          largura: Math.min(100, Math.round((p.pa / Math.max(config.meta * 1.15, 1)) * 100)),
           abaixo: corte ? p.pa < corte.pa : false,
-          folegoIcones: iconeDado("d6", { texto: p.folego }),
-          podeAvisar: dono && p.vala === "passou" && !e.avisoVala,
+          folegoIcones: config.folego ? iconeDado("d6", { texto: p.folego }) : null,
+          eventosP: eventos,
           podeAgir: dono && e.ativa && !e.fim && !p.agiu && !p.morto,
         };
       }),
@@ -340,10 +405,12 @@ export class PerseguicaoApp extends HandlebarsApplicationMixin(ApplicationV2) {
   _onRender(contexto, opcoes) {
     super._onRender(contexto, opcoes);
     this._dragDrop.bind(this.element);
-    // PA editável pelo mestre (correções e regras da casa).
     for (const campo of this.element.querySelectorAll("[data-pa]")) {
       campo.addEventListener("change", () => pedir("ajustarPA", { uuid: campo.dataset.pa, pa: campo.value }));
     }
+    this.element.querySelector("[data-seletor-cena]")?.addEventListener("change", (ev) => {
+      this.configId = ev.target.value;
+    });
   }
 
   async #aoSoltar(evento) {
@@ -356,6 +423,20 @@ export class PerseguicaoApp extends HandlebarsApplicationMixin(ApplicationV2) {
     await pedir("adicionar", { uuid: doc.uuid, papel });
   }
 
+  static async #iniciar() {
+    await pedir("iniciar", { configId: this.configId });
+  }
+
+  static async #novaCena() {
+    const id = await novaCena("perseguicao");
+    if (id) this.configId = id;
+    this.render();
+  }
+
+  static #configurar() {
+    new ConfigCenaApp("perseguicao", this.configId).render({ force: true });
+  }
+
   static async #encerrar() {
     const ok = await DialogV2.confirm({ window: { title: L("Encerrar") }, content: `<p>${esc(L("EncerrarPergunta"))}</p>`, rejectClose: false });
     if (ok) await pedir("encerrar");
@@ -365,14 +446,15 @@ export class PerseguicaoApp extends HandlebarsApplicationMixin(ApplicationV2) {
     const { uuid, acao } = alvo.dataset;
     const doc = await fromUuid(uuid);
     const e = estadoPerseguicao();
-    const p = e.participantes.find((x) => x.uuid === uuid);
+    const p = acharP(e, uuid);
     if (!doc?.isOwner || !p) return;
-    await ACOES[acao]?.(doc, e, p);
+    await ACOES[acao]?.(doc, e, p, alvo);
   }
 }
 
 let painel = null;
 export function abrirPerseguicao() {
+  if (!perseguicaoHabilitada()) return null;
   painel ??= new PerseguicaoApp();
   painel.render({ force: true });
   return painel;
@@ -383,16 +465,25 @@ export function abrirPerseguicao() {
 let estavaAtiva = false;
 let ultimoEvento = null;
 
+function somAmbiente(ativa) {
+  let ligado = true;
+  try { ligado = game.settings.get(SYSTEM_ID, "somPerseguicao"); } catch { /* sem setting */ }
+  if (ativa && ligado && perseguicaoHabilitada()) iniciarAmbientePerseguicao();
+  else pararAmbientePerseguicao();
+}
+
 function aoMudar(valor) {
+  if (!perseguicaoHabilitada()) return;
   const e = { ...VAZIO(), ...(valor ?? {}) };
-  ligarVinheta("perseguicao", e.ativa);
+  ligarVinheta("perseguicao", e.ativa && !e.fim);
+  somAmbiente(e.ativa && !e.fim);
   if (e.ativa && !estavaAtiva) abrirPerseguicao();
   estavaAtiva = e.ativa;
   atualizarBotao(e.ativa);
   if (painel?.rendered) painel.render();
   if (e.evento?.id && e.evento.id !== ultimoEvento) {
     ultimoEvento = e.evento.id;
-    (e.evento.mortos ?? []).forEach((uuid, i) => setTimeout(() => mostrarEncontrado(uuid, L("Alcancado")), 600 + i * 4700));
+    (e.evento.mortos ?? []).forEach((uuid, i) => setTimeout(() => mostrarAlcancado(uuid, L("Alcancado")), 400 + i * 6400));
   }
 }
 
@@ -422,15 +513,27 @@ function criarBotao() {
 }
 
 export function registrarPerseguicao() {
+  game.settings.register(SYSTEM_ID, "perseguicaoHabilitada", {
+    name: "OP2.Perseguicao.HabilitadaNome", hint: "OP2.Perseguicao.HabilitadaDica",
+    scope: "world", config: true, type: Boolean, default: false, requiresReload: true,
+  });
+  game.settings.register(SYSTEM_ID, "somPerseguicao", {
+    name: "OP2.Perseguicao.SomNome", hint: "OP2.Perseguicao.SomDica",
+    scope: "client", config: true, type: Boolean, default: true,
+    onChange: () => somAmbiente(estadoPerseguicao().ativa && !estadoPerseguicao().fim),
+  });
   game.settings.register(SYSTEM_ID, CHAVE, { scope: "world", config: false, type: Object, default: {}, onChange: aoMudar });
   registrarAcaoDeMestre("op2Perseguicao", executar);
+  Hooks.on("op2CenasConfig", () => { if (painel?.rendered) painel.render(); });
   Hooks.once("ready", () => {
+    if (!perseguicaoHabilitada()) return;
     const e = estadoPerseguicao();
     estavaAtiva = e.ativa;
     ultimoEvento = e.evento?.id ?? null;
     criarBotao();
     atualizarBotao(e.ativa);
-    ligarVinheta("perseguicao", e.ativa);
+    ligarVinheta("perseguicao", e.ativa && !e.fim);
+    somAmbiente(e.ativa && !e.fim);
   });
   Hooks.on("collapseSidebar", () => setTimeout(posicionarBotao, 400));
   Hooks.on("updateActor", () => { if (painel?.rendered) painel.render(); });

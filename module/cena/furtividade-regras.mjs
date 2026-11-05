@@ -7,7 +7,7 @@
  */
 
 /** DT das ações especiais: 7 na primeira vez, +3 a cada uso (10, 13…). */
-export const dtPorUsos = (usos = 0) => 7 + 3 * Math.max(0, usos);
+export const dtPorUsos = (usos = 0, base = 7, passo = 3) => base + passo * Math.max(0, usos);
 
 export const facesDe = (dado) => Number(String(dado ?? "").replace(/^\d*d/, "")) || 0;
 

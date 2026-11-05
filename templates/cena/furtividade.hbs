@@ -2,7 +2,7 @@
   <header class="op2-furt__topo">
     {{#if ativa}}
       <div class="op2-furt__fase">
-        <small>{{localize "OP2.Furtividade.Rodada"}} {{rodada}}</small>
+        <small>{{nomeCena}} · {{localize "OP2.Furtividade.Rodada"}} {{rodada}}</small>
         <strong>{{#if criaturasFase}}{{localize "OP2.Furtividade.FaseCriaturas"}}{{else}}{{localize "OP2.Furtividade.FasePersonagens"}}{{/if}}</strong>
       </div>
       <div class="op2-furt__botoes">
@@ -18,8 +18,19 @@
         {{/if}}
       </div>
     {{else}}
-      <p class="op2-dica">{{localize "OP2.Furtividade.Inativa"}}</p>
-      {{#if gm}}<button type="button" class="op2-botao" data-action="iniciar"><i class="fa-solid fa-eye-slash"></i> {{localize "OP2.Furtividade.Iniciar"}}</button>{{/if}}
+      {{#if gm}}
+        <div class="op2-cena-escolha">
+          <label>{{localize "OP2.CenaConfig.Visualizando"}}
+            <select data-seletor-cena>{{#each cenas}}<option value="{{id}}" {{#if sel}}selected{{/if}}>{{nome}}</option>{{/each}}</select></label>
+          <div class="op2-furt__botoes">
+            <button type="button" class="op2-botao op2-botao--fantasma" data-action="novaCena"><i class="fa-solid fa-plus"></i> {{localize "OP2.CenaConfig.NovaFurtividade"}}</button>
+            <button type="button" class="op2-botao op2-botao--fantasma" data-action="configurar"><i class="fa-solid fa-sliders"></i> {{localize "OP2.CenaConfig.Preparacao"}}</button>
+            <button type="button" class="op2-botao" data-action="iniciar"><i class="fa-solid fa-eye-slash"></i> {{localize "OP2.Furtividade.Iniciar"}}</button>
+          </div>
+        </div>
+      {{else}}
+        <p class="op2-dica">{{localize "OP2.Furtividade.Inativa"}}</p>
+      {{/if}}
     {{/if}}
   </header>
 

@@ -129,7 +129,7 @@ export function registrarCondicoes() {
     opcoes.op2Antes = { pv: ator.system.recursos.pv.value, pd: ator.system.recursos.pd.value };
   });
   Hooks.on("updateActor", (ator, mudancas, opcoes, userId) => {
-    if (ator.type !== "personagem" || userId !== game.user.id || !opcoes.op2Antes) return;
+    if (ator.type !== "personagem" || userId !== game.user.id || !opcoes.op2Antes || opcoes.op2SemQueda) return;
     for (const recurso of ["pv", "pd"]) {
       const novo = foundry.utils.getProperty(mudancas, `system.recursos.${recurso}.value`);
       if (novo === 0 && opcoes.op2Antes[recurso] > 0) {
