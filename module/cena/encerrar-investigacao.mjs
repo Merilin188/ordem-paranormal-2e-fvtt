@@ -42,6 +42,8 @@ export async function encerrarCena({ atores, avisar = true, investigacao = inves
   // Poderes "até o fim da cena": Ímpeto esvazia, marcadores e lobo machucado zeram.
   const { encerrarCenaDosPoderes } = await import("./poderes.mjs");
   await encerrarCenaDosPoderes(alvos);
+  const { encerrarCenaDosEfeitos } = await import("./efeitos-mundo.mjs");
+  await encerrarCenaDosEfeitos(alvos);
 
   // O contador de rodadas alimenta a sobrecarga mental (spec §7.6) e reinicia junto.
   // Travas de 1×-por-investigação e a ordem das rodadas também são da sessão que

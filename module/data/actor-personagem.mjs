@@ -5,6 +5,7 @@
  * paranormal (NEX) e os contadores de ferimento/trauma já existem porque são citados,
  * mesmo com a mecânica ainda não publicada.
  */
+import { passosDosEfeitos } from "../cena/efeitos-mundo.mjs";
 import { aptidoesDoMundo } from "../settings/pericias.mjs";
 import { PERFIS, TIPOS_PERSONAGEM, PERICIAS, DT_FERIMENTO_BASE, DT_FERIMENTO_INCREMENTO } from "../config.mjs";
 import { stepDie, faces } from "../dice/escada.mjs";
@@ -124,8 +125,11 @@ export class PersonagemData extends foundry.abstract.TypeDataModel {
 
     // Caído: redução de passo em testes físicos (inclui Luta).
     const caido = this.parent?.statuses?.has?.("caido") ? 1 : 0;
+    // Efeitos criados pelo mestre (Efeitos do mundo): passos em atributo, perícia ou todos.
+    const efeitos = passosDosEfeitos(this.parent?.statuses);
     for (const [chave, atributo] of Object.entries(this.atributos)) {
-      const passos = (aumentos[chave] ?? 0) - (reducoes[chave] ?? 0) - (chave === "fisico" ? caido : 0);
+      const passos = (aumentos[chave] ?? 0) - (reducoes[chave] ?? 0) - (chave === "fisico" ? caido : 0)
+        + (efeitos.atributo[chave] ?? 0) + efeitos.todos;
       atributo.dadoEfetivo = stepDie(atributo.die, passos);
       atributo.valor = faces(atributo.dadoEfetivo);
       atributo.reduzido = passos < 0;
@@ -139,7 +143,7 @@ export class PersonagemData extends foundry.abstract.TypeDataModel {
       if (p?.pericia && p.passos) penalidades[p.pericia] = (penalidades[p.pericia] ?? 0) + p.passos;
     }
     for (const [chave, pericia] of Object.entries(this.pericias)) {
-      pericia.dadoEfetivo = stepDie(pericia.die, (pericia.stepMod ?? 0) - (penalidades[chave] ?? 0));
+      pericia.dadoEfetivo = stepDie(pericia.die, (pericia.stepMod ?? 0) - (penalidades[chave] ?? 0) + (efeitos.pericia[chave] ?? 0));
       // O tamanho do dado é comparado direto contra a DT ao Investigar, sem rolagem (spec §6.3).
       pericia.valor = faces(pericia.dadoEfetivo);
       pericia.especializada = PERICIAS[chave]?.especializada ?? false;

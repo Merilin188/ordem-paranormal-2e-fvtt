@@ -2,6 +2,7 @@
  * Ordem Paranormal 2 (Playtest Alpha) — sistema não-oficial para Foundry VTT.
  * Compatível com v13 e v14.
  */
+import { registrarEfeitosDoMundo } from "./cena/efeitos-mundo.mjs";
 import { registrarExcluirDesafio } from "./cena/excluir-desafio.mjs";
 import { SYSTEM_ID, OP2, ICONES_PADRAO } from "./config.mjs";
 import { PersonagemData } from "./data/actor-personagem.mjs";
@@ -133,6 +134,7 @@ Hooks.once("init", () => {
   // Sem iniciativa rolada: os jogadores decidem a ordem entre si (spec §5.2).
   CONFIG.Combat.initiative = { formula: "0", decimals: 0 };
   registrarCondicoes();
+  registrarEfeitosDoMundo();
   registrarDeclaracao();
   registrarPoderes();
   registrarAparenciaDoPavor();

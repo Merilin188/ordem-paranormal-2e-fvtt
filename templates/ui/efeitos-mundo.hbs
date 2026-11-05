@@ -1,0 +1,89 @@
+<div class="op2-pericias-mundo__corpo">
+  <p class="op2-dica">{{localize "OP2.EfeitosMundo.Ajuda"}}</p>
+
+  <h3>{{localize "OP2.EfeitosMundo.DoSistema"}}</h3>
+  <table class="op2-pericias-mundo__tabela">
+    <thead><tr>
+      <th>{{localize "OP2.PericiasMundo.Exibir"}}</th><th></th>
+      <th>{{localize "OP2.EfeitosMundo.Efeito"}}</th><th>{{localize "OP2.PericiasMundo.NomeNaMesa"}}</th>
+    </tr></thead>
+    <tbody>
+      {{#each sistema}}
+        <tr>
+          <td><input type="checkbox" data-visivel="{{id}}" {{#if visivel}}checked{{/if}}></td>
+          <td><img class="op2-efeitos-mundo__img" src="{{img}}" alt=""></td>
+          <td>{{original}}</td>
+          <td><input type="text" data-nome="{{id}}" value="{{nome}}" placeholder="{{original}}"></td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+  <h3>{{localize "OP2.EfeitosMundo.Criados"}}</h3>
+  {{#unless novos.length}}<p class="op2-dica">{{localize "OP2.EfeitosMundo.Nenhum"}}</p>{{/unless}}
+  {{#each novos}}
+    <details class="op2-efeitos-mundo__bloco" data-novo="{{id}}" open>
+      <summary>
+        <input type="checkbox" data-visivel="{{id}}" {{#if visivel}}checked{{/if}}
+          data-tooltip="{{localize 'OP2.PericiasMundo.Exibir'}}">
+        <img class="op2-efeitos-mundo__img" src="{{icone}}" alt="">
+        <strong>{{nome}}</strong>
+        <button type="button" class="op2-botao-icone" data-action="remover" data-id="{{id}}"
+          data-tooltip="{{localize 'OP2.EfeitosMundo.Apagar'}}"><i class="fa-solid fa-trash"></i></button>
+      </summary>
+      <div class="op2-efeitos-mundo__campos">
+        <label>{{localize "OP2.EfeitosMundo.Nome"}}<input type="text" name="nome" value="{{nome}}"></label>
+        <label>{{localize "OP2.EfeitosMundo.Icone"}}
+          <span class="op2-efeitos-mundo__linha"><input type="text" name="icone" value="{{icone}}">
+            <button type="button" class="op2-botao-icone" data-action="escolherIcone"><i class="fa-solid fa-file-image"></i></button></span>
+        </label>
+
+        <fieldset><legend>{{localize "OP2.EfeitosMundo.Passos"}}</legend>
+          <span class="op2-efeitos-mundo__linha">
+            <select name="passosAlvo">{{#each alvos}}<option value="{{v}}" {{#if sel}}selected{{/if}}>{{r}}</option>{{/each}}</select>
+            <input type="number" name="passosValor" value="{{passos.valor}}" step="1" min="-4" max="4"
+              data-tooltip="{{localize 'OP2.EfeitosMundo.PassosDica'}}">
+          </span>
+        </fieldset>
+
+        <fieldset><legend>{{localize "OP2.EfeitosMundo.Dano"}}</legend>
+          <span class="op2-efeitos-mundo__linha">
+            <input type="text" name="danoFormula" value="{{dano.formula}}" placeholder="{{localize 'OP2.EfeitosMundo.DanoExemplo'}}">
+            <select name="danoRecurso"><option value="pv" {{#if pv}}selected{{/if}}>PV</option><option value="pd" {{#unless pv}}selected{{/unless}}>PD</option></select>
+          </span>
+        </fieldset>
+
+        <fieldset><legend>{{localize "OP2.EfeitosMundo.DuracaoTitulo"}}</legend>
+          <span class="op2-efeitos-mundo__linha">
+            <select name="duracaoTipo">{{#each duracoes}}<option value="{{v}}" {{#if sel}}selected{{/if}}>{{r}}</option>{{/each}}</select>
+            <input type="number" name="duracaoRodadas" value="{{duracao.rodadas}}" min="1" step="1"
+              data-tooltip="{{localize 'OP2.EfeitosMundo.RodadasDica'}}">
+          </span>
+        </fieldset>
+
+        <fieldset><legend>{{localize "OP2.EfeitosMundo.TesteTitulo"}}</legend>
+          <span class="op2-efeitos-mundo__linha">
+            <select name="testeChave">{{#each pericias}}<option value="{{v}}" {{#if sel}}selected{{/if}}>{{r}}</option>{{/each}}</select>
+            <label class="op2-efeitos-mundo__dt">DT <input type="number" name="testeDt" value="{{teste.dt}}" min="1" step="1"></label>
+          </span>
+        </fieldset>
+
+        <fieldset class="op2-efeitos-mundo__codigo"><legend>{{localize "OP2.EfeitosMundo.CodigoTitulo"}}</legend>
+          <p class="op2-dica">{{localize "OP2.EfeitosMundo.CodigoAjuda"}}</p>
+          <textarea name="codigo" rows="5" spellcheck="false" placeholder="if (evento === 'fimDeRodada') { /* ... */ }">{{codigo}}</textarea>
+        </fieldset>
+      </div>
+    </details>
+  {{/each}}
+
+  <div class="op2-pericias-mundo__nova">
+    <input type="text" name="novoNome" placeholder="{{localize 'OP2.EfeitosMundo.NovoNome'}}">
+    <button type="button" class="op2-botao" data-action="adicionar"><i class="fa-solid fa-plus"></i> {{localize "OP2.PericiasMundo.Adicionar"}}</button>
+  </div>
+
+  <footer class="op2-pericias-mundo__rodape">
+    <button type="button" class="op2-botao op2-botao--fantasma" data-action="restaurar">
+      <i class="fa-solid fa-rotate-left"></i> {{localize "OP2.PericiasMundo.Restaurar"}}</button>
+    <button type="submit" class="op2-botao"><i class="fa-solid fa-floppy-disk"></i> {{localize "OP2.PericiasMundo.Salvar"}}</button>
+  </footer>
+</div>

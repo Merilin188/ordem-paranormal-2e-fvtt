@@ -5,6 +5,7 @@
  * dados que será rolado — o dado da perícia e o do atributo pareado — em vez de um
  * seletor de texto. É a leitura que o livro usa e a que torna a ficha escaneável.
  */
+import { resetarUsos } from "../cena/efeitos-mundo.mjs";
 import { posicionarMenuDeDado } from "./menu-dado.mjs";
 import { ESCADA, ATRIBUTOS, PERICIAS, PERFIS, APTIDOES_PADRAO } from "../config.mjs";
 import { periciaVisivel, aptidaoVisivel } from "../settings/pericias.mjs";
@@ -57,6 +58,7 @@ export class PersonagemSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       consultarTabela: PersonagemSheet.#consultarTabela,
       removerPavor: PersonagemSheet.#removerPavor,
       alternarCondicao: PersonagemSheet.#alternarCondicao,
+      resetarUsos: PersonagemSheet.#resetarUsos,
       usarPoder: PersonagemSheet.#usarPoder,
       ajustarMarcadores: PersonagemSheet.#ajustarMarcadores,
       acaoExtraImpeto: PersonagemSheet.#acaoExtraImpeto,
@@ -250,6 +252,10 @@ export class PersonagemSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       content: `<div class="op2 op2-card"><header class="op2-card__topo"><span class="op2-tag op2-tag--pequena">${item.name}</span></header>
         <p class="op2-card__texto">${game.i18n.format("OP2.Impeto.AcaoExtraUsada", { nome: this.actor.name })}</p></div>`,
     });
+  }
+
+  static async #resetarUsos() {
+    await resetarUsos(this.actor);
   }
 
   static async #alternarCondicao(_evento, alvo) {

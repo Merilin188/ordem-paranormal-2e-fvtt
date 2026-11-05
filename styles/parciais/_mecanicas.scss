@@ -361,4 +361,20 @@
   // Lixeira do desafio na janela de ações: no canto direito do topo
   .op2-acoes__excluir { margin-left: auto; flex: none; width: auto; color: var(--op2-tinta-fraca); }
   .op2-acoes__excluir:hover { color: var(--op2-vermelho-claro); }
+
+  // Efeitos do mundo
+  .op2-efeitos-mundo__img { width: 24px; height: 24px; border: 0; vertical-align: middle; }
+  .op2-efeitos-mundo__bloco { margin: 0.4rem 0; padding: 0.3rem 0.5rem; border: 1px solid var(--op2-linha-forte, #555);
+    summary { display: flex; align-items: center; gap: 0.4rem; cursor: pointer;
+      strong { flex: 1; } input[type=checkbox] { flex: none; } button { flex: none; width: auto; } } }
+  .op2-efeitos-mundo__campos { display: grid; gap: 0.4rem; margin-top: 0.4rem;
+    label { display: grid; gap: 0.15rem; font-size: 0.85em; }
+    fieldset { margin: 0; padding: 0.3rem 0.5rem; border: 1px solid var(--op2-linha, #444); legend { font-size: 0.8em; color: var(--op2-tinta-fraca); } } }
+  .op2-efeitos-mundo__linha { display: flex; gap: 0.3rem; align-items: center;
+    input[type=text], select { flex: 1; } input[type=number] { width: 4.5rem; flex: none; } button { flex: none; width: auto; } }
+  .op2-efeitos-mundo__dt { display: flex !important; align-items: center; gap: 0.3rem; }
+  .op2-efeitos-mundo__codigo textarea { width: 100%; font-family: var(--op2-fonte-mono, monospace); font-size: 0.8rem; resize: vertical; }
+  .op2-efeitos__topo { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+    button { flex: none; width: auto; } }
+  .op2-aviso-forte { color: var(--op2-vermelho-claro, #e05a47); }
 }

@@ -1,5 +1,13 @@
 <section class="op2-painel op2-painel--efeitos tab {{tabs.efeitos.cssClass}}" data-group="principal" data-tab="efeitos">
-  <span class="op2-tag op2-tag--secao">{{localize "OP2.Efeitos.Titulo"}}</span>
+  <div class="op2-efeitos__topo">
+    <span class="op2-tag op2-tag--secao">{{localize "OP2.Efeitos.Titulo"}}</span>
+    {{#if ehGM}}
+      <button type="button" class="op2-botao op2-botao--pequeno op2-botao--perigo" data-action="resetarUsos"
+        data-tooltip="{{localize 'OP2.EfeitosMundo.ResetDica'}}">
+        <i class="fa-solid fa-rotate" aria-hidden="true"></i> {{localize "OP2.EfeitosMundo.ResetBotao"}}
+      </button>
+    {{/if}}
+  </div>
   <p class="op2-ajuda">{{localize "OP2.Efeitos.Ajuda"}}</p>
   <div class="op2-efeitos__grade">
     {{#each condicoes}}
