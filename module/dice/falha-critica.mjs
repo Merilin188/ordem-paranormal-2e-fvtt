@@ -96,6 +96,8 @@ export async function aplicarDano(ator, quantidade, recurso = "pv") {
     }
   }
 
+  // Criatura com redução de dano (bloco do bestiário): só no dano físico.
+  if (recurso === "pv" && ator.system.reducaoDano > 0) quantidade = Math.max(0, quantidade - ator.system.reducaoDano);
   const atual = ator.system.recursos[recurso].value;
   const novo = Math.max(0, atual - quantidade);
   await ator.update({ [`system.recursos.${recurso}.value`]: novo });

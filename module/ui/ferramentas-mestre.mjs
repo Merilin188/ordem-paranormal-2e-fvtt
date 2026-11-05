@@ -58,7 +58,7 @@ class DesafiosApp extends HandlebarsApplicationMixin(ApplicationV2) {
     const daCena = (investigacao?.system.participantes ?? [])
       .map((uuid) => fromUuidSync(uuid)).filter((a) => a?.documentName === "Actor");
     const vistos = new Set();
-    const atores = [...daCena, ...personagens(), ...game.actors.filter((a) => a.type === "npc")]
+    const atores = [...daCena, ...personagens(), ...game.actors.filter((a) => ["npc", "criatura"].includes(a.type))]
       .filter((a) => (vistos.has(a.id) ? false : vistos.add(a.id)));
     if (!this.atorId || !atores.some((a) => a.id === this.atorId)) {
       this.atorId = selecionados()[0]?.id ?? atores[0]?.id ?? null;
@@ -94,7 +94,7 @@ class DesafiosApp extends HandlebarsApplicationMixin(ApplicationV2) {
     });
     return {
       atores: atores.map((a) => ({
-        id: a.id, nome: a.type === "npc" ? `${a.name} (NPC)` : a.name, selecionado: a.id === this.atorId,
+        id: a.id, nome: a.type === "npc" ? `${a.name} (NPC)` : a.type === "criatura" ? `${a.name} (Criatura)` : a.name, selecionado: a.id === this.atorId,
       })),
       desafios,
       investigacao: investigacao?.name ?? null,

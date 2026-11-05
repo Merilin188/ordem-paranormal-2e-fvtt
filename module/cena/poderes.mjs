@@ -7,6 +7,7 @@
  * o que é passivo entra sozinho no cálculo (armadura, passo, crítico com 5…).
  */
 import { estadoFurtividade } from "./furtividade.mjs";
+import { estadoPerseguicao } from "./perseguicao.mjs";
 import { investigacaoAtiva } from "./investigacao-ativa.mjs";
 import { SYSTEM_ID } from "../config.mjs";
 import { comoMestre, registrarAcaoDeMestre } from "../ui/socket.mjs";
@@ -256,7 +257,7 @@ async function usarArsenal(ator, item) {
     rejectClose: false,
   });
   if (!restantes.includes(escolha)) return null;
-  const todos = game.actors.filter((a) => a.type === "personagem" || a.type === "npc");
+  const todos = game.actors.filter((a) => ["personagem", "npc", "criatura"].includes(a.type));
   const alvo = await escolherAtor(P(`Arsenal.${escolha}`), escolha === "vespa" ? todos.filter((a) => a.id !== ator.id) : todos, P("Alvo"));
   if (!alvo) return null;
   await item.update({ [`system.arsenal.${escolha}`]: true });
@@ -295,6 +296,8 @@ function chaveDaRodada() {
   if (game.combat?.started) return `c${game.combat.id}.${game.combat.round}`;
   const furtividade = estadoFurtividade();
   if (furtividade.ativa) return `f${furtividade.cenaId ?? ""}.${furtividade.rodada}`;
+  const perseguicao = estadoPerseguicao();
+  if (perseguicao.ativa) return `p${perseguicao.cenaId ?? ""}.${perseguicao.rodada}`;
   const investigacao = investigacaoAtiva();
   return `i${investigacao?.id ?? ""}.${investigacao?.system?.rodada ?? 0}`;
 }

@@ -21,7 +21,7 @@ const esc = (texto) => foundry.utils.escapeHTML(String(texto ?? ""));
 const IMG_PADRAO = "icons/svg/mystery-man.svg";
 
 export const personagens = () => game.actors.filter((a) => a.type === "personagem");
-export const testaveis = () => game.actors.filter((a) => a.type === "personagem" || a.type === "npc");
+export const testaveis = () => game.actors.filter((a) => ["personagem", "npc", "criatura"].includes(a.type));
 export const selecionados = () => (canvas?.tokens?.controlled ?? []).map((t) => t.actor).filter(Boolean);
 
 /* ------------------------------------------------------------------ */
@@ -45,7 +45,7 @@ export function rotuloDeChave(chave, ator = null) {
 
 /** Chaves de teste do próprio ator (NPC tem lista reduzida; personagem pode ter aptidões extras). */
 export function chavesDoAtor(ator) {
-  if (ator?.type === "npc") {
+  if (["npc", "criatura"].includes(ator?.type)) {
     return [...Object.keys(ator.system.atributos ?? {}), ...Object.keys(ator.system.pericias ?? {})];
   }
   const chaves = [...Object.keys(ATRIBUTOS)];
@@ -67,7 +67,7 @@ function opcoesDePericia(chaves, ator = null, selecionada = "percepcao") {
 
 /** Atributo pareado (nulo para atributo puro e NPC). */
 function atributoDaChave(ator, chave) {
-  if (!ator || ator.type === "npc" || ATRIBUTOS[chave]) return null;
+  if (!ator || ["npc", "criatura"].includes(ator.type) || ATRIBUTOS[chave]) return null;
   if (chave.startsWith("aptidao.")) return ator.system.pericias?.aptidao?.atributo ?? "mente";
   return ator.system.pericias?.[chave]?.atributo ?? PERICIAS[chave]?.atributo ?? null;
 }
@@ -97,7 +97,7 @@ function rotuloDesfecho(resultado) {
 function blocoParticipante({ id, titulo, atores, atorId, chave, comDT = false, dt = "" }) {
   const ator = game.actors.get(atorId);
   const opcoesAtor = `<option value="">${L("SelecionePersonagem")}</option>${atores
-    .map((a) => `<option value="${a.id}" ${a.id === atorId ? "selected" : ""}>${esc(a.name)}${a.type === "npc" ? " (NPC)" : ""}</option>`).join("")}`;
+    .map((a) => `<option value="${a.id}" ${a.id === atorId ? "selected" : ""}>${esc(a.name)}${a.type === "npc" ? " (NPC)" : a.type === "criatura" ? " (Criatura)" : ""}</option>`).join("")}`;
   const opcoesTeste = ator
     ? opcoesDePericia(chavesDoAtor(ator), ator, chave)
     : `<option value="">${L("SelecioneTeste")}</option>`;

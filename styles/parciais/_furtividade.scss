@@ -223,4 +223,49 @@
     h3 { margin: 0 0 0.4rem; border: 0; text-align: center; font-family: var(--op2-fonte-display); text-transform: uppercase; color: #e6a3b8; }
   }
   @keyframes op2-sorteio-entrar { from { opacity: 0; } to { opacity: 1; } }
+
+  // Perseguição
+  .op2-botao-flutuante--perseguicao { top: 156px !important; }
+  .op2-pers__pj--perigo { border-left-color: #d08a2a; }
+  .op2-pers__trilha {
+    display: flex; align-items: center; gap: 0.4rem;
+    small { color: var(--op2-tinta-fraca); font-size: 0.7em; }
+  }
+  .op2-pers__barra {
+    position: relative; flex: 1; height: 0.7rem; background: rgb(255 255 255 / 8%); border: 1px solid var(--op2-linha-forte);
+    > span { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, #6b1020, #c8342a); transition: width 0.6s ease; }
+  }
+  .op2-pers__marca { position: absolute; top: -3px; bottom: -3px; width: 2px; background: #e6d3a3; opacity: 0.8; }
+  .op2-pers__pa { width: 3.2rem; flex: none; text-align: center; font-family: var(--op2-fonte-mono); font-size: 1.1em; }
+  .op2-pers__status {
+    display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; font-size: 0.8em; color: var(--op2-tinta-fraca);
+    .op2-dado { font-size: 0.9em; }
+  }
+  .op2-pers__vala--passou { color: var(--op2-sucesso); }
+  .op2-pers__vala--falhou { color: #ff6b6b; }
+  .op2-pers-check { display: flex !important; align-items: center; gap: 0.4rem; }
+
+  // Ficha de criatura
+  .op2-ficha--criatura .op2-cabecalho { background: linear-gradient(160deg, rgb(70 6 18 / 60%), transparent 70%); }
+  .op2-criatura-ataque {
+    display: flex; gap: 0.5rem; padding: 0.4rem 0; border-bottom: 1px solid var(--op2-linha);
+    &--invalido input[name$=".dados"] { border-color: #c33; }
+  }
+  .op2-criatura-ataque__rolar { flex: none; width: 2.4rem; align-self: stretch; }
+  .op2-criatura-ataque__campos { flex: 1; display: flex; flex-direction: column; gap: 0.25rem; min-width: 0; }
+  .op2-criatura-ataque__linha {
+    display: flex; align-items: center; gap: 0.35rem;
+    select { flex: none; width: auto; }
+    label { display: flex; align-items: center; gap: 0.25rem; font-size: 0.8em; white-space: nowrap; input { width: 5rem; } }
+    button { flex: none; width: 24px; height: 24px; }
+  }
+  .op2-criatura-ataque__nome { flex: 1; font-weight: bold; }
+  .op2-criatura-ataque__icones { display: inline-flex; gap: 0.15rem; flex: 1; }
+  .op2-criatura-habilidade {
+    margin: 0.3rem 0; border-left: 3px solid #8b1d3a; padding-left: 0.4rem;
+    summary { display: flex; align-items: center; gap: 0.3rem; cursor: pointer; input { flex: 1; font-weight: bold; } button { flex: none; width: 24px; height: 24px; } }
+    textarea { width: 100%; margin-top: 0.3rem; resize: vertical; }
+  }
+  .op2-criatura-rd { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem; input { width: 4rem; } }
+  .op2-criatura-card h3 { margin: 0 0 0.3rem; border: 0; color: #e6a3b8; font-family: var(--op2-fonte-display); }
 }

@@ -55,8 +55,8 @@ export class TesteDialog extends HandlebarsApplicationMixin(ApplicationV2) {
       impetoDisponivel: impetoDisponivel(ator),
       gastarImpeto: false,
       passos: {
-        pericia: ajuda?.alvo === "pericia" ? ajuda.passos : 0,
-        atributo: ajuda?.alvo === "atributo" ? ajuda.passos : 0,
+        pericia: (ajuda?.alvo === "pericia" ? ajuda.passos : 0) + (base.passos?.pericia ?? 0),
+        atributo: (ajuda?.alvo === "atributo" ? ajuda.passos : 0) + (base.passos?.atributo ?? 0),
       },
       // Instinto de Sobrevivência: com metade ou menos dos PV, o passo já vem marcado.
       extras: new Set(ator.items.filter((i) => i.type === "habilidade" && i.system.automacao === "instinto"

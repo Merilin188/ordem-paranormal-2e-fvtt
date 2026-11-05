@@ -156,6 +156,7 @@ export const ICONES_PADRAO = {
   Actor: {
     personagem: "icons/svg/mystery-man.svg",
     npc: "icons/svg/cowled.svg",
+    criatura: "icons/svg/skull.svg",
     investigacao: `${ICONES}/tipos/investigacao.svg`,
   },
   Item: {

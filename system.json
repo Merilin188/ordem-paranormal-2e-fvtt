@@ -35,6 +35,7 @@
     "Actor": {
       "personagem": {},
       "npc": {},
+      "criatura": {},
       "investigacao": {}
     },
     "Item": {

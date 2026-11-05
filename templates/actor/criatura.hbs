@@ -1,0 +1,131 @@
+<div class="op2-ficha-npc op2-ficha-criatura">
+  <header class="op2-cabecalho op2-moldura">
+    <div class="op2-cabecalho__retrato op2-cabecalho__retrato--pequeno">
+      <img src="{{actor.img}}" alt="{{actor.name}}" data-action="editImage" data-edit="img">
+    </div>
+    <div class="op2-cabecalho__identidade">
+      <input type="text" class="op2-nome" name="name" value="{{actor.name}}" {{#unless editavel}}disabled{{/unless}}>
+      <input type="text" class="op2-ocupacao" name="system.categoria" value="{{sistema.categoria}}"
+        placeholder="{{localize 'OP2.Criatura.Categoria'}}" {{#unless editavel}}disabled{{/unless}}>
+      <div class="op2-recursos">
+        {{> (op2Caminho "partials/trilha-recurso") chave="pv" rotulo="OP2.Recurso.pv"
+            value=sistema.recursos.pv.value max=sistema.recursos.pv.max
+            tracos=recursos.pv.tracos critico=recursos.pv.critico}}
+        {{> (op2Caminho "partials/trilha-recurso") chave="pd" rotulo="OP2.Recurso.pd"
+            value=sistema.recursos.pd.value max=sistema.recursos.pd.max
+            tracos=recursos.pd.tracos critico=recursos.pd.critico}}
+      </div>
+    </div>
+  </header>
+
+  {{!-- `.op2-painel` é a classe das ABAS da ficha de personagem (`display:none` sem
+        `.active`); usar ela aqui deixava Atributos, Perícias e Notas invisíveis o
+        tempo todo. `.op2-npc-secao` é sempre visível, de propósito. --}}
+  <section class="op2-npc-secao op2-moldura">
+    <span class="op2-tag op2-tag--secao">{{localize "OP2.Secao.Atributos"}}</span>
+    <div class="op2-atributos op2-atributos--npc">
+      {{#each atributos}}
+        <div class="op2-atributo">
+          <button type="button" class="op2-atributo__nome" data-action="rolar" data-chave="{{chave}}"
+            data-tooltip="{{localize 'OP2.Pericia.Rolar'}}">{{rotulo}}</button>
+          {{> (op2Caminho "partials/controle-dado") caminho=caminho icone=icone valorAtual=die}}
+        </div>
+      {{/each}}
+    </div>
+  </section>
+
+  <section class="op2-npc-secao op2-moldura">
+    <div class="op2-painel__topo">
+      <span class="op2-tag op2-tag--secao">{{localize "OP2.Secao.Pericias"}}</span>
+      {{#if editavel}}
+        <button type="button" class="op2-botao op2-botao--fantasma" data-action="adicionarPericia">
+          <i class="fa-solid fa-plus"></i> {{localize "OP2.Npc.AdicionarPericia"}}
+        </button>
+      {{/if}}
+    </div>
+    <p class="op2-ajuda">{{localize "OP2.Npc.PericiasAjuda"}}</p>
+
+    {{#if pericias.length}}
+      <div class="op2-lista-pericias op2-lista-pericias--npc">
+        {{#each pericias}}
+          <div class="op2-pericia-npc" data-sub="{{sub}}">
+            <button type="button" class="op2-pericia-npc__nome" data-action="rolar" data-chave="{{sub}}"
+              data-tooltip="{{localize 'OP2.Pericia.Rolar'}}">{{rotulo}}</button>
+            {{> (op2Caminho "partials/controle-dado") caminho=caminho icone=icone valorAtual=die}}
+            {{#if @root.editavel}}
+              <button type="button" class="op2-botao-icone" data-action="removerPericia" data-sub="{{sub}}"
+                data-tooltip="{{localize 'OP2.Npc.RemoverPericia'}}"
+                aria-label="{{localize 'OP2.Npc.RemoverPericia'}}"><i class="fa-solid fa-xmark"></i></button>
+            {{/if}}
+          </div>
+        {{/each}}
+      </div>
+    {{else}}
+      <p class="op2-vazio">{{localize "OP2.Npc.SemPericias"}}</p>
+    {{/if}}
+  </section>
+
+  <section class="op2-npc-secao op2-moldura">
+    <div class="op2-painel__topo">
+      <span class="op2-tag op2-tag--secao">{{localize "OP2.Criatura.Ataques"}}</span>
+      {{#if editavel}}<button type="button" class="op2-botao op2-botao--fantasma" data-action="adicionarAtaque"><i class="fa-solid fa-plus"></i> {{localize "OP2.Criatura.AdicionarAtaque"}}</button>{{/if}}
+    </div>
+    {{#each ataques}}
+      <div class="op2-criatura-ataque {{#if invalido}}op2-criatura-ataque--invalido{{/if}}">
+        <button type="button" class="op2-botao op2-botao--perigo op2-criatura-ataque__rolar" data-action="rolarAtaque" data-id="{{id}}"
+          data-tooltip="{{localize 'OP2.Criatura.RolarAtaque'}}"><i class="fa-solid fa-hand-back-fist"></i></button>
+        <div class="op2-criatura-ataque__campos">
+          <div class="op2-criatura-ataque__linha">
+            <select name="system.ataques.{{id}}.alcance" {{#unless @root.editavel}}disabled{{/unless}}>
+              <option value="corpo" {{#if corpo}}selected{{/if}}>{{localize "OP2.Criatura.CorpoACorpo"}}</option>
+              <option value="distancia" {{#unless corpo}}selected{{/unless}}>{{localize "OP2.Criatura.Distancia"}}</option>
+            </select>
+            <input type="text" class="op2-criatura-ataque__nome" name="system.ataques.{{id}}.nome" value="{{nome}}" placeholder="{{localize 'OP2.Criatura.Nome'}}" {{#unless @root.editavel}}disabled{{/unless}}>
+            {{#if @root.editavel}}<button type="button" class="op2-botao-icone" data-action="removerAtaque" data-colecao="ataques" data-id="{{id}}" data-tooltip="{{localize 'OP2.Criatura.Remover'}}"><i class="fa-solid fa-xmark"></i></button>{{/if}}
+          </div>
+          <div class="op2-criatura-ataque__linha">
+            <label>{{localize "OP2.Criatura.Teste"}} <input type="text" name="system.ataques.{{id}}.dados" value="{{dados}}" placeholder="2d6" {{#unless @root.editavel}}disabled{{/unless}}></label>
+            <span class="op2-criatura-ataque__icones">{{{icones}}}</span>
+            <label>{{localize "OP2.Criatura.Dano"}} <input type="text" name="system.ataques.{{id}}.dano" value="{{dano}}" placeholder="RA+1" {{#unless @root.editavel}}disabled{{/unless}}></label>
+          </div>
+          <input type="text" name="system.ataques.{{id}}.nota" value="{{nota}}" placeholder="{{localize 'OP2.Criatura.Nota'}}" {{#unless @root.editavel}}disabled{{/unless}}>
+        </div>
+      </div>
+    {{else}}
+      <p class="op2-vazio">{{localize "OP2.Criatura.SemAtaques"}}</p>
+    {{/each}}
+  </section>
+
+  <section class="op2-npc-secao op2-moldura">
+    <div class="op2-painel__topo">
+      <span class="op2-tag op2-tag--secao">{{localize "OP2.Criatura.Habilidades"}}</span>
+      {{#if editavel}}<button type="button" class="op2-botao op2-botao--fantasma" data-action="adicionarHabilidade"><i class="fa-solid fa-plus"></i> {{localize "OP2.Criatura.AdicionarHabilidade"}}</button>{{/if}}
+    </div>
+    {{#each habilidades}}
+      <details class="op2-criatura-habilidade">
+        <summary>
+          <input type="text" name="system.habilidades.{{id}}.nome" value="{{nome}}" {{#unless @root.editavel}}disabled{{/unless}}>
+          <button type="button" class="op2-botao-icone" data-action="mostrarHabilidade" data-id="{{id}}" data-tooltip="{{localize 'OP2.Criatura.MostrarNoChat'}}"><i class="fa-solid fa-comment"></i></button>
+          {{#if @root.editavel}}<button type="button" class="op2-botao-icone" data-action="removerHabilidade" data-colecao="habilidades" data-id="{{id}}" data-tooltip="{{localize 'OP2.Criatura.Remover'}}"><i class="fa-solid fa-xmark"></i></button>{{/if}}
+        </summary>
+        <textarea name="system.habilidades.{{id}}.texto" rows="5" {{#unless @root.editavel}}disabled{{/unless}}>{{texto}}</textarea>
+      </details>
+    {{else}}
+      <p class="op2-vazio">{{localize "OP2.Criatura.SemHabilidades"}}</p>
+    {{/each}}
+    <label class="op2-criatura-rd">{{localize "OP2.Criatura.ReducaoDano"}}
+      <input type="number" name="system.reducaoDano" value="{{sistema.reducaoDano}}" min="0" step="1" {{#unless editavel}}disabled{{/unless}}></label>
+  </section>
+
+  <section class="op2-npc-secao op2-moldura">
+    <span class="op2-tag op2-tag--secao">{{localize "OP2.Criatura.Estrategia"}}</span>
+    {{formInput fields.estrategia value=sistema.estrategia enriched=estrategiaEnriquecida
+      toggled=true editable=editavel name="system.estrategia"}}
+  </section>
+
+  <section class="op2-npc-secao op2-npc-secao--notas op2-moldura">
+    <span class="op2-tag op2-tag--secao">{{localize "OP2.Secao.Notas"}}</span>
+    {{formInput fields.notas value=sistema.notas enriched=notasEnriquecidas
+      toggled=true editable=editavel name="system.notas"}}
+  </section>
+</div>

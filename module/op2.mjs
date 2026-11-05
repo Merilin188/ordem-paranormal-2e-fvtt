@@ -4,11 +4,13 @@
  */
 import { registrarEfeitosDoMundo } from "./cena/efeitos-mundo.mjs";
 import { registrarFurtividade, abrirFurtividade } from "./cena/furtividade.mjs";
+import { registrarPerseguicao, abrirPerseguicao } from "./cena/perseguicao.mjs";
 import { registrarVinhetaLoucura } from "./ui/vinheta-loucura.mjs";
 import { registrarExcluirDesafio } from "./cena/excluir-desafio.mjs";
 import { SYSTEM_ID, OP2, ICONES_PADRAO } from "./config.mjs";
 import { PersonagemData } from "./data/actor-personagem.mjs";
 import { NpcData } from "./data/actor-npc.mjs";
+import { CriaturaData } from "./data/actor-criatura.mjs";
 import { HabilidadeData } from "./data/item-habilidade.mjs";
 import { EquipamentoData } from "./data/item-equipamento.mjs";
 import { FerramentaData } from "./data/item-ferramenta.mjs";
@@ -19,6 +21,7 @@ import { OcupacaoData } from "./data/item-ocupacao.mjs";
 import { InvestigacaoData } from "./data/actor-investigacao.mjs";
 import { PersonagemSheet } from "./sheets/actor-personagem-sheet.mjs";
 import { NpcSheet } from "./sheets/actor-npc-sheet.mjs";
+import { CriaturaSheet } from "./sheets/actor-criatura-sheet.mjs";
 import { InvestigacaoSheet } from "./sheets/actor-investigacao-sheet.mjs";
 import { OP2ItemSheet } from "./sheets/item-sheet.mjs";
 import { PontoInteresseSheet } from "./sheets/item-ponto-interesse-sheet.mjs";
@@ -85,6 +88,7 @@ Hooks.once("init", () => {
 
   CONFIG.Actor.dataModels.personagem = PersonagemData;
   CONFIG.Actor.dataModels.npc = NpcData;
+  CONFIG.Actor.dataModels.criatura = CriaturaData;
   CONFIG.Actor.dataModels.investigacao = InvestigacaoData;
   CONFIG.Item.dataModels.habilidade = HabilidadeData;
   CONFIG.Item.dataModels.equipamento = EquipamentoData;
@@ -133,6 +137,7 @@ Hooks.once("init", () => {
   registrarEquilibrio();
   registrarGuiaCombate();
   registrarFurtividade();
+  registrarPerseguicao();
   registrarVinhetaLoucura();
 
   // Sem iniciativa rolada: os jogadores decidem a ordem entre si (spec §5.2).
@@ -165,6 +170,7 @@ Hooks.once("init", () => {
     alternarJaAgiu, alternarOculto, moverParticipante,
     marcarNoMapa, desmarcarDoMapa, abrirMarcador,
     furtividade: abrirFurtividade,
+    perseguicao: abrirPerseguicao,
     aventuras: abrirAventurasApp, boasVindas: abrirBoasVindas,
   };
 });
@@ -288,6 +294,9 @@ function registrarSheets() {
   });
   Actors.registerSheet(SYSTEM_ID, NpcSheet, {
     types: ["npc"], makeDefault: true, label: "OP2.Ficha.Npc",
+  });
+  Actors.registerSheet(SYSTEM_ID, CriaturaSheet, {
+    types: ["criatura"], makeDefault: true, label: "OP2.Ficha.Criatura",
   });
   Actors.registerSheet(SYSTEM_ID, InvestigacaoSheet, {
     types: ["investigacao"], makeDefault: true, label: "OP2.Ficha.Investigacao",

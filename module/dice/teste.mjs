@@ -31,7 +31,7 @@ import {
  */
 export async function rolarTeste(ator, {
   chavePericia, chaveAtributo, dt, oposto = false, semDT = false, contexto, rapido = false,
-  semCard = false, dadosExtras = [], ocultoDoMestre = false,
+  semCard = false, dadosExtras = [], ocultoDoMestre = false, passos = null,
 } = {}) {
   const sistema = ator.system;
   const pericia = sistema.resolverChave(chavePericia);
@@ -60,6 +60,8 @@ export async function rolarTeste(ator, {
     dadosExtras,
     // Ajuda recebida e ainda não usada (spec §4.7): entra como passo já aplicado
     // no dado que o setting `ajudaAlvo` indica, e some depois desta rolagem.
+    // Passos que a cena impõe (perseguição: esforço extra, vala oculta).
+    passos,
     ajuda: ator.system.estado?.ajuda?.passos
       ? { ...ator.system.estado.ajuda, alvo: lerConfig("ajudaAlvo") }
       : null,
@@ -160,7 +162,7 @@ export async function rolarTeste(ator, {
 function configuracaoRapida(ator, base) {
   // Sem diálogo, a ajuda pendente precisa entrar aqui — senão o modo rápido
   // (macros, cards, testes) ignoraria silenciosamente o passo do aliado.
-  const passosDaAjuda = (tipo) => (base.ajuda && base.ajuda.alvo === tipo ? base.ajuda.passos : 0);
+  const passosDaAjuda = (tipo) => (base.ajuda && base.ajuda.alvo === tipo ? base.ajuda.passos : 0) + (base.passos?.[tipo] ?? 0);
 
   const componentes = [
     {
@@ -227,7 +229,12 @@ export function htmlDoTeste(roll, ator) {
   const resultado = roll.resultado;
   // Teste de ataque (Luta/Pontaria): oferece o dano com o modificador da arma equipada.
   const ehAtaque = ["luta", "pontaria"].includes(roll.options.chavePericia);
-  const arma = ehAtaque ? melhorArma(ator) : null;
+  // Criatura: o dano vem do próprio ataque ("RA+1", "RB+2").
+  const danoCriatura = roll.options.danoCriatura ?? null;
+  const armaItem = ehAtaque && !roll.options.semArma ? melhorArma(ator) : null;
+  const arma = danoCriatura
+    ? { name: danoCriatura.nome, system: { danoBonus: danoCriatura.bonus } }
+    : armaItem;
   // Dado extra do crítico (botão no card): soma no total e no dano da arma.
   const bonusCritico = roll.options.bonusCritico ?? null;
   const extra = bonusCritico?.valor ?? 0;
@@ -237,7 +244,7 @@ export function htmlDoTeste(roll, ator) {
   const baseDano = bonusCritico
     ? (roll.dados ?? []).filter((d) => d.contado !== false && !d.pavor && !d.consumido).map((d) => d.resultado)
       .concat(extra).sort((x, y) => y - x).slice(0, 2).reduce((t, v) => t + v, 0)
-    : resultado.ra;
+    : (danoCriatura?.base === "rb" ? resultado.rb : resultado.ra);
   return renderizar("systems/ordem-paranormal-2e/templates/chat/teste.hbs", {
     rotulo: roll.options.rotulo,
     componentes: roll.dados,

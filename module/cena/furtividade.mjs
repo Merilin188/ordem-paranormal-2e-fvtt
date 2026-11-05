@@ -215,13 +215,13 @@ async function executarTabela(valor) {
 const espera = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /** A lista que acende de cima para baixo, desacelera e para em `final`. Roda em todos os clientes. */
-async function animarSorteio({ itens, final, passos }) {
+export async function animarSorteio({ itens, final, passos, titulo = null }) {
   document.getElementById("op2-sorteio-tela")?.remove();
   const tela = document.createElement("div");
   tela.id = "op2-sorteio-tela";
   tela.className = "op2 op2-sorteio-tela";
   tela.innerHTML = `<div class="op2-sorteio-tela__caixa">
-    <h3>${esc(L("SorteioTitulo"))}</h3>
+    <h3>${esc(titulo ?? L("SorteioTitulo"))}</h3>
     <ul class="op2-furt-sorteio__lista">${itens.map((p) => `<li><img src="${esc(p.img)}" alt=""><span>${esc(p.nome)}</span></li>`).join("")}</ul>
   </div>`;
   document.body.append(tela);
@@ -632,6 +632,14 @@ export function abrirFurtividade() {
 
 /* -- vinheta e animações ------------------------------------------------------ */
 
+/** Quem pediu a vinheta (furtividade, perseguição): ela fica enquanto houver algum. */
+const fontesVinheta = new Set();
+export function ligarVinheta(fonte, ativa) {
+  if (ativa) fontesVinheta.add(fonte);
+  else fontesVinheta.delete(fonte);
+  atualizarVinheta(fontesVinheta.size > 0);
+}
+
 function atualizarVinheta(ativa) {
   let vinheta = document.getElementById("op2-vinheta-furtividade");
   const ligar = ativa && game.settings.get(SYSTEM_ID, "vinhetaFurtividade");
@@ -650,7 +658,7 @@ function atualizarVinheta(ativa) {
 }
 
 /** Tela de "encontrado": vulto, garras e o retrato manchando de vermelho. */
-function mostrarEncontrado(uuid) {
+export function mostrarEncontrado(uuid, rotulo = null) {
   const doc = ator(uuid);
   if (!doc) return;
   const el = document.createElement("div");
@@ -660,7 +668,7 @@ function mostrarEncontrado(uuid) {
     <div class="op2-encontrado__retrato"><img src="${esc(doc.img)}" alt="">
       <span class="op2-encontrado__garra g1"></span><span class="op2-encontrado__garra g2"></span><span class="op2-encontrado__garra g3"></span>
     </div>
-    <div class="op2-encontrado__texto"><small>${esc(L("Encontrado"))}</small><strong>${esc(doc.name)}</strong></div>`;
+    <div class="op2-encontrado__texto"><small>${esc(rotulo ?? L("Encontrado"))}</small><strong>${esc(doc.name)}</strong></div>`;
   document.body.append(el);
   tocarAviso();
   setTimeout(() => el.remove(), 4600);
@@ -676,7 +684,7 @@ function tocarAviso() {
  * zumbido baixo por baixo. Volume baixo, pelo volume de interface do Foundry.
  * @param {number} duracao segundos
  */
-function tocarBatimento(duracao = 4.4) {
+export function tocarBatimento(duracao = 4.4) {
   try {
     const Contexto = window.AudioContext ?? window.webkitAudioContext;
     if (!Contexto) return;
@@ -744,7 +752,7 @@ let estavaAtiva = false;
 
 function aoMudar(valor) {
   const e = { ...VAZIO(), ...(valor ?? {}) };
-  atualizarVinheta(e.ativa);
+  ligarVinheta("furtividade", e.ativa);
   if (e.ativa && !estavaAtiva) abrirFurtividade();
   estavaAtiva = e.ativa;
   atualizarBotao(e.ativa);
@@ -800,7 +808,7 @@ export function registrarFurtividade() {
   game.settings.register(SYSTEM_ID, "vinhetaFurtividade", {
     name: "OP2.Furtividade.VinhetaNome", hint: "OP2.Furtividade.VinhetaDica",
     scope: "client", config: true, type: Boolean, default: true,
-    onChange: () => atualizarVinheta(estadoFurtividade().ativa),
+    onChange: () => atualizarVinheta(fontesVinheta.size > 0),
   });
   registrarAcaoDeMestre("op2Furtividade", executar);
   registrarAcaoDeChat("furtividade-sopro", soproNaNuca);
@@ -814,7 +822,7 @@ export function registrarFurtividade() {
     estavaAtiva = e.ativa;
     criarBotao();
     atualizarBotao(e.ativa);
-    atualizarVinheta(e.ativa);
+    ligarVinheta("furtividade", e.ativa);
     ajustarVinhetaDeDano();
   });
   Hooks.on("collapseSidebar", () => setTimeout(posicionarBotao, 400));

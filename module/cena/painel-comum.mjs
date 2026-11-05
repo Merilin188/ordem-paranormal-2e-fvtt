@@ -241,7 +241,7 @@ export function PainelInvestigacaoMixin(Base) {
       const jaAgiu = (investigacao?.system.jaAgiram ?? []).includes(ator.uuid);
       return {
         id: ator.id, uuid: ator.uuid, nome: ator.name, img: ator.img, tipo: ator.type,
-        ehNpc: ator.type === "npc", jaAgiu, oculto,
+        ehNpc: ["npc", "criatura"].includes(ator.type), jaAgiu, oculto,
       };
     }
 
@@ -724,7 +724,7 @@ export function PainelInvestigacaoMixin(Base) {
       }
       if (dados?.type === "Actor") {
         const ator = await fromUuid(dados.uuid);
-        if (["personagem", "npc"].includes(ator?.type)) await adicionarParticipante(investigacao, ator.uuid);
+        if (["personagem", "npc", "criatura"].includes(ator?.type)) await adicionarParticipante(investigacao, ator.uuid);
         return;
       }
       if (dados?.type === "Item") {
