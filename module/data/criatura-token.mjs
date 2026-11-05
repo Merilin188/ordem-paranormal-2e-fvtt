@@ -1,18 +1,18 @@
 /**
- * Token de criatura: nome e barra de PV só para o dono (o mestre). O modo OWNER
- * mostra sempre a quem é dono e nunca aos outros, nem passando o mouse.
+ * Token de criatura: nome e barra de PV só para o dono (o mestre) e só enquanto ele
+ * passa o mouse (OWNER_HOVER). Jogadores não veem nada, nem passando o mouse.
  */
 import { SYSTEM_ID } from "../config.mjs";
 
 const PADRAO = () => ({
-  displayName: CONST.TOKEN_DISPLAY_MODES.OWNER,
-  displayBars: CONST.TOKEN_DISPLAY_MODES.OWNER,
+  displayName: CONST.TOKEN_DISPLAY_MODES.OWNER_HOVER,
+  displayBars: CONST.TOKEN_DISPLAY_MODES.OWNER_HOVER,
 });
 
 /** Uma vez por mundo: criaturas e tokens de criatura que já existem. */
 async function migrar() {
   if (game.users.activeGM?.id !== game.user.id) return;
-  if (game.settings.get(SYSTEM_ID, "tokensCriaturaOcultos")) return;
+  if (game.settings.get(SYSTEM_ID, "tokensCriaturaPassarMouse")) return;
   const modo = PADRAO();
   for (const ator of game.actors.filter((a) => a.type === "criatura")) {
     await ator.update({ "prototypeToken.displayName": modo.displayName, "prototypeToken.displayBars": modo.displayBars });
@@ -21,11 +21,11 @@ async function migrar() {
     const mudancas = cena.tokens.filter((t) => t.actor?.type === "criatura").map((t) => ({ _id: t.id, ...modo }));
     if (mudancas.length) await cena.updateEmbeddedDocuments("Token", mudancas);
   }
-  await game.settings.set(SYSTEM_ID, "tokensCriaturaOcultos", true);
+  await game.settings.set(SYSTEM_ID, "tokensCriaturaPassarMouse", true);
 }
 
 export function registrarTokenDeCriatura() {
-  game.settings.register(SYSTEM_ID, "tokensCriaturaOcultos", { scope: "world", config: false, type: Boolean, default: false });
+  game.settings.register(SYSTEM_ID, "tokensCriaturaPassarMouse", { scope: "world", config: false, type: Boolean, default: false });
 
   // Criatura nova: hostil, barra de PV, nome e barra só para o mestre.
   Hooks.on("preCreateActor", (ator) => {
