@@ -59,7 +59,7 @@ export async function encerrarDeclaracao(combate) {
   const e = estadoDe(combate);
   if (!e?.ativo || !game.user.isGM) return;
   await combate.update({ turn: 0, [`flags.${SYSTEM_ID}.${FLAG}`]: { ...e, ativo: false } });
-  const faltando = combate.combatants.filter((c) => c.initiative === null || c.initiative === undefined).map((c) => c.name);
+  const faltando = combate.combatants.filter((c) => !c.getFlag(SYSTEM_ID, "antecipacao") && (c.initiative === null || c.initiative === undefined)).map((c) => c.name);
   if (faltando.length) {
     ui.notifications.info(game.i18n.format("OP2.Declaracao.Faltaram", { nomes: faltando.join(", ") }));
   }
@@ -75,6 +75,7 @@ class DeclaracaoApp extends HandlebarsApplicationMixin(ApplicationV2) {
     position: { width: 440, height: "auto", top: 90 },
     actions: {
       fase: DeclaracaoApp.#fase,
+      antecipar: DeclaracaoApp.#antecipar,
       pausar: DeclaracaoApp.#pausar,
       mais: DeclaracaoApp.#mais,
       encerrar: DeclaracaoApp.#encerrar,
@@ -90,7 +91,9 @@ class DeclaracaoApp extends HandlebarsApplicationMixin(ApplicationV2) {
   async _prepareContext() {
     const combate = this.combate;
     const e = estadoDe(combate);
-    const meus = (combate?.combatants ?? []).filter((c) => game.user.isGM || c.isOwner);
+    const { podeAntecipar, antecipadosDe, poderDe } = await import("./poderes.mjs");
+    const antecipados = antecipadosDe(combate);
+    const meus = (combate?.combatants ?? []).filter((c) => (game.user.isGM || c.isOwner) && !c.getFlag(SYSTEM_ID, "antecipacao"));
     return {
       ehGM: game.user.isGM,
       rodada: combate?.round ?? 0,
@@ -101,6 +104,13 @@ class DeclaracaoApp extends HandlebarsApplicationMixin(ApplicationV2) {
           id: c.id, nome: c.name, img: c.img ?? c.token?.texture?.src ?? c.actor?.img, npc: c.isNPC,
           fases: Object.keys(FASES_COMBATE).map((f) => ({ chave: f, rotulo: game.i18n.localize(`OP2.Combate.Fase.${f}`), ativa: f === fase })),
           declarado: Boolean(fase),
+          antecipacao: {
+            usada: antecipados.includes(c.actorId),
+            pode: podeAntecipar({
+              rodada: combate.round, temHabilidade: Boolean(poderDe(c.actor, "antecipacao")),
+              jaUsou: antecipados.includes(c.actorId), ehNpc: c.isNPC,
+            }),
+          },
         };
       }),
     };
@@ -140,6 +150,16 @@ class DeclaracaoApp extends HandlebarsApplicationMixin(ApplicationV2) {
     const c = this.combate?.combatants.get(alvo.dataset.id);
     if (!c?.isOwner) return;
     await c.update({ initiative: FASES_COMBATE[alvo.dataset.fase] });
+  }
+
+  /** Antecipação Tática na janela: 2 PD, rodada extra antes de todos. */
+  static async #antecipar(_evento, alvo) {
+    const c = this.combate?.combatants.get(alvo.dataset.id);
+    if (!c?.isOwner || !c.actor) return;
+    alvo.disabled = true;
+    const { anteciparNoCombate } = await import("./poderes.mjs");
+    await anteciparNoCombate(c.actor, this.combate);
+    this.render();
   }
 
   static async #pausar() { await pausar(this.combate); }

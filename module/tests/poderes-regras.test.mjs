@@ -20,3 +20,15 @@ test("Analise e Mentoria viram notas do card", async () => {
   assert.deepEqual(ajustesDoTeste("Muirenn", [3, 4], [3, 4], 0, 1, 4), [{ tipo: "mentoria", nome: "Muirenn", de: 4, para: 4 }]);
   assert.deepEqual(ajustesDoTeste("Muirenn", [3, 4], [3, 4], 0, null, 4), [{ tipo: "mentoriaRecusada", nome: "Muirenn", valor: 4 }]);
 });
+
+test("Antecipacao Tatica: so na primeira rodada, uma vez, personagem com a habilidade", async () => {
+  const { instalarStubs } = await import("./stub-foundry.mjs");
+  instalarStubs();
+  const { podeAntecipar } = await import("../cena/poderes.mjs");
+  const base = { rodada: 1, temHabilidade: true, jaUsou: false, ehNpc: false };
+  assert.equal(podeAntecipar(base), true);
+  assert.equal(podeAntecipar({ ...base, rodada: 2 }), false);
+  assert.equal(podeAntecipar({ ...base, jaUsou: true }), false);
+  assert.equal(podeAntecipar({ ...base, temHabilidade: false }), false);
+  assert.equal(podeAntecipar({ ...base, ehNpc: true }), false);
+});

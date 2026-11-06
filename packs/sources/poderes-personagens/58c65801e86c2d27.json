@@ -6,7 +6,7 @@
     "perfil": "",
     "custo": "2 PD",
     "custoPD": 0,
-    "descricao": "<p>No <strong>início de qualquer combate</strong>, você pode <strong>gastar 2 PD</strong>. Se fizer isso, ganha uma rodada na qual pode agir <strong>antes dos demais personagens e NPCs</strong> (botão <em>Usar</em>: vai para o topo da ordem).</p>",
+    "descricao": "<p>No <strong>início de qualquer combate</strong>, você pode <strong>gastar 2 PD</strong>. Se fizer isso, ganha uma rodada na qual pode agir <strong>antes dos demais personagens e NPCs</strong> (na janela de declaração da 1ª rodada ou no botão <em>Usar</em>: você age uma vez antes de todos, na fase <em>Antecipação</em>, e de novo na fase que declarar).</p>",
     "efeito": {
       "tipo": "nenhum",
       "passos": 1,

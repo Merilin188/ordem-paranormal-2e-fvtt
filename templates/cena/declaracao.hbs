@@ -15,6 +15,12 @@
             <button type="button" class="op2-fase-botao op2-fase-botao--{{chave}} {{#if ativa}}ativa{{/if}}" data-action="fase" data-id="{{../id}}" data-fase="{{chave}}">{{rotulo}}</button>
           {{/each}}
         </span>
+        {{#if antecipacao.pode}}
+          <button type="button" class="op2-fase-botao op2-fase-botao--antecipacao op2-declaracao__antecipar" data-action="antecipar" data-id="{{id}}"
+            data-tooltip="{{localize 'OP2.Poder.AntecipacaoDica'}}"><i class="fa-solid fa-forward-fast"></i> {{localize "OP2.Poder.AntecipacaoBotao"}}</button>
+        {{else if antecipacao.usada}}
+          <span class="op2-fase-botao op2-fase-botao--antecipacao ativa op2-declaracao__antecipar"><i class="fa-solid fa-forward-fast"></i> {{localize "OP2.Poder.AntecipacaoAtiva"}}</span>
+        {{/if}}
       </li>
     {{/each}}
   </ul>

@@ -1333,7 +1333,7 @@
       "MentoriaFalhou": "A mentoria para {nome} não funcionou.",
       "MentoriaSucesso": "{nome} pode trocar um dado do próximo teste por {ra} (rolagem alta do mentor).",
       "GuardiaUso": "{nome} gasta 2 PD e se coloca na frente: passa a ser o alvo do ataque.",
-      "AntecipacaoUso": "{nome} gasta 2 PD: nesta rodada age antes de todos os personagens e NPCs.",
+      "AntecipacaoUso": "{nome} spends 2 PD on Tactical Anticipation: gets an extra turn before everyone and still acts in the declared phase.",
       "LoboMachucado": "O lobo de {nome} tirou 1 e se machucou: não ajuda mais até o fim da cena.",
       "LoboFerido": "Lobo machucado nesta cena",
       "PlanoTitulo": "Plano Estratégico",
@@ -1373,7 +1373,11 @@
       "AnaliseNota": "{nome} spent {pontos} of analysis to turn a ({de}) into a ({para}).",
       "AnaliseNotaVarios": "{nome} spent {pontos} of analysis: {lista}.",
       "MentoriaNota": "{nome} used Mentoring: swapped the die ({de}) for the mentor's ({para}).",
-      "MentoriaRecusada": "{nome} did not use Mentoring: kept their own dice (the mentor's {valor} was not used)."
+      "MentoriaRecusada": "{nome} did not use Mentoring: kept their own dice (the mentor's {valor} was not used).",
+      "AntecipacaoSoNoInicio": "Tactical Anticipation only works in the first round of a combat, once per combat.",
+      "AntecipacaoBotao": "Anticipation (2 PD)",
+      "AntecipacaoAtiva": "Anticipation ✓",
+      "AntecipacaoDica": "Spend 2 PD: you act once before everyone (Anticipation phase) and again in your declared phase. First round only."
     },
     "PericiasMundo": {
       "MenuNome": "World skills",

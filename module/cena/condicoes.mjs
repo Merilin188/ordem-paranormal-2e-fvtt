@@ -2,6 +2,7 @@
  * Condições do sistema (no lugar das do core), iniciativa por fases de combate e os
  * gatilhos automáticos de PV/PD a zero e de Moribundo no fim da rodada.
  */
+import { SYSTEM_ID } from "../config.mjs";
 import { FASES_COMBATE, faseDoValor } from "./tabelas-dados.mjs";
 import { pedirTesteDeQueda } from "./ferimentos.mjs";
 import { iniciarDeclaracao } from "./declaracao.mjs";
@@ -77,7 +78,11 @@ export function criarClasseDeCombate(Base) {
 
     async #novaDeclaracao() {
       if (!game.user.isGM) return;
-      await this.updateEmbeddedDocuments("Combatant", this.combatants.map((c) => ({ _id: c.id, initiative: null })));
+      // A rodada extra da Antecipação Tática é só a primeira: a cópia sai na rodada 2.
+      const extras = this.combatants.filter((c) => c.getFlag(SYSTEM_ID, "antecipacao"));
+      if (this.round > 1 && extras.length) await this.deleteEmbeddedDocuments("Combatant", extras.map((c) => c.id));
+      const restantes = this.combatants.filter((c) => !c.getFlag(SYSTEM_ID, "antecipacao"));
+      await this.updateEmbeddedDocuments("Combatant", restantes.map((c) => ({ _id: c.id, initiative: null })));
       await iniciarDeclaracao(this);
     }
   };

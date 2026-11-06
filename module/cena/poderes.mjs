@@ -75,14 +75,52 @@ export async function usarPoder(ator, item) {
     }
     case "plano": return planoEstrategico(ator, item);
     case "arsenal": return usarArsenal(ator, item);
-    case "antecipacao": {
-      if (!(await pagarPD(ator, 2))) return null;
-      const combatente = game.combat?.combatants.find((c) => c.actor?.id === ator.id);
-      if (combatente) await comoMestre("op2DefinirIniciativa", { combateId: game.combat.id, id: combatente.id, valor: 4 });
-      return card(ator, item.name, P("AntecipacaoUso", { nome: esc(ator.name) }));
-    }
+    case "antecipacao": return anteciparNoCombate(ator);
     default: return null;
   }
+}
+
+/* ---- Antecipação Tática: uma rodada a mais, antes de todos, no início do combate ---- */
+
+/**
+ * Pode antecipar: combate na primeira rodada, personagem com a habilidade, ainda não
+ * usou neste combate. Pura, para a janela de declaração e para o teste.
+ */
+export function podeAntecipar({ rodada, temHabilidade, jaUsou, ehNpc }) {
+  return Boolean(temHabilidade) && !ehNpc && !jaUsou && Number(rodada) <= 1;
+}
+
+export const antecipadosDe = (combate) => combate?.getFlag(SYSTEM_ID, "antecipados") ?? [];
+
+/**
+ * Gasta 2 PD e põe uma cópia do combatente na fase "Antecipação" (antes de todos)
+ * — o original continua na fase que o jogador declarou. A cópia sai do combate no
+ * começo da rodada 2.
+ */
+export async function anteciparNoCombate(ator, combate = game.combat) {
+  const item = poderDe(ator, "antecipacao");
+  if (!item) return null;
+  const combatente = combate?.combatants.find((c) => c.actor?.id === ator.id && !c.getFlag(SYSTEM_ID, "antecipacao"));
+  const pode = combate?.started && combatente && podeAntecipar({
+    rodada: combate.round, temHabilidade: true, jaUsou: antecipadosDe(combate).includes(ator.id), ehNpc: false,
+  });
+  if (!pode) return void ui.notifications.warn(P("AntecipacaoSoNoInicio"));
+  if (!(await pagarPD(ator, 2))) return null;
+  await comoMestre("op2Antecipar", { combateId: combate.id, combatenteId: combatente.id });
+  return card(ator, item.name, P("AntecipacaoUso", { nome: esc(ator.name) }));
+}
+
+async function criarAntecipacao({ combateId, combatenteId }) {
+  const combate = game.combats.get(combateId);
+  const c = combate?.combatants.get(combatenteId);
+  if (!c) return;
+  const usados = antecipadosDe(combate);
+  if (usados.includes(c.actorId)) return;
+  await combate.setFlag(SYSTEM_ID, "antecipados", [...usados, c.actorId]);
+  await combate.createEmbeddedDocuments("Combatant", [{
+    tokenId: c.tokenId, sceneId: c.sceneId, actorId: c.actorId, hidden: c.hidden, initiative: 4,
+    flags: { [SYSTEM_ID]: { antecipacao: true, origem: c.id } },
+  }]);
 }
 
 /* ---- Análise: marcadores (máx. 4), +2 por ação, +1 ao se defender ---- */
@@ -458,6 +496,7 @@ export function registrarPoderes() {
   registrarAcaoDeMestre("op2AtualizarMensagem", async ({ id, content, rolls }) => {
     await game.messages.get(id)?.update(rolls ? { content, rolls } : { content });
   });
+  registrarAcaoDeMestre("op2Antecipar", criarAntecipacao);
   registrarAcaoDeMestre("op2DefinirIniciativa", async ({ combateId, id, valor }) => {
     await game.combats.get(combateId)?.combatants.get(id)?.update({ initiative: valor });
   });
