@@ -1792,6 +1792,11 @@
     "EfeitosCena": {
       "Nome": "Scene with FX Bus effects",
       "Dica": "Name (or id) of the scene that turns on FX Bus shake, blur and smear on the screen of everyone on it (players and GM). Leave empty to turn it off. Requires the FX Bus module."
+    },
+    "Dados3D": {
+      "Nome": "Standard 3D dice",
+      "Dica": "Everyone (GM and players) uses the same Dice So Nice finish: Pristine material, Signika font, high quality. Each die takes its user's color. Changes made in the Dice So Nice window return to the standard on the next login.",
+      "Recarregue": "3D dice set to the table standard. Reload the page (F5) to see the new quality."
     }
   }
 }

@@ -1792,6 +1792,11 @@
     "EfeitosCena": {
       "Nome": "Cena com efeitos do FX Bus",
       "Dica": "Nome (ou id) da cena que liga tremor, desfoque e rastro do FX Bus na tela de quem estiver nela (jogadores e mestre). Deixe vazio para desligar. Precisa do módulo FX Bus."
+    },
+    "Dados3D": {
+      "Nome": "Dados 3D padronizados",
+      "Dica": "Todos (mestre e jogadores) usam o mesmo acabamento do Dice So Nice: material Impecável, fonte Signika, qualidade alta. A cor do dado é a cor de cada usuário. Mudanças feitas na janela do Dice So Nice voltam ao padrão no próximo login.",
+      "Recarregue": "Dados 3D ajustados ao padrão da mesa. Recarregue a página (F5) para ver a qualidade nova."
     }
   }
 }
