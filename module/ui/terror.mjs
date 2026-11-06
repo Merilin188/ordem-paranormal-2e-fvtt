@@ -103,7 +103,7 @@ export function pararAmbientePerseguicao() {
 
 /* -- rugido da criatura (mais alto, para assustar) ---------------------------- */
 
-/** Rugido gravado (efeitos do Mixkit misturados); sem o arquivo, o sintético. */
+/** Rugido gravado (dois efeitos do Mixkit misturados); sem o arquivo, o sintético. */
 export function tocarRugido() {
   const volume = volumeDeInterface();
   if (volume <= 0) return;

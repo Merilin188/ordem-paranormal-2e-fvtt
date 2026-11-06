@@ -94,19 +94,31 @@ async function vincularTokens() {
 }
 
 /** Personagem do jogador morto: a tela inteira perde as cores. */
+/**
+ * Personagem do jogador morto: a tela inteira perde as cores. Vale para todo
+ * personagem de que o jogador é dono (não só o atribuído no perfil: o jogador
+ * pode controlar outro personagem na mesa) e para os tokens dele na cena.
+ */
+function meusPersonagens() {
+  const meus = game.actors.filter((a) => a.type === "personagem" && a.testUserPermission(game.user, "OWNER"));
+  const tokens = canvas?.tokens?.placeables?.map((t) => t.actor).filter((a) => a?.type === "personagem" && a.isOwner) ?? [];
+  return [...meus, ...tokens];
+}
+
 function atualizarMorte() {
-  const meu = game.user?.character;
-  const morto = !game.user?.isGM && !!meu?.statuses?.has?.("morto");
+  const morto = !game.user?.isGM && meusPersonagens().some((a) => a.statuses?.has?.("morto"));
   document.body.classList.toggle("op2-tela-morta", morto);
 }
 
+const agendarMorte = () => setTimeout(atualizarMorte, 0);
+
 export function registrarVinhetaLoucura() {
   Hooks.once("ready", atualizarMorte);
-  for (const gancho of ["createActiveEffect", "deleteActiveEffect", "updateActiveEffect"]) {
-    Hooks.on(gancho, (efeito) => { if (efeito.parent?.id === game.user.character?.id) setTimeout(atualizarMorte, 0); });
+  Hooks.on("canvasReady", agendarMorte);
+  for (const gancho of ["createActiveEffect", "deleteActiveEffect", "updateActiveEffect", "updateActor", "updateToken"]) {
+    Hooks.on(gancho, agendarMorte);
   }
-  Hooks.on("updateActor", (ator) => { if (ator.id === game.user.character?.id) setTimeout(atualizarMorte, 0); });
-  Hooks.on("updateUser", (usuario) => { if (usuario.id === game.user.id) setTimeout(atualizarMorte, 0); });
+  Hooks.on("updateUser", (usuario) => { if (usuario.id === game.user.id) agendarMorte(); });
 
   game.settings.register(SYSTEM_ID, "vinhetaLoucura", {
     name: "OP2.Loucura.Nome", hint: "OP2.Loucura.Dica",
