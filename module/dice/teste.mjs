@@ -225,6 +225,18 @@ export function melhorArma(ator) {
 }
 
 /** HTML do card de resultado de um teste (o mesmo do chat). */
+/** "Rhiona gastou 2 pontos de análise para transformar um (3) em um (5)." */
+function notasDeAjuste(ajustes = []) {
+  const L = (chave, dados) => game.i18n.format(`OP2.Poder.${chave}`, dados);
+  return ajustes.map((a) => {
+    if (a.tipo === "mentoria") return L("MentoriaNota", { nome: a.nome, de: a.de, para: a.para });
+    const pontos = L(a.gastos === 1 ? "AnalisePonto" : "AnalisePontos", { n: a.gastos });
+    if (a.mudancas.length === 1) return L("AnaliseNota", { nome: a.nome, pontos, de: a.mudancas[0].de, para: a.mudancas[0].para });
+    const lista = a.mudancas.map((m) => `(${m.de}) → (${m.para})`).join(", ");
+    return L("AnaliseNotaVarios", { nome: a.nome, pontos, lista });
+  });
+}
+
 export function htmlDoTeste(roll, ator) {
   const resultado = roll.resultado;
   // Teste de ataque (Luta/Pontaria): oferece o dano com o modificador da arma equipada.
@@ -251,6 +263,7 @@ export function htmlDoTeste(roll, ator) {
     ...resultado,
     total: resultado.total + extra,
     bonusCritico,
+    notasAjuste: notasDeAjuste(roll.options.ajustes),
     arma: arma ? { nome: arma.name, bonus: arma.system.danoBonus, base: baseDano, dano: baseDano + arma.system.danoBonus } : null,
     atorId: ator.id,
     ehGM: game.user.isGM,

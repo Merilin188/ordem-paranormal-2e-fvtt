@@ -7,7 +7,7 @@
  * o que é passivo entra sozinho no cálculo (armadura, passo, crítico com 5…).
  */
 import { estadoFurtividade } from "./furtividade.mjs";
-import { dadosDoPlano } from "./poderes-regras.mjs";
+import { ajustesDoTeste, dadosDoPlano } from "./poderes-regras.mjs";
 import { estadoPerseguicao } from "./perseguicao.mjs";
 import { investigacaoAtiva } from "./investigacao-ativa.mjs";
 import { SYSTEM_ID } from "../config.mjs";
@@ -158,6 +158,9 @@ export async function ajustarDepoisDaRolagem(ator, roll) {
   });
 
   roll.dice.forEach((termo, i) => { termo.results[0].result = resultado.valores[i]; });
+  // O card conta o que mudou (como a nota da Prontidão); fica no roll e sobrevive a re-renders.
+  const ajustes = ajustesDoTeste(ator.name, dados.map((d) => d.valor), resultado.valores, resultado.gastos, resultado.mentoriaEm);
+  if (ajustes.length) roll.options.ajustes = [...(roll.options.ajustes ?? []), ...ajustes];
   if (resultado.gastos && analise) await analise.update({ "system.marcadores": marcadores - resultado.gastos });
   if (resultado.mentoriaEm !== null) await ator.update({ "system.estado.mentoria": 0 });
 }

@@ -1365,7 +1365,12 @@
       "ProntidaoRerrolar": "Rolar de novo",
       "ProntidaoNota": "Prontidão de {nome}: um dado foi de {antes} para {depois}.",
       "ProntidaoOposto": "{nome} gasta 2 PD para rerrolar um dado de {alvo}. Qual dado?",
-      "ProntidaoMorto": "Personagem morto não pode usar Prontidão."
+      "ProntidaoMorto": "Personagem morto não pode usar Prontidão.",
+      "AnalisePonto": "1 ponto",
+      "AnalisePontos": "{n} pontos",
+      "AnaliseNota": "{nome} gastou {pontos} de análise para transformar um ({de}) em um ({para}).",
+      "AnaliseNotaVarios": "{nome} gastou {pontos} de análise: {lista}.",
+      "MentoriaNota": "{nome} usou a Mentoria: um ({de}) virou um ({para})."
     },
     "PericiasMundo": {
       "MenuNome": "Perícias do mundo",

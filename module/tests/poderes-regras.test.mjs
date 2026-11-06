@@ -8,3 +8,12 @@ test("Plano Estrategico: passar da 1d6, e +1d6 a cada 3 acima da DT", () => {
   assert.equal(dadosDoPlano(13, true), 3);
   assert.equal(dadosDoPlano(6, false), 0);
 });
+
+test("Analise e Mentoria viram notas do card", async () => {
+  const { ajustesDoTeste } = await import("../cena/poderes-regras.mjs");
+  assert.deepEqual(ajustesDoTeste("Rhiona", [3, 10], [5, 10], 2), [
+    { tipo: "analise", nome: "Rhiona", gastos: 2, mudancas: [{ de: 3, para: 5 }] },
+  ]);
+  assert.deepEqual(ajustesDoTeste("Rhiona", [3, 4], [3, 6], 0, 1), [{ tipo: "mentoria", nome: "Rhiona", de: 4, para: 6 }]);
+  assert.deepEqual(ajustesDoTeste("Rhiona", [3, 4], [3, 4], 0), []);
+});

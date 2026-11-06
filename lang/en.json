@@ -1365,7 +1365,12 @@
       "ProntidaoRerrolar": "Rolar de novo",
       "ProntidaoNota": "Prontidão de {nome}: um dado foi de {antes} para {depois}.",
       "ProntidaoOposto": "{nome} spends 2 SP to reroll one of {alvo}'s dice. Which die?",
-      "ProntidaoMorto": "A dead character cannot use Readiness."
+      "ProntidaoMorto": "A dead character cannot use Readiness.",
+      "AnalisePonto": "1 point",
+      "AnalisePontos": "{n} points",
+      "AnaliseNota": "{nome} spent {pontos} of analysis to turn a ({de}) into a ({para}).",
+      "AnaliseNotaVarios": "{nome} spent {pontos} of analysis: {lista}.",
+      "MentoriaNota": "{nome} used Mentoring: a ({de}) became a ({para})."
     },
     "PericiasMundo": {
       "MenuNome": "World skills",

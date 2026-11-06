@@ -16,6 +16,9 @@
     <span class="op2-card__igual" aria-hidden="true">=</span>
     <span class="op2-card__total">{{total}}</span>
   </div>
+  {{#each notasAjuste}}
+    <p class="op2-prontidao-nota op2-analise-nota"><i class="fa-solid fa-magnifying-glass-chart" aria-hidden="true"></i> {{this}}</p>
+  {{/each}}
 
   {{#if pavor}}
     <div class="op2-pavor-faixa">
