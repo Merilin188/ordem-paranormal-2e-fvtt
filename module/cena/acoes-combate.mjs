@@ -48,7 +48,8 @@ export async function atacarComCriatura(ator, { rolar, dano = null, distancia = 
 }
 
 async function publicarAtaque(ator, alvo, roll, { armado, dano = null, distancia = false, nome = "" }) {
-  const conteudo = await renderizar(`systems/${SYSTEM_ID}/templates/chat/ataque.hbs`, {
+  // Os dados do card ficam na flag: a Guardiã re-renderiza o card com outro alvo.
+  const dados = {
     titulo: nome || game.i18n.localize("OP2.Combate.Atacar"),
     texto: game.i18n.format("OP2.Combate.Ataque", {
       atacante: ator.name, alvo: alvo.name, total: roll.total,
@@ -64,12 +65,13 @@ async function publicarAtaque(ator, alvo, roll, { armado, dano = null, distancia
     semRevidar: distancia,
     // O defensor escolhe: revidar (troca de golpes) ou só se defender (esquiva).
     dicaEsquiva: game.i18n.localize(distancia ? "OP2.Combate.EsquivaDicaDistancia" : "OP2.Combate.EsquivaDica"),
-  });
+  };
+  const conteudo = await renderizar(`systems/${SYSTEM_ID}/templates/chat/ataque.hbs`, dados);
 
   await ChatMessage.create({
     content: conteudo,
     speaker: ChatMessage.getSpeaker({ actor: ator }),
-    flags: { [SYSTEM_ID]: { tipo: "ataque", atorId: ator.id } },
+    flags: { [SYSTEM_ID]: { tipo: "ataque", atorId: ator.id, ataque: dados } },
   });
 }
 

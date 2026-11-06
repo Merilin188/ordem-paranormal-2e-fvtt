@@ -1377,7 +1377,15 @@
       "AntecipacaoSoNoInicio": "A Antecipação Tática só vale na primeira rodada de um combate, uma vez por combate.",
       "AntecipacaoBotao": "Antecipação (2 PD)",
       "AntecipacaoAtiva": "Antecipação ✓",
-      "AntecipacaoDica": "Gasta 2 PD: você age uma vez antes de todos (fase Antecipação) e de novo na fase que declarou. Só na primeira rodada."
+      "AntecipacaoDica": "Gasta 2 PD: você age uma vez antes de todos (fase Antecipação) e de novo na fase que declarou. Só na primeira rodada.",
+      "InstintoNota": "Passo de dados aumentado devido à Habilidade: {habilidade}.",
+      "GuardiaTitulo": "Guardiã",
+      "GuardiaPergunta": "{atacante} vai atacar {alvo} (total {total}). {guardia} pode gastar 2 PD para se tornar o alvo deste ataque.",
+      "GuardiaLembrete": "Vale uma vez por rodada, com o aliado em alcance curto.",
+      "GuardiaAceitar": "Tomar o golpe (2 PD)",
+      "GuardiaRecusar": "Deixar",
+      "GuardiaTrocou": "Guardiã: {guardia} se coloca na frente de {alvo} e passa a ser o alvo.",
+      "GuardiaTarde": "{alvo} já respondeu a este ataque: a Guardiã não pode mais trocar o alvo."
     },
     "PericiasMundo": {
       "MenuNome": "Perícias do mundo",

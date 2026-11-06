@@ -83,13 +83,13 @@ export class CriaturaSheet extends NpcSheet {
       nome: ataque.nome,
       dano,
       distancia: ataque.alcance === "distancia",
-      rolar: async (vitima) => {
+      rolar: async () => {
         const roll = OP2Roll.paraComponentes(
           dados.map((dado, i) => ({ chave: `ataque.${i}`, rotulo: ataque.nome, tipo: "extra", dado })),
           {
             dt: null,
             escopoCritico: lerConfig("escopoCritico"),
-            rotulo: `${ataque.nome} → ${vitima.name}${ataque.nota ? ` (${ataque.nota})` : ""}`,
+            rotulo: `${ataque.nome}${ataque.nota ? ` (${ataque.nota})` : ""}`,
             atorId: ator.id,
             chavePericia: "luta",
             semArma: true,

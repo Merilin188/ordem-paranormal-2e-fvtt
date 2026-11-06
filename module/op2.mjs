@@ -10,6 +10,7 @@ import { registrarSussurro, abrirCaixaDeSussurro } from "./ui/sussurro.mjs";
 import { registrarVinhetaLoucura } from "./ui/vinheta-loucura.mjs";
 import { registrarEfeitosDeCena } from "./ui/efeitos-cena.mjs";
 import { registrarDados3D } from "./ui/dados-3d.mjs";
+import { registrarGuardia } from "./cena/guardia.mjs";
 import { registrarExcluirDesafio } from "./cena/excluir-desafio.mjs";
 import { SYSTEM_ID, OP2, ICONES_PADRAO } from "./config.mjs";
 import { PersonagemData } from "./data/actor-personagem.mjs";
@@ -149,6 +150,7 @@ Hooks.once("init", () => {
   registrarVinhetaLoucura();
   registrarEfeitosDeCena();
   registrarDados3D();
+  registrarGuardia();
 
   // Sem iniciativa rolada: os jogadores decidem a ordem entre si (spec §5.2).
   CONFIG.Combat.initiative = { formula: "0", decimals: 0 };

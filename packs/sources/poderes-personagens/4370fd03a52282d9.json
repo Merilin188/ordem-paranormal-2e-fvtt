@@ -6,7 +6,7 @@
     "perfil": "",
     "custo": "",
     "custoPD": 0,
-    "descricao": "<p>Se você estiver com <strong>metade ou menos</strong> de seus PV máximos, recebe um <strong>aumento de passo em todos os testes</strong> (marcado sozinho no diálogo do teste).</p>",
+    "descricao": "<p>Se você estiver com <strong>metade ou menos</strong> de seus PV máximos, recebe um <strong>aumento de passo em todos os testes</strong> (marcado sozinho no diálogo do teste e avisado no card).</p>",
     "efeito": {
       "tipo": "passo",
       "passos": 1,

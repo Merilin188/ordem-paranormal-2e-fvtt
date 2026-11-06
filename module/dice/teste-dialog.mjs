@@ -243,6 +243,7 @@ export class TesteDialog extends HandlebarsApplicationMixin(ApplicationV2) {
       oposto: Boolean(oposto),
       gastarImpeto: this.estado.gastarImpeto,
       custoPD: this.custoDeExtras,
+      habilidades: [...this.estado.extras],
     });
     this.#resolver = null;
   }

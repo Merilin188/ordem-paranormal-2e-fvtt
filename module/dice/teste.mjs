@@ -69,6 +69,10 @@ export async function rolarTeste(ator, {
 
   const config = rapido ? configuracaoRapida(ator, base) : await TesteDialog.abrir({ ator, base });
   if (!config) return null;
+  // Habilidades que mudaram o passo e merecem nota no card (Instinto de Sobrevivência).
+  const notasDeHabilidade = (rapido ? [instintoAtivo(ator)?.id] : config.habilidades ?? [])
+    .map((id) => ator.items?.get(id)).filter((i) => i?.system?.automacao === "instinto")
+    .map((i) => ({ tipo: "instinto", habilidade: i.name }));
 
   // Habilidade com custo em PD ("gaste 2 PD para receber +d4"): cobra ao confirmar,
   // não ao marcar — desmarcar ou fechar o diálogo não pode custar nada.
@@ -117,6 +121,7 @@ export async function rolarTeste(ator, {
     chavePericia,
     modificador,
   });
+  if (notasDeHabilidade.length) roll.options.ajustes = [...(roll.options.ajustes ?? []), ...notasDeHabilidade];
 
   await roll.evaluate();
 
@@ -159,10 +164,19 @@ export async function rolarTeste(ator, {
 }
 
 /** Configuração sem diálogo: perícia + atributo pareado, DT padrão. */
+/** Instinto de Sobrevivência ligado agora (metade ou menos dos PV), ou null. */
+function instintoAtivo(ator) {
+  const pv = ator.system?.recursos?.pv;
+  if (!pv || (pv.value ?? 0) > (pv.max ?? 0) / 2) return null;
+  return ator.items?.find((i) => i.type === "habilidade" && i.system.automacao === "instinto") ?? null;
+}
+
 function configuracaoRapida(ator, base) {
   // Sem diálogo, a ajuda pendente precisa entrar aqui — senão o modo rápido
   // (macros, cards, testes) ignoraria silenciosamente o passo do aliado.
-  const passosDaAjuda = (tipo) => (base.ajuda && base.ajuda.alvo === tipo ? base.ajuda.passos : 0) + (base.passos?.[tipo] ?? 0);
+  const instinto = instintoAtivo(ator);
+  const passosDaAjuda = (tipo) => (base.ajuda && base.ajuda.alvo === tipo ? base.ajuda.passos : 0) + (base.passos?.[tipo] ?? 0)
+    + (tipo === "pericia" && instinto ? instinto.system.efeito?.passos ?? 1 : 0);
 
   const componentes = [
     {
@@ -231,6 +245,7 @@ function notasDeAjuste(ajustes = []) {
   return ajustes.map((a) => {
     if (a.tipo === "mentoria") return L("MentoriaNota", { nome: a.nome, de: a.de, para: a.para });
     if (a.tipo === "mentoriaRecusada") return L("MentoriaRecusada", { nome: a.nome, valor: a.valor });
+    if (a.tipo === "instinto") return L("InstintoNota", { habilidade: a.habilidade });
     const pontos = L(a.gastos === 1 ? "AnalisePonto" : "AnalisePontos", { n: a.gastos });
     if (a.mudancas.length === 1) return L("AnaliseNota", { nome: a.nome, pontos, de: a.mudancas[0].de, para: a.mudancas[0].para });
     const lista = a.mudancas.map((m) => `(${m.de}) → (${m.para})`).join(", ");

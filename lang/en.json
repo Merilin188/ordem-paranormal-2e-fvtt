@@ -1377,7 +1377,15 @@
       "AntecipacaoSoNoInicio": "Tactical Anticipation only works in the first round of a combat, once per combat.",
       "AntecipacaoBotao": "Anticipation (2 PD)",
       "AntecipacaoAtiva": "Anticipation ✓",
-      "AntecipacaoDica": "Spend 2 PD: you act once before everyone (Anticipation phase) and again in your declared phase. First round only."
+      "AntecipacaoDica": "Spend 2 PD: you act once before everyone (Anticipation phase) and again in your declared phase. First round only.",
+      "InstintoNota": "Dice step increased by the Ability: {habilidade}.",
+      "GuardiaTitulo": "Guardian",
+      "GuardiaPergunta": "{atacante} is about to attack {alvo} (total {total}). {guardia} may spend 2 PD to become the target of this attack.",
+      "GuardiaLembrete": "Once per round, with the ally within short range.",
+      "GuardiaAceitar": "Take the hit (2 PD)",
+      "GuardiaRecusar": "Let it be",
+      "GuardiaTrocou": "Guardian: {guardia} steps in front of {alvo} and becomes the target.",
+      "GuardiaTarde": "{alvo} already answered this attack: the Guardian can no longer change the target."
     },
     "PericiasMundo": {
       "MenuNome": "World skills",

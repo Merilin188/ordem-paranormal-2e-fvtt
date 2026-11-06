@@ -59,6 +59,9 @@ const ACOES = {
       ui.notifications.warn(game.i18n.localize("OP2.Aviso.SemPermissao"));
       return;
     }
+    // Respondeu: a Guardiã não troca mais o alvo deste ataque.
+    const { marcarAtaqueRespondido } = await import("../cena/guardia.mjs");
+    await marcarAtaqueRespondido(dataset.mensagemId);
     await defender(ator, {
       atacanteId: dataset.atacanteId,
       totalAtaque: Number(dataset.total),
