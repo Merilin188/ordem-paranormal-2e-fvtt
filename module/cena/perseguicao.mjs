@@ -497,7 +497,7 @@ async function avancar(doc, e, p) {
     await aplicarDano(doc, perda.total, "pv");
     await card(`<p>${esc(L("EsforcoPerdeu", { nome: doc.name, n: perda.total }))}</p>`);
   }
-  const pontos = pontosDoAvanco(roll.resultado ?? {});
+  const pontos = pontosDoAvanco(roll.resultado ?? {}, (roll.dadosDoTeste ?? []).filter((d) => d.contado !== false).map((d) => d.resultado));
   await card(`<p><i class="fa-solid fa-person-running"></i> ${esc(L("Avancou", { nome: doc.name, n: pontos }))}</p>`);
   await pedir("avanco", { uuid: doc.uuid, pontos, chave: escolha.chave, folegoUsado: escolha.folego, esforco: escolha.esforco });
 }

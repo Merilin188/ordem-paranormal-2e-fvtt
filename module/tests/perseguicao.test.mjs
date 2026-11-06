@@ -15,6 +15,7 @@ test("esforço extra cresce 1d4 por uso", () => {
 test("avanço: RA se passou, RB se falhou", () => {
   assert.equal(pontosDoAvanco({ sucesso: true, ra: 6, rb: 2 }), 6);
   assert.equal(pontosDoAvanco({ sucesso: false, ra: 6, rb: 2 }), 2);
+  assert.equal(pontosDoAvanco({ sucesso: true, ra: 6, rb: 4, critico: true }, [6, 4, 6]), 12);
 });
 
 test("corte: só o de menor PA abaixo do limite é alcançado; empate pede teste oposto", () => {

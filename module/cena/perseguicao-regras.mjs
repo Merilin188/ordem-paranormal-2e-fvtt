@@ -20,8 +20,15 @@ export const folegoInicial = (dadoVigor) => Math.floor(faces(dadoVigor) / 2);
 /** Esforço extra: 1d4 na primeira vez, 2d4 na segunda… */
 export const formulaDoEsforco = (usosAnteriores = 0) => `${usosAnteriores + 1}d4`;
 
-/** Passou: pontos = RA. Falhou: pontos = RB. */
-export const pontosDoAvanco = ({ sucesso, ra, rb }) => (sucesso ? ra : rb);
+/**
+ * Passou: pontos = RA. Falhou: pontos = RB. Crítico: as duas rolagens mais altas
+ * somadas (como o crítico soma mais uma rolagem nos testes estendidos).
+ * `valores`: os resultados dos dados que contam no teste.
+ */
+export function pontosDoAvanco({ sucesso, ra, rb, critico = false }, valores = []) {
+  if (critico && valores.length >= 2) return [...valores].sort((a, b) => b - a).slice(0, 2).reduce((t, v) => t + v, 0);
+  return sucesso ? ra : rb;
+}
 
 /**
  * Quem é alcançado no fim da rodada. `alvo` quando há um só com a menor
