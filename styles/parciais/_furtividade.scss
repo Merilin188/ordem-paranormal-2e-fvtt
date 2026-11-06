@@ -434,7 +434,6 @@ body.op2-tela-morta { filter: grayscale(1); transition: filter 3s ease; }
 
 @layer system {
   .op2-pers-empate__mestre button { width: 100%; min-height: 2.4rem; font-size: 0.85rem; line-height: 1.2; padding: 0.4rem 0.5rem; white-space: normal; }
-  .op2-sussurro-janela__exemplo { margin: -0.3rem 0 0; font-style: italic; }
   .op2-op__prontidao { margin-top: 0.3rem; width: auto; font-size: 0.7rem; }
   .op2-op__prontidao-nota { display: block; font-size: 0.7em; color: #e6c46a; }
   .op2-op__resolver { display: flex; justify-content: center; margin-top: 0.4rem; button { width: auto; } }

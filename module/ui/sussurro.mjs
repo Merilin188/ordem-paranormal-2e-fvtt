@@ -136,7 +136,6 @@ export async function abrirCaixaDeSussurro() {
           ${esc(u.name)}${u.character ? ` <em>(${esc(u.character.name)})</em>` : ""}${u.active ? "" : ` <small>${esc(L("Offline"))}</small>`}</label>`).join("")}
       </fieldset>
       <label>${esc(L("SuaMensagem"))}<textarea name="pergunta" rows="4" placeholder="${esc(L("Placeholder"))}"></textarea></label>
-      <p class="op2-dica op2-sussurro-janela__exemplo">${esc(L("Placeholder"))}</p>
       <div class="op2-sussurro-janela__soltar" data-op2-sussurro-soltar>
         <i class="fa-solid fa-gift"></i> ${esc(L("ArrasteItens"))}
         <ul data-op2-sussurro-lista></ul>
@@ -145,12 +144,7 @@ export async function abrirCaixaDeSussurro() {
     render: (_ev, dialogo) => {
       const raiz = dialogo.element;
       const campo = raiz.querySelector("[name=pergunta]");
-      const exemplo = raiz.querySelector(".op2-sussurro-janela__exemplo");
-      if (campo) {
-        campo.placeholder = L("Placeholder");
-        // O exemplo some quando o mestre começa a escrever.
-        campo.addEventListener("input", () => { if (exemplo) exemplo.hidden = !!campo.value; });
-      }
+      if (campo) campo.placeholder = L("Placeholder");
       const zona = raiz.querySelector("[data-op2-sussurro-soltar]");
       const lista = raiz.querySelector("[data-op2-sussurro-lista]");
       const desenhar = () => {
