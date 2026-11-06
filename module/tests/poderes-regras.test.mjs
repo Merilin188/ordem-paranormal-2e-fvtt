@@ -16,4 +16,7 @@ test("Analise e Mentoria viram notas do card", async () => {
   ]);
   assert.deepEqual(ajustesDoTeste("Rhiona", [3, 4], [3, 6], 0, 1), [{ tipo: "mentoria", nome: "Rhiona", de: 4, para: 6 }]);
   assert.deepEqual(ajustesDoTeste("Rhiona", [3, 4], [3, 4], 0), []);
+  // Troca por um valor igual ainda conta como troca; recusar também vira nota.
+  assert.deepEqual(ajustesDoTeste("Muirenn", [3, 4], [3, 4], 0, 1, 4), [{ tipo: "mentoria", nome: "Muirenn", de: 4, para: 4 }]);
+  assert.deepEqual(ajustesDoTeste("Muirenn", [3, 4], [3, 4], 0, null, 4), [{ tipo: "mentoriaRecusada", nome: "Muirenn", valor: 4 }]);
 });

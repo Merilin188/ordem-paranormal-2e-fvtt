@@ -10,17 +10,19 @@ export function dadosDoPlano(total, sucesso, dt = 7) {
 }
 
 /**
- * O que a Análise e a Mentoria mudaram nos dados, para a nota do card.
- * `antes`/`depois`: valores por dado; `mentoriaEm`: índice trocado pela Mentoria.
+ * O que a Análise e a Mentoria fizeram nos dados, para a nota do card.
+ * `antes`/`depois`: valores por dado; `mentoriaEm`: índice trocado pela Mentoria;
+ * `mentoria`: a RA oferecida (0 = não havia). Mentoria oferecida e não usada também
+ * vira nota — ela vale só para este teste.
  */
-export function ajustesDoTeste(nome, antes, depois, gastos, mentoriaEm = null) {
+export function ajustesDoTeste(nome, antes, depois, gastos, mentoriaEm = null, mentoria = 0) {
   const ajustes = [];
+  const usouMentoria = mentoriaEm !== null && mentoriaEm !== undefined;
   const mudancas = antes
     .map((de, i) => ({ i, de, para: depois[i] }))
-    .filter((m) => m.de !== m.para && m.i !== mentoriaEm);
+    .filter((m) => m.de !== m.para && !(usouMentoria && m.i === mentoriaEm));
   if (gastos && mudancas.length) ajustes.push({ tipo: "analise", nome, gastos, mudancas: mudancas.map(({ de, para }) => ({ de, para })) });
-  if (mentoriaEm !== null && mentoriaEm !== undefined && antes[mentoriaEm] !== depois[mentoriaEm]) {
-    ajustes.push({ tipo: "mentoria", nome, de: antes[mentoriaEm], para: depois[mentoriaEm] });
-  }
+  if (usouMentoria) ajustes.push({ tipo: "mentoria", nome, de: antes[mentoriaEm], para: depois[mentoriaEm] });
+  else if (mentoria) ajustes.push({ tipo: "mentoriaRecusada", nome, valor: mentoria });
   return ajustes;
 }

@@ -1372,7 +1372,8 @@
       "AnalisePontos": "{n} points",
       "AnaliseNota": "{nome} spent {pontos} of analysis to turn a ({de}) into a ({para}).",
       "AnaliseNotaVarios": "{nome} spent {pontos} of analysis: {lista}.",
-      "MentoriaNota": "{nome} used Mentoring: a ({de}) became a ({para})."
+      "MentoriaNota": "{nome} used Mentoring: swapped the die ({de}) for the mentor's ({para}).",
+      "MentoriaRecusada": "{nome} did not use Mentoring: kept their own dice (the mentor's {valor} was not used)."
     },
     "PericiasMundo": {
       "MenuNome": "World skills",

@@ -230,6 +230,7 @@ function notasDeAjuste(ajustes = []) {
   const L = (chave, dados) => game.i18n.format(`OP2.Poder.${chave}`, dados);
   return ajustes.map((a) => {
     if (a.tipo === "mentoria") return L("MentoriaNota", { nome: a.nome, de: a.de, para: a.para });
+    if (a.tipo === "mentoriaRecusada") return L("MentoriaRecusada", { nome: a.nome, valor: a.valor });
     const pontos = L(a.gastos === 1 ? "AnalisePonto" : "AnalisePontos", { n: a.gastos });
     if (a.mudancas.length === 1) return L("AnaliseNota", { nome: a.nome, pontos, de: a.mudancas[0].de, para: a.mudancas[0].para });
     const lista = a.mudancas.map((m) => `(${m.de}) → (${m.para})`).join(", ");

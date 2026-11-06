@@ -1372,7 +1372,8 @@
       "AnalisePontos": "{n} pontos",
       "AnaliseNota": "{nome} gastou {pontos} de análise para transformar um ({de}) em um ({para}).",
       "AnaliseNotaVarios": "{nome} gastou {pontos} de análise: {lista}.",
-      "MentoriaNota": "{nome} usou a Mentoria: um ({de}) virou um ({para})."
+      "MentoriaNota": "{nome} usou a Mentoria: trocou o dado ({de}) pelo ({para}) do mentor.",
+      "MentoriaRecusada": "{nome} não usou a Mentoria: manteve os próprios dados (o {valor} do mentor não entrou)."
     },
     "PericiasMundo": {
       "MenuNome": "Perícias do mundo",

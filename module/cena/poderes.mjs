@@ -172,10 +172,10 @@ export async function ajustarDepoisDaRolagem(ator, roll) {
 
   roll.dice.forEach((termo, i) => { termo.results[0].result = resultado.valores[i]; });
   // O card conta o que mudou (como a nota da Prontidão); fica no roll e sobrevive a re-renders.
-  const ajustes = ajustesDoTeste(ator.name, dados.map((d) => d.valor), resultado.valores, resultado.gastos, resultado.mentoriaEm);
+  const ajustes = ajustesDoTeste(ator.name, dados.map((d) => d.valor), resultado.valores, resultado.gastos, resultado.mentoriaEm, mentoria);
   if (ajustes.length) roll.options.ajustes = [...(roll.options.ajustes ?? []), ...ajustes];
   if (resultado.gastos && analise) await analise.update({ "system.marcadores": marcadores - resultado.gastos });
-  if (resultado.mentoriaEm !== null) await ator.update({ "system.estado.mentoria": 0 });
+  if (mentoria) await ator.update({ "system.estado.mentoria": 0 });
 }
 
 /* ---- Espectro, o lobo: dado do lobo tirou 1 → machucado até o fim da cena ---- */
