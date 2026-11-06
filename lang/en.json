@@ -1686,7 +1686,10 @@
       "MotivoOposto": "Chase tie: who got further ahead?",
       "PerguntaEmpate": "You are tied. Whisper to the GM what your character does to get ahead (e.g. betray your companion and push them into the ditch).",
       "SemEmpate": "There is no chase tie waiting for a decision.",
-      "VencedorForaDoEmpate": "The winner of this test is not among the tied characters."
+      "VencedorForaDoEmpate": "The winner of this test is not among the tied characters.",
+      "EmpatePendente": "A tie from this round is waiting for a decision in chat. Discard it and calculate the end of the round again?",
+      "DescartarEmpate": "Discard and continue",
+      "Voltar": "Back"
     },
     "CenaConfig": {
       "Nome": "Name",

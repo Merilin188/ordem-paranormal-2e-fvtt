@@ -1686,7 +1686,10 @@
       "MotivoOposto": "Empate na perseguição: quem prosseguiu mais à frente?",
       "PerguntaEmpate": "Vocês estão empatados. Sussurre ao mestre o que seu personagem faz para seguir à frente (ex.: trair o companheiro e empurrá-lo na vala).",
       "SemEmpate": "Não há empate da perseguição esperando decisão.",
-      "VencedorForaDoEmpate": "O vencedor deste teste não está entre os empatados."
+      "VencedorForaDoEmpate": "O vencedor deste teste não está entre os empatados.",
+      "EmpatePendente": "Há um empate desta rodada esperando decisão no chat. Descartar o empate e calcular o fim da rodada de novo?",
+      "DescartarEmpate": "Descartar e seguir",
+      "Voltar": "Voltar"
     },
     "CenaConfig": {
       "Nome": "Nome",

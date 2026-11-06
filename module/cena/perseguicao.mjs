@@ -71,10 +71,10 @@ const acharP = (e, uuid) => e.participantes.find((x) => x.uuid === uuid);
 const OPS = {
   iniciar(e, { configId }) {
     const config = obterCena("perseguicao", configId);
-    Object.assign(e, { ativa: true, cenaId: foundry.utils.randomID(), rodada: 1, avisos: {}, cabecas: false, fim: false, evento: null, config });
+    Object.assign(e, { ativa: true, cenaId: foundry.utils.randomID(), rodada: 1, avisos: {}, cabecas: false, fim: false, evento: null, config, empate: null });
     e.participantes = e.participantes.map((p) => novoParticipante(p.uuid, config));
   },
-  encerrar(e) { e.ativa = false; e.evento = null; },
+  encerrar(e) { e.ativa = false; e.evento = null; e.empate = null; },
   adicionar(e, { uuid, papel }) {
     if (e.participantes.some((p) => p.uuid === uuid) || e.criaturas.some((c) => c.uuid === uuid)) return;
     if (papel === "criatura") e.criaturas.push({ uuid });
@@ -279,15 +279,27 @@ function ligarCardDeEmpate(msg, html) {
 async function proximaRodada() {
   const e = estadoPerseguicao();
   if (e.empate) {
-    ui.notifications.warn(L("ResolvaEmpate"));
-    return false;
+    // Empate de outra rodada/cena, cuja mensagem sumiu ou com gente que saiu da cena: não pode travar.
+    const valido = e.empate.rodada === e.rodada && e.empate.cenaId === e.cenaId && game.messages.get(e.empate.mensagemId)
+      && e.empate.uuids.every((u) => e.participantes.some((p) => p.uuid === u && !p.morto));
+    if (valido) {
+      const descartar = await DialogV2.confirm({
+        window: { title: L("EmpateTitulo") },
+        content: `<p>${esc(L("EmpatePendente"))}</p>`,
+        yes: { label: L("DescartarEmpate") }, no: { label: L("Voltar") },
+        rejectClose: false,
+      });
+      if (!descartar) return false;
+    }
+    e.empate = null;
+    await game.settings.set(SYSTEM_ID, CHAVE, e);
   }
   const config = e.config;
   const { corte, alvo, empate } = quemEAlcancado(e.participantes, e.rodada, config.marcos);
   if (!alvo && empate.length) {
     const dados = { corte, uuids: empate, salvos: [] };
     const mensagem = await card(htmlDoEmpate(dados));
-    e.empate = { ...dados, mensagemId: mensagem?.id };
+    e.empate = { ...dados, mensagemId: mensagem?.id, rodada: e.rodada, cenaId: e.cenaId };
     await game.settings.set(SYSTEM_ID, CHAVE, e);
     return true;
   }
