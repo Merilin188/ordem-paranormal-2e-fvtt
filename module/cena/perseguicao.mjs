@@ -86,10 +86,12 @@ const OPS = {
   },
   agiu(e, { uuid }) { const p = acharP(e, uuid); if (p) p.agiu = !p.agiu; },
   ajustarPA(e, { uuid, pa }) { const p = acharP(e, uuid); if (p) p.pa = Math.max(0, Number(pa) || 0); },
-  avanco(e, { uuid, pontos, chave, folegoUsado = 0, esforco = false }) {
+  avanco(e, { uuid, pontos, chave, folegoUsado = 0, esforco = false, mensagemId = null }) {
     const p = acharP(e, uuid);
     if (!p) return;
     p.pa += Math.max(0, pontos);
+    // Guarda de qual card veio o avanço: se a Prontidão mudar o teste, o PA é refeito.
+    if (mensagemId) p.avancos = { ...(p.avancos ?? {}), [mensagemId]: Math.max(0, pontos) };
     p.folego = Math.max(0, p.folego - folegoUsado);
     if (esforco) p.esforcos += 1;
     if (chave !== e.config?.periciaPadrao && !p.periciasUsadas.includes(chave)) p.periciasUsadas.push(chave);
@@ -112,6 +114,7 @@ function executar({ op, ...dados }) {
     if (op === "prosseguiu") return marcarProsseguiu(dados.uuid);
     if (op === "sussurroEmpate") return sussurroDoEmpate();
     if (op === "resolverOposto") return resolverPeloOposto(dados);
+    if (op === "reavaliar") return reavaliarAvanco(dados.mensagemId);
     if (op === "cabecas") return eventoDeInicio();
     const e = estadoPerseguicao();
     OPS[op]?.(e, dados);
@@ -215,6 +218,26 @@ async function sussurroDoEmpate() {
   if (destinos.length) await enviarCaixasDeSussurro({ destinos, pergunta: L("PerguntaEmpate") });
   e.empate.sussurro = true;
   await game.settings.set(SYSTEM_ID, CHAVE, e);
+  return true;
+}
+
+/**
+ * O card do teste de avanço mudou (Prontidão rerrolou um dado): refaz os pontos.
+ * Falha que virou sucesso passa de RB para RA; virou crítico, soma as duas maiores.
+ */
+async function reavaliarAvanco(mensagemId) {
+  const e = estadoPerseguicao();
+  const p = e.participantes.find((x) => x.avancos?.[mensagemId] !== undefined);
+  const roll = game.messages.get(mensagemId)?.rolls?.[0];
+  if (!p || !roll?.resultado) return false;
+  const valores = (roll.dadosDoTeste ?? []).filter((d) => d.contado !== false).map((d) => d.resultado);
+  const novo = Math.max(0, pontosDoAvanco(roll.resultado, valores));
+  const antigo = p.avancos[mensagemId];
+  if (novo === antigo) return false;
+  p.pa = Math.max(0, p.pa + novo - antigo);
+  p.avancos[mensagemId] = novo;
+  await game.settings.set(SYSTEM_ID, CHAVE, e);
+  await card(`<p><i class="fa-solid fa-bolt"></i> ${esc(L("AvancoRefeito", { nome: nomeDe(p.uuid), antes: antigo, depois: novo, total: p.pa }))}</p>`);
   return true;
 }
 
@@ -499,7 +522,8 @@ async function avancar(doc, e, p) {
   }
   const pontos = pontosDoAvanco(roll.resultado ?? {}, (roll.dadosDoTeste ?? []).filter((d) => d.contado !== false).map((d) => d.resultado));
   await card(`<p><i class="fa-solid fa-person-running"></i> ${esc(L("Avancou", { nome: doc.name, n: pontos }))}</p>`);
-  await pedir("avanco", { uuid: doc.uuid, pontos, chave: escolha.chave, folegoUsado: escolha.folego, esforco: escolha.esforco });
+  const mensagem = game.messages.contents.filter((m) => m.author?.id === game.user.id && m.rolls?.[0]?.options?.atorId === doc.id).at(-1);
+  await pedir("avanco", { uuid: doc.uuid, pontos, chave: escolha.chave, folegoUsado: escolha.folego, esforco: escolha.esforco, mensagemId: mensagem?.id ?? null });
 }
 
 const ACOES = {
@@ -708,6 +732,10 @@ export function registrarPerseguicao() {
   registrarAcaoDeTodos("op2PersEventoFim", fecharEventoParaOutros);
   Hooks.on("op2CenasConfig", () => { if (painel?.rendered) painel.render(); });
   Hooks.on("renderChatMessageHTML", ligarCardDeEmpate);
+  Hooks.on("updateChatMessage", (msg, mudancas) => {
+    if (!("rolls" in mudancas) || game.users.activeGM?.id !== game.user.id) return;
+    if (estadoPerseguicao().participantes.some((p) => p.avancos?.[msg.id] !== undefined)) void executar({ op: "reavaliar", mensagemId: msg.id });
+  });
   Hooks.once("ready", () => {
     if (!perseguicaoHabilitada()) return;
     precarregarEfeitos();

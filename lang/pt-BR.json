@@ -1690,7 +1690,8 @@
       "VencedorForaDoEmpate": "O vencedor deste teste não está entre os empatados.",
       "EmpatePendente": "Há um empate desta rodada esperando decisão no chat. Descartar o empate e calcular o fim da rodada de novo?",
       "DescartarEmpate": "Descartar e seguir",
-      "Voltar": "Voltar"
+      "Voltar": "Voltar",
+      "AvancoRefeito": "Prontidão muda o avanço de {nome}: {antes} → {depois} PA (agora {total} PA)."
     },
     "CenaConfig": {
       "Nome": "Nome",

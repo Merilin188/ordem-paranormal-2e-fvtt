@@ -1690,7 +1690,8 @@
       "VencedorForaDoEmpate": "The winner of this test is not among the tied characters.",
       "EmpatePendente": "A tie from this round is waiting for a decision in chat. Discard it and calculate the end of the round again?",
       "DescartarEmpate": "Discard and continue",
-      "Voltar": "Back"
+      "Voltar": "Back",
+      "AvancoRefeito": "Readiness changes {nome}'s advance: {antes} → {depois} AP (now {total} AP)."
     },
     "CenaConfig": {
       "Nome": "Name",
