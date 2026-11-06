@@ -253,7 +253,7 @@ export function htmlOposto(dados) {
     ${dados.motivo ? `<p class="op2-req__motivo">${esc(dados.motivo)}</p>` : ""}
     <div class="op2-op__lados">${lado(dados.lados[0], 0)}<span class="op2-op__vs">VS</span>${lado(dados.lados[1], 1)}</div>
     ${veredito ? `<p class="op2-op__veredito">${veredito}</p>` : ""}
-    ${dados.empatePerseguicao && vencedor >= 0 && !dados.resolvido ? `<div class="op2-op__resolver" data-op2-gm>
+    ${dados.empatePerseguicao && vencedor !== null && vencedor >= 0 && !dados.resolvido ? `<div class="op2-op__resolver" data-op2-gm>
       <button type="button" class="op2-botao op2-botao--perigo" data-op2-pers-resolver="${esc(dados.lados[vencedor].atorId)}">
         <i class="fa-solid fa-skull"></i> ${L("OpostoResolver")}</button></div>` : ""}
     ${dados.resolvido ? `<p class="op2-dica op2-op__resolvido"><i class="fa-solid fa-check"></i> ${L("OpostoResolvido")}</p>` : ""}
