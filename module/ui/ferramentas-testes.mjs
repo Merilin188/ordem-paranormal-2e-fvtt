@@ -226,15 +226,19 @@ function vencedorOposto(lados) {
   return -1;
 }
 
-function htmlOposto(dados) {
+export function htmlOposto(dados) {
   const vencedor = vencedorOposto(dados.lados);
+  const ambos = dados.lados.every((l) => l.resultado);
   const lado = (l, i) => {
     const r = l.resultado;
     const extremo = r && (r.desfecho === "critico" || r.desfecho === "falha-critica");
     const corpo = r
       ? `<div class="op2-op__total ${vencedor === i ? "vencedor" : ""}">${r.total}</div>
          <div class="op2-op__dados">${(r.dados ?? []).map((d) => `<span class="${d.contado ? "" : "fora"}">${d.resultado}</span>`).join("")}</div>
-         ${extremo ? `<span class="op2-op__desfecho op2-op__desfecho--${r.desfecho}">${esc(rotuloDesfecho(r))}</span>` : ""}`
+         ${extremo ? `<span class="op2-op__desfecho op2-op__desfecho--${r.desfecho}">${esc(rotuloDesfecho(r))}</span>` : ""}
+         ${(r.prontidao ?? []).map((p) => `<span class="op2-op__prontidao-nota"><i class="fa-solid fa-bolt"></i> ${esc(F("OpostoProntidaoNota", p))}</span>`).join("")}
+         ${ambos && !dados.resolvido ? `<button type="button" class="op2-botao op2-botao--pequeno op2-op__prontidao" data-op2-acao="oposto-prontidao"
+           data-ator-id="${esc(l.atorId)}" data-lado="${i}" data-tooltip="${esc(L("OpostoProntidaoDica"))}"><i class="fa-solid fa-bolt"></i> ${L("OpostoProntidao")}</button>` : ""}`
       : `<p class="op2-req__status"><i class="fa-regular fa-hourglass-half"></i> ${L("Aguardando")}</p>
          <button type="button" class="op2-req__rolar" data-op2-acao="ferr-oposto" data-ator-id="${esc(l.atorId)}" data-lado="${i}">${L("Rolar")}</button>`;
     return `<div class="op2-op__lado ${vencedor === i ? "op2-op__lado--vencedor" : ""}">
@@ -249,10 +253,14 @@ function htmlOposto(dados) {
     ${dados.motivo ? `<p class="op2-req__motivo">${esc(dados.motivo)}</p>` : ""}
     <div class="op2-op__lados">${lado(dados.lados[0], 0)}<span class="op2-op__vs">VS</span>${lado(dados.lados[1], 1)}</div>
     ${veredito ? `<p class="op2-op__veredito">${veredito}</p>` : ""}
+    ${dados.empatePerseguicao && vencedor >= 0 && !dados.resolvido ? `<div class="op2-op__resolver" data-op2-gm>
+      <button type="button" class="op2-botao op2-botao--perigo" data-op2-pers-resolver="${esc(dados.lados[vencedor].atorId)}">
+        <i class="fa-solid fa-skull"></i> ${L("OpostoResolver")}</button></div>` : ""}
+    ${dados.resolvido ? `<p class="op2-dica op2-op__resolvido"><i class="fa-solid fa-check"></i> ${L("OpostoResolvido")}</p>` : ""}
   </div>`;
 }
 
-export async function testeOposto({ atorIds = null, chave = "luta", motivo = "" } = {}) {
+export async function testeOposto({ atorIds = null, chave = "luta", motivo = "", empate = false } = {}) {
   const atores = testaveis();
   if (!atores.length) return void ui.notifications.warn(L("SemPersonagens"));
   const sel = selecionados();
@@ -301,6 +309,7 @@ export async function testeOposto({ atorIds = null, chave = "luta", motivo = "" 
 
   const dados = {
     motivo: resposta.motivo,
+    empatePerseguicao: empate,
     lados: resposta.lados.map(({ atorId, pericia }) => {
       const a = game.actors.get(atorId);
       return {
@@ -344,7 +353,7 @@ function resumo(roll) {
   const r = roll.resultado;
   return {
     total: r.total, desfecho: r.desfecho, sucesso: r.sucesso,
-    dados: roll.dados.filter((d) => !d.pavor).map((d) => ({ resultado: d.resultado, contado: d.contado })),
+    dados: roll.dados.filter((d) => !d.pavor).map((d) => ({ resultado: d.resultado, contado: d.contado, dado: d.dado })),
   };
 }
 

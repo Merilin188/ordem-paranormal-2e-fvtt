@@ -1133,7 +1133,12 @@
       "OpostoSub": "Configure os dois participantes",
       "ParticipanteA": "Participante A",
       "ParticipanteB": "Participante B",
-      "CriarTeste": "Criar teste"
+      "CriarTeste": "Criar teste",
+      "OpostoProntidao": "Readiness",
+      "OpostoProntidaoDica": "Spend 2 SP (Readiness ability) to reroll one die on this side.",
+      "OpostoProntidaoNota": "{nome} rerolled {antes} → {depois}",
+      "OpostoResolver": "Resolve the tie",
+      "OpostoResolvido": "Tie resolved."
     },
     "Pavor": {
       "Dado": "Dado de pavor",
@@ -1359,7 +1364,8 @@
       "ProntidaoSemDado": "Nenhum dado pode ser rolado de novo (resultados 1 não contam).",
       "ProntidaoPergunta": "{nome} gasta 2 PD. Qual dado rolar de novo?",
       "ProntidaoRerrolar": "Rolar de novo",
-      "ProntidaoNota": "Prontidão de {nome}: um dado foi de {antes} para {depois}."
+      "ProntidaoNota": "Prontidão de {nome}: um dado foi de {antes} para {depois}.",
+      "ProntidaoOposto": "{nome} spends 2 SP to reroll one of {alvo}'s dice. Which die?"
     },
     "PericiasMundo": {
       "MenuNome": "World skills",
@@ -1678,7 +1684,9 @@
       "ResolvaEmpate": "Resolve the tie in chat before moving on.",
       "Prosseguiu": "Got ahead",
       "MotivoOposto": "Chase tie: who got further ahead?",
-      "PerguntaEmpate": "You are tied. Whisper to the GM what your character does to get ahead (e.g. betray your companion and push them into the ditch)."
+      "PerguntaEmpate": "You are tied. Whisper to the GM what your character does to get ahead (e.g. betray your companion and push them into the ditch).",
+      "SemEmpate": "There is no chase tie waiting for a decision.",
+      "VencedorForaDoEmpate": "The winner of this test is not among the tied characters."
     },
     "CenaConfig": {
       "Nome": "Name",

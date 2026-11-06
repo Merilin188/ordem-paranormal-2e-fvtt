@@ -430,3 +430,12 @@ body.op2-tela-morta { filter: grayscale(1); transition: filter 3s ease; }
 
 // Placeholder legível nos campos do sussurro (o tema escuro do core apagava o texto).
 .op2-sussurro-janela textarea::placeholder, .op2-sussurro textarea::placeholder { color: #a99a8a !important; opacity: 1 !important; font-style: italic; }
+
+@layer system {
+  .op2-pers-empate__mestre button { font-size: 0.68rem; line-height: 1.15; padding: 0.3rem 0.35rem; white-space: nowrap; letter-spacing: 0; }
+  .op2-sussurro-janela__exemplo { margin: -0.3rem 0 0; font-style: italic; }
+  .op2-op__prontidao { margin-top: 0.3rem; width: auto; font-size: 0.7rem; }
+  .op2-op__prontidao-nota { display: block; font-size: 0.7em; color: #e6c46a; }
+  .op2-op__resolver { display: flex; justify-content: center; margin-top: 0.4rem; button { width: auto; } }
+  .op2-op__resolvido { text-align: center; margin: 0.3rem 0 0; }
+}

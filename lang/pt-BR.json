@@ -1133,7 +1133,12 @@
       "OpostoSub": "Configure os dois participantes",
       "ParticipanteA": "Participante A",
       "ParticipanteB": "Participante B",
-      "CriarTeste": "Criar teste"
+      "CriarTeste": "Criar teste",
+      "OpostoProntidao": "Prontidão",
+      "OpostoProntidaoDica": "Gaste 2 PD (habilidade Prontidão) para rerrolar um dado deste lado.",
+      "OpostoProntidaoNota": "{nome} rerrolou {antes} → {depois}",
+      "OpostoResolver": "Resolver o empate",
+      "OpostoResolvido": "Empate resolvido."
     },
     "Pavor": {
       "Dado": "Dado de pavor",
@@ -1359,7 +1364,8 @@
       "ProntidaoSemDado": "Nenhum dado pode ser rolado de novo (resultados 1 não contam).",
       "ProntidaoPergunta": "{nome} gasta 2 PD. Qual dado rolar de novo?",
       "ProntidaoRerrolar": "Rolar de novo",
-      "ProntidaoNota": "Prontidão de {nome}: um dado foi de {antes} para {depois}."
+      "ProntidaoNota": "Prontidão de {nome}: um dado foi de {antes} para {depois}.",
+      "ProntidaoOposto": "{nome} gasta 2 PD para rerrolar um dado de {alvo}. Qual dado?"
     },
     "PericiasMundo": {
       "MenuNome": "Perícias do mundo",
@@ -1678,7 +1684,9 @@
       "ResolvaEmpate": "Resolva o empate no chat antes de seguir.",
       "Prosseguiu": "Prosseguiu",
       "MotivoOposto": "Empate na perseguição: quem prosseguiu mais à frente?",
-      "PerguntaEmpate": "Vocês estão empatados. Sussurre ao mestre o que seu personagem faz para seguir à frente (ex.: trair o companheiro e empurrá-lo na vala)."
+      "PerguntaEmpate": "Vocês estão empatados. Sussurre ao mestre o que seu personagem faz para seguir à frente (ex.: trair o companheiro e empurrá-lo na vala).",
+      "SemEmpate": "Não há empate da perseguição esperando decisão.",
+      "VencedorForaDoEmpate": "O vencedor deste teste não está entre os empatados."
     },
     "CenaConfig": {
       "Nome": "Nome",

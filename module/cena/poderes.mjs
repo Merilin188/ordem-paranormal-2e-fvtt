@@ -302,6 +302,50 @@ function chaveDaRodada() {
   return `i${investigacao?.id ?? ""}.${investigacao?.system?.rodada ?? 0}`;
 }
 
+/**
+ * Prontidão num teste oposto (ex.: empate da perseguição): qualquer jogador com a
+ * habilidade gasta 2 PD e rerrola um dado (não 1) de qualquer um dos lados.
+ */
+async function prontidaoNoOposto(_autor, dataset) {
+  const mensagem = game.messages.get(dataset.mensagemId);
+  const dados = mensagem?.getFlag(SYSTEM_ID, "oposto");
+  const indice = Number(dataset.lado);
+  const lado = dados?.lados?.[indice];
+  if (!lado?.resultado || dados.resolvido) return;
+  const meus = game.actors.filter((a) => a.isOwner && a.type === "personagem" && poderDe(a, "prontidao"));
+  const usuario = meus.find((a) => a.id === game.user.character?.id) ?? meus[0];
+  if (!usuario) return void ui.notifications.warn(P("ProntidaoSem"));
+  const poder = poderDe(usuario, "prontidao");
+  const rodada = chaveDaRodada();
+  if (poder.system.usadoNaRodada === rodada) return void ui.notifications.warn(P("ProntidaoJaUsou"));
+  const elegiveis = lado.resultado.dados.map((d, i) => ({ ...d, i })).filter((d) => d.resultado !== 1 && d.dado);
+  if (!elegiveis.length) return void ui.notifications.warn(P("ProntidaoSemDado"));
+  const escolhido = await DialogV2.prompt({
+    window: { title: poder.name, icon: "fa-solid fa-bolt" },
+    classes: ["op2", "op2-ferr-dialogo"],
+    content: `<p>${P("ProntidaoOposto", { nome: esc(usuario.name), alvo: esc(lado.nome) })}</p>
+      <div class="form-group"><select name="d">${elegiveis.map((d) => `<option value="${d.i}">${esc(d.dado)}: ${d.resultado}</option>`).join("")}</select></div>`,
+    ok: { label: P("ProntidaoRerrolar"), callback: (_e, b) => Number(b.form.elements.d.value) },
+    rejectClose: false,
+  });
+  if (escolhido === null || escolhido === undefined) return;
+  if (!(await pagarPD(usuario, 2))) return;
+  await poder.update({ "system.usadoNaRodada": rodada });
+  const alvo = lado.resultado.dados[escolhido];
+  const novo = await new Roll(`1${alvo.dado}`).evaluate();
+  const { mostrarDados3D } = await import("../dice/teste.mjs");
+  await mostrarDados3D(novo);
+  const { analisar, soma } = await import("../dice/analise.mjs");
+  const dadosNovos = lado.resultado.dados.map((d, j) => (j === escolhido ? { ...d, resultado: novo.total } : d));
+  const modificador = lado.resultado.total - soma(lado.resultado.dados);
+  const analise = analisar(dadosNovos);
+  const resultado = {
+    ...lado.resultado, dados: dadosNovos, total: analise.total + modificador, desfecho: analise.desfecho,
+    prontidao: [...(lado.resultado.prontidao ?? []), { nome: usuario.name, antes: alvo.resultado, depois: novo.total }],
+  };
+  await comoMestre("ferrRegistrarOposto", { mensagemId: mensagem.id, indice, resultado });
+}
+
 async function usarProntidao(_autor, dataset) {
   const mensagem = game.messages.get(dataset.mensagemId);
   const roll = mensagem?.rolls?.[0];
@@ -369,6 +413,7 @@ export async function encerrarCenaDosPoderes(atores) {
 
 export function registrarPoderes() {
   registrarAcaoDeChat("prontidao", usarProntidao);
+  registrarAcaoDeChat("oposto-prontidao", prontidaoNoOposto);
   registrarAcaoDeMestre("op2Curar", async ({ atorId, recurso, quantidade }) => {
     const a = game.actors.get(atorId);
     if (!a) return;

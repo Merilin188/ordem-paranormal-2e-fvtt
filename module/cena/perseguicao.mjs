@@ -111,6 +111,7 @@ function executar({ op, ...dados }) {
     if (op === "proxima") return proximaRodada();
     if (op === "prosseguiu") return marcarProsseguiu(dados.uuid);
     if (op === "sussurroEmpate") return sussurroDoEmpate();
+    if (op === "resolverOposto") return resolverPeloOposto(dados);
     if (op === "cabecas") return eventoDeInicio();
     const e = estadoPerseguicao();
     OPS[op]?.(e, dados);
@@ -214,6 +215,22 @@ async function sussurroDoEmpate() {
   return true;
 }
 
+/** Card do teste oposto: o mestre resolve o empate com o vencedor do teste. */
+async function resolverPeloOposto({ atorId, mensagemId }) {
+  const e = estadoPerseguicao();
+  if (!e.empate) return void ui.notifications.warn(L("SemEmpate"));
+  const uuid = e.empate.uuids.find((u) => ator(u)?.id === atorId);
+  if (!uuid) return void ui.notifications.warn(L("VencedorForaDoEmpate"));
+  const mensagem = game.messages.get(mensagemId);
+  const dados = foundry.utils.deepClone(mensagem?.getFlag(SYSTEM_ID, "oposto"));
+  if (dados) {
+    dados.resolvido = true;
+    const { htmlOposto } = await import("../ui/ferramentas-testes.mjs");
+    await mensagem.update({ content: htmlOposto(dados), [`flags.${SYSTEM_ID}.oposto`]: dados });
+  }
+  return marcarProsseguiu(uuid);
+}
+
 /** Mestre clicou em quem prosseguiu: quando sobra um só, ele é alcançado. */
 async function marcarProsseguiu(uuid) {
   const e = estadoPerseguicao();
@@ -233,14 +250,18 @@ async function marcarProsseguiu(uuid) {
   return concluirRodada(e, perdedor, empate.corte);
 }
 
-function ligarCardDeEmpate(_msg, html) {
+function ligarCardDeEmpate(msg, html) {
   if (!game.user.isGM) return;
+  html.querySelector("[data-op2-pers-resolver]")?.addEventListener("click", (ev) => {
+    ev.currentTarget.disabled = true;
+    void executar({ op: "resolverOposto", atorId: ev.currentTarget.dataset.op2PersResolver, mensagemId: msg.id });
+  });
   const raiz = html.querySelector(".op2-pers-empate")?.parentElement;
   if (!raiz) return;
   raiz.querySelector("[data-op2-pers-oposto]")?.addEventListener("click", async (ev) => {
     const [a, b] = ev.currentTarget.dataset.op2PersOposto.split(",").map((u) => ator(u)?.id);
     const { testeOposto } = await import("../ui/ferramentas-testes.mjs");
-    await testeOposto({ atorIds: [a, b], chave: "atletismo", motivo: L("MotivoOposto") });
+    await testeOposto({ atorIds: [a, b], chave: "atletismo", motivo: L("MotivoOposto"), empate: true });
   });
   raiz.querySelector("[data-op2-pers-manual]")?.addEventListener("click", () => {
     raiz.querySelector(".op2-pers-empate")?.classList.add("op2-pers-empate--manual");
