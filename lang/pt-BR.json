@@ -1788,6 +1788,10 @@
       "Revelada": "Revelada para todos.",
       "AceitouItem": "{nome} aceitou: {item}.",
       "SemDestino": "Não achei o personagem ou o item."
+    },
+    "EfeitosCena": {
+      "Nome": "Cena com efeitos do FX Bus",
+      "Dica": "Nome (ou id) da cena que liga tremor, desfoque e rastro do FX Bus na tela de cada jogador enquanto ele estiver nela. Deixe vazio para desligar. Precisa do módulo FX Bus."
     }
   }
 }
