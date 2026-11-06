@@ -36,7 +36,7 @@ export const perseguicaoHabilitada = () => {
 /* -- estado ----------------------------------------------------------------- */
 
 const VAZIO = () => ({
-  ativa: false, cenaId: "", rodada: 1, participantes: [], criaturas: [], avisos: {}, cabecas: false, fim: false, evento: null, config: null,
+  ativa: false, cenaId: "", rodada: 1, participantes: [], criaturas: [], avisos: {}, cabecas: false, fim: false, evento: null, config: null, empate: null,
 });
 
 export function estadoPerseguicao() {
@@ -56,7 +56,7 @@ const novoParticipante = (uuid, config) => ({
 const vivos = (e) => e.participantes.filter((p) => !p.morto);
 
 async function card(html) {
-  await ChatMessage.create({
+  return ChatMessage.create({
     content: `<div class="op2 op2-card op2-furt-card op2-pers-card">${html}</div>`,
     speaker: { alias: estadoPerseguicao().config?.nome ?? L("Titulo") },
     flags: { [SYSTEM_ID]: { tipo: "perseguicao" } },
@@ -108,6 +108,7 @@ let fila = Promise.resolve();
 function executar({ op, ...dados }) {
   const resultado = fila.then(async () => {
     if (op === "proxima") return proximaRodada();
+    if (op === "prosseguiu") return marcarProsseguiu(dados.uuid);
     if (op === "cabecas") return eventoDeInicio();
     const e = estadoPerseguicao();
     OPS[op]?.(e, dados);
@@ -172,21 +173,95 @@ async function matar(uuid) {
 }
 
 /** Fim da rodada: marco de corte, depois a próxima rodada ou o fim da perseguição. */
+/* -- empate no corte: decidido no próprio card ---------------------------------- */
+
+/** HTML do card de empate: retratos na vertical e, para o mestre, como decidir. */
+function htmlDoEmpate(empate, perdedor = null) {
+  const linhas = empate.uuids.map((u) => {
+    const doc = ator(u);
+    const salvo = empate.salvos.includes(u);
+    const morto = u === perdedor;
+    return `<button type="button" class="op2-pers-empate__pj${salvo ? " op2-pers-empate__pj--salvo" : ""}${morto ? " op2-pers-empate__pj--morto" : ""}"
+      data-op2-pers-escolher="${u}" ${perdedor || salvo ? "disabled" : ""}>
+      <img src="${esc(doc?.img ?? ANONIMO)}" alt=""><span>${esc(doc?.name ?? "?")}</span>
+      ${salvo ? `<i class="fa-solid fa-person-running" data-tooltip="${esc(L("Prosseguiu"))}"></i>` : ""}${morto ? `<i class="fa-solid fa-skull"></i>` : ""}</button>`;
+  }).join("");
+  const dois = empate.uuids.length === 2;
+  const mestre = perdedor ? "" : `
+    <div class="op2-pers-empate__mestre" data-op2-gm>
+      <button type="button" class="op2-botao op2-botao--pequeno" data-op2-pers-oposto="${empate.uuids.join(",")}" ${dois ? "" : "disabled"}
+        ${dois ? "" : `data-tooltip="${esc(L("OpostoSoDois"))}"`}><i class="fa-solid fa-swords"></i> ${esc(L("SolicitarOposto"))}</button>
+      <button type="button" class="op2-botao op2-botao--pequeno op2-botao--perigo" data-op2-pers-manual><i class="fa-solid fa-hand-pointer"></i> ${esc(L("DecidirManual"))}</button>
+    </div>
+    <p class="op2-dica op2-pers-empate__instrucao" data-op2-gm hidden>${esc(L(dois ? "CliqueQuemProsseguiu" : "CliqueQuemProsseguiuVarios"))}</p>`;
+  return `<p>${esc(L("Empate", { nomes: empate.uuids.map(nomeDe).join(", "), corte: empate.corte }))}</p>
+    <p class="op2-pers-empate__pergunta"><strong>${esc(L("QuemProsseguiu"))}</strong></p>
+    <div class="op2-pers-empate${empate.manual ? " op2-pers-empate--manual" : ""}">${linhas}</div>${mestre}`;
+}
+
+const conteudoDoCard = (html) => `<div class="op2 op2-card op2-furt-card op2-pers-card">${html}</div>`;
+
+/** Mestre clicou em quem prosseguiu: quando sobra um só, ele é alcançado. */
+async function marcarProsseguiu(uuid) {
+  const e = estadoPerseguicao();
+  const empate = e.empate;
+  if (!empate || !empate.uuids.includes(uuid) || empate.salvos.includes(uuid)) return false;
+  empate.salvos.push(uuid);
+  const restantes = empate.uuids.filter((u) => !empate.salvos.includes(u));
+  const mensagem = game.messages.get(empate.mensagemId);
+  if (restantes.length > 1) {
+    await mensagem?.update({ content: conteudoDoCard(htmlDoEmpate({ ...empate, manual: true })) });
+    await game.settings.set(SYSTEM_ID, CHAVE, e);
+    return true;
+  }
+  const perdedor = restantes[0];
+  await mensagem?.update({ content: conteudoDoCard(htmlDoEmpate(empate, perdedor)) });
+  e.empate = null;
+  return concluirRodada(e, perdedor, empate.corte);
+}
+
+function ligarCardDeEmpate(_msg, html) {
+  if (!game.user.isGM) return;
+  const raiz = html.querySelector(".op2-pers-empate")?.parentElement;
+  if (!raiz) return;
+  raiz.querySelector("[data-op2-pers-oposto]")?.addEventListener("click", async (ev) => {
+    const [a, b] = ev.currentTarget.dataset.op2PersOposto.split(",").map((u) => ator(u)?.id);
+    const { testeOposto } = await import("../ui/ferramentas-testes.mjs");
+    await testeOposto({ atorIds: [a, b], chave: "atletismo", motivo: L("MotivoOposto") });
+  });
+  raiz.querySelector("[data-op2-pers-manual]")?.addEventListener("click", () => {
+    raiz.querySelector(".op2-pers-empate")?.classList.add("op2-pers-empate--manual");
+    raiz.querySelector(".op2-pers-empate__instrucao")?.removeAttribute("hidden");
+  });
+  for (const botao of raiz.querySelectorAll("[data-op2-pers-escolher]")) {
+    botao.addEventListener("click", () => {
+      if (!raiz.querySelector(".op2-pers-empate--manual")) return void ui.notifications.info(L("AtiveManual"));
+      void executar({ op: "prosseguiu", uuid: botao.dataset.op2PersEscolher });
+    });
+  }
+}
+
 async function proximaRodada() {
   const e = estadoPerseguicao();
+  if (e.empate) {
+    ui.notifications.warn(L("ResolvaEmpate"));
+    return false;
+  }
   const config = e.config;
   const { corte, alvo, empate } = quemEAlcancado(e.participantes, e.rodada, config.marcos);
-  let morto = alvo;
-  if (!morto && empate.length) {
-    await card(`<p>${esc(L("Empate", { nomes: empate.map(nomeDe).join(", "), corte }))}</p>`);
-    morto = await DialogV2.prompt({
-      window: { title: L("EmpateTitulo") },
-      content: `<p>${esc(L("EmpateAjuda"))}</p><select name="alvo">${empate.map((u) => `<option value="${u}">${esc(nomeDe(u))}</option>`).join("")}</select>`,
-      ok: { label: L("Alcancado"), callback: (_e, b) => b.form.elements.alvo.value },
-      rejectClose: false,
-    });
-    if (!morto) return false;
+  if (!alvo && empate.length) {
+    const dados = { corte, uuids: empate, salvos: [] };
+    const mensagem = await card(htmlDoEmpate(dados));
+    e.empate = { ...dados, mensagemId: mensagem?.id };
+    await game.settings.set(SYSTEM_ID, CHAVE, e);
+    return true;
   }
+  return concluirRodada(e, alvo, corte);
+}
+
+/** O resto do fim da rodada: quem foi alcançado, depois a próxima rodada ou o fim. */
+async function concluirRodada(e, morto, corte) {
+  const config = e.config;
   if (morto) {
     const p = acharP(e, morto);
     if (p) p.morto = true;
@@ -582,6 +657,7 @@ export function registrarPerseguicao() {
   registrarAcaoDeTodos("op2PersEvento", mostrarEventoParaOutros);
   registrarAcaoDeTodos("op2PersEventoFim", fecharEventoParaOutros);
   Hooks.on("op2CenasConfig", () => { if (painel?.rendered) painel.render(); });
+  Hooks.on("renderChatMessageHTML", ligarCardDeEmpate);
   Hooks.once("ready", () => {
     if (!perseguicaoHabilitada()) return;
     precarregarEfeitos();

@@ -1667,7 +1667,17 @@
       "AvisarEvento": "Avisar: {evento}",
       "ChamadaPadrao": "Escolha um método para evitar o perigo:",
       "Fechar": "Fechar",
-      "PassosDoEvento": "({evento}: {n} passos)"
+      "PassosDoEvento": "({evento}: {n} passos)",
+      "QuemProsseguiu": "Quem prosseguiu mais à frente?",
+      "SolicitarOposto": "Solicitar teste oposto",
+      "DecidirManual": "Decidir manualmente",
+      "OpostoSoDois": "Só com dois empatados. Com três ou mais, decida manualmente.",
+      "CliqueQuemProsseguiu": "Clique no retrato de quem prosseguiu mais à frente. O outro é alcançado.",
+      "CliqueQuemProsseguiuVarios": "Clique, um por um, nos retratos de quem prosseguiu. O último que sobrar é alcançado.",
+      "AtiveManual": "Clique em Decidir manualmente antes de escolher.",
+      "ResolvaEmpate": "Resolva o empate no chat antes de seguir.",
+      "Prosseguiu": "Prosseguiu",
+      "MotivoOposto": "Empate na perseguição: quem prosseguiu mais à frente?"
     },
     "CenaConfig": {
       "Nome": "Nome",

@@ -252,7 +252,7 @@ function htmlOposto(dados) {
   </div>`;
 }
 
-export async function testeOposto() {
+export async function testeOposto({ atorIds = null, chave = "luta", motivo = "" } = {}) {
   const atores = testaveis();
   if (!atores.length) return void ui.notifications.warn(L("SemPersonagens"));
   const sel = selecionados();
@@ -263,11 +263,11 @@ export async function testeOposto() {
     position: { width: 660 },
     content: `${cabecalhoDialogo(L("TesteOposto"), L("OpostoSub"))}
       <div class="op2-dlg__lados">
-        ${blocoParticipante({ id: "A", titulo: L("ParticipanteA"), atores, atorId: sel[0]?.id ?? "", chave: "luta" })}
+        ${blocoParticipante({ id: "A", titulo: L("ParticipanteA"), atores, atorId: atorIds?.[0] ?? sel[0]?.id ?? "", chave })}
         <span class="op2-dlg__vs">VS</span>
-        ${blocoParticipante({ id: "B", titulo: L("ParticipanteB"), atores, atorId: sel[1]?.id ?? "", chave: "luta" })}
+        ${blocoParticipante({ id: "B", titulo: L("ParticipanteB"), atores, atorId: atorIds?.[1] ?? sel[1]?.id ?? "", chave })}
       </div>
-      <label class="op2-dlg__motivo">${L("Motivo")}<input type="text" name="motivo" placeholder="${L("MotivoDica")}"></label>`,
+      <label class="op2-dlg__motivo">${L("Motivo")}<input type="text" name="motivo" value="${esc(motivo)}" placeholder="${L("MotivoDica")}"></label>`,
     render: (_evento, dialogo) => {
       const raiz = dialogo.element ?? dialogo;
       const botao = raiz.querySelector('[data-action="ok"]');

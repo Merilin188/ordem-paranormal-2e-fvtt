@@ -1667,7 +1667,17 @@
       "AvisarEvento": "Warn: {evento}",
       "ChamadaPadrao": "Choose a way to avoid the danger:",
       "Fechar": "Close",
-      "PassosDoEvento": "({evento}: {n} steps)"
+      "PassosDoEvento": "({evento}: {n} steps)",
+      "QuemProsseguiu": "Who got further ahead?",
+      "SolicitarOposto": "Request opposed test",
+      "DecidirManual": "Decide manually",
+      "OpostoSoDois": "Only with two tied. With three or more, decide manually.",
+      "CliqueQuemProsseguiu": "Click the portrait of whoever got further ahead. The other one is caught.",
+      "CliqueQuemProsseguiuVarios": "Click, one by one, the portraits of those who got ahead. The last one left is caught.",
+      "AtiveManual": "Click Decide manually before choosing.",
+      "ResolvaEmpate": "Resolve the tie in chat before moving on.",
+      "Prosseguiu": "Got ahead",
+      "MotivoOposto": "Chase tie: who got further ahead?"
     },
     "CenaConfig": {
       "Nome": "Name",
