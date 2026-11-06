@@ -93,7 +93,21 @@ async function vincularTokens() {
   if (n) ui.notifications.info(game.i18n.format("OP2.Loucura.Vinculados", { n }));
 }
 
+/** Personagem do jogador morto: a tela inteira perde as cores. */
+function atualizarMorte() {
+  const meu = game.user?.character;
+  const morto = !game.user?.isGM && !!meu?.statuses?.has?.("morto");
+  document.body.classList.toggle("op2-tela-morta", morto);
+}
+
 export function registrarVinhetaLoucura() {
+  Hooks.once("ready", atualizarMorte);
+  for (const gancho of ["createActiveEffect", "deleteActiveEffect", "updateActiveEffect"]) {
+    Hooks.on(gancho, (efeito) => { if (efeito.parent?.id === game.user.character?.id) setTimeout(atualizarMorte, 0); });
+  }
+  Hooks.on("updateActor", (ator) => { if (ator.id === game.user.character?.id) setTimeout(atualizarMorte, 0); });
+  Hooks.on("updateUser", (usuario) => { if (usuario.id === game.user.id) setTimeout(atualizarMorte, 0); });
+
   game.settings.register(SYSTEM_ID, "vinhetaLoucura", {
     name: "OP2.Loucura.Nome", hint: "OP2.Loucura.Dica",
     scope: "client", config: true, type: Boolean, default: true, onChange: atualizar,

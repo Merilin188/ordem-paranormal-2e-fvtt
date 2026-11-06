@@ -60,7 +60,7 @@ export function iniciarAmbientePerseguicao() {
   // Respiração: gravação real (respirações espaçadas, com silêncio entre elas),
   // em loop e mais baixa que o coração para não tomar a cena.
   const respiracao = ctx.createGain();
-  respiracao.gain.value = 0.55;
+  respiracao.gain.value = 0.42;
   respiracao.connect(mestre);
   fetch(`systems/${SYSTEM_ID}/assets/sons/perseguicao-respiracao.wav`)
     .then((r) => r.arrayBuffer())
@@ -103,7 +103,31 @@ export function pararAmbientePerseguicao() {
 
 /* -- rugido da criatura (mais alto, para assustar) ---------------------------- */
 
+/** Rugido gravado (efeitos do Mixkit misturados); sem o arquivo, o sintético. */
 export function tocarRugido() {
+  const volume = volumeDeInterface();
+  if (volume <= 0) return;
+  const ctx = novoContexto();
+  if (!ctx) return;
+  fetch(`systems/${SYSTEM_ID}/assets/sons/perseguicao-alcancado.wav`)
+    .then((r) => r.arrayBuffer())
+    .then((dados) => ctx.decodeAudioData(dados))
+    .then((buffer) => {
+      const ganho = ctx.createGain();
+      ganho.gain.value = 0.75 * volume;
+      const fonte = ctx.createBufferSource();
+      fonte.buffer = buffer;
+      fonte.connect(ganho).connect(ctx.destination);
+      fonte.onended = () => ctx.close();
+      fonte.start();
+    })
+    .catch(() => {
+      ctx.close();
+      rugidoSintetico();
+    });
+}
+
+function rugidoSintetico() {
   try {
     const volume = volumeDeInterface();
     if (volume <= 0) return;

@@ -1664,7 +1664,10 @@
         "passou": "passou",
         "falhou": "falhou"
       },
-      "AvisarEvento": "Avisar: {evento}"
+      "AvisarEvento": "Avisar: {evento}",
+      "ChamadaPadrao": "Escolha um método para evitar o perigo:",
+      "Fechar": "Fechar",
+      "PassosDoEvento": "({evento}: {n} passos)"
     },
     "CenaConfig": {
       "Nome": "Nome",
@@ -1728,7 +1731,10 @@
         "todos": "Procurar todos",
         "um": "Procurar um (sorteado)",
         "nada": "Nada acontece"
-      }
+      },
+      "Som": "Som de fundo (coração e respiração)",
+      "SomDica": "Toca para todos enquanto esta perseguição estiver ativa. Cada jogador ainda pode desligar nas configurações dele.",
+      "Chamada": "Chamada antes das opções"
     }
   }
 }

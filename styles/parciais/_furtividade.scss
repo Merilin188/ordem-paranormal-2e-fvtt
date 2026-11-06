@@ -354,4 +354,20 @@
   @keyframes op2-alc-garra { to { transform: rotate(12deg) scaleY(1); } }
   @keyframes op2-alc-esq { to { transform: translate(-28%, 14%) rotate(-16deg); filter: brightness(0.5) sepia(1) hue-rotate(-40deg) saturate(3); } }
   @keyframes op2-alc-dir { to { transform: translate(28%, 18%) rotate(14deg); filter: brightness(0.5) sepia(1) hue-rotate(-40deg) saturate(3); } }
+
+  // Janela do evento no caminho
+  .op2-pers-evento-janela {
+    .op2-pers-evento-janela__corpo p { margin: 0.3rem 0; }
+    .op2-pers-evento-janela__chamada { font-weight: bold; color: #e6a3b8; }
+    .form-footer { flex-direction: row; flex-wrap: wrap; }
+    .form-footer button { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem; }
+  }
+  .op2-pers-evento-janela .op2-pers-evento__opcoes, .op2-pers-evento__opcoes { flex-direction: row; flex-wrap: wrap; gap: 0.5rem; }
+  .op2-pers-evento__opcao {
+    display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.3rem 0.6rem; border: 1px solid var(--op2-linha-forte); background: rgb(0 0 0 / 30%);
+  }
+  .op2-pers-evento__dados { display: inline-flex; align-items: center; gap: 0.15rem; }
 }
+
+// Personagem morto: a tela de quem o controla fica em tons de cinza.
+body.op2-tela-morta { filter: grayscale(1); transition: filter 3s ease; }

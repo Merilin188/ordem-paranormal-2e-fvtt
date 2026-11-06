@@ -24,12 +24,14 @@ export const PERSEGUICAO_PADRAO = () => ({
   periciaPadrao: "atletismo",
   outrasUmaVez: true,
   folego: true,
+  som: true,
   marcos: [{ rodada: 3, pa: 15 }, { rodada: 4, pa: 20 }, { rodada: 5, pa: 30 }],
   eventos: [{
     id: "vala",
     nome: "A vala oculta",
     gatilhoPA: 15,
     descricao: "{nome} estava correndo à frente e identificou que há um buraco escondido pela vegetação rasteira, no caminho entre o grupo e a vila.",
+    chamada: "Escolha um método para evitar a vala:",
     pericias: ["percepcao", "sobrevivencia"],
     dt: 10,
     passosFalha: -2,
@@ -159,7 +161,7 @@ export class ConfigCenaApp extends HandlebarsApplicationMixin(ApplicationV2) {
       .sort((a, b) => a.r.localeCompare(b.r));
     if (this.tipo === "perseguicao") {
       return {
-        c, pericias: pericias.map((p) => ({ ...p, sel: p.k === c.periciaPadrao })),
+        c, somLigado: c.som !== false, pericias: pericias.map((p) => ({ ...p, sel: p.k === c.periciaPadrao })),
         eventos: c.eventos.map((ev, i) => ({
           ...ev, i, periciasEv: pericias.map((p) => ({ ...p, sel: ev.pericias.includes(p.k) })),
         })),
@@ -196,11 +198,12 @@ export class ConfigCenaApp extends HandlebarsApplicationMixin(ApplicationV2) {
       perseguidor: v("perseguidor").trim(), rodadas: Math.max(1, n("rodadas")), meta: n("meta"),
       dtAvanco: n("dtAvanco"), periciaPadrao: v("periciaPadrao"),
       outrasUmaVez: !!f.querySelector("[name=outrasUmaVez]")?.checked, folego: !!f.querySelector("[name=folego]")?.checked,
+      som: !!f.querySelector("[name=som]")?.checked,
     });
     c.marcos = [...f.querySelectorAll("[data-marco]")].map((el) => ({ rodada: n("rodada", el), pa: n("pa", el) }));
     c.eventos = [...f.querySelectorAll("[data-evento]")].map((el, i) => ({
       id: c.eventos[i]?.id ?? foundry.utils.randomID(),
-      nome: v("nome", el).trim(), gatilhoPA: n("gatilhoPA", el), descricao: v("descricao", el).trim(),
+      nome: v("nome", el).trim(), gatilhoPA: n("gatilhoPA", el), descricao: v("descricao", el).trim(), chamada: v("chamada", el).trim(),
       pericias: [...el.querySelectorAll("[name=pericias] option:checked")].map((o) => o.value),
       dt: n("dt", el), passosFalha: n("passosFalha", el),
       avisavel: !!el.querySelector("[name=avisavel]")?.checked, passosAviso: n("passosAviso", el),
@@ -221,7 +224,7 @@ export class ConfigCenaApp extends HandlebarsApplicationMixin(ApplicationV2) {
     if (o === "marcos") c.marcos.push({ rodada: c.rodadas, pa: c.meta });
     if (o === "eventos") {
       c.eventos.push({
-        id: foundry.utils.randomID(), nome: L("NovoEvento"), gatilhoPA: 0, descricao: "", pericias: ["percepcao"], dt: 10,
+        id: foundry.utils.randomID(), nome: L("NovoEvento"), gatilhoPA: 0, descricao: "", chamada: "", pericias: ["percepcao"], dt: 10,
         passosFalha: -1, avisavel: false, passosAviso: 1, textoPassou: "", textoFalhou: "",
       });
     }

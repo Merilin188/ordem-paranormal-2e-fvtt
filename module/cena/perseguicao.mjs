@@ -9,12 +9,12 @@
  * gravação por `comoMestre()`.
  */
 import { SYSTEM_ID } from "../config.mjs";
-import { comoMestre, registrarAcaoDeMestre, paraTodos } from "../ui/socket.mjs";
+import { comoMestre, registrarAcaoDeMestre, paraTodos, registrarAcaoDeTodos } from "../ui/socket.mjs";
 import { iconeDado } from "../ui/dice-icons.mjs";
 import { stepDie } from "../dice/escada.mjs";
 import { MAX_BONUS, folegoInicial, formulaDoEsforco, pontosDoAvanco, quemEAlcancado, proximoCorte } from "./perseguicao-regras.mjs";
 import { animarSorteio, ligarVinheta } from "./furtividade.mjs";
-import { listarCenas, obterCena, novaCena, ConfigCenaApp } from "./cenas-config.mjs";
+import { listarCenas, obterCena, novaCena, ConfigCenaApp, PERSEGUICAO_PADRAO } from "./cenas-config.mjs";
 import { iniciarAmbientePerseguicao, pararAmbientePerseguicao, mostrarAlcancado } from "../ui/terror.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } = foundry.applications.api;
@@ -224,6 +224,82 @@ function dadosDaPericia(doc, chave, passos = 0) {
 const icones = (dados) => dados.map((d) => iconeDado(d)).join("");
 const rotuloPericia = (k) => game.i18n.localize(`OP2.Pericia.${k}`);
 
+/** HTML da janela do evento (o mesmo para quem age e para quem assiste). */
+function htmlDoEvento(d, comChips) {
+  return `<div class="op2-pers-evento-janela__corpo">
+    <p>${esc(d.texto)}</p>
+    ${d.avisado ? `<p class="op2-dica">${esc(L("EventoAvisado", { n: d.avisado }))}</p>` : ""}
+    <p class="op2-pers-evento-janela__chamada">${esc(d.chamada)}</p>
+    ${comChips ? `<div class="op2-pers-evento__opcoes">${d.opcoes.map((o) => `<span class="op2-pers-evento__opcao">${esc(o.rotulo)} ${o.dados}</span>`).join("")}</div>` : ""}
+    <p class="op2-dica">DT ${d.dt}. ${esc(d.falha)}</p>
+  </div>`;
+}
+
+/** Janela do evento para quem só assiste (todos os outros). Fecha quando o teste sai. */
+let janelaEventoAlheio = null;
+function mostrarEventoParaOutros(d) {
+  janelaEventoAlheio?.close();
+  janelaEventoAlheio = new DialogV2({
+    window: { title: `${d.titulo}: ${d.nome}`, icon: "fa-solid fa-triangle-exclamation" },
+    classes: ["op2", "op2-pers-evento-janela"],
+    position: { width: 520 },
+    content: htmlDoEvento(d, true),
+    buttons: [{ action: "ok", label: L("Fechar"), default: true }],
+  });
+  janelaEventoAlheio.render({ force: true });
+}
+function fecharEventoParaOutros() {
+  janelaEventoAlheio?.close();
+  janelaEventoAlheio = null;
+}
+
+/**
+ * O evento no caminho, numa janela própria e para todos: quem age escolhe o
+ * método (botões na horizontal, com os dados); os outros veem a mesma janela.
+ * Devolve "passou", "falhou" ou null (fechou sem escolher).
+ */
+async function enfrentarEvento(doc, evento, avisado) {
+  const d = {
+    titulo: evento.nome, nome: doc.name, texto: comNome(evento.descricao, doc.name),
+    chamada: comNome(evento.chamada || PERSEGUICAO_PADRAO().eventos.find((x) => x.id === evento.id)?.chamada || L("ChamadaPadrao"), doc.name),
+    dt: evento.dt, avisado,
+    falha: L("EventoFalha", { n: evento.passosFalha }),
+    opcoes: evento.pericias.map((k) => ({ k, rotulo: rotuloPericia(k), dados: icones(dadosDaPericia(doc, k, avisado)) })),
+  };
+  paraTodos("op2PersEvento", d);
+  const chave = await DialogV2.wait({
+    window: { title: evento.nome, icon: "fa-solid fa-triangle-exclamation" },
+    classes: ["op2", "op2-pers-evento-janela"],
+    position: { width: 520 },
+    content: htmlDoEvento(d, false),
+    buttons: d.opcoes.map((o, i) => ({ action: o.k, label: o.rotulo, default: i === 0 })),
+    render: (_ev, dialogo) => {
+      for (const o of d.opcoes) {
+        dialogo.element.querySelector(`button[data-action="${o.k}"]`)
+          ?.insertAdjacentHTML("beforeend", `<span class="op2-pers-evento__dados">${o.dados}</span>`);
+      }
+    },
+    rejectClose: false,
+  });
+  if (!chave) {
+    paraTodos("op2PersEventoFim", {});
+    return null;
+  }
+  const opcoesTxt = d.opcoes.map((o) => `${esc(o.rotulo)} ${o.dados}`).join(` ${esc(L("Ou"))} `);
+  await card(`<h3><i class="fa-solid fa-triangle-exclamation"></i> ${esc(evento.nome)}</h3><p>${esc(d.texto)}</p>
+    <p class="op2-pers-card__dados">${esc(L("TesteDoEvento"))} ${opcoesTxt} (DT ${evento.dt})</p>`);
+  const { rolarTeste } = await import("../dice/teste.mjs");
+  const teste = await rolarTeste(doc, {
+    chavePericia: chave, dt: evento.dt, contexto: evento.nome, rapido: true, passos: avisado ? { pericia: avisado } : null,
+  });
+  paraTodos("op2PersEventoFim", {});
+  if (!teste) return null;
+  const resultado = teste.resultado?.sucesso ? "passou" : "falhou";
+  await card(`<p>${esc(comNome(resultado === "passou" ? evento.textoPassou : evento.textoFalhou, doc.name))}</p>`);
+  await pedir("evento", { uuid: doc.uuid, eventoId: evento.id, resultado });
+  return resultado;
+}
+
 async function avancar(doc, e, p) {
   const config = e.config;
   const padrao = config.periciaPadrao || "atletismo";
@@ -235,24 +311,19 @@ async function avancar(doc, e, p) {
   const evento = (config.eventos ?? []).find((ev) => ev.pericias?.length && p.pa >= ev.gatilhoPA && !p.eventos?.[ev.id]) ?? null;
   const avisado = evento && e.avisos?.[evento.id] ? Number(evento.passosAviso) || 0 : 0;
 
-  const blocoEvento = evento ? `
-    <fieldset class="op2-pers-evento">
-      <legend><i class="fa-solid fa-triangle-exclamation"></i> ${esc(evento.nome)}</legend>
-      <p>${esc(comNome(evento.descricao, doc.name))}</p>
-      ${avisado ? `<p class="op2-dica">${esc(L("EventoAvisado", { n: avisado }))}</p>` : ""}
-      <div class="op2-pers-evento__opcoes">${evento.pericias.map((k, i) => `
-        <label><input type="radio" name="eventoPericia" value="${k}" ${i ? "" : "checked"}>
-          ${esc(rotuloPericia(k))} ${icones(dadosDaPericia(doc, k, avisado))}</label>`).join("")}
-      </div>
-      <p class="op2-dica">DT ${evento.dt}. ${esc(L("EventoFalha", { n: evento.passosFalha }))}</p>
-    </fieldset>` : "";
+  // Primeiro o evento, na janela dele; depois a janela de Avançar já com o resultado.
+  let resultadoEvento = null;
+  if (evento) {
+    resultadoEvento = await enfrentarEvento(doc, evento, avisado);
+    if (!resultadoEvento) return;
+  }
+  const passosEvento = resultadoEvento === "falhou" ? Number(evento.passosFalha) || 0 : 0;
 
   const escolha = await DialogV2.prompt({
     window: { title: L("Avancar"), icon: "fa-solid fa-person-running" },
     classes: ["op2", "op2-pers-dialogo"],
     position: { width: 460 },
     content: `<div class="op2-furt-procurar">
-      ${blocoEvento}
       <label>${esc(L("Pericia"))}<select name="chave">${opcoes.map((k) => `<option value="${k}">${esc(rotuloPericia(k))}</option>`).join("")}</select></label>
       ${config.outrasUmaVez ? `<p class="op2-dica">${esc(L("PericiaAjuda", { pericia: rotuloPericia(padrao) }))}</p>` : ""}
       ${config.folego ? `<label>${esc(L("UsarFolego", { n: p.folego }))}<input type="number" name="folego" min="0" max="${maxFolego}" value="0"></label>` : ""}
@@ -267,8 +338,8 @@ async function avancar(doc, e, p) {
         const folego = Math.clamp(Number(raiz.querySelector("[name=folego]")?.value) || 0, 0, maxFolego);
         const esforco = raiz.querySelector("[name=esforco]").checked ? 1 : 0;
         const extras = Array(folego + sacrificios).fill("d6");
-        raiz.querySelector("[data-previa]").innerHTML = `${icones(dadosDaPericia(doc, chave, esforco))}${extras.length ? ` + ${icones(extras)}` : ""}`
-          + (evento ? ` <em>${esc(L("SeFalharEvento", { n: evento.passosFalha }))}</em>` : "");
+        raiz.querySelector("[data-previa]").innerHTML = `${icones(dadosDaPericia(doc, chave, esforco + passosEvento))}${extras.length ? ` + ${icones(extras)}` : ""}`
+          + (passosEvento ? ` <em>${esc(L("PassosDoEvento", { evento: evento.nome, n: passosEvento }))}</em>` : "");
       };
       raiz.querySelectorAll("select, input").forEach((el) => el.addEventListener("change", atualizar));
       raiz.querySelector("[name=folego]")?.addEventListener("input", atualizar);
@@ -280,7 +351,6 @@ async function avancar(doc, e, p) {
         chave: b.form.elements.chave.value,
         folego: Math.clamp(Number(b.form.elements.folego?.value) || 0, 0, maxFolego),
         esforco: b.form.elements.esforco.checked,
-        eventoPericia: b.form.elements.eventoPericia?.value ?? null,
       }),
     },
     rejectClose: false,
@@ -288,24 +358,8 @@ async function avancar(doc, e, p) {
   if (!escolha) return;
   const { rolarTeste } = await import("../dice/teste.mjs");
 
-  // Evento no caminho: todos leem o aviso, com os dados de cada opção.
-  let resultadoEvento = null;
-  if (evento) {
-    const opcoesTxt = evento.pericias.map((k) => `${esc(rotuloPericia(k))} ${icones(dadosDaPericia(doc, k, avisado))}`).join(` ${esc(L("Ou"))} `);
-    await card(`<h3><i class="fa-solid fa-triangle-exclamation"></i> ${esc(evento.nome)}</h3><p>${esc(comNome(evento.descricao, doc.name))}</p>
-      <p class="op2-pers-card__dados">${esc(L("TesteDoEvento"))} ${opcoesTxt} (DT ${evento.dt})</p>`);
-    const teste = await rolarTeste(doc, {
-      chavePericia: escolha.eventoPericia ?? evento.pericias[0], dt: evento.dt, contexto: evento.nome, rapido: true,
-      passos: avisado ? { pericia: avisado } : null,
-    });
-    if (!teste) return;
-    resultadoEvento = teste.resultado?.sucesso ? "passou" : "falhou";
-    await card(`<p>${esc(comNome(resultadoEvento === "passou" ? evento.textoPassou : evento.textoFalhou, doc.name))}</p>`);
-    await pedir("evento", { uuid: doc.uuid, eventoId: evento.id, resultado: resultadoEvento });
-  }
-
   const d6 = (rotulo, n) => Array.from({ length: n }, (_, i) => ({ chave: `${rotulo}.${i}`, rotulo: L(rotulo), tipo: "extra", dado: "d6" }));
-  const passos = (escolha.esforco ? 1 : 0) + (resultadoEvento === "falhou" ? Number(evento.passosFalha) || 0 : 0);
+  const passos = (escolha.esforco ? 1 : 0) + passosEvento;
   const roll = await rolarTeste(doc, {
     chavePericia: escolha.chave, dt: config.dtAvanco, contexto: L("TesteAvanco"), rapido: true,
     dadosExtras: [...d6("Folego", escolha.folego), ...d6("Sacrificio", sacrificios)],
@@ -468,7 +522,8 @@ let ultimoEvento = null;
 function somAmbiente(ativa) {
   let ligado = true;
   try { ligado = game.settings.get(SYSTEM_ID, "somPerseguicao"); } catch { /* sem setting */ }
-  if (ativa && ligado && perseguicaoHabilitada()) iniciarAmbientePerseguicao();
+  const daCena = estadoPerseguicao().config?.som !== false;
+  if (ativa && ligado && daCena && perseguicaoHabilitada()) iniciarAmbientePerseguicao();
   else pararAmbientePerseguicao();
 }
 
@@ -524,6 +579,8 @@ export function registrarPerseguicao() {
   });
   game.settings.register(SYSTEM_ID, CHAVE, { scope: "world", config: false, type: Object, default: {}, onChange: aoMudar });
   registrarAcaoDeMestre("op2Perseguicao", executar);
+  registrarAcaoDeTodos("op2PersEvento", mostrarEventoParaOutros);
+  registrarAcaoDeTodos("op2PersEventoFim", fecharEventoParaOutros);
   Hooks.on("op2CenasConfig", () => { if (painel?.rendered) painel.render(); });
   Hooks.once("ready", () => {
     if (!perseguicaoHabilitada()) return;

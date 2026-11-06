@@ -1664,7 +1664,10 @@
         "passou": "passed",
         "falhou": "failed"
       },
-      "AvisarEvento": "Warn: {evento}"
+      "AvisarEvento": "Warn: {evento}",
+      "ChamadaPadrao": "Choose a way to avoid the danger:",
+      "Fechar": "Close",
+      "PassosDoEvento": "({evento}: {n} steps)"
     },
     "CenaConfig": {
       "Nome": "Name",
@@ -1728,7 +1731,10 @@
         "todos": "Search everyone",
         "um": "Search one (drawn)",
         "nada": "Nothing happens"
-      }
+      },
+      "Som": "Background sound (heart and breathing)",
+      "SomDica": "Plays for everyone while this chase is active. Each player can still turn it off in their settings.",
+      "Chamada": "Prompt before the options"
     }
   }
 }
