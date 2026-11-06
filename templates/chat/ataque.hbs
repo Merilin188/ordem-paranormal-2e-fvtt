@@ -9,14 +9,16 @@
 
   {{!-- O defensor escolhe: revidar (troca de golpes) ou só se defender. --}}
   <div class="op2-card__acoes">
+    {{#unless semRevidar}}
     <button type="button" class="op2-botao op2-botao--pequeno" data-op2-acao="defender-ataque"
       data-ator-id="{{alvoId}}" data-atacante-id="{{atacanteId}}" data-total="{{total}}"
-      data-ra="{{ra}}" data-rb="{{rb}}" data-armado="{{armado}}" data-esquiva="false">
+      data-ra="{{ra}}" data-rb="{{rb}}" data-armado="{{armado}}" data-dano-base="{{danoBase}}" data-dano-bonus="{{danoBonus}}" data-esquiva="false">
       {{localize "OP2.Combate.Revidar"}}
     </button>
+    {{/unless}}
     <button type="button" class="op2-botao op2-botao--pequeno" data-op2-acao="defender-ataque"
       data-ator-id="{{alvoId}}" data-atacante-id="{{atacanteId}}" data-total="{{total}}"
-      data-ra="{{ra}}" data-rb="{{rb}}" data-armado="{{armado}}" data-esquiva="true">
+      data-ra="{{ra}}" data-rb="{{rb}}" data-armado="{{armado}}" data-dano-base="{{danoBase}}" data-dano-bonus="{{danoBonus}}" data-esquiva="true">
       {{localize "OP2.Combate.Esquivar"}}
     </button>
   </div>

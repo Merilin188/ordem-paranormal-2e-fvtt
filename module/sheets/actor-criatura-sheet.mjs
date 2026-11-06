@@ -66,29 +66,42 @@ export class CriaturaSheet extends NpcSheet {
     if (ok) await this.actor.update({ [`system.${colecao}.-=${id}`]: null });
   }
 
-  /** Teste do ataque: os dados do bloco ("2d10", "d8+d6") e o dano RA/RB + N no card. */
+  /**
+   * Agredir com o ataque: escolhe o alvo (a mira do Foundry, ou uma lista), rola os
+   * dados do bloco ("2d10", "d8+d6") e abre o card de resposta — Revidar ou
+   * Esquivar — com o dano da fórmula (RA/RB + N). À distância, só Esquivar.
+   */
   static async #rolarAtaque(_evento, alvo) {
-    const ataque = this.actor.system.ataques?.[alvo.dataset.id];
+    const ator = this.actor;
+    const ataque = ator.system.ataques?.[alvo.dataset.id];
     if (!ataque) return;
     const dados = dadosDoAtaque(ataque.dados);
     if (!dados.length) return void ui.notifications.warn(L("DadosInvalidos", { dados: ataque.dados }));
     const dano = danoDoAtaque(ataque.dano);
-    const roll = OP2Roll.paraComponentes(
-      dados.map((dado, i) => ({ chave: `ataque.${i}`, rotulo: ataque.nome, tipo: "extra", dado })),
-      {
-        dt: null,
-        escopoCritico: lerConfig("escopoCritico"),
-        rotulo: `${ataque.nome}${ataque.nota ? ` (${ataque.nota})` : ""}`,
-        atorId: this.actor.id,
-        chavePericia: "luta",
-        danoCriatura: dano ? { nome: ataque.nome, ...dano } : null,
-        semArma: true,
+    const { atacarComCriatura } = await import("../cena/acoes-combate.mjs");
+    await atacarComCriatura(ator, {
+      nome: ataque.nome,
+      dano,
+      distancia: ataque.alcance === "distancia",
+      rolar: async (vitima) => {
+        const roll = OP2Roll.paraComponentes(
+          dados.map((dado, i) => ({ chave: `ataque.${i}`, rotulo: ataque.nome, tipo: "extra", dado })),
+          {
+            dt: null,
+            escopoCritico: lerConfig("escopoCritico"),
+            rotulo: `${ataque.nome} → ${vitima.name}${ataque.nota ? ` (${ataque.nota})` : ""}`,
+            atorId: ator.id,
+            chavePericia: "luta",
+            semArma: true,
+          },
+        );
+        await roll.evaluate();
+        await mostrarDados3D(roll);
+        if (roll.precisaSelecao) roll.aplicarSelecao(roll.selecaoSugerida());
+        await enviarParaChat(roll, ator, { pularDados3D: true });
+        return roll;
       },
-    );
-    await roll.evaluate();
-    await mostrarDados3D(roll);
-    if (roll.precisaSelecao) roll.aplicarSelecao(roll.selecaoSugerida());
-    await enviarParaChat(roll, this.actor, { pularDados3D: true });
+    });
   }
 
   /**

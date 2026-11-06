@@ -10,7 +10,7 @@
  */
 import { SYSTEM_ID } from "../config.mjs";
 import { rolarTeste, renderizar } from "../dice/teste.mjs";
-import { vencedorDoOposto, resolverAtaque, danoDoAtaque, empateAcertaOsDois } from "./combate.mjs";
+import { vencedorDoOposto, resolverAtaque, danoDoAtaque, empateAcertaOsDois, modoDaEsquiva } from "./combate.mjs";
 import { alvosDaCenaAtiva, alvosMarcados } from "./encerrar-investigacao.mjs";
 
 /** Rola o ataque e publica o card que espera a resposta do defensor. */
@@ -28,9 +28,28 @@ export async function atacar(ator, { alvoUuid, armado, rapido = false } = {}) {
     contexto: game.i18n.format("OP2.Combate.AtaqueContexto", { alvo: alvo.name }),
   });
   if (!roll) return null;
+  await publicarAtaque(ator, alvo, roll, { armado: usaArma });
+  return roll;
+}
 
+/**
+ * Ataque de criatura (botão de punho da ficha): mesmo card de resposta do Agredir,
+ * mas com os dados do bloco e o dano da fórmula dela ("RA+1", "RB+2"). À distância
+ * não há revide em Luta — só esquivar.
+ * `rolar()` rola e publica o teste; devolve o roll.
+ */
+export async function atacarComCriatura(ator, { rolar, dano = null, distancia = false, nome = "" }) {
+  const alvo = await escolherAlvo(ator);
+  if (!alvo) return null;
+  const roll = await rolar(alvo);
+  if (!roll) return null;
+  await publicarAtaque(ator, alvo, roll, { armado: true, dano, distancia, nome });
+  return roll;
+}
+
+async function publicarAtaque(ator, alvo, roll, { armado, dano = null, distancia = false, nome = "" }) {
   const conteudo = await renderizar(`systems/${SYSTEM_ID}/templates/chat/ataque.hbs`, {
-    titulo: game.i18n.localize("OP2.Combate.Atacar"),
+    titulo: nome || game.i18n.localize("OP2.Combate.Atacar"),
     texto: game.i18n.format("OP2.Combate.Ataque", {
       atacante: ator.name, alvo: alvo.name, total: roll.total,
     }),
@@ -39,9 +58,12 @@ export async function atacar(ator, { alvoUuid, armado, rapido = false } = {}) {
     total: roll.total,
     ra: roll.ra,
     rb: roll.rb,
-    armado: usaArma,
+    armado,
+    danoBase: dano?.base ?? "",
+    danoBonus: dano?.bonus ?? 0,
+    semRevidar: distancia,
     // O defensor escolhe: revidar (troca de golpes) ou só se defender (esquiva).
-    dicaEsquiva: game.i18n.localize("OP2.Combate.EsquivaDica"),
+    dicaEsquiva: game.i18n.localize(distancia ? "OP2.Combate.EsquivaDicaDistancia" : "OP2.Combate.EsquivaDica"),
   });
 
   await ChatMessage.create({
@@ -49,17 +71,31 @@ export async function atacar(ator, { alvoUuid, armado, rapido = false } = {}) {
     speaker: ChatMessage.getSpeaker({ actor: ator }),
     flags: { [SYSTEM_ID]: { tipo: "ataque", atorId: ator.id } },
   });
-
-  return roll;
 }
 
 /**
  * Resposta do defensor. `esquiva` troca Luta por Acrobacia e soma um d6 — a única
  * exceção aditiva do playtest (spec §8.1) — e abre mão de causar dano.
  */
-export async function defender(defensor, { atacanteId, totalAtaque, raAtaque, rbAtaque, armadoAtacante, esquiva, rapido = false }) {
+export async function defender(defensor, { atacanteId, totalAtaque, raAtaque, rbAtaque, armadoAtacante, esquiva, danoAtacante = null, rapido = false }) {
   const atacante = game.actors.get(atacanteId);
   if (!atacante) return null;
+
+  // Quem pode esquivar: declarou Defender-se nesta rodada (gasta a ação) ou tem a
+  // habilidade Esquiva (ação livre, uma vez por rodada). NPC e criatura não contam.
+  let modo = null;
+  if (esquiva) {
+    const { poderDe, chaveDaRodada } = await import("./poderes.mjs");
+    const rodada = chaveDaRodada();
+    const flag = (k) => defensor.getFlag(SYSTEM_ID, k);
+    modo = modoDaEsquiva({
+      ehPersonagem: defensor.type === "personagem",
+      declarouDefesa: flag("defesaRodada") === rodada,
+      temEsquiva: Boolean(poderDe(defensor, "esquiva")),
+      esquivaUsada: flag("esquivaRodada") === rodada,
+    });
+    if (!modo) return void ui.notifications.warn(game.i18n.format("OP2.Combate.SemEsquiva", { nome: defensor.name }));
+  }
 
   const armadoDefensor = esquiva
     ? false
@@ -77,9 +113,19 @@ export async function defender(defensor, { atacanteId, totalAtaque, raAtaque, rb
     contexto: game.i18n.format("OP2.Combate.DefesaContexto", { atacante: atacante.name }),
   });
   if (!roll) return null;
+  if (modo === "declarada") await defensor.unsetFlag(SYSTEM_ID, "defesaRodada");
+  if (modo === "habilidade") {
+    const { chaveDaRodada } = await import("./poderes.mjs");
+    await defensor.setFlag(SYSTEM_ID, "esquivaRodada", chaveDaRodada());
+  }
 
+  // Criatura: o dano vem da fórmula do ataque (RA+N ou RB+N), não da arma.
+  if (danoAtacante) {
+    armadoAtacante = true;
+    if (danoAtacante.base === "rb") raAtaque = rbAtaque;
+  }
   const vencedor = vencedorDoOposto(totalAtaque, roll.total);
-  const bonusAtacante = bonusDeArma(atacante);
+  const bonusAtacante = danoAtacante ? danoAtacante.bonus : bonusDeArma(atacante);
   const bonusDefensor = bonusDeArma(defensor);
   const { dano, alvo } = resolverAtaque({
     vencedor,
@@ -102,9 +148,12 @@ export async function defender(defensor, { atacanteId, totalAtaque, raAtaque, rb
   let danoFinal = dano;
   const escudo = defensor.items?.find((i) => i.type === "equipamento" && i.system.equipado && i.system.escudo);
   if (escudo && alvo === "defensor" && roll.total >= 7) danoFinal = Math.max(0, dano - roll.rb);
-  // Leitura de Combate: gastou a ação para se defender → +1 marcador de análise.
-  const { leituraDeCombate } = await import("./poderes.mjs");
-  await leituraDeCombate(defensor);
+  // Leitura de Combate: só quando gastou a AÇÃO para se defender (Defender-se
+  // declarado). Revidar é troca de golpes; a Esquiva da habilidade é ação livre.
+  if (modo === "declarada") {
+    const { leituraDeCombate } = await import("./poderes.mjs");
+    await leituraDeCombate(defensor);
+  }
 
   const quemSofre = alvo === "defensor" ? defensor : (alvo === "atacante" ? atacante : null);
   const conteudo = await renderizar(`systems/${SYSTEM_ID}/templates/chat/ataque-resultado.hbs`, {

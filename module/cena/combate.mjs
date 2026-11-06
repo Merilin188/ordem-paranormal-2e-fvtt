@@ -52,3 +52,16 @@ export function resolverAtaque({ vencedor, esquiva, leituraAtacante, leituraDefe
     ? { dano: danoDoAtaque(leituraAtacante, { armado: armadoAtacante, bonus: bonusAtacante }), alvo: "defensor" }
     : { dano: danoDoAtaque(leituraDefensor, { armado: armadoDefensor, bonus: bonusDefensor }), alvo: "atacante" };
 }
+
+/**
+ * Como o personagem esquiva (botão Esquivar do card de ataque):
+ * "declarada" — declarou Defender-se nesta rodada (a ação dele);
+ * "habilidade" — tem Esquiva e ainda não usou nesta rodada (ação livre);
+ * "livre" — NPC ou criatura, sem esse controle; null — não pode.
+ */
+export function modoDaEsquiva({ ehPersonagem, declarouDefesa, temEsquiva, esquivaUsada }) {
+  if (!ehPersonagem) return "livre";
+  if (declarouDefesa) return "declarada";
+  if (temEsquiva && !esquivaUsada) return "habilidade";
+  return null;
+}

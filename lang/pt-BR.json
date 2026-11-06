@@ -829,7 +829,7 @@
       "AtaqueContexto": "Ataque contra {alvo}",
       "DefesaContexto": "Defesa contra {atacante}",
       "Ataque": "{atacante} ataca {alvo} — teste oposto de Luta, resultado {total}.",
-      "EsquivaDica": "Revidar é teste de Luta e pode causar dano. Esquivar é Acrobacia +d6: vencendo, ninguém sofre nem causa dano.",
+      "EsquivaDica": "Revidar é teste de Luta e pode causar dano. Esquivar é Acrobacia +d6 (vencendo, ninguém sofre nem causa dano) — vale para quem declarou Defender-se nesta rodada ou tem a habilidade Esquiva (1× por rodada, ação livre).",
       "Revidar": "Revidar (Luta)",
       "Esquivar": "Esquivar (Acrobacia +d6)",
       "Resultado": "Resultado do ataque",
@@ -847,7 +847,9 @@
       "FaseAjuda": "Em que fase cada um age nesta rodada? Geral (qualquer ação, exceto ataques) → Ataques à distância → Ataques corpo a corpo. Quem age numa fase não age nas seguintes.",
       "Declarar": "Declarar",
       "FasesDeclaradas": "Fases declaradas",
-      "EmpateMutuo": "Empate: os dois atingiram a DT 7 e se acertam."
+      "EmpateMutuo": "Empate: os dois atingiram a DT 7 e se acertam.",
+      "EsquivaDicaDistancia": "Ataque à distância: não dá para revidar em Luta. Esquivar é Acrobacia +d6 — para quem declarou Defender-se nesta rodada ou tem a habilidade Esquiva (1× por rodada, ação livre).",
+      "SemEsquiva": "{nome} não pode esquivar agora: declare Defender-se nesta rodada (Ações de combate) ou tenha a habilidade Esquiva ainda não usada na rodada."
     },
     "Impeto": {
       "Titulo": "Ímpeto",
@@ -1577,7 +1579,7 @@
       "Ataques": "Ações de ataque",
       "AdicionarAtaque": "Novo ataque",
       "NovoAtaque": "Ataque",
-      "RolarAtaque": "Rolar o teste deste ataque (o dano sai no card)",
+      "RolarAtaque": "Agredir: escolhe o alvo, rola e abre Revidar/Esquivar para ele",
       "CorpoACorpo": "Corpo a corpo",
       "Distancia": "À distância",
       "Nome": "Nome",

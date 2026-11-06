@@ -66,6 +66,7 @@ const ACOES = {
       rbAtaque: Number(dataset.rb),
       armadoAtacante: dataset.armado === "true",
       esquiva: dataset.esquiva === "true",
+      danoAtacante: dataset.danoBase ? { base: dataset.danoBase, bonus: Number(dataset.danoBonus) || 0 } : null,
     });
   },
   // O dano do combate já sabe em quem cai — não usa a seleção de tokens.

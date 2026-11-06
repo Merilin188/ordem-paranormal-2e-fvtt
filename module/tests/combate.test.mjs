@@ -47,3 +47,14 @@ test("empate não move nada", () => {
     leituraAtacante: { ra: 5, rb: 2 }, leituraDefensor: { ra: 5, rb: 2 },
   }), { dano: 0, alvo: null });
 });
+
+test("esquiva: Defender-se declarado ou a habilidade, uma vez por rodada", async () => {
+  const { modoDaEsquiva } = await import("../cena/combate.mjs");
+  const base = { ehPersonagem: true, declarouDefesa: false, temEsquiva: false, esquivaUsada: false };
+  assert.equal(modoDaEsquiva(base), null);
+  assert.equal(modoDaEsquiva({ ...base, declarouDefesa: true }), "declarada");
+  assert.equal(modoDaEsquiva({ ...base, temEsquiva: true }), "habilidade");
+  assert.equal(modoDaEsquiva({ ...base, temEsquiva: true, esquivaUsada: true }), null);
+  assert.equal(modoDaEsquiva({ ...base, temEsquiva: true, esquivaUsada: true, declarouDefesa: true }), "declarada");
+  assert.equal(modoDaEsquiva({ ...base, ehPersonagem: false }), "livre");
+});

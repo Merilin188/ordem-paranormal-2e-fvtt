@@ -829,7 +829,7 @@
       "AtaqueContexto": "Attack against {alvo}",
       "DefesaContexto": "Defense against {atacante}",
       "Ataque": "{atacante} attacks {alvo} — opposed Fight check, result {total}.",
-      "EsquivaDica": "Fighting back is a Fight check and can deal damage. Dodging is Acrobatics +d6: if you win, nobody takes or deals damage.",
+      "EsquivaDica": "Strike back is a Fighting test and can deal damage. Dodge is Acrobatics +d6 (winning, nobody takes or deals damage) — for whoever declared Defend this round or has the Dodge ability (once per round, free action).",
       "Revidar": "Fight back (Fight)",
       "Esquivar": "Dodge (Acrobatics +d6)",
       "Resultado": "Attack result",
@@ -847,7 +847,9 @@
       "FaseAjuda": "Em que fase cada um age nesta rodada? Geral (qualquer ação, exceto ataques) → Ataques à distância → Ataques corpo a corpo. Quem age numa fase não age nas seguintes.",
       "Declarar": "Declarar",
       "FasesDeclaradas": "Fases declaradas",
-      "EmpateMutuo": "Empate: os dois atingiram a DT 7 e se acertam."
+      "EmpateMutuo": "Empate: os dois atingiram a DT 7 e se acertam.",
+      "EsquivaDicaDistancia": "Ranged attack: you cannot strike back with Fighting. Dodge is Acrobatics +d6 — for whoever declared Defend this round or has the Dodge ability (once per round, free action).",
+      "SemEsquiva": "{nome} cannot dodge now: declare Defend this round (Combat actions) or have the Dodge ability not yet used this round."
     },
     "Impeto": {
       "Titulo": "Momentum",
@@ -1577,7 +1579,7 @@
       "Ataques": "Attack actions",
       "AdicionarAtaque": "New attack",
       "NovoAtaque": "Attack",
-      "RolarAtaque": "Roll this attack's test (damage shows on the card)",
+      "RolarAtaque": "Strike: picks the target, rolls and opens Strike back/Dodge for them",
       "CorpoACorpo": "Melee",
       "Distancia": "Ranged",
       "Nome": "Name",
