@@ -7,6 +7,7 @@
  * o que é passivo entra sozinho no cálculo (armadura, passo, crítico com 5…).
  */
 import { estadoFurtividade } from "./furtividade.mjs";
+import { dadosDoPlano } from "./poderes-regras.mjs";
 import { estadoPerseguicao } from "./perseguicao.mjs";
 import { investigacaoAtiva } from "./investigacao-ativa.mjs";
 import { SYSTEM_ID } from "../config.mjs";
@@ -172,7 +173,7 @@ export async function conferirLobo(ator, roll) {
   await card(ator, lobo.name, P("LoboMachucado", { nome: esc(ator.name) }));
 }
 
-/* ---- Plano Estratégico: rola; aliados recebem +d6 por 3 pontos acima da DT ---- */
+/* ---- Plano Estratégico: passou = +1d6, e +1d6 a cada 3 pontos acima da DT ---- */
 
 async function planoEstrategico(ator, item) {
   if (!(await pagarPD(ator, 3))) return null;
@@ -180,9 +181,8 @@ async function planoEstrategico(ator, item) {
   const chave = Object.keys(ator.system.aptidoes ?? {}).find((k) => /guerra/i.test(k) || /guerra/i.test(ator.system.aptidoes[k]?.rotulo ?? "")) ?? "tatica";
   const roll = await rolarTeste(ator, { chavePericia: `aptidao.${chave}`, dt: 7, contexto: item.name });
   if (!roll) return null;
-  if (!roll.sucesso) return card(ator, item.name, P("PlanoFalhou", { nome: esc(ator.name) }));
-  const n = Math.max(0, Math.floor((roll.total - 7) / 3));
-  if (!n) return card(ator, item.name, P("PlanoSemBonus", { nome: esc(ator.name) }));
+  const n = dadosDoPlano(roll.total, roll.sucesso);
+  if (!n) return card(ator, item.name, P("PlanoFalhou", { nome: esc(ator.name) }));
   const grupo = [ator, ...aliados(ator)];
   for (const a of grupo) await comoMestre("op2DarBonusPlano", { atorId: a.id, n });
   return card(ator, item.name, P("PlanoSucesso", { nome: esc(ator.name), n }));

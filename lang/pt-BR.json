@@ -1337,7 +1337,6 @@
       "PlanoTitulo": "Plano Estratégico",
       "PlanoPergunta": "Você tem {n} d6 do Plano Estratégico. Quantos usar neste teste?",
       "PlanoFalhou": "O plano de {nome} não se sustentou.",
-      "PlanoSemBonus": "{nome} passou, mas sem margem para bônus.",
       "PlanoSucesso": "Plano de {nome}: o grupo todo recebe {n} d6 bônus para usar até o fim da cena.",
       "CurandeiroSemAlvo": "Nenhum aliado disponível (cada um só pode ser curado uma vez por cena).",
       "CurandeiroFalhou": "O tratamento em {nome} não funcionou.",
