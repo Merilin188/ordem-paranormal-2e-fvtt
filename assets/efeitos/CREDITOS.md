@@ -1,3 +1,3 @@
 # Efeitos
 
-- `sangue-cortina.webp`, `sangue-gotas.webp`, `garras.webp`: gerados pelo sistema, com respingos e manchas da textura "Blood Splatter" de ExileGL (OpenGameArt, CC0): https://opengameart.org/content/blood-splatter
+- `respingos-1.webp`, `respingos-2.webp`, `respingos-3.webp` e `garras.webp`: gerados pelo próprio sistema (sem arte de terceiros).

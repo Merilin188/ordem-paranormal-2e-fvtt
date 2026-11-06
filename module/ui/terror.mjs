@@ -194,12 +194,12 @@ function rugidoSintetico() {
 
 /* -- tela de alcançado -------------------------------------------------------- */
 
-const EFEITOS = `systems/${SYSTEM_ID}/assets/efeitos`;
+export const EFEITOS = `systems/${SYSTEM_ID}/assets/efeitos`;
 
 /**
  * Sangue tomando a tela, garras rasgando o retrato ao meio e o rugido. Dura ~5,5 s.
- * Sangue e garras são imagens pré-renderizadas (textura CC0 de sangue): o navegador
- * só recorta e move, sem filtro calculado a cada quadro.
+ * Respingos e garras são imagens pré-renderizadas: o navegador só mexe em
+ * opacidade, escala e recorte, sem filtro calculado a cada quadro.
  */
 export function mostrarAlcancado(uuid, rotulo) {
   const doc = fromUuidSync(uuid);
@@ -209,8 +209,9 @@ export function mostrarAlcancado(uuid, rotulo) {
   el.className = "op2 op2-alcancado";
   el.innerHTML = `
     <div class="op2-alcancado__cobertura"></div>
-    <img class="op2-alcancado__sangue op2-alcancado__sangue--cortina" src="${EFEITOS}/sangue-cortina.webp" alt="">
-    <img class="op2-alcancado__sangue op2-alcancado__sangue--gotas" src="${EFEITOS}/sangue-gotas.webp" alt="">
+    <img class="op2-alcancado__respingo r1" src="${EFEITOS}/respingos-1.webp" alt="">
+    <img class="op2-alcancado__respingo r2" src="${EFEITOS}/respingos-2.webp" alt="">
+    <img class="op2-alcancado__respingo r3" src="${EFEITOS}/respingos-3.webp" alt="">
     <div class="op2-alcancado__retrato">
       <div class="op2-alcancado__metade op2-alcancado__metade--esq" style="background-image:url('${img}')"></div>
       <div class="op2-alcancado__metade op2-alcancado__metade--dir" style="background-image:url('${img}')"></div>
@@ -224,7 +225,7 @@ export function mostrarAlcancado(uuid, rotulo) {
 
 /** Baixa as imagens antes, para a primeira morte não piscar. */
 export function precarregarEfeitos() {
-  for (const f of ["sangue-cortina.webp", "sangue-gotas.webp", "garras.webp"]) {
+  for (const f of ["respingos-1.webp", "respingos-2.webp", "respingos-3.webp", "garras.webp"]) {
     const imagem = new Image();
     imagem.src = `${EFEITOS}/${f}`;
   }

@@ -9,6 +9,7 @@
  * setting roda em todos os clientes: re-renderiza o painel, liga a vinheta e
  * dispara as animações do evento novo.
  */
+import { EFEITOS, precarregarEfeitos } from "../ui/terror.mjs";
 import { SYSTEM_ID } from "../config.mjs";
 import { comoMestre, registrarAcaoDeMestre, paraTodos, registrarAcaoDeTodos } from "../ui/socket.mjs";
 import { registrarAcaoDeChat } from "../ui/chat.mjs";
@@ -699,7 +700,7 @@ export function mostrarEncontrado(uuid, rotulo = null) {
   el.innerHTML = `
     <div class="op2-encontrado__flash"></div>
     <div class="op2-encontrado__retrato"><img src="${esc(doc.img)}" alt="">
-      <span class="op2-encontrado__garra g1"></span><span class="op2-encontrado__garra g2"></span><span class="op2-encontrado__garra g3"></span>
+      <img class="op2-encontrado__garras" src="${EFEITOS}/garras.webp" alt="">
     </div>
     <div class="op2-encontrado__texto"><small>${esc(rotulo ?? L("Encontrado"))}</small><strong>${esc(doc.name)}</strong></div>`;
   document.body.append(el);
@@ -849,6 +850,7 @@ export function registrarFurtividade() {
   registrarAcaoDeTodos("op2FurtSorteio", animarSorteio);
 
   Hooks.once("ready", () => {
+    precarregarEfeitos();
     const e = estadoFurtividade();
     ultimoEvento = e.evento?.id ?? null;
     if (ultimoEvento) animados.add(ultimoEvento);
