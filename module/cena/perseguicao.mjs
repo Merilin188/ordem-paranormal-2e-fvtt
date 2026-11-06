@@ -189,14 +189,17 @@ function htmlDoEmpate(empate, perdedor = null) {
       <img src="${esc(doc?.img ?? ANONIMO)}" alt=""><span>${esc(doc?.name ?? "?")}</span>
       ${salvo ? `<i class="fa-solid fa-person-running" data-tooltip="${esc(L("Prosseguiu"))}"></i>` : ""}${morto ? `<i class="fa-solid fa-skull"></i>` : ""}</button>`;
   }).join("");
-  const dois = empate.uuids.length === 2;
+  // Teste oposto só entre dois: num empate triplo, volta a valer quando sobram dois.
+  const restantes = empate.uuids.filter((u) => !empate.salvos.includes(u));
+  const dois = restantes.length === 2;
   const mestre = perdedor ? "" : `
     <div class="op2-pers-empate__mestre" data-op2-gm>
-      <button type="button" class="op2-botao op2-botao--pequeno" data-op2-pers-oposto="${empate.uuids.join(",")}" ${dois ? "" : "disabled"}
+      <button type="button" class="op2-botao" data-op2-pers-oposto="${restantes.join(",")}" ${dois ? "" : "disabled"}
         ${dois ? "" : `data-tooltip="${esc(L("OpostoSoDois"))}"`}><i class="fa-solid fa-swords"></i> ${esc(L("SolicitarOposto"))}</button>
-      <button type="button" class="op2-botao op2-botao--pequeno op2-botao--perigo" data-op2-pers-manual><i class="fa-solid fa-hand-pointer"></i> ${esc(L("DecidirManual"))}</button>
+      <span class="op2-pers-empate__ou">${esc(L("Ou"))}</span>
+      <button type="button" class="op2-botao op2-botao--perigo" data-op2-pers-manual><i class="fa-solid fa-hand-pointer"></i> ${esc(L("DecidirManual"))}</button>
     </div>
-    <p class="op2-dica op2-pers-empate__instrucao" data-op2-gm hidden>${esc(L(dois ? "CliqueQuemProsseguiu" : "CliqueQuemProsseguiuVarios"))}</p>`;
+    <p class="op2-dica op2-pers-empate__instrucao" data-op2-gm ${empate.manual ? "" : "hidden"}>${esc(L(dois ? "CliqueQuemProsseguiu" : "CliqueQuemProsseguiuVarios"))}</p>`;
   return `<p>${esc(L("Empate", { nomes: empate.uuids.map(nomeDe).join(", "), corte: empate.corte }))}</p>
     <p class="op2-pers-empate__pergunta"><strong>${esc(L("QuemProsseguiu"))}</strong></p>
     <div class="op2-pers-empate${empate.manual ? " op2-pers-empate--manual" : ""}">${linhas}</div>${mestre}`;

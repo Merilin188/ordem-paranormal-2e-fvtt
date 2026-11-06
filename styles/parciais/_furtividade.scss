@@ -387,7 +387,8 @@ body.op2-tela-morta { filter: grayscale(1); transition: filter 3s ease; }
     cursor: pointer; border-color: #d0537a;
     &:hover { background: rgb(160 28 70 / 40%); }
   }
-  .op2-pers-empate__mestre { display: flex; gap: 0.3rem; margin-top: 0.4rem; button { flex: 1; } }
+  .op2-pers-empate__mestre { display: flex; flex-direction: column; align-items: stretch; gap: 0.25rem; margin-top: 0.5rem; }
+  .op2-pers-empate__ou { text-align: center; font-size: 0.75em; font-weight: bold; letter-spacing: 0.1em; text-transform: uppercase; color: var(--op2-tinta-fraca); }
   .op2-pers-empate__instrucao { margin: 0.3rem 0 0; }
 }
 
@@ -432,7 +433,7 @@ body.op2-tela-morta { filter: grayscale(1); transition: filter 3s ease; }
 .op2-sussurro-janela textarea::placeholder, .op2-sussurro textarea::placeholder { color: #a99a8a !important; opacity: 1 !important; font-style: italic; }
 
 @layer system {
-  .op2-pers-empate__mestre button { font-size: 0.68rem; line-height: 1.15; padding: 0.3rem 0.35rem; white-space: nowrap; letter-spacing: 0; }
+  .op2-pers-empate__mestre button { width: 100%; min-height: 2.4rem; font-size: 0.85rem; line-height: 1.2; padding: 0.4rem 0.5rem; white-space: normal; }
   .op2-sussurro-janela__exemplo { margin: -0.3rem 0 0; font-style: italic; }
   .op2-op__prontidao { margin-top: 0.3rem; width: auto; font-size: 0.7rem; }
   .op2-op__prontidao-nota { display: block; font-size: 0.7em; color: #e6c46a; }
