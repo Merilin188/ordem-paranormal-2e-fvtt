@@ -15,6 +15,7 @@ import { stepDie } from "../dice/escada.mjs";
 import { MAX_BONUS, folegoInicial, formulaDoEsforco, pontosDoAvanco, quemEAlcancado, proximoCorte } from "./perseguicao-regras.mjs";
 import { animarSorteio, ligarVinheta } from "./furtividade.mjs";
 import { listarCenas, obterCena, novaCena, ConfigCenaApp, PERSEGUICAO_PADRAO } from "./cenas-config.mjs";
+import { enviarCaixasDeSussurro, jogadoresDe } from "../ui/sussurro.mjs";
 import { iniciarAmbientePerseguicao, pararAmbientePerseguicao, mostrarAlcancado, precarregarEfeitos } from "../ui/terror.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } = foundry.applications.api;
@@ -109,6 +110,7 @@ function executar({ op, ...dados }) {
   const resultado = fila.then(async () => {
     if (op === "proxima") return proximaRodada();
     if (op === "prosseguiu") return marcarProsseguiu(dados.uuid);
+    if (op === "sussurroEmpate") return sussurroDoEmpate();
     if (op === "cabecas") return eventoDeInicio();
     const e = estadoPerseguicao();
     OPS[op]?.(e, dados);
@@ -201,6 +203,17 @@ function htmlDoEmpate(empate, perdedor = null) {
 
 const conteudoDoCard = (html) => `<div class="op2 op2-card op2-furt-card op2-pers-card">${html}</div>`;
 
+/** Decidir manualmente: cada empatado recebe uma caixa para sussurrar o que faz (uma vez). */
+async function sussurroDoEmpate() {
+  const e = estadoPerseguicao();
+  if (!e.empate || e.empate.sussurro) return false;
+  const destinos = e.empate.uuids.flatMap((u) => jogadoresDe(ator(u)).map((usuario) => ({ usuarioId: usuario.id, atorUuid: u })));
+  if (destinos.length) await enviarCaixasDeSussurro({ destinos, pergunta: L("PerguntaEmpate") });
+  e.empate.sussurro = true;
+  await game.settings.set(SYSTEM_ID, CHAVE, e);
+  return true;
+}
+
 /** Mestre clicou em quem prosseguiu: quando sobra um só, ele é alcançado. */
 async function marcarProsseguiu(uuid) {
   const e = estadoPerseguicao();
@@ -232,6 +245,7 @@ function ligarCardDeEmpate(_msg, html) {
   raiz.querySelector("[data-op2-pers-manual]")?.addEventListener("click", () => {
     raiz.querySelector(".op2-pers-empate")?.classList.add("op2-pers-empate--manual");
     raiz.querySelector(".op2-pers-empate__instrucao")?.removeAttribute("hidden");
+    void executar({ op: "sussurroEmpate" });
   });
   for (const botao of raiz.querySelectorAll("[data-op2-pers-escolher]")) {
     botao.addEventListener("click", () => {

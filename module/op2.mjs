@@ -6,6 +6,7 @@ import { registrarEfeitosDoMundo } from "./cena/efeitos-mundo.mjs";
 import { registrarFurtividade, abrirFurtividade } from "./cena/furtividade.mjs";
 import { registrarCenasConfig } from "./cena/cenas-config.mjs";
 import { registrarPerseguicao, abrirPerseguicao } from "./cena/perseguicao.mjs";
+import { registrarSussurro, abrirCaixaDeSussurro } from "./ui/sussurro.mjs";
 import { registrarVinhetaLoucura } from "./ui/vinheta-loucura.mjs";
 import { registrarExcluirDesafio } from "./cena/excluir-desafio.mjs";
 import { SYSTEM_ID, OP2, ICONES_PADRAO } from "./config.mjs";
@@ -141,6 +142,7 @@ Hooks.once("init", () => {
   registrarCenasConfig();
   registrarFurtividade();
   registrarPerseguicao();
+  registrarSussurro();
   registrarTokenDeCriatura();
   registrarVinhetaLoucura();
 
@@ -175,6 +177,7 @@ Hooks.once("init", () => {
     marcarNoMapa, desmarcarDoMapa, abrirMarcador,
     furtividade: abrirFurtividade,
     perseguicao: abrirPerseguicao,
+    sussurro: abrirCaixaDeSussurro,
     aventuras: abrirAventurasApp, boasVindas: abrirBoasVindas,
   };
 });

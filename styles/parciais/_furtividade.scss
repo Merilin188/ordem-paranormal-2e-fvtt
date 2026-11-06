@@ -20,3 +20,40 @@
   .op2-pers-empate__mestre { display: flex; gap: 0.3rem; margin-top: 0.4rem; button { flex: 1; } }
   .op2-pers-empate__instrucao { margin: 0.3rem 0 0; }
 }
+
+// Caixa de sussurro
+@layer system {
+  .op2-sussurro {
+    padding: 0.5rem; border-left: 3px solid #5b3a8a; background: linear-gradient(90deg, rgb(30 14 50 / 70%), transparent);
+    h3 { margin: 0 0 0.3rem; border: 0; color: #c8b0ef; font-family: var(--op2-fonte-display); font-size: 1rem; }
+    p { margin: 0.25rem 0; }
+    blockquote { margin: 0.3rem 0; padding: 0.3rem 0.5rem; border-left: 2px solid #c8b0ef; font-style: italic; }
+    textarea { width: 100%; resize: vertical; margin: 0.3rem 0; }
+  }
+  .op2-sussurro__oferta { font-size: 0.8em; text-transform: uppercase; color: var(--op2-tinta-fraca); }
+  .op2-sussurro__itens {
+    margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 0.25rem;
+    li { display: flex; align-items: center; gap: 0.4rem; }
+    img { width: 28px; height: 28px; border: 0; }
+    span { flex: 1; }
+    button { flex: none; width: auto; }
+  }
+  .op2-sussurro__item--aceito em { color: var(--op2-sucesso); font-style: normal; }
+  .op2-sussurro__mestre { display: flex; justify-content: flex-end; button { flex: none; width: auto; } }
+  .op2-sussurro-janela__corpo {
+    display: flex; flex-direction: column; gap: 0.5rem;
+    fieldset { display: flex; flex-direction: column; gap: 0.2rem; }
+    label { display: flex; flex-direction: column; gap: 0.2rem; }
+    textarea { resize: vertical; }
+  }
+  .op2-sussurro-janela__jogador { flex-direction: row !important; align-items: center; gap: 0.4rem; em, small { color: var(--op2-tinta-fraca); } }
+  .op2-sussurro-janela__soltar {
+    padding: 0.6rem; border: 1px dashed var(--op2-linha-forte); text-align: center; color: var(--op2-tinta-fraca);
+    &.sobre { border-color: #c8b0ef; background: rgb(90 60 140 / 20%); }
+    ul { margin: 0.4rem 0 0; padding: 0; list-style: none; text-align: left; }
+    li { display: flex; align-items: center; gap: 0.4rem; color: var(--op2-tinta); }
+    img { width: 26px; height: 26px; border: 0; }
+    span { flex: 1; }
+    button { flex: none; width: 22px; height: 22px; }
+  }
+}

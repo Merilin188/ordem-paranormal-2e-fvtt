@@ -11,6 +11,7 @@ import {
   solicitarTeste, testeOposto, testeDeEquilibrio, registrarTestesDoMestre, personagens, selecionados,
 } from "./ferramentas-testes.mjs";
 import { abrirPavor } from "../cena/pavor.mjs";
+import { abrirCaixaDeSussurro } from "./sussurro.mjs";
 import { registrarAcaoDeChat } from "./chat.mjs";
 import { abrirAventurasApp } from "../aventura/aventuras-app.mjs";
 import { investigacaoAtiva, todasInvestigacoes, removerDesafio } from "../cena/investigacao-ativa.mjs";
@@ -189,6 +190,7 @@ class FerramentasMestre extends HandlebarsApplicationMixin(ApplicationV2) {
       aventura: () => abrirAventurasApp(),
       equilibrio: () => testeDeEquilibrio(),
       pavor: () => abrirPavor(),
+      sussurro: () => abrirCaixaDeSussurro(),
     },
   };
 
@@ -207,6 +209,7 @@ class FerramentasMestre extends HandlebarsApplicationMixin(ApplicationV2) {
         { acao: "desafios", icone: `${ICONES}/access-challenges.png`, rotulo: L("DesafiosAcesso"), grande: true },
         { acao: "equilibrio", fa: "fa-person-falling", rotulo: game.i18n.localize("OP2.Equilibrio.Titulo") },
         { acao: "pavor", fa: "fa-ghost", rotulo: game.i18n.localize("OP2.Pavor.Janela") },
+        { acao: "sussurro", fa: "fa-comment-dots", rotulo: game.i18n.localize("OP2.Sussurro.Titulo") },
         { acao: "aventura", icone: `${ICONES}/adventure-import.svg`, rotulo: L("ImportarAventura") },
       ],
     };

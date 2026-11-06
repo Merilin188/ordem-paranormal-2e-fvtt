@@ -1677,7 +1677,8 @@
       "AtiveManual": "Click Decide manually before choosing.",
       "ResolvaEmpate": "Resolve the tie in chat before moving on.",
       "Prosseguiu": "Got ahead",
-      "MotivoOposto": "Chase tie: who got further ahead?"
+      "MotivoOposto": "Chase tie: who got further ahead?",
+      "PerguntaEmpate": "You are tied. Whisper to the GM what your character does to get ahead (e.g. betray your companion and push them into the ditch)."
     },
     "CenaConfig": {
       "Nome": "Name",
@@ -1745,6 +1746,35 @@
       "Som": "Background sound (heart and breathing)",
       "SomDica": "Plays for everyone while this chase is active. Each player can still turn it off in their settings.",
       "Chamada": "Prompt before the options"
+    },
+    "Sussurro": {
+      "Titulo": "Send whisper box",
+      "SussurrarCom": "Whisper to",
+      "SuaMensagem": "Your message",
+      "Placeholder": "E.g.: You hear a voice from a nearby alley...",
+      "ArrasteItens": "Optional: drag items to offer the player",
+      "Enviar": "Send",
+      "Enviado": "Whisper box sent.",
+      "EscolhaJogador": "Choose at least one player.",
+      "SemConteudo": "Write a message or offer an item.",
+      "SoItens": "Only items can be offered.",
+      "SemJogadores": "There are no players in the world.",
+      "Offline": "(offline)",
+      "Mestre": "GM",
+      "TituloCaixa": "A whisper for {nome}",
+      "Ofertados": "Offered to you",
+      "Aceitar": "Accept",
+      "Aceito": "accepted",
+      "RespostaEnviada": "Answer sent to the GM.",
+      "Aguardando": "Waiting for {nome} to answer.",
+      "ResponderPlaceholder": "Write what you want to do. Only the GM will read it.",
+      "ResponderEnviar": "Whisper to the GM",
+      "Vazio": "Write something before sending.",
+      "Sussurra": "{nome} whispers",
+      "Revelar": "Reveal to everyone",
+      "Revelada": "Revealed to everyone.",
+      "AceitouItem": "{nome} accepted: {item}.",
+      "SemDestino": "Could not find the character or the item."
     }
   }
 }

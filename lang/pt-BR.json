@@ -1677,7 +1677,8 @@
       "AtiveManual": "Clique em Decidir manualmente antes de escolher.",
       "ResolvaEmpate": "Resolva o empate no chat antes de seguir.",
       "Prosseguiu": "Prosseguiu",
-      "MotivoOposto": "Empate na perseguição: quem prosseguiu mais à frente?"
+      "MotivoOposto": "Empate na perseguição: quem prosseguiu mais à frente?",
+      "PerguntaEmpate": "Vocês estão empatados. Sussurre ao mestre o que seu personagem faz para seguir à frente (ex.: trair o companheiro e empurrá-lo na vala)."
     },
     "CenaConfig": {
       "Nome": "Nome",
@@ -1745,6 +1746,35 @@
       "Som": "Som de fundo (coração e respiração)",
       "SomDica": "Toca para todos enquanto esta perseguição estiver ativa. Cada jogador ainda pode desligar nas configurações dele.",
       "Chamada": "Chamada antes das opções"
+    },
+    "Sussurro": {
+      "Titulo": "Enviar caixa de sussurro",
+      "SussurrarCom": "Sussurrar com",
+      "SuaMensagem": "Sua mensagem",
+      "Placeholder": "Ex: Você ouve uma voz de um beco próximo...",
+      "ArrasteItens": "Opcional: arraste itens para ofertar ao jogador",
+      "Enviar": "Enviar",
+      "Enviado": "Caixa de sussurro enviada.",
+      "EscolhaJogador": "Escolha pelo menos um jogador.",
+      "SemConteudo": "Escreva uma mensagem ou oferte um item.",
+      "SoItens": "Só dá para ofertar itens.",
+      "SemJogadores": "Não há jogadores no mundo.",
+      "Offline": "(offline)",
+      "Mestre": "Mestre",
+      "TituloCaixa": "Um sussurro para {nome}",
+      "Ofertados": "Ofertado a você",
+      "Aceitar": "Aceitar",
+      "Aceito": "aceito",
+      "RespostaEnviada": "Resposta enviada ao mestre.",
+      "Aguardando": "Aguardando a resposta de {nome}.",
+      "ResponderPlaceholder": "Escreva o que você quer fazer. Só o mestre vai ler.",
+      "ResponderEnviar": "Sussurrar ao mestre",
+      "Vazio": "Escreva algo antes de enviar.",
+      "Sussurra": "{nome} sussurra",
+      "Revelar": "Revelar para todos",
+      "Revelada": "Revelada para todos.",
+      "AceitouItem": "{nome} aceitou: {item}.",
+      "SemDestino": "Não achei o personagem ou o item."
     }
   }
 }
