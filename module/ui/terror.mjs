@@ -194,110 +194,38 @@ function rugidoSintetico() {
 
 /* -- tela de alcançado -------------------------------------------------------- */
 
-/**
- * Sangue escorrendo, em pixels da tela (o filtro não deforma): cortina irregular
- * no topo e gotas com a ponta inchada, cada uma descendo no seu tempo. O filtro
- * deforma a borda com ruído, escurece em manchas e acende um brilho úmido.
- */
-function svgDoSangue(id) {
-  const w = window.innerWidth;
-  const h = window.innerHeight;
-  const r = Math.random;
-  let cortina = `M0 0 H${w} V${h * 0.06}`;
-  for (let x = w; x >= 0; x -= w / 48) cortina += ` L${x.toFixed(1)} ${(h * (0.035 + r() * 0.07)).toFixed(1)}`;
-  cortina += " Z";
-  const gotas = Array.from({ length: Math.round(w / 55) }, () => {
-    const x = r() * w;
-    const larg = 5 + r() * 16;
-    const y0 = h * 0.05;
-    const comp = h * (0.12 + r() * r() * 0.85);
-    const fim = y0 + comp;
-    return `<g class="op2-alc-gota" style="--dur:${(1.8 + r() * 3).toFixed(2)}s;--atraso:${(r() * 1.4).toFixed(2)}s">
-      <path d="M${x - larg / 2} ${y0} C${x - larg / 2} ${y0 + comp * 0.55} ${x - larg * 0.25} ${fim} ${x} ${fim} C${x + larg * 0.25} ${fim} ${x + larg / 2} ${y0 + comp * 0.55} ${x + larg / 2} ${y0} Z"/>
-      <ellipse cx="${x}" cy="${fim - larg * 0.15}" rx="${larg * 0.62}" ry="${larg * 0.8}"/></g>`;
-  }).join("");
-  return `<svg class="op2-alcancado__sangue" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true">
-    <defs>
-      <filter id="${id}" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
-        <feTurbulence type="fractalNoise" baseFrequency="0.011 0.028" numOctaves="3" seed="${Math.floor(r() * 99)}" result="ruido"/>
-        <feDisplacementMap in="SourceGraphic" in2="ruido" scale="22" xChannelSelector="R" yChannelSelector="G" result="forma"/>
-        <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="3" seed="${Math.floor(r() * 99)}" result="manchas"/>
-        <feColorMatrix in="manchas" type="matrix" values="0 0 0 0 0.09  0 0 0 0 0  0 0 0 0 0.01  1.4 0 0 0 -0.55" result="escuro"/>
-        <feComposite in="escuro" in2="forma" operator="in" result="manchado"/>
-        <feGaussianBlur in="forma" stdDeviation="5" result="relevo"/>
-        <feSpecularLighting in="relevo" surfaceScale="6" specularConstant="0.85" specularExponent="30" lighting-color="#ff8f8f" result="luz">
-          <feDistantLight azimuth="235" elevation="52"/>
-        </feSpecularLighting>
-        <feComposite in="luz" in2="forma" operator="in" result="brilho"/>
-        <feMerge><feMergeNode in="forma"/><feMergeNode in="manchado"/><feMergeNode in="brilho"/></feMerge>
-      </filter>
-    </defs>
-    <g filter="url(#${id})" fill="#560008"><path class="op2-alc-cortina" d="${cortina}"/>${gotas}</g>
-  </svg>`;
-}
+const EFEITOS = `systems/${SYSTEM_ID}/assets/efeitos`;
 
 /**
- * Três rasgos de garra sobre o retrato: borda rasgada (ruído), fundo quase preto,
- * carne viva vermelha nas bordas com brilho úmido, e um fio escorrendo de cada um.
+ * Sangue tomando a tela, garras rasgando o retrato ao meio e o rugido. Dura ~5,5 s.
+ * Sangue e garras são imagens pré-renderizadas (textura CC0 de sangue): o navegador
+ * só recorta e move, sem filtro calculado a cada quadro.
  */
-function svgDasGarras(id) {
-  const rasgo = (x0, y0, x1, y1, larg) => {
-    const mx = (x0 + x1) / 2;
-    const my = (y0 + y1) / 2;
-    const nx = -(y1 - y0);
-    const ny = x1 - x0;
-    const n = Math.hypot(nx, ny);
-    const ax = (nx / n) * larg;
-    const ay = (ny / n) * larg;
-    const curva = 3;
-    return `M${x0} ${y0} Q${mx + ax + curva} ${my + ay} ${x1} ${y1} Q${mx - ax * 0.7 + curva} ${my - ay * 0.7} ${x0} ${y0} Z`;
-  };
-  const rasgos = [0, 1, 2].map((i) => {
-    const x0 = 34 + i * 15;
-    const x1 = 12 + i * 15;
-    const larg = 4.2 - i * 0.6;
-    return `<g class="op2-alc-rasgo" style="--atraso:${(1.25 + i * 0.1).toFixed(2)}s">
-      <path d="${rasgo(x0, 4, x1, 96, larg + 1.3)}" fill="#6e0610"/>
-      <path d="${rasgo(x0, 6, x1, 94, larg)}" fill="#0b0002"/>
-      <path d="M${(x0 + x1) / 2 - 1} 55 q -0.6 9 0.4 18" stroke="#5a0008" stroke-width="1.2" fill="none" stroke-linecap="round"/>
-    </g>`;
-  }).join("");
-  return `<svg class="op2-alcancado__garras" viewBox="0 0 100 100" aria-hidden="true">
-    <defs>
-      <filter id="${id}" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
-        <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" seed="5" result="ruido"/>
-        <feDisplacementMap in="SourceGraphic" in2="ruido" scale="2.4" xChannelSelector="R" yChannelSelector="G" result="borda"/>
-        <feGaussianBlur in="borda" stdDeviation="0.7" result="relevo"/>
-        <feSpecularLighting in="relevo" surfaceScale="2.5" specularConstant="0.7" specularExponent="20" lighting-color="#ff7070" result="luz">
-          <feDistantLight azimuth="225" elevation="42"/>
-        </feSpecularLighting>
-        <feComposite in="luz" in2="borda" operator="in" result="brilho"/>
-        <feDropShadow in="borda" dx="0" dy="0" stdDeviation="1.2" flood-color="#000" flood-opacity="0.9" result="sombra"/>
-        <feMerge><feMergeNode in="sombra"/><feMergeNode in="borda"/><feMergeNode in="brilho"/></feMerge>
-      </filter>
-    </defs>
-    <g filter="url(#${id})">${rasgos}</g>
-  </svg>`;
-}
-
-/** Sangue tomando a tela, garras rasgando o retrato ao meio e o rugido. Dura ~5,5 s. */
 export function mostrarAlcancado(uuid, rotulo) {
   const doc = fromUuidSync(uuid);
   if (!doc) return;
   const img = esc(doc.img);
-  const sufixo = foundry.utils.randomID(6);
   const el = document.createElement("div");
   el.className = "op2 op2-alcancado";
   el.innerHTML = `
-    ${svgDoSangue(`op2-sangue-${sufixo}`)}
     <div class="op2-alcancado__cobertura"></div>
+    <img class="op2-alcancado__sangue op2-alcancado__sangue--cortina" src="${EFEITOS}/sangue-cortina.webp" alt="">
+    <img class="op2-alcancado__sangue op2-alcancado__sangue--gotas" src="${EFEITOS}/sangue-gotas.webp" alt="">
     <div class="op2-alcancado__retrato">
       <div class="op2-alcancado__metade op2-alcancado__metade--esq" style="background-image:url('${img}')"></div>
       <div class="op2-alcancado__metade op2-alcancado__metade--dir" style="background-image:url('${img}')"></div>
-      ${svgDasGarras(`op2-garras-${sufixo}`)}
+      <img class="op2-alcancado__garras" src="${EFEITOS}/garras.webp" alt="">
     </div>
     <div class="op2-alcancado__texto"><small>${esc(rotulo)}</small><strong>${esc(doc.name)}</strong></div>`;
   document.body.append(el);
   setTimeout(tocarRugido, 900);
   setTimeout(() => el.remove(), 6200);
+}
+
+/** Baixa as imagens antes, para a primeira morte não piscar. */
+export function precarregarEfeitos() {
+  for (const f of ["sangue-cortina.webp", "sangue-gotas.webp", "garras.webp"]) {
+    const imagem = new Image();
+    imagem.src = `${EFEITOS}/${f}`;
+  }
 }

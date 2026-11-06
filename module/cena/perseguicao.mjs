@@ -15,7 +15,7 @@ import { stepDie } from "../dice/escada.mjs";
 import { MAX_BONUS, folegoInicial, formulaDoEsforco, pontosDoAvanco, quemEAlcancado, proximoCorte } from "./perseguicao-regras.mjs";
 import { animarSorteio, ligarVinheta } from "./furtividade.mjs";
 import { listarCenas, obterCena, novaCena, ConfigCenaApp, PERSEGUICAO_PADRAO } from "./cenas-config.mjs";
-import { iniciarAmbientePerseguicao, pararAmbientePerseguicao, mostrarAlcancado } from "../ui/terror.mjs";
+import { iniciarAmbientePerseguicao, pararAmbientePerseguicao, mostrarAlcancado, precarregarEfeitos } from "../ui/terror.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } = foundry.applications.api;
 const CHAVE = "perseguicao";
@@ -584,6 +584,7 @@ export function registrarPerseguicao() {
   Hooks.on("op2CenasConfig", () => { if (painel?.rendered) painel.render(); });
   Hooks.once("ready", () => {
     if (!perseguicaoHabilitada()) return;
+    precarregarEfeitos();
     const e = estadoPerseguicao();
     estavaAtiva = e.ativa;
     ultimoEvento = e.evento?.id ?? null;
