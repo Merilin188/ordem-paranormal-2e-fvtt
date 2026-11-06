@@ -42,7 +42,6 @@ export function iniciarAmbientePerseguicao() {
   grave.type = "lowpass";
   grave.frequency.value = 150;
   grave.connect(mestre);
-  const ruido = bufferDeRuido(ctx);
 
   const batida = (t, freq, forca) => {
     const o = ctx.createOscillator();
@@ -58,39 +57,31 @@ export function iniciarAmbientePerseguicao() {
     o.stop(t + 0.3);
   };
 
-  // Ofego: ruído filtrado na faixa da voz, puxando o ar e soltando.
-  const folego = (t, dur, centro, forca) => {
-    const fonte = ctx.createBufferSource();
-    fonte.buffer = ruido;
-    const banda = ctx.createBiquadFilter();
-    banda.type = "bandpass";
-    banda.frequency.setValueAtTime(centro, t);
-    banda.frequency.linearRampToValueAtTime(centro * 1.25, t + dur);
-    banda.Q.value = 1.1;
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.linearRampToValueAtTime(forca, t + dur * 0.35);
-    g.gain.linearRampToValueAtTime(0.0001, t + dur);
-    fonte.connect(banda).connect(g).connect(mestre);
-    fonte.start(t, Math.random());
-    fonte.stop(t + dur + 0.05);
-  };
+  // Respiração: gravação real (respirações espaçadas, com silêncio entre elas),
+  // em loop e mais baixa que o coração para não tomar a cena.
+  const respiracao = ctx.createGain();
+  respiracao.gain.value = 0.55;
+  respiracao.connect(mestre);
+  fetch(`systems/${SYSTEM_ID}/assets/sons/perseguicao-respiracao.wav`)
+    .then((r) => r.arrayBuffer())
+    .then((dados) => ctx.decodeAudioData(dados))
+    .then((buffer) => {
+      if (ambiente?.ctx !== ctx) return;
+      const fonte = ctx.createBufferSource();
+      fonte.buffer = buffer;
+      fonte.loop = true;
+      fonte.connect(respiracao);
+      fonte.start(ctx.currentTime + 0.5);
+    })
+    .catch((erro) => console.warn(`${SYSTEM_ID} | respiração da perseguição`, erro));
 
   let proximaBatida = ctx.currentTime + 0.2;
-  let proximoFolego = ctx.currentTime + 0.4;
-  let puxando = true;
   const agendar = () => {
     const limite = ctx.currentTime + 0.3;
     while (proximaBatida < limite) {
       batida(proximaBatida, 56, 0.9);
       batida(proximaBatida + 0.2, 47, 0.55);
       proximaBatida += 0.5 + (Math.random() - 0.5) * 0.03; // ~120 bpm
-    }
-    while (proximoFolego < limite) {
-      const dur = puxando ? 0.32 + Math.random() * 0.06 : 0.42 + Math.random() * 0.08;
-      folego(proximoFolego, dur, puxando ? 1500 : 900, puxando ? 0.35 : 0.5);
-      proximoFolego += dur + 0.06 + Math.random() * 0.05;
-      puxando = !puxando;
     }
   };
   agendar();
