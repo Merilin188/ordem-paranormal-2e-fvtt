@@ -316,9 +316,9 @@
   .op2-alcancado__respingo {
     position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border: 0;
     opacity: 0; transform: scale(1.08); will-change: transform, opacity;
-    &.r1 { animation: op2-alc-espirrar 0.28s cubic-bezier(0.2, 0.8, 0.3, 1) 0.15s forwards; }
-    &.r2 { animation: op2-alc-espirrar 0.24s cubic-bezier(0.2, 0.8, 0.3, 1) 1.3s forwards; }
-    &.r3 { animation: op2-alc-espirrar 0.22s cubic-bezier(0.2, 0.8, 0.3, 1) 1.5s forwards; }
+    // Fundo (borrado, escuro, centro preto) entra no impacto; as manchas vivas espirram com as garras.
+    &.r1 { animation: op2-alc-espirrar 0.45s cubic-bezier(0.2, 0.8, 0.3, 1) 0.1s forwards; }
+    &.r2 { animation: op2-alc-espirrar 0.26s cubic-bezier(0.2, 0.8, 0.3, 1) 1.3s forwards; }
   }
   @keyframes op2-alc-espirrar { 0% { opacity: 0; transform: scale(1.08); } 40% { opacity: 1; } 100% { opacity: 1; transform: scale(1); } }
   .op2-alcancado__cobertura {

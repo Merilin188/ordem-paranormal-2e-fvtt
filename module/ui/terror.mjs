@@ -209,9 +209,8 @@ export function mostrarAlcancado(uuid, rotulo) {
   el.className = "op2 op2-alcancado";
   el.innerHTML = `
     <div class="op2-alcancado__cobertura"></div>
-    <img class="op2-alcancado__respingo r1" src="${EFEITOS}/respingos-1.webp" alt="">
-    <img class="op2-alcancado__respingo r2" src="${EFEITOS}/respingos-2.webp" alt="">
-    <img class="op2-alcancado__respingo r3" src="${EFEITOS}/respingos-3.webp" alt="">
+    <img class="op2-alcancado__respingo r1" src="${EFEITOS}/respingos-fundo.webp" alt="">
+    <img class="op2-alcancado__respingo r2" src="${EFEITOS}/respingos-manchas.webp" alt="">
     <div class="op2-alcancado__retrato">
       <div class="op2-alcancado__metade op2-alcancado__metade--esq" style="background-image:url('${img}')"></div>
       <div class="op2-alcancado__metade op2-alcancado__metade--dir" style="background-image:url('${img}')"></div>
@@ -225,7 +224,7 @@ export function mostrarAlcancado(uuid, rotulo) {
 
 /** Baixa as imagens antes, para a primeira morte não piscar. */
 export function precarregarEfeitos() {
-  for (const f of ["respingos-1.webp", "respingos-2.webp", "respingos-3.webp", "garras.webp"]) {
+  for (const f of ["respingos-fundo.webp", "respingos-manchas.webp", "garras.webp"]) {
     const imagem = new Image();
     imagem.src = `${EFEITOS}/${f}`;
   }

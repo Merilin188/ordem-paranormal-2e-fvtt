@@ -1,3 +1,4 @@
 # Efeitos
 
-- `respingos-1.webp`, `respingos-2.webp`, `respingos-3.webp` e `garras.webp`: gerados pelo próprio sistema (sem arte de terceiros).
+- `respingos-fundo.webp` e `respingos-manchas.webp`: a imagem de referência enviada pelo usuário, separada em duas camadas (fundo e manchas vivas) para a animação.
+- `garras.webp`: gerada pelo próprio sistema.
