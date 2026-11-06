@@ -7,7 +7,7 @@ import { SYSTEM_ID } from "../config.mjs";
 
 const { ApplicationV2 } = foundry.applications.api;
 
-const GUIA = [
+export const GUIA = [
   { secao: "Fases da rodada", itens: [
     ["Ordem", "Cada rodada tem três fases: Geral (qualquer ação, exceto ataques), Ataques à Distância e Ataques Corpo a Corpo. Quem age numa fase não age nas seguintes. Ações da mesma fase são simultâneas."],
   ] },

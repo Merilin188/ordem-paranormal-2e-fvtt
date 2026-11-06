@@ -257,7 +257,7 @@
     },
     "Acoes": {
       "Titulo": "Investigation actions",
-      "Botao": "Actions",
+      "Botao": "Invest. actions",
       "Ajuda": "Opens this character's investigation actions — investigate, examine, tools, challenges.",
       "Livres": "Free actions",
       "SemInvestigacao": "No investigation in play for this character. The GM needs to put one in play and add you as a participant.",
@@ -1801,6 +1801,16 @@
       "Nome": "Standard 3D dice",
       "Dica": "Everyone (GM and players) uses the same Dice So Nice finish: Pristine material, Signika font, high quality. Each die takes its user's color. Changes made in the Dice So Nice window return to the standard on the next login.",
       "Recarregue": "3D dice set to the table standard. Reload the page (F5) to see the new quality."
+    },
+    "AcoesCombate": {
+      "Titulo": "Combat actions",
+      "Botao": "Combat actions",
+      "Dica": "Read and run this character's combat actions: declares it in chat and triggers what depends on the action (Combat Reading, attack, maneuvers).",
+      "Ajuda": "Run declares the action in chat. Strike opens the attack; Defend triggers Combat Reading; Feint and maneuvers roll the opposed test; dropping and standing set Prone.",
+      "Executar": "Run",
+      "Rotulo": "Combat action",
+      "Declara": "{nome} declares: {acao}.",
+      "Manobra": "Maneuver: {nome}"
     }
   }
 }

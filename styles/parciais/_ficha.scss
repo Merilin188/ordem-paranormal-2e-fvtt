@@ -873,3 +873,18 @@
   color: var(--op2-texto-fraco);
 }
 }
+
+// Ações de investigação e de combate, embaixo dos atributos.
+@layer system {
+  .op2-atributos__acoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--op2-e1);
+    .op2-acoes-investigacao { flex: 1 1 8em; margin-top: 0; font-size: 0.82em; white-space: nowrap; }
+  }
+  .op2-acoes-combate__item summary {
+    display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+    button { flex: none; width: auto; border-radius: 0; }
+  }
+  .op2-acao-combate-card__regra { margin: 0.25rem 0 0; font-size: 0.8em; color: var(--op2-tinta-fraca); }
+}

@@ -103,9 +103,8 @@ export async function defender(defensor, { atacanteId, totalAtaque, raAtaque, rb
   const escudo = defensor.items?.find((i) => i.type === "equipamento" && i.system.equipado && i.system.escudo);
   if (escudo && alvo === "defensor" && roll.total >= 7) danoFinal = Math.max(0, dano - roll.rb);
   // Leitura de Combate: gastou a ação para se defender → +1 marcador de análise.
-  const { poderDe, ganharMarcadores } = await import("./poderes.mjs");
-  const analise = poderDe(defensor, "analise");
-  if (analise && poderDe(defensor, "leituraCombate")) await ganharMarcadores(defensor, analise, 1, game.i18n.localize("OP2.Poder.LeituraMotivo"));
+  const { leituraDeCombate } = await import("./poderes.mjs");
+  await leituraDeCombate(defensor);
 
   const quemSofre = alvo === "defensor" ? defensor : (alvo === "atacante" ? atacante : null);
   const conteudo = await renderizar(`systems/${SYSTEM_ID}/templates/chat/ataque-resultado.hbs`, {

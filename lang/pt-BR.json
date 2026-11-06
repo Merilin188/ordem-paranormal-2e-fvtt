@@ -257,7 +257,7 @@
     },
     "Acoes": {
       "Titulo": "Ações de investigação",
-      "Botao": "Ações",
+      "Botao": "Ações de Invest.",
       "Ajuda": "Abre as ações de investigação deste personagem — investigar, examinar, ferramentas, desafios.",
       "Livres": "Ações livres",
       "SemInvestigacao": "Nenhuma investigação em jogo para este personagem. O mestre precisa colocar uma em jogo e adicionar você como participante.",
@@ -1801,6 +1801,16 @@
       "Nome": "Dados 3D padronizados",
       "Dica": "Todos (mestre e jogadores) usam o mesmo acabamento do Dice So Nice: material Impecável, fonte Signika, qualidade alta. A cor do dado é a cor de cada usuário. Mudanças feitas na janela do Dice So Nice voltam ao padrão no próximo login.",
       "Recarregue": "Dados 3D ajustados ao padrão da mesa. Recarregue a página (F5) para ver a qualidade nova."
+    },
+    "AcoesCombate": {
+      "Titulo": "Ações de combate",
+      "Botao": "Ações de combate",
+      "Dica": "Lê e executa as ações de combate deste personagem: declara no chat e aciona o que depende da ação (Leitura de Combate, ataque, manobras).",
+      "Ajuda": "Executar declara a ação no chat. Agredir abre o ataque; Defender-se ativa a Leitura de Combate; Fintar e manobras rolam o teste oposto; cair e levantar marcam Caído.",
+      "Executar": "Executar",
+      "Rotulo": "Ação de combate",
+      "Declara": "{nome} declara: {acao}.",
+      "Manobra": "Manobra: {nome}"
     }
   }
 }

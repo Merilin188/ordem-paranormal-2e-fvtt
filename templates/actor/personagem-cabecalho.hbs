@@ -41,15 +41,6 @@
       </label>
     </div>
 
-    {{!-- As ações de investigação moram aqui, não no painel: na ficha o personagem
-          que age é este, sem ambiguidade. No painel, um jogador com mais de um
-          personagem não teria como escolher por qual deles o botão agiria (achado
-          em uso real). --}}
-    <button type="button" class="op2-botao op2-acoes-investigacao" data-action="abrirAcoesInvestigacao"
-      data-tooltip="{{localize 'OP2.Acoes.Ajuda'}}" aria-label="{{localize 'OP2.Acoes.Titulo'}}">
-      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-      {{localize "OP2.Acoes.Botao"}}
-    </button>
   </div>
 
   <div class="op2-atributos">
@@ -63,6 +54,21 @@
         {{> (op2Caminho "partials/abrir-dialogo") chave=chave}}
       </div>
     {{/each}}
+    {{!-- As ações moram na ficha, não no painel: aqui o personagem que age é este,
+          sem ambiguidade (um jogador com dois personagens não saberia por qual o
+          botão do painel agiria — achado em uso real). --}}
+    <div class="op2-atributos__acoes">
+      <button type="button" class="op2-botao op2-acoes-investigacao" data-action="abrirAcoesInvestigacao"
+        data-tooltip="{{localize 'OP2.Acoes.Ajuda'}}" aria-label="{{localize 'OP2.Acoes.Titulo'}}">
+        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+        {{localize "OP2.Acoes.Botao"}}
+      </button>
+      <button type="button" class="op2-botao op2-acoes-investigacao op2-acoes-combate-botao" data-action="abrirAcoesCombate"
+        data-tooltip="{{localize 'OP2.AcoesCombate.Dica'}}" aria-label="{{localize 'OP2.AcoesCombate.Titulo'}}">
+        <i class="fa-solid fa-swords" aria-hidden="true"></i>
+        {{localize "OP2.AcoesCombate.Botao"}}
+      </button>
+    </div>
   </div>
 
   <div class="op2-recursos op2-cabecalho__recursos">

@@ -17,6 +17,7 @@ import { encerrarCena } from "../cena/encerrar-investigacao.mjs";
 import { enriquecerHtml as enriquecer } from "../ui/enriquecer.mjs";
 import { ligarRodaDoMouse } from "../ui/controle-dado.mjs";
 import { abrirAcoesInvestigacao } from "../cena/acoes-app.mjs";
+import { abrirAcoesCombate } from "../cena/acoes-combate-app.mjs";
 import { renderDoPerfil } from "../ui/perfil.mjs";
 import { descreverMarca } from "../cena/tabelas-dados.mjs";
 import { usarPoder, USAVEIS } from "../cena/poderes.mjs";
@@ -35,6 +36,7 @@ export class PersonagemSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     actions: {
       rolar: PersonagemSheet.#rolar,
       abrirAcoesInvestigacao: PersonagemSheet.#abrirAcoesInvestigacao,
+      abrirAcoesCombate: PersonagemSheet.#abrirAcoesCombate,
       abrirDialogoTeste: PersonagemSheet.#abrirDialogoTeste,
       definirRecurso: PersonagemSheet.#definirRecurso,
       passoDado: PersonagemSheet.#passoDado,
@@ -386,6 +388,10 @@ export class PersonagemSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
    */
   static #abrirAcoesInvestigacao() {
     abrirAcoesInvestigacao(this.actor);
+  }
+
+  static #abrirAcoesCombate() {
+    abrirAcoesCombate(this.actor);
   }
 
   static async #rolar(evento, alvo) {

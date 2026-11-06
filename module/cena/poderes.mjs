@@ -95,6 +95,19 @@ export async function ganharMarcadores(ator, item, n, motivo) {
 }
 
 /**
+ * Leitura de Combate: gastar a ação para se defender dá 1 marcador de análise — uma
+ * vez por rodada, venha de "Defender-se" declarado ou da resposta a um ataque.
+ */
+export async function leituraDeCombate(ator) {
+  const analise = poderDe(ator, "analise");
+  if (!analise || !poderDe(ator, "leituraCombate")) return;
+  const rodada = chaveDaRodada();
+  if (ator.getFlag(SYSTEM_ID, "leituraRodada") === rodada) return;
+  await ator.setFlag(SYSTEM_ID, "leituraRodada", rodada);
+  await ganharMarcadores(ator, analise, 1, game.i18n.localize("OP2.Poder.LeituraMotivo"));
+}
+
+/**
  * Depois de rolar: gastar marcadores de análise (±1 por marcador num dado, até o máximo
  * do dado). Também aplica a Mentoria pendente (trocar um dado pela RA do mentor).
  * Mexe direto nos resultados do roll.
@@ -295,7 +308,7 @@ async function usarArsenal(ator, item) {
  * senão a investigação ativa. Cada cena entra na chave pelo id, para a rodada 1
  * de uma cena nova não parecer a rodada 1 da anterior.
  */
-function chaveDaRodada() {
+export function chaveDaRodada() {
   if (game.combat?.started) return `c${game.combat.id}.${game.combat.round}`;
   const furtividade = estadoFurtividade();
   if (furtividade.ativa) return `f${furtividade.cenaId ?? ""}.${furtividade.rodada}`;
