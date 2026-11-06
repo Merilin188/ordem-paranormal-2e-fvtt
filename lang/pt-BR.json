@@ -1365,7 +1365,8 @@
       "ProntidaoPergunta": "{nome} gasta 2 PD. Qual dado rolar de novo?",
       "ProntidaoRerrolar": "Rolar de novo",
       "ProntidaoNota": "Prontidão de {nome}: um dado foi de {antes} para {depois}.",
-      "ProntidaoOposto": "{nome} gasta 2 PD para rerrolar um dado de {alvo}. Qual dado?"
+      "ProntidaoOposto": "{nome} gasta 2 PD para rerrolar um dado de {alvo}. Qual dado?",
+      "ProntidaoMorto": "Personagem morto não pode usar Prontidão."
     },
     "PericiasMundo": {
       "MenuNome": "Perícias do mundo",

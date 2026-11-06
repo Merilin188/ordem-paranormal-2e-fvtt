@@ -302,6 +302,14 @@ function chaveDaRodada() {
   return `i${investigacao?.id ?? ""}.${investigacao?.system?.rodada ?? 0}`;
 }
 
+/** Quem usa a Prontidão: um personagem do usuário com a habilidade e vivo (morto não gasta PD). */
+function quemUsaProntidao() {
+  const meus = game.actors.filter((a) => a.isOwner && a.type === "personagem" && poderDe(a, "prontidao"));
+  const vivos = meus.filter((a) => !a.statuses?.has?.("morto"));
+  const usuario = vivos.find((a) => a.id === game.user.character?.id) ?? vivos[0] ?? null;
+  return { usuario, motivo: meus.length ? "ProntidaoMorto" : "ProntidaoSem" };
+}
+
 /**
  * Prontidão num teste oposto (ex.: empate da perseguição): qualquer jogador com a
  * habilidade gasta 2 PD e rerrola um dado (não 1) de qualquer um dos lados.
@@ -312,9 +320,8 @@ async function prontidaoNoOposto(_autor, dataset) {
   const indice = Number(dataset.lado);
   const lado = dados?.lados?.[indice];
   if (!lado?.resultado || dados.resolvido) return;
-  const meus = game.actors.filter((a) => a.isOwner && a.type === "personagem" && poderDe(a, "prontidao"));
-  const usuario = meus.find((a) => a.id === game.user.character?.id) ?? meus[0];
-  if (!usuario) return void ui.notifications.warn(P("ProntidaoSem"));
+  const { usuario, motivo } = quemUsaProntidao();
+  if (!usuario) return void ui.notifications.warn(P(motivo));
   const poder = poderDe(usuario, "prontidao");
   const rodada = chaveDaRodada();
   if (poder.system.usadoNaRodada === rodada) return void ui.notifications.warn(P("ProntidaoJaUsou"));
@@ -351,9 +358,8 @@ async function usarProntidao(_autor, dataset) {
   const roll = mensagem?.rolls?.[0];
   if (!roll?.dados) return;
   // Quem usa: um personagem do usuário que tenha Prontidão.
-  const meus = game.actors.filter((a) => a.isOwner && a.type === "personagem" && poderDe(a, "prontidao"));
-  const usuario = meus.find((a) => a.id === game.user.character?.id) ?? meus[0];
-  if (!usuario) return void ui.notifications.warn(P("ProntidaoSem"));
+  const { usuario, motivo } = quemUsaProntidao();
+  if (!usuario) return void ui.notifications.warn(P(motivo));
   const poder = poderDe(usuario, "prontidao");
   const rodada = chaveDaRodada();
   if (poder.system.usadoNaRodada === rodada) return void ui.notifications.warn(P("ProntidaoJaUsou"));
