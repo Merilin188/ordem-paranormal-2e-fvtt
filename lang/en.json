@@ -1791,7 +1791,7 @@
     },
     "EfeitosCena": {
       "Nome": "Scene with FX Bus effects",
-      "Dica": "Name (or id) of the scene that turns on FX Bus shake, blur and smear on each player's screen while they are on it. Leave empty to turn it off. Requires the FX Bus module."
+      "Dica": "Name (or id) of the scene that turns on FX Bus shake, blur and smear on the screen of everyone on it (players and GM). Leave empty to turn it off. Requires the FX Bus module."
     }
   }
 }

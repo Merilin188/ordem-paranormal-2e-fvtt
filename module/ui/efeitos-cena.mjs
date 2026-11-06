@@ -2,7 +2,7 @@
  * Efeitos do FX Bus ao entrar numa cena (a tela "Home"): tremor lento, desfoque
  * que pulsa e rastro de movimento, rodando até o jogador sair da cena.
  *
- * Roda direto no cliente de cada jogador, pelos handlers do runtime do FX Bus
+ * Roda direto no cliente de cada um (jogadores e mestre), pelos handlers do runtime do FX Bus
  * (`globalThis.fxbus.handlers`). O `emit()` do FX Bus não serve aqui: jogador comum
  * não aplica o próprio pacote, e o mestre não precisaria estar na cena. Ao trocar de
  * cena, o próprio FX Bus reseta tudo no `canvasTearDown`.
@@ -58,7 +58,7 @@ function despachar(acoes) {
 let ligados = false;
 
 function atualizar() {
-  if (game.user.isGM || !game.modules.get("fxbus")?.active) return;
+  if (!game.modules.get("fxbus")?.active) return;
   const deve = cenaTemEfeitos(canvas?.scene, configurada()) && !bloqueado();
   if (deve) despachar(EFEITOS_DA_ENTRADA);
   else if (ligados) despachar(PARADAS.map((action) => ({ action })));
