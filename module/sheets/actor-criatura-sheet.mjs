@@ -84,8 +84,22 @@ export class CriaturaSheet extends NpcSheet {
       dano,
       distancia: ataque.alcance === "distancia",
       rolar: async ({ dt = null } = {}) => {
+        // Atrapalhar (e outras reduções da rodada): desce o MAIOR dado do ataque.
+        const { reducaoDoTeste } = await import("../cena/reducoes.mjs");
+        const reducao = await reducaoDoTeste(ator);
+        const usados = [...dados];
+        const ajustes = [];
+        if (reducao.passos) {
+          const { stepDie, faces } = await import("../dice/escada.mjs");
+          const i = usados.reduce((m, d, j) => (faces(d) > faces(usados[m]) ? j : m), 0);
+          const antes = usados[i];
+          usados[i] = stepDie(antes, -reducao.passos);
+          for (const n of reducao.notas) {
+            ajustes.push({ tipo: "texto", texto: game.i18n.format("OP2.Motivo.ReducaoAtaque", { passos: n.passos, motivo: n.motivo, de: antes, para: usados[i] }) });
+          }
+        }
         const roll = OP2Roll.paraComponentes(
-          dados.map((dado, i) => ({ chave: `ataque.${i}`, rotulo: ataque.nome, tipo: "extra", dado })),
+          usados.map((dado, i) => ({ chave: `ataque.${i}`, rotulo: ataque.nome, tipo: "extra", dado })),
           {
             dt,
             escopoCritico: lerConfig("escopoCritico"),
@@ -95,6 +109,7 @@ export class CriaturaSheet extends NpcSheet {
             semArma: true,
           },
         );
+        if (ajustes.length) roll.options.ajustes = ajustes;
         await roll.evaluate();
         await mostrarDados3D(roll);
         if (roll.precisaSelecao) roll.aplicarSelecao(roll.selecaoSugerida());

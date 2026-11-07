@@ -30,6 +30,8 @@ export class OP2Roll extends Roll {
     return new this(formula, {}, {
       dt: null,
       escopoCritico: "todos",
+      // Identifica o teste: o card de ataque se atualiza quando o dado do crítico rola.
+      id: globalThis.foundry?.utils?.randomID?.() ?? Math.random().toString(36).slice(2),
       ...opcoes,
       componentes: componentes.map((c) => ({ ...c })),
     });

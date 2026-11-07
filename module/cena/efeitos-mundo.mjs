@@ -54,6 +54,7 @@ function normalizar(d = {}) {
   };
 }
 
+export const definicaoDoEfeito = (id) => definicao(id);
 const definicao = (id) => (id?.startsWith(PREFIXO) ? (atual.novos?.[id] ? normalizar(atual.novos[id]) : null) : null);
 
 /* ================== registro (init) ================== */

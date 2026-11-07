@@ -84,7 +84,7 @@ async function acaoOposta(ator, titulo, texto, alvo) {
   if (!roll) return null;
   const nomes = defesas.map((d) => rotuloDePericia(d));
   const botoes = defesas.map((d, i) => `<button type="button" class="op2-botao op2-botao--pequeno" data-op2-acao="resistir-acao"
-      data-ator-id="${alvo.id}" data-ator-uuid="${alvo.uuid}" data-agente-id="${ator.id}" data-acao="${esc(titulo)}" data-pericia="${d}"
+      data-ator-id="${alvo.id}" data-ator-uuid="${alvo.uuid}" data-agente-id="${ator.id}" data-agente-uuid="${ator.uuid}" data-acao="${esc(titulo)}" data-pericia="${d}"
       data-total="${roll.total}" data-ra="${roll.ra}" data-rb="${roll.rb}">${esc(L("Resistir", { pericia: nomes[i] }))}</button>`).join("");
   await ChatMessage.create({
     speaker: ChatMessage.getSpeaker({ actor: ator }),
@@ -115,7 +115,7 @@ async function resistirAcao(defensor, dataset) {
   if (!game.user.isGM && !defensor.isOwner) return void ui.notifications.warn(game.i18n.localize("OP2.Aviso.SemPermissao"));
   const mensagem = game.messages.get(dataset.mensagemId);
   if (mensagem?.getFlag(SYSTEM_ID, "respondido")) return void ui.notifications.warn(L("JaRespondido"));
-  const agente = game.actors.get(dataset.agenteId);
+  const agente = (dataset.agenteUuid && fromUuidSync(dataset.agenteUuid)) || game.actors.get(dataset.agenteId);
   if (!agente) return null;
   const titulo = dataset.acao;
   const { rolarTeste } = await import("../dice/teste.mjs");
@@ -136,6 +136,11 @@ async function resistirAcao(defensor, dataset) {
       ? L("Venceu", { nome: agente.name, acao: titulo, alvo: defensor.name, placar })
       : L("Resistiu", { nome: agente.name, acao: titulo, alvo: defensor.name, placar });
   const efeito = d.venceu ? efeitoDaAcao(titulo, { nome: agente.name, alvo: defensor.name, rb, forte: d.forte }) : "";
+  // Fintar vencido: o próximo ataque do agente contra este alvo ganha +2 passos.
+  if (d.venceu && titulo === "Fintar") {
+    const { registrarVantagem } = await import("./reducoes.mjs");
+    await registrarVantagem(agente, { tipo: "finta", alvo: defensor });
+  }
   // Atrapalhar vencido: a redução já entra nos testes do alvo até o fim da rodada.
   if (d.venceu && titulo === "Atrapalhar") {
     const { reduzirNaRodada } = await import("./reducoes.mjs");
@@ -199,11 +204,18 @@ export async function executarAcaoDeCombate(ator, titulo, texto) {
     return atacar(ator);
   }
   if (COM_ALVO.has(titulo)) {
-    const { escolherAlvo } = await import("./acoes-combate.mjs");
-    const alvo = await escolherAlvo(ator, titulo);
-    if (!alvo) return null;
-    if (OPOSTAS[titulo]) return acaoOposta(ator, titulo, texto, alvo);
-    return declarar(ator, titulo, texto, alvo);
+    const { escolherAlvo, limparAlvos } = await import("./acoes-combate.mjs");
+    try {
+      const alvo = await escolherAlvo(ator, titulo);
+      if (!alvo) return null;
+      if (OPOSTAS[titulo]) return await acaoOposta(ator, titulo, texto, alvo);
+      // Mirar: +1d6 nos ataques à distância contra ele na próxima rodada.
+      const { registrarVantagem } = await import("./reducoes.mjs");
+      await registrarVantagem(ator, { tipo: "mira", alvo });
+      return await declarar(ator, titulo, texto, alvo, L("MiraNota", { alvo: alvo.name }));
+    } finally {
+      limparAlvos();
+    }
   }
   if (titulo === "Erguer-se") {
     const modo = await comoSeErgue(ator);

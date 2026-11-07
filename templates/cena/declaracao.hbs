@@ -9,18 +9,21 @@
     {{#each combatentes}}
       <li class="{{#if declarado}}declarado{{/if}}">
         <img src="{{img}}" alt="">
-        <span class="op2-declaracao__nome">{{nome}}</span>
+        <span class="op2-declaracao__nome"><span class="op2-declaracao__nome-texto">{{nome}}</span>
+          {{#if antecipacao.pode}}
+            <button type="button" class="op2-declaracao__antecipar" data-action="antecipar" data-id="{{id}}"
+              data-tooltip="{{localize 'OP2.Poder.AntecipacaoBotao'}}: {{localize 'OP2.Poder.AntecipacaoDica'}}" aria-label="{{localize 'OP2.Poder.AntecipacaoBotao'}}">
+              {{#if antecipacao.img}}<img src="{{antecipacao.img}}" alt="">{{else}}<i class="fa-solid fa-forward-fast"></i>{{/if}}</button>
+          {{else if antecipacao.usada}}
+            <span class="op2-declaracao__antecipar ativa" data-tooltip="{{localize 'OP2.Poder.AntecipacaoAtiva'}}">
+              {{#if antecipacao.img}}<img src="{{antecipacao.img}}" alt="">{{else}}<i class="fa-solid fa-forward-fast"></i>{{/if}}</span>
+          {{/if}}
+        </span>
         <span class="op2-declaracao__fases">
           {{#each fases}}
             <button type="button" class="op2-fase-botao op2-fase-botao--{{chave}} {{#if ativa}}ativa{{/if}}" data-action="fase" data-id="{{../id}}" data-fase="{{chave}}">{{rotulo}}</button>
           {{/each}}
         </span>
-        {{#if antecipacao.pode}}
-          <button type="button" class="op2-fase-botao op2-fase-botao--antecipacao op2-declaracao__antecipar" data-action="antecipar" data-id="{{id}}"
-            data-tooltip="{{localize 'OP2.Poder.AntecipacaoDica'}}"><i class="fa-solid fa-forward-fast"></i> {{localize "OP2.Poder.AntecipacaoBotao"}}</button>
-        {{else if antecipacao.usada}}
-          <span class="op2-fase-botao op2-fase-botao--antecipacao ativa op2-declaracao__antecipar"><i class="fa-solid fa-forward-fast"></i> {{localize "OP2.Poder.AntecipacaoAtiva"}}</span>
-        {{/if}}
       </li>
     {{/each}}
   </ul>

@@ -11,7 +11,7 @@
 import { SYSTEM_ID } from "../config.mjs";
 import { rolarTeste, renderizar, rotuloDePericia } from "../dice/teste.mjs";
 import { vencedorDoOposto, resolverAtaque, opcoesDeDefesa, acertaContraDT } from "./combate.mjs";
-import { perguntarA, registrarPergunta, responsavelPor } from "../ui/socket.mjs";
+import { comoMestre, perguntarA, registrarAcaoDeMestre, registrarPergunta, responsavelPor } from "../ui/socket.mjs";
 import { alvosDisponiveis, alvosMarcados } from "./encerrar-investigacao.mjs";
 
 /**
@@ -19,7 +19,22 @@ import { alvosDisponiveis, alvosMarcados } from "./encerrar-investigacao.mjs";
  * publica o card. Sem defesa, o ataque é contra a DT 7; com defesa, o card espera o
  * teste oposto do alvo.
  */
-export async function atacar(ator, { alvoUuid, armado, rapido = false } = {}) {
+export async function atacar(ator, opcoes = {}) {
+  try {
+    return await atacarSemLimpar(ator, opcoes);
+  } finally {
+    limparAlvos();
+  }
+}
+
+/** Depois da ação (executada ou cancelada), o alvo marcado sai da mira. */
+export function limparAlvos() {
+  for (const t of [...(game.user?.targets ?? [])]) {
+    try { t.setTarget(false, { releaseOthers: false, groupSelection: true }); } catch { /* token já saiu da cena */ }
+  }
+}
+
+async function atacarSemLimpar(ator, { alvoUuid, armado, rapido = false } = {}) {
   const alvo = alvoUuid ? await fromUuid(alvoUuid) : await escolherAlvo(ator);
   if (!alvo) return null;
 
@@ -30,15 +45,34 @@ export async function atacar(ator, { alvoUuid, armado, rapido = false } = {}) {
   const distancia = pericia === "pontaria";
   const nome = arma?.name ?? game.i18n.localize("OP2.Combate.Desarmado");
 
+  // Fintar vencido (+2 passos) e Mirar (+1d6 à distância) contra este alvo.
+  const { vantagensContra, consumirVantagem } = await import("./reducoes.mjs");
+  const vantagens = await vantagensContra(ator, alvo);
+  const notas = [];
+  const dadosExtras = [];
+  let passos = null;
+  if (vantagens.finta) {
+    passos = { pericia: 2 };
+    notas.push(game.i18n.format("OP2.Motivo.Finta", { alvo: alvo.name }));
+  }
+  if (vantagens.mira && distancia) {
+    dadosExtras.push({ chave: "mira", rotulo: game.i18n.localize("OP2.Motivo.MirarRotulo"), tipo: "extra", dado: "d6" });
+    notas.push(game.i18n.format("OP2.Motivo.Mira", { alvo: alvo.name }));
+  }
+
   const defesa = await perguntarDefesa(ator, alvo, { distancia, nome });
   const roll = await rolarTeste(ator, {
     chavePericia: pericia,
     ...(defesa ? { oposto: true } : { dt: 7 }),
     rapido,
     arma,
+    passos,
+    dadosExtras,
+    notas,
     contexto: game.i18n.format("OP2.Combate.AtaqueContexto", { alvo: alvo.name }),
   });
   if (!roll) return null;
+  if (vantagens.finta) await consumirVantagem(ator, vantagens.finta.id);
   await publicarAtaque(ator, alvo, roll, {
     armado: Boolean(arma), defesa, distancia, nome,
     dano: arma ? { base: "ra", bonus: arma.system.danoBonus ?? 0 } : { base: "rb", bonus: 0 },
@@ -53,13 +87,17 @@ export async function atacar(ator, { alvoUuid, armado, rapido = false } = {}) {
  * `rolar({ dt })` rola e publica o teste; devolve o roll.
  */
 export async function atacarComCriatura(ator, { rolar, dano = null, distancia = false, nome = "" }) {
-  const alvo = await escolherAlvo(ator);
-  if (!alvo) return null;
-  const defesa = await perguntarDefesa(ator, alvo, { distancia, nome });
-  const roll = await rolar({ dt: defesa ? null : 7 });
-  if (!roll) return null;
-  await publicarAtaque(ator, alvo, roll, { armado: true, dano, distancia, nome, defesa });
-  return roll;
+  try {
+    const alvo = await escolherAlvo(ator);
+    if (!alvo) return null;
+    const defesa = await perguntarDefesa(ator, alvo, { distancia, nome });
+    const roll = await rolar({ dt: defesa ? null : 7 });
+    if (!roll) return null;
+    await publicarAtaque(ator, alvo, roll, { armado: true, dano, distancia, nome, defesa });
+    return roll;
+  } finally {
+    limparAlvos();
+  }
 }
 
 /* ---------------- defesa perguntada antes da rolagem ---------------- */
@@ -136,18 +174,14 @@ async function responderDefesa({ atacanteId, alvoUuid, distancia, nome }) {
 
 async function publicarAtaque(ator, alvo, roll, { armado, dano = null, distancia = false, nome = "", defesa = null }) {
   const acertou = defesa ? null : acertaContraDT(roll);
-  const leitura = dano?.base === "rb" ? roll.rb : roll.ra;
-  const valorDano = dano?.base ? Math.max(0, leitura + (dano.bonus ?? 0)) : 0;
   const esquiva = defesa ? (await import("./poderes.mjs")).poderDe(alvo, "esquiva") : null;
-  // Os dados do card ficam na flag: a Guardiã re-renderiza o card com outro alvo.
+  // Os dados do card ficam na flag: a Guardiã e o dado do crítico re-renderizam o card.
   const dados = {
     titulo: nome || game.i18n.localize("OP2.Combate.Atacar"),
-    texto: defesa
-      ? game.i18n.format("OP2.Combate.AtaqueDefendido", {
-        atacante: ator.name, alvo: alvo.name, total: roll.total, defesa: rotuloDaDefesa(defesa, esquiva),
-      })
-      : game.i18n.format(acertou ? "OP2.Combate.Acertou" : "OP2.Combate.Errou", { atacante: ator.name, alvo: alvo.name, total: roll.total }),
     atacanteId: ator.id,
+    atacanteNome: ator.name,
+    rollId: roll.options?.id ?? null,
+    critico: Boolean(roll.critico),
     alvoId: alvo.id,
     alvoNome: alvo.name,
     total: roll.total,
@@ -159,9 +193,9 @@ async function publicarAtaque(ator, alvo, roll, { armado, dano = null, distancia
     distancia,
     defesa: defesa ? { ...defesa, rotulo: rotuloDaDefesa(defesa, esquiva) } : null,
     acertou,
-    dano: acertou ? valorDano : 0,
+    alvoUuid: alvo.uuid,
   };
-  dados.alvoUuid = alvo.uuid;
+  Object.assign(dados, await calcularDanoDoAtaque(dados, roll));
   const conteudo = await renderizar(`systems/${SYSTEM_ID}/templates/chat/ataque.hbs`, dados);
 
   await ChatMessage.create({
@@ -169,6 +203,42 @@ async function publicarAtaque(ator, alvo, roll, { armado, dano = null, distancia
     speaker: ChatMessage.getSpeaker({ actor: ator }),
     flags: { [SYSTEM_ID]: { tipo: "ataque", atorId: ator.id, ataque: dados } },
   });
+}
+
+/**
+ * Texto, total e dano do card a partir do teste. No crítico, o dano usa as duas
+ * rolagens mais altas (com o dado extra) e o card diz isso; sem o dado extra rolado
+ * ainda, avisa que o dano se atualiza quando ele rolar.
+ */
+async function calcularDanoDoAtaque(d, roll) {
+  const { danoBaseDoRoll, duasMaiores } = await import("../dice/teste.mjs");
+  const extra = roll.options?.bonusCritico?.valor ?? 0;
+  const total = roll.total + extra;
+  const base = d.danoBase ? danoBaseDoRoll(roll, d.danoBase) : 0;
+  const dano = d.acertou && d.danoBase ? Math.max(0, base + (d.danoBonus ?? 0)) : 0;
+  let notaDano = "";
+  if (d.critico && d.acertou) {
+    notaDano = extra
+      ? game.i18n.format("OP2.Combate.DanoCritico", { dados: duasMaiores(roll).join(" + "), bonus: d.danoBonus ?? 0, dano })
+      : game.i18n.localize("OP2.Combate.CriticoPendente");
+  }
+  const texto = d.defesa
+    ? game.i18n.format("OP2.Combate.AtaqueDefendido", { atacante: d.atacanteNome, alvo: d.alvoNome, total, defesa: d.defesa.rotulo })
+    : game.i18n.format(d.acertou ? "OP2.Combate.Acertou" : "OP2.Combate.Errou", { atacante: d.atacanteNome, alvo: d.alvoNome, total });
+  return { total, dano, notaDano, texto };
+}
+
+/** O dado do crítico rolou no card do teste: os cards de ataque daquele teste se refazem. */
+export async function atualizarAtaquesDoTeste(roll) {
+  const id = roll.options?.id;
+  if (!id) return;
+  for (const m of game.messages.filter((x) => x.flags?.[SYSTEM_ID]?.ataque?.rollId === id)) {
+    const atual = m.flags[SYSTEM_ID].ataque;
+    const ataque = { ...atual, ...(await calcularDanoDoAtaque(atual, roll)) };
+    if (m.flags[SYSTEM_ID].guardia) ataque.texto = atual.texto;
+    const content = await renderizar(`systems/${SYSTEM_ID}/templates/chat/ataque.hbs`, ataque);
+    await comoMestre("op2AtaqueAtualizar", { id: m.id, content, ataque });
+  }
 }
 
 /**
@@ -270,6 +340,9 @@ function abrirDefesaAoNascer(mensagem) {
 
 export function registrarDefesa() {
   registrarPergunta("op2PerguntarDefesa", responderDefesa);
+  registrarAcaoDeMestre("op2AtaqueAtualizar", async ({ id, content, ataque }) => {
+    await game.messages.get(id)?.update({ content, [`flags.${SYSTEM_ID}.ataque`]: ataque });
+  });
   Hooks.on("createChatMessage", abrirDefesaAoNascer);
 }
 

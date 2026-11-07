@@ -105,6 +105,7 @@ class DeclaracaoApp extends HandlebarsApplicationMixin(ApplicationV2) {
           fases: Object.keys(FASES_COMBATE).map((f) => ({ chave: f, rotulo: game.i18n.localize(`OP2.Combate.Fase.${f}`), ativa: f === fase })),
           declarado: Boolean(fase),
           antecipacao: {
+            img: poderDe(c.actor, "antecipacao")?.img ?? "",
             usada: antecipados.includes(c.actorId),
             pode: podeAntecipar({
               rodada: combate.round, temHabilidade: Boolean(poderDe(c.actor, "antecipacao")),

@@ -251,7 +251,16 @@
     li.declarado { border-color: var(--op2-sucesso); }
     img { width: 32px; height: 32px; border: 0; border-radius: 50%; object-fit: cover; flex: none; }
   }
-  .op2-declaracao__nome { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .op2-declaracao__nome { flex: 1; min-width: 0; display: flex; align-items: center; gap: 0.3rem; }
+  .op2-declaracao__nome-texto { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  // Antecipação Tática: só o ícone da habilidade ao lado do nome (botão antes de usar, selo depois).
+  .op2-declaracao__antecipar {
+    flex: none; display: inline-grid; place-items: center; width: 1.45rem; height: 1.45rem; padding: 0;
+    border: 1px dashed #a5d36b; border-radius: 0; background: transparent; color: #a5d36b; opacity: 0.8; cursor: pointer;
+    img { width: 100%; height: 100%; border-radius: 0; object-fit: contain; }
+    &:hover { opacity: 1; box-shadow: 0 0 0.35rem rgb(165 211 107 / 45%); }
+    &.ativa { border-style: solid; opacity: 1; cursor: default; box-shadow: 0 0 0.35rem rgb(165 211 107 / 45%); }
+  }
   .op2-declaracao__fases { display: flex; gap: 0.25rem; }
   .op2-fase-botao {
     width: auto; padding: 0.15rem 0.5rem; font-size: 0.75em; border-radius: 0.25rem; white-space: nowrap; opacity: 0.75;

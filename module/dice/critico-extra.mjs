@@ -33,6 +33,9 @@ async function rolarDadoDoCritico(_autor, dataset) {
   roll.options.bonusCritico = { dado: `d${faces}`, valor: extra.total };
   const html = await htmlDoTeste(roll, ator);
   await comoMestre("op2AtualizarMensagem", { id: mensagem.id, content: html, rolls: [JSON.stringify(roll.toJSON())] });
+  // O card "acerta X" daquele ataque passa a usar as duas rolagens mais altas.
+  const { atualizarAtaquesDoTeste } = await import("../cena/acoes-combate.mjs");
+  await atualizarAtaquesDoTeste(roll);
 }
 
 /** Chamado no init. */

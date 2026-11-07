@@ -19,3 +19,17 @@ test("arma a distancia: pelo campo ou pelo nome", async () => {
   assert.equal(armaADistancia({ name: "Lança", system: { distancia: true } }), true);
   assert.equal(armaADistancia(null), false);
 });
+
+test("vantagens: proxima rodada e so contra o alvo certo", async () => {
+  const { proximaChave, vantagensAtivas } = await import("../cena/reducoes.mjs");
+  assert.equal(proximaChave("cAbc.3"), "cAbc.4");
+  assert.equal(proximaChave("i.9"), "i.10");
+  const lista = [
+    { tipo: "finta", alvoUuid: "A", rodadas: ["c.1", "c.2"] },
+    { tipo: "mira", alvoUuid: "A", rodadas: ["c.2"] },
+    { tipo: "finta", alvoUuid: "B", rodadas: ["c.1", "c.2"] },
+  ];
+  assert.deepEqual(vantagensAtivas(lista, "c.1", "A").map((v) => v.tipo), ["finta"]);
+  assert.deepEqual(vantagensAtivas(lista, "c.2", "A").map((v) => v.tipo), ["finta", "mira"]);
+  assert.deepEqual(vantagensAtivas(lista, "c.3", "A"), []);
+});

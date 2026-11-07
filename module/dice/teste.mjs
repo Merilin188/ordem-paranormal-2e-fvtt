@@ -2,6 +2,7 @@
  * Orquestra um teste do começo ao fim: monta os componentes, rola, resolve a escolha
  * dos dados contabilizados e publica o card no chat.
  */
+import { definicaoDoEfeito } from "../cena/efeitos-mundo.mjs";
 import { SYSTEM_ID } from "../config.mjs";
 import { OP2Roll } from "./op2-roll.mjs";
 import { TesteDialog } from "./teste-dialog.mjs";
@@ -31,7 +32,7 @@ import {
  */
 export async function rolarTeste(ator, {
   chavePericia, chaveAtributo, dt, oposto = false, semDT = false, contexto, rapido = false,
-  semCard = false, dadosExtras = [], ocultoDoMestre = false, passos = null, arma = undefined,
+  semCard = false, dadosExtras = [], ocultoDoMestre = false, passos = null, arma = undefined, notas = [],
 } = {}) {
   const sistema = ator.system;
   // Redução até o fim da rodada (Erguer-se livre, Atrapalhar): desce o dado da perícia.
@@ -74,9 +75,15 @@ export async function rolarTeste(ator, {
   const config = rapido ? configuracaoRapida(ator, base) : await TesteDialog.abrir({ ator, base });
   if (!config) return null;
   // Habilidades que mudaram o passo e merecem nota no card (Instinto de Sobrevivência).
+  // Habilidades marcadas que mudaram o dado: passo (Instinto e outras) ou dado extra.
   const notasDeHabilidade = (rapido ? [instintoAtivo(ator)?.id] : config.habilidades ?? [])
-    .map((id) => ator.items?.get(id)).filter((i) => i?.system?.automacao === "instinto")
-    .map((i) => ({ tipo: "instinto", habilidade: i.name }));
+    .map((id) => ator.items?.get(id)).filter((i) => i && (i.system?.automacao === "instinto"
+      || ["passo", "dado-extra"].includes(i.system?.efeito?.tipo)))
+    .map((i) => (i.system.efeito?.tipo === "dado-extra"
+      ? { tipo: "texto", texto: game.i18n.format("OP2.Motivo.DadoHabilidade", { dado: i.system.efeito.dado, habilidade: i.name }) }
+      : { tipo: "instinto", habilidade: i.name }));
+  // Quem chamou já sabe de outro motivo (Fintar, Mirar, defesa).
+  for (const texto of notas) notasDeHabilidade.push({ tipo: "texto", texto });
   notasDeHabilidade.push(...reducao.notas);
   // Ajuda do aliado usada neste teste: o card diz de quem veio (Mentoria, se ele tem).
   if (base.ajuda?.passos) notasDeHabilidade.push(notaDaAjuda(base.ajuda));
@@ -116,6 +123,8 @@ export async function rolarTeste(ator, {
   for (let i = 0; i < bonusPlano; i++) {
     componentes.push({ chave: `plano.${i}`, rotulo: game.i18n.localize("OP2.Poder.PlanoTitulo"), tipo: "extra", dado: "d6" });
   }
+  // Todo dado que a ficha já entrega mudado (Caído, falha crítica, efeito, item) diz por quê.
+  notasDeHabilidade.push(...motivosDosDados(ator, componentes, chavePericia));
   // Arma com crítico facilitado (espada: dois valores 5+) nos testes de ataque.
   const armaCritico = ["luta", "pontaria"].includes(chavePericia)
     ? (arma === undefined ? melhorArma(ator) : arma)?.system?.criticoMinimo : 0;
@@ -172,6 +181,60 @@ export async function rolarTeste(ator, {
 }
 
 /** Configuração sem diálogo: perícia + atributo pareado, DT padrão. */
+const sinal = (n) => (n > 0 ? `+${n}` : String(n));
+
+/**
+ * Motivos dos dados que já chegam mudados ao teste: Caído e as reduções/aumentos
+ * temporários no atributo, efeitos do mundo, penalidade de item e passo concedido na
+ * perícia; e os dados extras (Ímpeto, Plano Estratégico, defesa, pavor abraçado).
+ */
+function motivosDosDados(ator, componentes, chavePericia) {
+  const M = (chave, dados) => game.i18n.format(`OP2.Motivo.${chave}`, dados);
+  const notas = [];
+  const atributo = componentes.find((c) => c.tipo === "atributo")?.chave?.split(".")[1];
+  const pericia = String(chavePericia ?? "");
+  const nomeAtributo = atributo ? game.i18n.localize(`OP2.Atributo.${atributo}`) : "";
+  const nomePericia = rotuloDePericia(pericia);
+  const s = ator.system;
+  if (ator.type === "personagem") {
+    if (atributo === "fisico" && ator.statuses?.has?.("caido")) notas.push(M("Caido", { atributo: nomeAtributo }));
+    const red = atributo ? s.estado?.reducoesTemporarias?.[atributo] : 0;
+    if (red) notas.push(M("FalhaCritica", { passos: red, atributo: nomeAtributo }));
+    const aum = atributo ? s.estado?.aumentosTemporarios?.[atributo] : 0;
+    if (aum) notas.push(M("Aumento", { passos: aum, atributo: nomeAtributo }));
+    for (const item of ator.items ?? []) {
+      const p = item.type === "equipamento" && item.system.equipado ? item.system.penalidade : null;
+      if (p?.passos && p.pericia === pericia) notas.push(M("Item", { item: item.name, passos: p.passos, pericia: nomePericia }));
+    }
+    const concedido = s.pericias?.[pericia]?.stepMod;
+    if (concedido) notas.push(M("Concedido", { passos: sinal(concedido), pericia: nomePericia }));
+    for (const ef of efeitosComPasso(ator)) {
+      const alvo = ef.passos.alvo;
+      if (alvo === "todos" || alvo === atributo || alvo === pericia) {
+        notas.push(M("Efeito", { efeito: ef.nome, passos: sinal(ef.passos.valor), alvo: alvo === "todos" ? M("Todos") : (alvo === atributo ? nomeAtributo : nomePericia) }));
+      }
+    }
+  }
+  const EXTRAS = { impeto: "Impeto", defesa: "Defesa", pavorAbracado: "PavorAbracado" };
+  for (const c of componentes) {
+    if (c.tipo !== "extra") continue;
+    const chave = String(c.chave ?? "");
+    if (EXTRAS[chave]) notas.push(M(EXTRAS[chave], { dado: c.dado }));
+    else if (chave.startsWith("plano.")) notas.push(M("Plano", { dado: c.dado }));
+  }
+  return notas.map((texto) => ({ tipo: "texto", texto }));
+}
+
+/** Efeitos do mundo ativos no ator que mexem em passo. */
+function efeitosComPasso(ator) {
+  const lista = [];
+  for (const id of ator.statuses ?? []) {
+    const d = definicaoDoEfeito(id);
+    if (d?.passos?.valor && d.passos.alvo) lista.push(d);
+  }
+  return lista;
+}
+
 /** Nota do passo que veio da ajuda: "Mentoria de X" quando quem ajudou tem Mentoria. */
 function notaDaAjuda(ajuda) {
   const ajudante = game.actors?.find((a) => a.type === "personagem" && a.name === ajuda.de);
@@ -262,6 +325,7 @@ function notasDeAjuste(ajustes = []) {
     if (a.tipo === "mentoriaRecusada") return L("MentoriaRecusada", { nome: a.nome, valor: a.valor });
     if (a.tipo === "instinto") return L("InstintoNota", { habilidade: a.habilidade });
     if (a.tipo === "reducao") return L("ReducaoNota", { motivo: a.motivo, passos: a.passos });
+    if (a.tipo === "texto") return a.texto;
     if (a.tipo === "ajuda") return a.mentoria
       ? L("AjudaNotaMentoria", { mentoria: a.mentoria, nome: a.de, passos: a.passos })
       : L("AjudaNota", { nome: a.de, passos: a.passos });
@@ -270,6 +334,25 @@ function notasDeAjuste(ajustes = []) {
     const lista = a.mudancas.map((m) => `(${m.de}) → (${m.para})`).join(", ");
     return L("AnaliseNotaVarios", { nome: a.nome, pontos, lista });
   });
+}
+
+/**
+ * Base do dano de um teste de ataque: RA (ou RB). No crítico com o dado extra já
+ * rolado, as DUAS rolagens mais altas entre os dados do teste e o extra.
+ */
+export function danoBaseDoRoll(roll, base = "ra") {
+  const extra = roll.options?.bonusCritico?.valor;
+  if (extra) {
+    return duasMaiores(roll).reduce((t, v) => t + v, 0);
+  }
+  return base === "rb" ? roll.resultado?.rb ?? roll.rb : roll.resultado?.ra ?? roll.ra;
+}
+
+/** As duas rolagens mais altas do crítico (dados contados + o dado extra). */
+export function duasMaiores(roll) {
+  const extra = roll.options?.bonusCritico?.valor ?? 0;
+  return (roll.dados ?? []).filter((d) => d.contado !== false && !d.pavor && !d.consumido).map((d) => d.resultado)
+    .concat(extra).sort((x, y) => y - x).slice(0, 2);
 }
 
 export function htmlDoTeste(roll, ator) {
@@ -288,10 +371,7 @@ export function htmlDoTeste(roll, ator) {
   // Dano no crítico: as DUAS rolagens mais altas entre os dados do teste e o dado
   // extra (+ arma). O extra só entra se for maior que um dos dois — nunca troca uma
   // rolagem alta por uma menor (achado em uso real: 6, 6 e extra 5 dava 6+5).
-  const baseDano = bonusCritico
-    ? (roll.dados ?? []).filter((d) => d.contado !== false && !d.pavor && !d.consumido).map((d) => d.resultado)
-      .concat(extra).sort((x, y) => y - x).slice(0, 2).reduce((t, v) => t + v, 0)
-    : (danoCriatura?.base === "rb" ? resultado.rb : resultado.ra);
+  const baseDano = danoBaseDoRoll(roll, danoCriatura?.base === "rb" ? "rb" : "ra");
   return renderizar("systems/ordem-paranormal-2e/templates/chat/teste.hbs", {
     rotulo: roll.options.rotulo,
     componentes: roll.dados,

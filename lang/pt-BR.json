@@ -850,7 +850,9 @@
       "CliqueProprio": "Esse é o seu próprio token: clique no alvo.",
       "Arma": "Arma",
       "PericiaAtaque": "Perícia do ataque",
-      "ArmaAjuda": "Com arma, o dano é a RA (+ o modificador dela); desarmado, a RB. Corpo a corpo usa Luta, à distância usa Pontaria — dá para trocar."
+      "ArmaAjuda": "Com arma, o dano é a RA (+ o modificador dela); desarmado, a RB. Corpo a corpo usa Luta, à distância usa Pontaria — dá para trocar.",
+      "DanoCritico": "Crítico: dano com as duas rolagens mais altas ({dados}) + {bonus} = {dano}.",
+      "CriticoPendente": "Sucesso crítico: role o dado do crítico no card do teste — o dano deste card se atualiza com as duas rolagens mais altas."
     },
     "Impeto": {
       "Titulo": "Ímpeto",
@@ -1868,7 +1870,8 @@
       "ErguerPadrao": "Ação padrão (não age mais neste turno)",
       "ErguerLivre": "Ação livre (−1 passo nos testes da rodada)",
       "ErguerNotaPadrao": "{nome} se levanta como ação padrão e não age mais neste turno.",
-      "ErguerNotaLivre": "{nome} se levanta como ação livre: −1 passo em todos os testes até o fim da rodada."
+      "ErguerNotaLivre": "{nome} se levanta como ação livre: −1 passo em todos os testes até o fim da rodada.",
+      "MiraNota": "Na próxima rodada, os ataques à distância contra {alvo} ganham +1d6 (já preparado)."
     },
     "Defesa": {
       "Titulo": "Defender-se",
@@ -1882,6 +1885,24 @@
       "Aguardando": "Esperando {nome} decidir se vai se defender…",
       "Rolar": "Rolar a defesa",
       "JaRolou": "A defesa deste ataque já foi rolada."
+    },
+    "Motivo": {
+      "Caido": "Caído: −1 passo em {atributo}.",
+      "FalhaCritica": "Falha crítica: −{passos} passo(s) em {atributo} até o fim da cena.",
+      "Aumento": "Aumento temporário: +{passos} passo(s) em {atributo} até o fim da cena.",
+      "Item": "{item}: −{passos} passo(s) em {pericia} (item equipado).",
+      "Concedido": "Modificador de passo da ficha: {passos} em {pericia}.",
+      "Efeito": "{efeito}: {passos} passo(s) em {alvo}.",
+      "Todos": "todos os testes",
+      "Impeto": "+{dado}: gastou 1 espaço de Ímpeto.",
+      "Defesa": "+{dado}: Defender-se (bônus da defesa).",
+      "PavorAbracado": "+{dado}: pavor abraçado vira dado bônus.",
+      "Plano": "+{dado}: Plano Estratégico.",
+      "DadoHabilidade": "+{dado} devido à Habilidade: {habilidade}.",
+      "Finta": "+2 passos: fintou {alvo} (Fintar vencido).",
+      "Mira": "+1d6: mirou em {alvo} na rodada anterior (Mirar).",
+      "MirarRotulo": "Mirar",
+      "ReducaoAtaque": "Redução de {passos} passo(s) até o fim da rodada ({motivo}): {de} → {para}."
     }
   }
 }

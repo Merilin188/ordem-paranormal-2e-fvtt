@@ -850,7 +850,9 @@
       "CliqueProprio": "That is your own token: click the target.",
       "Arma": "Weapon",
       "PericiaAtaque": "Attack skill",
-      "ArmaAjuda": "With a weapon, damage is RA (+ its modifier); unarmed, RB. Melee uses Fighting, ranged uses Aim — you can change it."
+      "ArmaAjuda": "With a weapon, damage is RA (+ its modifier); unarmed, RB. Melee uses Fighting, ranged uses Aim — you can change it.",
+      "DanoCritico": "Critical: damage with the two highest rolls ({dados}) + {bonus} = {dano}.",
+      "CriticoPendente": "Critical success: roll the critical die on the test card — this card's damage updates with the two highest rolls."
     },
     "Impeto": {
       "Titulo": "Momentum",
@@ -1868,7 +1870,8 @@
       "ErguerPadrao": "Standard action (no more actions this turn)",
       "ErguerLivre": "Free action (−1 step on tests this round)",
       "ErguerNotaPadrao": "{nome} stands up as a standard action and acts no more this turn.",
-      "ErguerNotaLivre": "{nome} stands up as a free action: −1 step on every test until the end of the round."
+      "ErguerNotaLivre": "{nome} stands up as a free action: −1 step on every test until the end of the round.",
+      "MiraNota": "Next round, ranged attacks against {alvo} get +1d6 (already set)."
     },
     "Defesa": {
       "Titulo": "Defend",
@@ -1882,6 +1885,24 @@
       "Aguardando": "Waiting for {nome} to decide whether to defend…",
       "Rolar": "Roll the defense",
       "JaRolou": "The defense for this attack was already rolled."
+    },
+    "Motivo": {
+      "Caido": "Prone: −1 step on {atributo}.",
+      "FalhaCritica": "Critical failure: −{passos} step(s) on {atributo} until the end of the scene.",
+      "Aumento": "Temporary increase: +{passos} step(s) on {atributo} until the end of the scene.",
+      "Item": "{item}: −{passos} step(s) on {pericia} (equipped item).",
+      "Concedido": "Sheet step modifier: {passos} on {pericia}.",
+      "Efeito": "{efeito}: {passos} step(s) on {alvo}.",
+      "Todos": "every test",
+      "Impeto": "+{dado}: spent 1 Momentum space.",
+      "Defesa": "+{dado}: Defend (defense bonus).",
+      "PavorAbracado": "+{dado}: embraced dread becomes a bonus die.",
+      "Plano": "+{dado}: Strategic Plan.",
+      "DadoHabilidade": "+{dado} from the Ability: {habilidade}.",
+      "Finta": "+2 steps: feinted {alvo} (Feint won).",
+      "Mira": "+1d6: aimed at {alvo} last round (Aim).",
+      "MirarRotulo": "Aim",
+      "ReducaoAtaque": "{passos} step(s) reduced until the end of the round ({motivo}): {de} → {para}."
     }
   }
 }

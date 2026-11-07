@@ -5,6 +5,7 @@
   </header>
 
   <p class="op2-card__texto">{{texto}}</p>
+  {{#if notaDano}}<p class="op2-prontidao-nota"><i class="fa-solid fa-star" aria-hidden="true"></i> {{notaDano}}</p>{{/if}}
   {{#if guardiaNota}}<p class="op2-prontidao-nota op2-guardia-nota"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> {{guardiaNota}}</p>{{/if}}
 
   {{!-- Com defesa: o teste do alvo abre sozinho para quem joga com ele; o botão é a reserva. --}}

@@ -30,7 +30,54 @@ export async function reducaoDoTeste(ator) {
   };
 }
 
+/* ---- Vantagens contra um alvo: Fintar (+2 passos no próximo ataque) e Mirar (+1d6) ---- */
+
+/** Chave da rodada seguinte ("c<id>.3" → "c<id>.4"). */
+export function proximaChave(chave) {
+  return String(chave).replace(/(\d+)$/, (n) => String(Number(n) + 1));
+}
+
+/** As vantagens do agente que valem agora contra o alvo (pura). */
+export function vantagensAtivas(lista, rodada, alvoUuid) {
+  return (Array.isArray(lista) ? lista : []).filter((v) => v?.alvoUuid === alvoUuid && v.rodadas?.includes(rodada));
+}
+
+/**
+ * Fintar vencido: +2 passos no próximo ataque contra o alvo, até o fim da PRÓXIMA rodada.
+ * Mirar: +1d6 nos ataques à distância contra o alvo NA PRÓXIMA rodada.
+ */
+export async function registrarVantagem(agente, { tipo, alvo }) {
+  const atual = await rodadaAtual();
+  const rodadas = tipo === "finta" ? [atual, proximaChave(atual)] : [proximaChave(atual)];
+  await comoMestre("op2Vantagem", {
+    uuid: agente.uuid, atual,
+    vantagem: { id: foundry.utils.randomID(), tipo, alvoUuid: alvo.uuid, alvoNome: alvo.name, rodadas },
+  });
+}
+
+export async function vantagensContra(agente, alvo) {
+  const ativas = vantagensAtivas(agente?.getFlag?.(SYSTEM_ID, "vantagens"), await rodadaAtual(), alvo?.uuid);
+  return { finta: ativas.find((v) => v.tipo === "finta") ?? null, mira: ativas.find((v) => v.tipo === "mira") ?? null };
+}
+
+/** A finta vale para UM ataque: usada, sai. */
+export async function consumirVantagem(agente, id) {
+  await comoMestre("op2VantagemUsada", { uuid: agente.uuid, id });
+}
+
 export function registrarReducoes() {
+  registrarAcaoDeMestre("op2Vantagem", async ({ uuid, atual, vantagem }) => {
+    const ator = await fromUuid(uuid);
+    if (!ator) return;
+    const vivas = (ator.getFlag(SYSTEM_ID, "vantagens") ?? [])
+      .filter((v) => v.rodadas?.some((r) => r === atual || r === proximaChave(atual)));
+    await ator.setFlag(SYSTEM_ID, "vantagens", [...vivas, vantagem]);
+  });
+  registrarAcaoDeMestre("op2VantagemUsada", async ({ uuid, id }) => {
+    const ator = await fromUuid(uuid);
+    if (!ator) return;
+    await ator.setFlag(SYSTEM_ID, "vantagens", (ator.getFlag(SYSTEM_ID, "vantagens") ?? []).filter((v) => v.id !== id));
+  });
   registrarAcaoDeMestre("op2ReducaoRodada", async ({ uuid, passos, motivo, rodada }) => {
     const ator = await fromUuid(uuid);
     if (!ator) return;
