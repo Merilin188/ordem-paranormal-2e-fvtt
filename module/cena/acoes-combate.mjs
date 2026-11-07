@@ -11,7 +11,7 @@
 import { SYSTEM_ID } from "../config.mjs";
 import { rolarTeste, renderizar } from "../dice/teste.mjs";
 import { vencedorDoOposto, resolverAtaque, danoDoAtaque, empateAcertaOsDois, modoDaEsquiva } from "./combate.mjs";
-import { alvosDaCenaAtiva, alvosMarcados } from "./encerrar-investigacao.mjs";
+import { alvosDisponiveis, alvosMarcados } from "./encerrar-investigacao.mjs";
 
 /** Rola o ataque e publica o card que espera a resposta do defensor. */
 export async function atacar(ator, { alvoUuid, armado, rapido = false } = {}) {
@@ -198,13 +198,14 @@ function textoDoDesfecho({ vencedor, esquiva, atacante, defensor, dano }) {
 
 /**
  * Quem apanha. A mira do Foundry manda: marcou um token, é nele — sem lista, sem
- * exigir que esteja na investigação. Sem marcação, oferece quem está em cena.
+ * exigir que esteja na investigação. Sem marcação, oferece quem está no combate, na
+ * cena ou na investigação.
  */
-async function escolherAlvo(ator) {
+export async function escolherAlvo(ator, titulo = game.i18n.localize("OP2.Combate.Atacar")) {
   const marcados = alvosMarcados({ exceto: ator });
   if (marcados.length === 1) return marcados[0];
 
-  const candidatos = marcados.length > 1 ? marcados : alvosDaCenaAtiva({ exceto: ator, comNpcs: true });
+  const candidatos = marcados.length > 1 ? marcados : alvosDisponiveis({ exceto: ator });
   if (!candidatos.length) {
     ui.notifications.warn(game.i18n.localize("OP2.Combate.SemAlvos"));
     return null;
@@ -212,7 +213,7 @@ async function escolherAlvo(ator) {
   const opcoes = candidatos
     .map((a) => `<option value="${a.uuid}">${foundry.utils.escapeHTML(a.name)}</option>`).join("");
   const uuid = await foundry.applications.api.DialogV2.prompt({
-    window: { title: game.i18n.localize("OP2.Combate.Atacar") },
+    window: { title: titulo },
     content: `
       <div class="form-group">
         <label>${game.i18n.localize("OP2.Combate.Alvo")}</label>

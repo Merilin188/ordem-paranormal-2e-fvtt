@@ -99,6 +99,30 @@ export function alvosDaCenaAtiva({ exceto, comNpcs = false } = {}) {
 }
 
 /**
+ * Quem pode ser alvo agora: os combatentes do combate em curso, os tokens visíveis da
+ * cena e o roster da investigação. Sem investigação aberta, o combate ainda acha
+ * alvos (achado em uso: o ataque da criatura dizia que não havia ninguém).
+ * Um ator por id, como os cards de chat resolvem (`game.actors.get`).
+ */
+export function alvosDisponiveis({ exceto, tipos = ["personagem", "npc", "criatura"] } = {}) {
+  const vistos = new Map();
+  const somar = (ator) => {
+    if (!ator || !tipos.includes(ator.type) || ator.id === exceto?.id || vistos.has(ator.id)) return;
+    vistos.set(ator.id, ator);
+  };
+  for (const c of game.combat?.combatants ?? []) {
+    if (c.defeated || (c.hidden && !game.user?.isGM)) continue;
+    somar(c.actor);
+  }
+  for (const t of globalThis.canvas?.tokens?.placeables ?? []) {
+    if (t.visible === false || (t.document?.hidden && !game.user?.isGM)) continue;
+    somar(t.actor);
+  }
+  for (const a of alvosDaCenaAtiva({ exceto, comNpcs: true })) somar(a);
+  return [...vistos.values()];
+}
+
+/**
  * O alvo marcado no mapa (a mira do Foundry), que é como a mesa já diz "é nele".
  *
  * Quando existe um alvo marcado, ele manda: não faz sentido abrir uma lista para
@@ -110,7 +134,7 @@ export function alvosDaCenaAtiva({ exceto, comNpcs = false } = {}) {
  * @param {string[]} [opcoes.tipos]  tipos aceitos; default personagem e NPC
  * @returns {Actor[]}
  */
-export function alvosMarcados({ exceto, tipos = ["personagem", "npc"] } = {}) {
+export function alvosMarcados({ exceto, tipos = ["personagem", "npc", "criatura"] } = {}) {
   const marcados = [...(game.user?.targets ?? [])]
     .map((token) => token.actor)
     .filter((ator) => ator && tipos.includes(ator.type) && ator.id !== exceto?.id);

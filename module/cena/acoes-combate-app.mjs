@@ -7,6 +7,7 @@
  */
 import { SYSTEM_ID } from "../config.mjs";
 import { GUIA } from "../ui/guia-combate.mjs";
+import { registrarAcaoDeChat } from "../ui/chat.mjs";
 
 const { ApplicationV2 } = foundry.applications.api;
 const L = (chave, dados) => (dados ? game.i18n.format(`OP2.AcoesCombate.${chave}`, dados) : game.i18n.localize(`OP2.AcoesCombate.${chave}`));
@@ -17,6 +18,26 @@ const SECOES = ["Ações gerais", "Ataques", "Manobras (substituem um ataque cor
 const SO_LEITURA = new Set(["Teste de ataque", "Atirando em corpo a corpo", "Ataques opostos", "Dano", "Como funciona"]);
 const MANOBRAS = new Set(["Agarrar", "Derrubar", "Desarmar", "Empurrar", "Quebrar"]);
 
+/**
+ * Ações com teste oposto: a perícia de quem age e as que o alvo pode usar para
+ * resistir (spec §8.1: manobra é ataque oposto à Acrobacia ou Luta do alvo).
+ */
+export const OPOSTAS = {
+  Fintar: { pericia: "enganacao", defesas: ["intuicao"] },
+  ...Object.fromEntries([...MANOBRAS].map((m) => [m, { pericia: "luta", defesas: ["acrobacia", "luta"] }])),
+};
+/** Ações que pedem alvo (as opostas e Mirar). */
+export const COM_ALVO = new Set(["Mirar", ...Object.keys(OPOSTAS)]);
+
+/**
+ * Desfecho do teste oposto da ação: quem age precisa vencer (empate não gera efeito);
+ * vencer por 5 ou mais libera o efeito maior das manobras.
+ */
+export function desfechoOposto(totalAcao, totalDefesa) {
+  const margem = totalAcao - totalDefesa;
+  return { venceu: margem > 0, empate: margem === 0, margem, forte: margem >= 5 };
+}
+
 /** Lista das ações executáveis e de referência, por seção (pura, para teste). */
 export function acoesDeCombate(guia = GUIA) {
   return guia.filter((s) => SECOES.includes(s.secao)).map((s) => ({
@@ -25,20 +46,105 @@ export function acoesDeCombate(guia = GUIA) {
   }));
 }
 
-async function declarar(ator, titulo, texto) {
+const forte = (t) => `<strong>${esc(t)}</strong>`;
+
+async function declarar(ator, titulo, texto, alvo = null) {
+  const frase = alvo
+    ? L(titulo === "Mirar" ? "DeclaraMirar" : "DeclaraAlvo", { nome: forte(ator.name), acao: forte(titulo), alvo: forte(alvo.name) })
+    : L("Declara", { nome: forte(ator.name), acao: forte(titulo) });
   return ChatMessage.create({
     speaker: ChatMessage.getSpeaker({ actor: ator }),
     content: `<div class="op2 op2-card op2-acao-combate-card">
       <header class="op2-card__topo"><span class="op2-tag op2-tag--pequena"><i class="fa-solid fa-swords"></i> ${esc(L("Rotulo"))}</span></header>
-      <p class="op2-card__texto">${L("Declara", { nome: `<strong>${esc(ator.name)}</strong>`, acao: `<strong>${esc(titulo)}</strong>` })}</p>
+      <p class="op2-card__texto">${frase}</p>
       <p class="op2-acao-combate-card__regra">${esc(texto)}</p></div>`,
-    flags: { [SYSTEM_ID]: { tipo: "acao-combate", atorId: ator.id, acao: titulo } },
+    flags: { [SYSTEM_ID]: { tipo: "acao-combate", atorId: ator.id, acao: titulo, alvoId: alvo?.id ?? null } },
   });
 }
 
-async function teste(ator, chavePericia, titulo) {
+/**
+ * Ação oposta: quem age rola, e o card espera o alvo resistir — um botão por perícia
+ * de defesa, para o dono do alvo (o mestre, no caso de NPC e criatura).
+ */
+async function acaoOposta(ator, titulo, texto, alvo) {
+  const { pericia, defesas } = OPOSTAS[titulo];
+  const { rolarTeste, rotuloDePericia } = await import("../dice/teste.mjs");
+  const roll = await rolarTeste(ator, {
+    chavePericia: pericia, oposto: true, contexto: L("ContraAlvo", { acao: titulo, alvo: alvo.name }),
+  });
+  if (!roll) return null;
+  const nomes = defesas.map((d) => rotuloDePericia(d));
+  const botoes = defesas.map((d, i) => `<button type="button" class="op2-botao op2-botao--pequeno" data-op2-acao="resistir-acao"
+      data-ator-id="${alvo.id}" data-agente-id="${ator.id}" data-acao="${esc(titulo)}" data-pericia="${d}"
+      data-total="${roll.total}" data-ra="${roll.ra}" data-rb="${roll.rb}">${esc(L("Resistir", { pericia: nomes[i] }))}</button>`).join("");
+  await ChatMessage.create({
+    speaker: ChatMessage.getSpeaker({ actor: ator }),
+    content: `<div class="op2 op2-card op2-acao-combate-card">
+      <header class="op2-card__topo"><span class="op2-tag op2-tag--pequena"><i class="fa-solid fa-swords"></i> ${esc(titulo)}</span>
+        <span class="op2-card__dt">${roll.total}</span></header>
+      <p class="op2-card__texto">${L("Oposto", {
+        nome: forte(ator.name), acao: forte(titulo), alvo: forte(alvo.name),
+        pericia: esc(rotuloDePericia(pericia)), total: roll.total, defesas: esc(nomes.join(L("Ou"))),
+      })}</p>
+      <p class="op2-acao-combate-card__regra">${esc(texto)}</p>
+      <div class="op2-card__acoes">${botoes}</div></div>`,
+    flags: { [SYSTEM_ID]: { tipo: "acao-oposta", atorId: ator.id, acao: titulo, alvoId: alvo.id } },
+  });
+  return roll;
+}
+
+/** Texto do efeito de cada ação quando quem age vence (e o extra por 5 ou mais). */
+function efeitoDaAcao(titulo, { nome, alvo, rb, forte: porCinco }) {
+  const base = L(`Efeito.${titulo}`, { nome, alvo });
+  const chaveForte = `OP2.AcoesCombate.EfeitoForte.${titulo}`;
+  const extra = porCinco && game.i18n.has(chaveForte) ? ` ${game.i18n.format(chaveForte, { nome, alvo, rb })}` : "";
+  return base + extra;
+}
+
+/** O alvo resiste: rola a perícia escolhida, compara e publica o desfecho. */
+async function resistirAcao(defensor, dataset) {
+  if (!game.user.isGM && !defensor.isOwner) return void ui.notifications.warn(game.i18n.localize("OP2.Aviso.SemPermissao"));
+  const mensagem = game.messages.get(dataset.mensagemId);
+  if (mensagem?.getFlag(SYSTEM_ID, "respondido")) return void ui.notifications.warn(L("JaRespondido"));
+  const agente = game.actors.get(dataset.agenteId);
+  if (!agente) return null;
+  const titulo = dataset.acao;
   const { rolarTeste } = await import("../dice/teste.mjs");
-  return rolarTeste(ator, { chavePericia, oposto: true, contexto: titulo });
+  const roll = await rolarTeste(defensor, {
+    chavePericia: dataset.pericia, oposto: true, contexto: L("ResisteA", { acao: titulo, nome: agente.name }),
+  });
+  if (!roll) return null;
+  const { marcarAtaqueRespondido } = await import("./guardia.mjs");
+  await marcarAtaqueRespondido(dataset.mensagemId);
+
+  const totalAcao = Number(dataset.total);
+  const rb = Number(dataset.rb) || 0;
+  const d = desfechoOposto(totalAcao, roll.total);
+  const placar = `${totalAcao} × ${roll.total}`;
+  const texto = d.empate
+    ? L("Empatou", { acao: titulo, placar })
+    : d.venceu
+      ? L("Venceu", { nome: agente.name, acao: titulo, alvo: defensor.name, placar })
+      : L("Resistiu", { nome: agente.name, acao: titulo, alvo: defensor.name, placar });
+  const efeito = d.venceu ? efeitoDaAcao(titulo, { nome: agente.name, alvo: defensor.name, rb, forte: d.forte }) : "";
+  // Derrubar vencendo por 5+: dano de impacto igual à RB, num clique.
+  const dano = d.venceu && d.forte && titulo === "Derrubar" && rb > 0
+    ? `<div class="op2-card__acoes"><button type="button" class="op2-botao op2-botao--pequeno" data-op2-acao="aplicar-dano-alvo"
+        data-ator-id="${defensor.id}" data-quantidade="${rb}">${esc(L("AplicarDano", { dano: rb, alvo: defensor.name }))}</button></div>`
+    : "";
+  await ChatMessage.create({
+    speaker: ChatMessage.getSpeaker({ actor: defensor }),
+    content: `<div class="op2 op2-card op2-acao-combate-card">
+      <header class="op2-card__topo"><span class="op2-tag op2-tag--pequena"><i class="fa-solid fa-swords"></i> ${esc(L("Resultado", { acao: titulo }))}</span></header>
+      <p class="op2-card__texto">${esc(texto)}</p>
+      ${efeito ? `<p class="op2-prontidao-nota">${esc(efeito)}</p>` : ""}${dano}</div>`,
+    flags: { [SYSTEM_ID]: { tipo: "acao-oposta-resultado", atorId: defensor.id } },
+  });
+  return { roll, ...d };
+}
+
+export function registrarAcoesCombate() {
+  registrarAcaoDeChat("resistir-acao", resistirAcao);
 }
 
 /** Executa a ação: declara e roda a automação dela. */
@@ -47,6 +153,13 @@ export async function executarAcaoDeCombate(ator, titulo, texto) {
     const { atacar } = await import("./acoes-combate.mjs");
     return atacar(ator);
   }
+  if (COM_ALVO.has(titulo)) {
+    const { escolherAlvo } = await import("./acoes-combate.mjs");
+    const alvo = await escolherAlvo(ator, titulo);
+    if (!alvo) return null;
+    if (OPOSTAS[titulo]) return acaoOposta(ator, titulo, texto, alvo);
+    return declarar(ator, titulo, texto, alvo);
+  }
   await declarar(ator, titulo, texto);
   if (titulo === "Defender-se") {
     // Vale para um ataque desta rodada: o Esquivar do card consome a declaração.
@@ -54,8 +167,6 @@ export async function executarAcaoDeCombate(ator, titulo, texto) {
     await ator.setFlag(SYSTEM_ID, "defesaRodada", chaveDaRodada());
     return leituraDeCombate(ator);
   }
-  if (titulo === "Fintar") return teste(ator, "enganacao", titulo);
-  if (MANOBRAS.has(titulo)) return teste(ator, "luta", L("Manobra", { nome: titulo }));
   if (titulo === "Erguer-se") return ator.toggleStatusEffect("caido", { active: false });
   if (titulo === "Jogar-se no chão (livre)") return ator.toggleStatusEffect("caido", { active: true });
   return null;

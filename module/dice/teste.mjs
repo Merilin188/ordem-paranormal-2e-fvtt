@@ -73,6 +73,8 @@ export async function rolarTeste(ator, {
   const notasDeHabilidade = (rapido ? [instintoAtivo(ator)?.id] : config.habilidades ?? [])
     .map((id) => ator.items?.get(id)).filter((i) => i?.system?.automacao === "instinto")
     .map((i) => ({ tipo: "instinto", habilidade: i.name }));
+  // Ajuda do aliado usada neste teste: o card diz de quem veio (Mentoria, se ele tem).
+  if (base.ajuda?.passos) notasDeHabilidade.push(notaDaAjuda(base.ajuda));
 
   // Habilidade com custo em PD ("gaste 2 PD para receber +d4"): cobra ao confirmar,
   // não ao marcar — desmarcar ou fechar o diálogo não pode custar nada.
@@ -164,6 +166,13 @@ export async function rolarTeste(ator, {
 }
 
 /** Configuração sem diálogo: perícia + atributo pareado, DT padrão. */
+/** Nota do passo que veio da ajuda: "Mentoria de X" quando quem ajudou tem Mentoria. */
+function notaDaAjuda(ajuda) {
+  const ajudante = game.actors?.find((a) => a.type === "personagem" && a.name === ajuda.de);
+  const mentoria = ajudante?.items?.find((i) => i.type === "habilidade" && i.system.automacao === "mentoria");
+  return { tipo: "ajuda", de: ajuda.de, passos: ajuda.passos, mentoria: mentoria?.name ?? "" };
+}
+
 /** Instinto de Sobrevivência ligado agora (metade ou menos dos PV), ou null. */
 function instintoAtivo(ator) {
   const pv = ator.system?.recursos?.pv;
@@ -246,6 +255,9 @@ function notasDeAjuste(ajustes = []) {
     if (a.tipo === "mentoria") return L("MentoriaNota", { nome: a.nome, de: a.de, para: a.para });
     if (a.tipo === "mentoriaRecusada") return L("MentoriaRecusada", { nome: a.nome, valor: a.valor });
     if (a.tipo === "instinto") return L("InstintoNota", { habilidade: a.habilidade });
+    if (a.tipo === "ajuda") return a.mentoria
+      ? L("AjudaNotaMentoria", { mentoria: a.mentoria, nome: a.de, passos: a.passos })
+      : L("AjudaNota", { nome: a.de, passos: a.passos });
     const pontos = L(a.gastos === 1 ? "AnalisePonto" : "AnalisePontos", { n: a.gastos });
     if (a.mudancas.length === 1) return L("AnaliseNota", { nome: a.nome, pontos, de: a.mudancas[0].de, para: a.mudancas[0].para });
     const lista = a.mudancas.map((m) => `(${m.de}) → (${m.para})`).join(", ");

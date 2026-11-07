@@ -822,7 +822,7 @@
       "Atacar": "Atacar",
       "Defender": "Defender",
       "Alvo": "Alvo do ataque (marque no mapa para pular esta escolha)",
-      "SemAlvos": "Não há outro personagem ou NPC na investigação para atacar.",
+      "SemAlvos": "Não há outro personagem, NPC ou criatura no combate, na cena ou na investigação para atacar.",
       "ArmadoPergunta": "Você está empunhando uma arma? Com arma o dano é o RA; desarmado, o RB.",
       "Armado": "Com arma (RA)",
       "Desarmado": "Desarmado (RB)",
@@ -1385,7 +1385,9 @@
       "GuardiaAceitar": "Tomar o golpe (2 PD)",
       "GuardiaRecusar": "Deixar",
       "GuardiaTrocou": "Guardiã: {guardia} se coloca na frente de {alvo} e passa a ser o alvo.",
-      "GuardiaTarde": "{alvo} já respondeu a este ataque: a Guardiã não pode mais trocar o alvo."
+      "GuardiaTarde": "{alvo} já respondeu a este ataque: a Guardiã não pode mais trocar o alvo.",
+      "AjudaNota": "Passo de dados aumentado (+{passos}) devido à ajuda de {nome}.",
+      "AjudaNotaMentoria": "Passo de dados aumentado (+{passos}) devido à {mentoria} de {nome}."
     },
     "PericiasMundo": {
       "MenuNome": "Perícias do mundo",
@@ -1821,11 +1823,36 @@
       "Titulo": "Ações de combate",
       "Botao": "Ações de combate",
       "Dica": "Lê e executa as ações de combate deste personagem: declara no chat e aciona o que depende da ação (Leitura de Combate, ataque, manobras).",
-      "Ajuda": "Executar declara a ação no chat. Agredir abre o ataque; Defender-se ativa a Leitura de Combate; Fintar e manobras rolam o teste oposto; cair e levantar marcam Caído.",
+      "Ajuda": "Executar declara a ação no chat. Agredir abre o ataque; Defender-se ativa a Leitura de Combate; Mirar, Fintar e as manobras pedem o alvo (ou usam o marcado no mapa); Fintar e as manobras rolam o teste e o alvo resiste pelo card; cair e levantar marcam Caído.",
       "Executar": "Executar",
       "Rotulo": "Ação de combate",
       "Declara": "{nome} declara: {acao}.",
-      "Manobra": "Manobra: {nome}"
+      "DeclaraAlvo": "{nome} declara: {acao} contra {alvo}.",
+      "DeclaraMirar": "{nome} declara: {acao} em {alvo}.",
+      "ContraAlvo": "{acao} contra {alvo}",
+      "Oposto": "{nome} usa {acao} contra {alvo} ({pericia}, total {total}). {alvo} resiste com {defesas}.",
+      "Ou": " ou ",
+      "Resistir": "Resistir com {pericia}",
+      "ResisteA": "Resistir a {acao} de {nome}",
+      "JaRespondido": "Este teste oposto já foi respondido.",
+      "Resultado": "{acao}: resultado",
+      "Venceu": "{nome} vence {acao} contra {alvo} ({placar}).",
+      "Resistiu": "{alvo} resiste a {acao} de {nome} ({placar}): sem efeito.",
+      "Empatou": "Empate em {acao} ({placar}): sem efeito.",
+      "AplicarDano": "Aplicar {dano} de dano em {alvo}",
+      "Efeito": {
+        "Fintar": "{nome} recebe dois aumentos de passo no próximo ataque contra {alvo} (até o fim da próxima rodada).",
+        "Agarrar": "{alvo} está agarrado: fica imóvel, sofre redução de passo em ataques e só ataca com armas pequenas. {nome} fica com a mão ocupada e sobrecarregado.",
+        "Derrubar": "{alvo} fica caído.",
+        "Desarmar": "{alvo} derruba um item empunhado.",
+        "Empurrar": "{alvo} é empurrado alguns metros.",
+        "Quebrar": "{nome} atinge um item de {alvo} e causa o dano do ataque no objeto."
+      },
+      "EfeitoForte": {
+        "Derrubar": "Venceu por 5 ou mais: {alvo} sofre {rb} de dano de impacto (RB).",
+        "Desarmar": "Venceu por 5 ou mais: {nome} pode pegar o item (mão livre) ou arremessá-lo.",
+        "Empurrar": "Venceu por 5 ou mais: {alvo} fica desequilibrado (redução de passo no próximo teste)."
+      }
     }
   }
 }

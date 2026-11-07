@@ -822,7 +822,7 @@
       "Atacar": "Attack",
       "Defender": "Defend",
       "Alvo": "Attack target (target on the map to skip this)",
-      "SemAlvos": "There is no other character or NPC in the investigation to attack.",
+      "SemAlvos": "There is no other character, NPC or creature in the combat, the scene or the investigation to attack.",
       "ArmadoPergunta": "Are you wielding a weapon? Armed, damage is HR; unarmed, LR.",
       "Armado": "Armed (HR)",
       "Desarmado": "Unarmed (LR)",
@@ -1385,7 +1385,9 @@
       "GuardiaAceitar": "Take the hit (2 PD)",
       "GuardiaRecusar": "Let it be",
       "GuardiaTrocou": "Guardian: {guardia} steps in front of {alvo} and becomes the target.",
-      "GuardiaTarde": "{alvo} already answered this attack: the Guardian can no longer change the target."
+      "GuardiaTarde": "{alvo} already answered this attack: the Guardian can no longer change the target.",
+      "AjudaNota": "Dice step increased (+{passos}) thanks to {nome}'s help.",
+      "AjudaNotaMentoria": "Dice step increased (+{passos}) thanks to {nome}'s {mentoria}."
     },
     "PericiasMundo": {
       "MenuNome": "World skills",
@@ -1821,11 +1823,36 @@
       "Titulo": "Combat actions",
       "Botao": "Combat actions",
       "Dica": "Read and run this character's combat actions: declares it in chat and triggers what depends on the action (Combat Reading, attack, maneuvers).",
-      "Ajuda": "Run declares the action in chat. Strike opens the attack; Defend triggers Combat Reading; Feint and maneuvers roll the opposed test; dropping and standing set Prone.",
+      "Ajuda": "Execute declares the action in chat. Strike opens the attack; Defend triggers Combat Reading; Aim, Feint and maneuvers ask for the target (or use the one marked on the map); Feint and maneuvers roll the test and the target resists from the card; falling and standing toggle Prone.",
       "Executar": "Run",
       "Rotulo": "Combat action",
       "Declara": "{nome} declares: {acao}.",
-      "Manobra": "Maneuver: {nome}"
+      "DeclaraAlvo": "{nome} declares: {acao} against {alvo}.",
+      "DeclaraMirar": "{nome} declares: {acao} at {alvo}.",
+      "ContraAlvo": "{acao} against {alvo}",
+      "Oposto": "{nome} uses {acao} against {alvo} ({pericia}, total {total}). {alvo} resists with {defesas}.",
+      "Ou": " or ",
+      "Resistir": "Resist with {pericia}",
+      "ResisteA": "Resist {nome}'s {acao}",
+      "JaRespondido": "This opposed test was already answered.",
+      "Resultado": "{acao}: result",
+      "Venceu": "{nome} wins {acao} against {alvo} ({placar}).",
+      "Resistiu": "{alvo} resists {nome}'s {acao} ({placar}): no effect.",
+      "Empatou": "Tie on {acao} ({placar}): no effect.",
+      "AplicarDano": "Apply {dano} damage to {alvo}",
+      "Efeito": {
+        "Fintar": "{nome} gets two step increases on the next attack against {alvo} (until the end of the next round).",
+        "Agarrar": "{alvo} is grappled: immobile, step reduction on attacks and attacks only with small weapons. {nome} has a hand busy and is overloaded.",
+        "Derrubar": "{alvo} is knocked prone.",
+        "Desarmar": "{alvo} drops a wielded item.",
+        "Empurrar": "{alvo} is pushed a few meters.",
+        "Quebrar": "{nome} hits an item of {alvo} and deals the attack damage to the object."
+      },
+      "EfeitoForte": {
+        "Derrubar": "Won by 5 or more: {alvo} takes {rb} impact damage (RB).",
+        "Desarmar": "Won by 5 or more: {nome} may take the item (free hand) or throw it.",
+        "Empurrar": "Won by 5 or more: {alvo} is off-balance (step reduction on the next test)."
+      }
     }
   }
 }
