@@ -18,6 +18,21 @@ export function dadoDoCritico(dados) {
   return Math.max(...base.map(faces), 6);
 }
 
+/**
+ * Rola o dado extra do crítico e guarda no teste (o total passa a somá-lo). Em
+ * ataques e testes opostos isso acontece sozinho, ANTES dos cards que dependem do
+ * total — senão "vence ... (16 × 7)" saía sem o dado do crítico.
+ */
+export async function rolarExtraDoCritico(roll) {
+  if (!roll?.resultado?.critico || roll.options.bonusCritico) return null;
+  const faces = dadoDoCritico(roll.dados);
+  const extra = await new Roll(`1d${faces}`).evaluate();
+  const { mostrarDados3D } = await import("./teste.mjs");
+  await mostrarDados3D(extra);
+  roll.options.bonusCritico = { dado: `d${faces}`, valor: extra.total };
+  return roll.options.bonusCritico;
+}
+
 async function rolarDadoDoCritico(_autor, dataset) {
   const mensagem = game.messages.get(dataset.mensagemId);
   const roll = mensagem?.rolls?.[0];
@@ -26,11 +41,8 @@ async function rolarDadoDoCritico(_autor, dataset) {
   if (!game.user.isGM && !ator?.isOwner) return;
   if (roll.options.bonusCritico) return void ui.notifications.info(game.i18n.localize("OP2.CriticoExtra.JaRolado"));
 
-  const faces = dadoDoCritico(roll.dados);
-  const extra = await new Roll(`1d${faces}`).evaluate();
-  const { mostrarDados3D, htmlDoTeste } = await import("./teste.mjs");
-  await mostrarDados3D(extra);
-  roll.options.bonusCritico = { dado: `d${faces}`, valor: extra.total };
+  await rolarExtraDoCritico(roll);
+  const { htmlDoTeste } = await import("./teste.mjs");
   const html = await htmlDoTeste(roll, ator);
   await comoMestre("op2AtualizarMensagem", { id: mensagem.id, content: html, rolls: [JSON.stringify(roll.toJSON())] });
   // O card "acerta X" daquele ataque passa a usar as duas rolagens mais altas.

@@ -213,7 +213,7 @@ async function publicarAtaque(ator, alvo, roll, { armado, dano = null, distancia
 async function calcularDanoDoAtaque(d, roll) {
   const { danoBaseDoRoll, duasMaiores } = await import("../dice/teste.mjs");
   const extra = roll.options?.bonusCritico?.valor ?? 0;
-  const total = roll.total + extra;
+  const total = roll.total; // já soma o dado do crítico
   const base = d.danoBase ? danoBaseDoRoll(roll, d.danoBase) : 0;
   const dano = d.acertou && d.danoBase ? Math.max(0, base + (d.danoBonus ?? 0)) : 0;
   let notaDano = "";

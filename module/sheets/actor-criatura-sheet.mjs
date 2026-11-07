@@ -113,6 +113,11 @@ export class CriaturaSheet extends NpcSheet {
         await roll.evaluate();
         await mostrarDados3D(roll);
         if (roll.precisaSelecao) roll.aplicarSelecao(roll.selecaoSugerida());
+        // Ataque crítico: o dado extra rola já (total e dano do card de ataque).
+        if (roll.resultado.critico) {
+          const { rolarExtraDoCritico } = await import("../dice/critico-extra.mjs");
+          await rolarExtraDoCritico(roll);
+        }
         await enviarParaChat(roll, ator, { pularDados3D: true });
         return roll;
       },

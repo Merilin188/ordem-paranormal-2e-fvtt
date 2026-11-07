@@ -168,6 +168,13 @@ export async function rolarTeste(ator, {
 
   // `semCard`: quem chamou publica o próprio card com os dados dentro (Examinar,
   // solicitação do mestre). A animação já aconteceu; o card não repete.
+  // Crítico em ataque ou teste oposto: o dado extra rola já, para o total comparado
+  // (e o dano) saírem certos nos cards seguintes.
+  if (roll.resultado.critico && (oposto || ["luta", "pontaria"].includes(chavePericia))) {
+    const { rolarExtraDoCritico } = await import("./critico-extra.mjs");
+    await rolarExtraDoCritico(roll);
+  }
+
   if (!semCard) await enviarParaChat(roll, ator, { pularDados3D: true, ocultoDoMestre });
 
   // Ajuda é para UMA rolagem: usada, acabou (spec §4.7 — custa a ação do aliado

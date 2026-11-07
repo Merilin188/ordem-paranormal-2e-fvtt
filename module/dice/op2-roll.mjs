@@ -105,6 +105,23 @@ export class OP2Roll extends Roll {
     return dados.length > MAX_DADOS_CONTADOS && this.contados.length === dados.length;
   }
 
+  /**
+   * Total do teste COM o dado extra do crítico ("soma mais uma rolagem à pontuação").
+   * Quem compara totais (teste oposto, ataque) lê daqui e já pega o valor final.
+   */
+  get total() {
+    const base = this._total;
+    if (base === undefined || base === null) return base;
+    return base + (this.options?.bonusCritico?.valor ?? 0);
+  }
+
+  /** Serializa o total SEM o extra: ao recarregar, o getter soma de novo. */
+  toJSON() {
+    const dados = super.toJSON();
+    dados.total = this._total;
+    return dados;
+  }
+
   /** Modificador fixo (lesões/traumas). */
   get modificador() {
     return this.options.modificador ?? 0;

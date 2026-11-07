@@ -271,6 +271,18 @@
   }
   .op2-declaracao__mestre { display: flex; gap: 0.4rem; button { flex: 1; border-radius: 0.3rem; } }
 
+  // Janelas de reação (defesa antes do ataque, Guardiã): as opções têm texto longo —
+  // uma por linha, com a altura do texto, em vez de espremidas lado a lado.
+  .op2-defesa-janela, .op2-guardia-janela {
+    .form-footer, footer {
+      display: flex; flex-direction: column; align-items: stretch; gap: 0.35rem;
+      button {
+        width: 100%; height: auto; min-height: 2rem; padding: 0.4rem 0.7rem; border-radius: 0;
+        white-space: normal; line-height: 1.25; justify-content: flex-start; text-align: left;
+      }
+    }
+  }
+
   // Escolha do pavor antes do teste
   .op2-pavor-escolha .op2-oculto { display: none; }
   .op2-pavor-opcoes { display: flex; flex-direction: column; gap: 0.45rem; margin-top: 0.5rem; }
