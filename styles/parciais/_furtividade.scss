@@ -90,6 +90,21 @@
     box-shadow: inset 0 0 160px 40px rgb(0 0 0 / 70%);
     &.ativa { opacity: 1; }
   }
+  // Furtividade nas Profundezas da Mata: batimento escuro-avermelhado nas bordas
+  // (duas batidas e uma pausa); mais rápido na fase das criaturas.
+  .op2-batimento {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0;
+    background: radial-gradient(ellipse at center, transparent 52%, rgb(70 0 12 / 38%) 80%, rgb(40 0 6 / 70%) 100%);
+    &.ativa { animation: op2-batimento 1.7s ease-out infinite; }
+    &.ativa.rapido { animation-duration: 1s; }
+  }
+  @keyframes op2-batimento {
+    0% { opacity: 0; }
+    8% { opacity: 0.9; }
+    18% { opacity: 0.25; }
+    27% { opacity: 0.7; }
+    45%, 100% { opacity: 0; }
+  }
   .op2-vinheta__nevoa {
     position: absolute; width: 70vmax; height: 70vmax; border-radius: 50%; opacity: 0.22; filter: blur(40px);
     background: radial-gradient(circle, rgb(170 180 190 / 70%), transparent 65%);
@@ -139,7 +154,7 @@
   @keyframes op2-enc-sair { to { opacity: 0; } }
 
   @media (prefers-reduced-motion: reduce) {
-    .op2-vinheta__nevoa, .op2-encontrado { animation: none !important; }
+    .op2-vinheta__nevoa, .op2-encontrado, .op2-batimento { animation: none !important; }
   }
 
   // Já agiu na rodada

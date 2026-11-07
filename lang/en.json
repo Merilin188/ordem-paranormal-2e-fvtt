@@ -1816,8 +1816,10 @@
       "SemDestino": "Could not find the character or the item."
     },
     "EfeitosCena": {
-      "Nome": "Scene with FX Bus effects",
-      "Dica": "Name (or id) of the scene that turns on FX Bus shake, blur and smear on the screen of everyone on it (players and GM). Leave empty to turn it off. Requires the FX Bus module."
+      "Nome": "Scene with FX Bus effects (Home)",
+      "Dica": "Name (or id) of the scene that turns on FX Bus shake, blur and smear on the screen of everyone on it (players and GM). Leave empty to turn it off. Requires the FX Bus module.",
+      "NomeProfundezas": "Watching-forest scene",
+      "DicaProfundezas": "Name (or id) of the scene with fireflies, eyes and silhouettes in the woods, lighter shake and smear (no blur) and, during stealth, a more watchful forest and a heartbeat on the edges. Leave empty to turn off."
     },
     "Dados3D": {
       "Nome": "Standard 3D dice",

@@ -28,3 +28,28 @@ test("vagalumes: cor pelo peso e brilho entre 0 e 1", async () => {
     assert.ok(b >= 0.25 && b <= 1);
   }
 });
+
+test("presets: Home e Profundezas; profundezas sem desfoque e mais leve", async () => {
+  const { presetDaCena, EFEITOS_PROFUNDEZAS } = await import("../ui/efeitos-cena.mjs");
+  const conf = { home: "Home", profundezas: "Profundezas da Mata" };
+  assert.equal(presetDaCena({ name: "Home", id: "a" }, conf), "home");
+  assert.equal(presetDaCena({ name: "profundezas da mata", id: "b" }, conf), "profundezas");
+  assert.equal(presetDaCena({ name: "Limiar da Mata", id: "c" }, conf), null);
+  assert.ok(!EFEITOS_PROFUNDEZAS.some((e) => e.action.includes("Blur")));
+  const shake = (lista) => lista.find((e) => e.action === "fx.screenShake.start").intensityPx;
+  const smear = (lista) => lista.find((e) => e.action === "fx.screenSmear.start").maxStrength;
+  assert.ok(shake(EFEITOS_PROFUNDEZAS) < shake(EFEITOS_DA_ENTRADA));
+  assert.ok(smear(EFEITOS_PROFUNDEZAS) < smear(EFEITOS_DA_ENTRADA));
+});
+
+test("mata: envelope sobe, fica e some; furtividade acelera", async () => {
+  const { envelope, ritmoDaMata } = await import("../ui/efeitos-cena.mjs");
+  const tempos = { entrada: 1, fica: 2, saida: 1 };
+  assert.equal(envelope(0.5, tempos), 0.5);
+  assert.equal(envelope(2, tempos), 1);
+  assert.equal(envelope(3.5, tempos), 0.5);
+  assert.equal(envelope(5, tempos), 0);
+  assert.equal(ritmoDaMata({ ativa: false }).procuram, false);
+  assert.ok(ritmoDaMata({ ativa: true, fase: "personagens" }).olhos > ritmoDaMata({ ativa: false }).olhos);
+  assert.equal(ritmoDaMata({ ativa: true, fase: "criaturas" }).procuram, true);
+});
