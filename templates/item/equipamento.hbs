@@ -22,6 +22,11 @@
         {{#unless editavel}}disabled{{/unless}}>
       <span>{{localize "OP2.Equipamento.Arma"}}</span>
     </label>
+    <label class="op2-campo op2-campo--inline">
+      <input type="checkbox" name="system.distancia" {{#if sistema.distancia}}checked{{/if}}
+        {{#unless editavel}}disabled{{/unless}}>
+      <span>{{localize "OP2.Equipamento.Distancia"}}</span>
+    </label>
     <label class="op2-campo">
       <span>{{localize "OP2.Equipamento.DanoBonus"}}</span>
       <input type="number" name="system.danoBonus" value="{{sistema.danoBonus}}" {{#unless editavel}}disabled{{/unless}}>

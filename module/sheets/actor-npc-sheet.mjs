@@ -23,6 +23,7 @@ export class NpcSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       abrirSeletor: NpcSheet.#abrirSeletor,
       adicionarPericia: NpcSheet.#adicionarPericia,
       removerPericia: NpcSheet.#removerPericia,
+      definirRecurso: NpcSheet.#definirRecurso,
     },
   };
 
@@ -73,6 +74,14 @@ export class NpcSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         ? Array.from({ length: max }, (_, i) => ({ n: i + 1, cheio: i < recurso.value }))
         : null,
     };
+  }
+
+  /** Clicar no traço N define o recurso em N; clicar no atual desce para N-1 (igual à ficha do personagem). */
+  static async #definirRecurso(_evento, alvo) {
+    const { recurso, valor } = alvo.dataset;
+    const atual = this.actor.system.recursos[recurso].value;
+    const novo = Number(valor) === atual ? Number(valor) - 1 : Number(valor);
+    await this.actor.update({ [`system.recursos.${recurso}.value`]: Math.max(0, novo) });
   }
 
   static async #rolar(evento, alvo) {

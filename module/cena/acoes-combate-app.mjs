@@ -24,6 +24,8 @@ const MANOBRAS = new Set(["Agarrar", "Derrubar", "Desarmar", "Empurrar", "Quebra
  */
 export const OPOSTAS = {
   Fintar: { pericia: "enganacao", defesas: ["intuicao"] },
+  // "Uma perícia coerente": quem atrapalha escolhe.
+  Atrapalhar: { pericia: null, defesas: ["percepcao"] },
   ...Object.fromEntries([...MANOBRAS].map((m) => [m, { pericia: "luta", defesas: ["acrobacia", "luta"] }])),
 };
 /** Ações que pedem alvo (as opostas e Mirar). */
@@ -48,7 +50,7 @@ export function acoesDeCombate(guia = GUIA) {
 
 const forte = (t) => `<strong>${esc(t)}</strong>`;
 
-async function declarar(ator, titulo, texto, alvo = null) {
+async function declarar(ator, titulo, texto, alvo = null, nota = "") {
   const frase = alvo
     ? L(titulo === "Mirar" ? "DeclaraMirar" : "DeclaraAlvo", { nome: forte(ator.name), acao: forte(titulo), alvo: forte(alvo.name) })
     : L("Declara", { nome: forte(ator.name), acao: forte(titulo) });
@@ -57,6 +59,7 @@ async function declarar(ator, titulo, texto, alvo = null) {
     content: `<div class="op2 op2-card op2-acao-combate-card">
       <header class="op2-card__topo"><span class="op2-tag op2-tag--pequena"><i class="fa-solid fa-swords"></i> ${esc(L("Rotulo"))}</span></header>
       <p class="op2-card__texto">${frase}</p>
+      ${nota ? `<p class="op2-prontidao-nota">${esc(nota)}</p>` : ""}
       <p class="op2-acao-combate-card__regra">${esc(texto)}</p></div>`,
     flags: { [SYSTEM_ID]: { tipo: "acao-combate", atorId: ator.id, acao: titulo, alvoId: alvo?.id ?? null } },
   });
@@ -67,15 +70,21 @@ async function declarar(ator, titulo, texto, alvo = null) {
  * de defesa, para o dono do alvo (o mestre, no caso de NPC e criatura).
  */
 async function acaoOposta(ator, titulo, texto, alvo) {
-  const { pericia, defesas } = OPOSTAS[titulo];
+  const { defesas } = OPOSTAS[titulo];
+  let { pericia } = OPOSTAS[titulo];
   const { rolarTeste, rotuloDePericia } = await import("../dice/teste.mjs");
+  if (!pericia) {
+    const { escolherPericiaSimples } = await import("../ui/ferramentas-testes.mjs");
+    pericia = await escolherPericiaSimples(ator, L("QualPericia", { acao: titulo }));
+    if (!pericia) return null;
+  }
   const roll = await rolarTeste(ator, {
     chavePericia: pericia, oposto: true, contexto: L("ContraAlvo", { acao: titulo, alvo: alvo.name }),
   });
   if (!roll) return null;
   const nomes = defesas.map((d) => rotuloDePericia(d));
   const botoes = defesas.map((d, i) => `<button type="button" class="op2-botao op2-botao--pequeno" data-op2-acao="resistir-acao"
-      data-ator-id="${alvo.id}" data-agente-id="${ator.id}" data-acao="${esc(titulo)}" data-pericia="${d}"
+      data-ator-id="${alvo.id}" data-ator-uuid="${alvo.uuid}" data-agente-id="${ator.id}" data-acao="${esc(titulo)}" data-pericia="${d}"
       data-total="${roll.total}" data-ra="${roll.ra}" data-rb="${roll.rb}">${esc(L("Resistir", { pericia: nomes[i] }))}</button>`).join("");
   await ChatMessage.create({
     speaker: ChatMessage.getSpeaker({ actor: ator }),
@@ -127,10 +136,18 @@ async function resistirAcao(defensor, dataset) {
       ? L("Venceu", { nome: agente.name, acao: titulo, alvo: defensor.name, placar })
       : L("Resistiu", { nome: agente.name, acao: titulo, alvo: defensor.name, placar });
   const efeito = d.venceu ? efeitoDaAcao(titulo, { nome: agente.name, alvo: defensor.name, rb, forte: d.forte }) : "";
-  // Derrubar vencendo por 5+: dano de impacto igual à RB, num clique.
-  const dano = d.venceu && d.forte && titulo === "Derrubar" && rb > 0
-    ? `<div class="op2-card__acoes"><button type="button" class="op2-botao op2-botao--pequeno" data-op2-acao="aplicar-dano-alvo"
-        data-ator-id="${defensor.id}" data-quantidade="${rb}">${esc(L("AplicarDano", { dano: rb, alvo: defensor.name }))}</button></div>`
+  // Atrapalhar vencido: a redução já entra nos testes do alvo até o fim da rodada.
+  if (d.venceu && titulo === "Atrapalhar") {
+    const { reduzirNaRodada } = await import("./reducoes.mjs");
+    await reduzirNaRodada(defensor, { motivo: L("MotivoAtrapalhar", { nome: agente.name }) });
+  }
+  // Derrubar vencido: Caído num clique; por 5+, junto com o dano de impacto (RB).
+  const danoDerrubar = d.forte ? rb : 0;
+  const dano = d.venceu && titulo === "Derrubar"
+    ? `<div class="op2-card__acoes"><button type="button" class="op2-botao op2-botao--pequeno op2-botao--perigo" data-op2-acao="derrubar-aplicar"
+        data-ator-id="${defensor.id}" data-ator-uuid="${defensor.uuid}" data-quantidade="${danoDerrubar}">${esc(danoDerrubar
+          ? L("AplicarDanoCaido", { dano: danoDerrubar, alvo: defensor.name })
+          : L("AplicarCaido", { alvo: defensor.name }))}</button></div>`
     : "";
   await ChatMessage.create({
     speaker: ChatMessage.getSpeaker({ actor: defensor }),
@@ -143,8 +160,36 @@ async function resistirAcao(defensor, dataset) {
   return { roll, ...d };
 }
 
+/** Derrubar: o alvo fica Caído (e sofre o dano de impacto, se venceu por 5 ou mais). */
+async function derrubarAplicar(ator, dataset) {
+  const quantidade = Number(dataset.quantidade) || 0;
+  if (!game.user.isGM && !ator.isOwner) return void ui.notifications.warn(game.i18n.localize("OP2.Aviso.SemPermissao"));
+  if (quantidade > 0) {
+    const { aplicarDano } = await import("../dice/falha-critica.mjs");
+    await aplicarDano(ator, quantidade, "pv");
+  }
+  const { definirCondicao } = await import("./ferimentos.mjs");
+  await definirCondicao(ator, "caido", true);
+  ui.notifications.info(L("CaidoAplicado", { alvo: ator.name }));
+}
+
+/** Erguer-se: ação padrão (não age mais no turno) ou livre (−1 passo nos testes da rodada). */
+async function comoSeErgue(ator) {
+  return foundry.applications.api.DialogV2.wait({
+    window: { title: `${L("ErguerTitulo")} — ${ator.name}`, icon: "fa-solid fa-person-arrow-up-from-line" },
+    classes: ["op2", "op2-ferr-dialogo"],
+    content: `<p>${esc(L("ErguerPergunta"))}</p>`,
+    buttons: [
+      { action: "padrao", label: L("ErguerPadrao"), icon: "fa-solid fa-hourglass-end", default: true },
+      { action: "livre", label: L("ErguerLivre"), icon: "fa-solid fa-bolt" },
+    ],
+    rejectClose: false,
+  });
+}
+
 export function registrarAcoesCombate() {
   registrarAcaoDeChat("resistir-acao", resistirAcao);
+  registrarAcaoDeChat("derrubar-aplicar", derrubarAplicar);
 }
 
 /** Executa a ação: declara e roda a automação dela. */
@@ -160,6 +205,16 @@ export async function executarAcaoDeCombate(ator, titulo, texto) {
     if (OPOSTAS[titulo]) return acaoOposta(ator, titulo, texto, alvo);
     return declarar(ator, titulo, texto, alvo);
   }
+  if (titulo === "Erguer-se") {
+    const modo = await comoSeErgue(ator);
+    if (!modo) return null;
+    await declarar(ator, titulo, texto, null, L(modo === "livre" ? "ErguerNotaLivre" : "ErguerNotaPadrao", { nome: ator.name }));
+    if (modo === "livre") {
+      const { reduzirNaRodada } = await import("./reducoes.mjs");
+      await reduzirNaRodada(ator, { motivo: L("MotivoErguer") });
+    }
+    return ator.toggleStatusEffect("caido", { active: false });
+  }
   await declarar(ator, titulo, texto);
   if (titulo === "Defender-se") {
     // Vale para um ataque desta rodada: o Esquivar do card consome a declaração.
@@ -169,7 +224,6 @@ export async function executarAcaoDeCombate(ator, titulo, texto) {
     await ator.toggleStatusEffect("defendendo", { active: true });
     return leituraDeCombate(ator);
   }
-  if (titulo === "Erguer-se") return ator.toggleStatusEffect("caido", { active: false });
   if (titulo === "Jogar-se no chão (livre)") return ator.toggleStatusEffect("caido", { active: true });
   return null;
 }

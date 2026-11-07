@@ -102,13 +102,13 @@ export function alvosDaCenaAtiva({ exceto, comNpcs = false } = {}) {
  * Quem pode ser alvo agora: os combatentes do combate em curso, os tokens visíveis da
  * cena e o roster da investigação. Sem investigação aberta, o combate ainda acha
  * alvos (achado em uso: o ataque da criatura dizia que não havia ninguém).
- * Um ator por id, como os cards de chat resolvem (`game.actors.get`).
+ * Um por uuid: duas Crias do mesmo ator (tokens sem vínculo) são dois alvos.
  */
 export function alvosDisponiveis({ exceto, tipos = ["personagem", "npc", "criatura"] } = {}) {
   const vistos = new Map();
   const somar = (ator) => {
-    if (!ator || !tipos.includes(ator.type) || ator.id === exceto?.id || vistos.has(ator.id)) return;
-    vistos.set(ator.id, ator);
+    if (!ator || !tipos.includes(ator.type) || ator.uuid === exceto?.uuid || vistos.has(ator.uuid)) return;
+    vistos.set(ator.uuid, ator);
   };
   for (const c of game.combat?.combatants ?? []) {
     if (c.defeated || (c.hidden && !game.user?.isGM)) continue;

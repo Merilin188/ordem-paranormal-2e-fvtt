@@ -23,18 +23,26 @@ export async function atacar(ator, { alvoUuid, armado, rapido = false } = {}) {
   const alvo = alvoUuid ? await fromUuid(alvoUuid) : await escolherAlvo(ator);
   if (!alvo) return null;
 
-  const usaArma = armado ?? await perguntarSeArmado(game.i18n.localize("OP2.Combate.Atacar"));
-  if (usaArma === null) return null;
+  // Com qual arma (ou desarmado) e qual perícia: à distância sugere Pontaria.
+  const escolha = armado === false ? { arma: null, pericia: "luta" } : await escolherArma(ator);
+  if (!escolha) return null;
+  const { arma, pericia } = escolha;
+  const distancia = pericia === "pontaria";
+  const nome = arma?.name ?? game.i18n.localize("OP2.Combate.Desarmado");
 
-  const defesa = await perguntarDefesa(ator, alvo, { distancia: false, nome: game.i18n.localize("OP2.Combate.Atacar") });
+  const defesa = await perguntarDefesa(ator, alvo, { distancia, nome });
   const roll = await rolarTeste(ator, {
-    chavePericia: "luta",
+    chavePericia: pericia,
     ...(defesa ? { oposto: true } : { dt: 7 }),
     rapido,
+    arma,
     contexto: game.i18n.format("OP2.Combate.AtaqueContexto", { alvo: alvo.name }),
   });
   if (!roll) return null;
-  await publicarAtaque(ator, alvo, roll, { armado: usaArma, defesa, dano: { base: usaArma ? "ra" : "rb", bonus: usaArma ? bonusDeArma(ator) : 0 } });
+  await publicarAtaque(ator, alvo, roll, {
+    armado: Boolean(arma), defesa, distancia, nome,
+    dano: arma ? { base: "ra", bonus: arma.system.danoBonus ?? 0 } : { base: "rb", bonus: 0 },
+  });
   return roll;
 }
 
@@ -153,6 +161,7 @@ async function publicarAtaque(ator, alvo, roll, { armado, dano = null, distancia
     acertou,
     dano: acertou ? valorDano : 0,
   };
+  dados.alvoUuid = alvo.uuid;
   const conteudo = await renderizar(`systems/${SYSTEM_ID}/templates/chat/ataque.hbs`, dados);
 
   await ChatMessage.create({
@@ -249,7 +258,7 @@ export async function rolarDefesaDoCard(defensor, dataset) {
 function abrirDefesaAoNascer(mensagem) {
   const f = mensagem.flags?.[SYSTEM_ID];
   if (f?.tipo !== "ataque" || !f.ataque?.defesa || f.respondido) return;
-  const defensor = game.actors.get(f.ataque.alvoId);
+  const defensor = (f.ataque.alvoUuid && fromUuidSync(f.ataque.alvoUuid)) || game.actors.get(f.ataque.alvoId);
   if (!defensor || responsavelPor(defensor)?.id !== game.user.id) return;
   const a = f.ataque;
   void rolarDefesaDoCard(defensor, {
@@ -263,25 +272,102 @@ export function registrarDefesa() {
   Hooks.on("createChatMessage", abrirDefesaAoNascer);
 }
 
-/** Modificador de dano da melhor arma equipada (0 sem arma). */
-function bonusDeArma(ator) {
-  const armas = ator?.items?.filter((i) => i.type === "equipamento" && i.system.arma && i.system.equipado) ?? [];
-  return armas.reduce((max, i) => Math.max(max, i.system.danoBonus ?? 0), 0);
-}
-
 function textoDoDesfecho({ vencedor, atacante, defensor, dano }) {
   if (vencedor === "atacante") return game.i18n.format("OP2.Combate.Venceu", { vencedor: atacante.name, perdedor: defensor.name, dano });
   return game.i18n.format("OP2.Combate.DefendeuTexto", { defensor: defensor.name });
 }
 
+/** Armas que o ator carrega: o item é arma; à distância pelo campo ou pelo nome. */
+const NOME_DISTANCIA = /\b(arco|besta|pistola|rev[oó]lver|rifle|espingarda|fuzil|carabina|funda|estilingue|zarabatana|dardos?)\b/i;
+export function armaADistancia(item) {
+  return Boolean(item?.system?.distancia) || NOME_DISTANCIA.test(item?.name ?? "");
+}
+
 /**
- * Quem apanha. A mira do Foundry manda: marcou um token, é nele — sem lista, sem
- * exigir que esteja na investigação. Sem marcação, oferece quem está no combate, na
- * cena ou na investigação.
+ * Agredir: escolhe a arma (ou desarmado) e a perícia. Corpo a corpo sugere Luta; à
+ * distância, Pontaria — o jogador pode trocar. Devolve `{ arma, pericia }` ou null.
+ */
+async function escolherArma(ator) {
+  const armas = (ator.items?.filter((i) => i.type === "equipamento" && i.system.arma) ?? [])
+    .sort((a, b) => Number(b.system.equipado) - Number(a.system.equipado));
+  const esc = (t) => foundry.utils.escapeHTML(String(t ?? ""));
+  const padrao = armas.find((a) => a.system.equipado) ?? armas[0] ?? null;
+  const opcoes = [
+    ...armas.map((a) => `<option value="${a.id}" data-distancia="${armaADistancia(a)}" ${a === padrao ? "selected" : ""}>${esc(a.name)}${
+      a.system.danoBonus ? ` (RA+${a.system.danoBonus})` : " (RA)"}${a.system.equipado ? "" : ` — ${esc(game.i18n.localize("OP2.Equipamento.NaoEquipado"))}`}</option>`),
+    `<option value="" data-distancia="false" ${padrao ? "" : "selected"}>${esc(game.i18n.localize("OP2.Combate.Desarmado"))}</option>`,
+  ].join("");
+  const periciaPadrao = armaADistancia(padrao) ? "pontaria" : "luta";
+  const pericias = ["luta", "pontaria"].map((p) => `<option value="${p}" ${p === periciaPadrao ? "selected" : ""}>${esc(rotuloDePericia(p))}</option>`).join("");
+  const resposta = await foundry.applications.api.DialogV2.prompt({
+    window: { title: game.i18n.localize("OP2.Combate.Atacar"), icon: "fa-solid fa-hand-fist" },
+    classes: ["op2", "op2-ferr-dialogo"],
+    content: `<div class="form-group"><label>${esc(game.i18n.localize("OP2.Combate.Arma"))}</label><select name="arma">${opcoes}</select></div>
+      <div class="form-group"><label>${esc(game.i18n.localize("OP2.Combate.PericiaAtaque"))}</label><select name="pericia">${pericias}</select></div>
+      <p class="op2-ajuda">${esc(game.i18n.localize("OP2.Combate.ArmaAjuda"))}</p>`,
+    render: (_evento, dialogo) => {
+      const raiz = dialogo.element ?? dialogo;
+      const arma = raiz.querySelector?.("select[name=arma]");
+      const pericia = raiz.querySelector?.("select[name=pericia]");
+      arma?.addEventListener("change", () => {
+        pericia.value = arma.selectedOptions[0]?.dataset.distancia === "true" ? "pontaria" : "luta";
+      });
+    },
+    ok: { callback: (_e, botao) => ({ armaId: botao.form.elements.arma.value, pericia: botao.form.elements.pericia.value }) },
+    rejectClose: false,
+  });
+  if (!resposta) return null;
+  return { arma: resposta.armaId ? ator.items.get(resposta.armaId) : null, pericia: resposta.pericia };
+}
+
+/**
+ * O jogador clica no token do alvo ("Clique contra quem quer realizar sua ação").
+ * Vale qualquer token visível — inclusive um aliado, em conflito entre jogadores.
+ * Esc ou o botão direito cancelam. Sem mapa, cai na lista.
+ */
+function alvoPorClique(ator) {
+  const vista = globalThis.canvas;
+  const elemento = vista?.ready ? vista.app?.view : null;
+  if (!elemento || typeof vista.canvasCoordinatesFromClient !== "function") return Promise.resolve(undefined);
+  return new Promise((resolve) => {
+    const aviso = ui.notifications.info(game.i18n.localize("OP2.Combate.CliqueAlvo"), { permanent: true });
+    const fim = (valor) => {
+      elemento.removeEventListener("pointerdown", clique, true);
+      document.removeEventListener("keydown", tecla, true);
+      clearTimeout(timer);
+      try { ui.notifications.remove(aviso); } catch { aviso?.remove?.(); }
+      resolve(valor);
+    };
+    const tecla = (e) => { if (e.key === "Escape") { e.preventDefault(); fim(null); } };
+    const clique = (e) => {
+      if (e.button === 2) return fim(null);
+      if (e.button !== 0) return;
+      const p = vista.canvasCoordinatesFromClient({ x: e.clientX, y: e.clientY });
+      const tokens = (vista.tokens?.placeables ?? []).filter((t) => t.visible !== false && t.actor && t.bounds?.contains(p.x, p.y));
+      const token = tokens.at(-1);
+      if (!token) return;
+      if (token.actor.uuid === ator.uuid) return void ui.notifications.warn(game.i18n.localize("OP2.Combate.CliqueProprio"));
+      token.setTarget?.(true, { releaseOthers: true, groupSelection: false });
+      fim(token.actor);
+    };
+    const timer = setTimeout(() => fim(null), 120000);
+    elemento.addEventListener("pointerdown", clique, true);
+    document.addEventListener("keydown", tecla, true);
+  });
+}
+
+/**
+ * Quem apanha. A mira do Foundry manda: marcou um token, é nele. Sem marcação, o
+ * jogador clica no token do alvo; sem mapa, escolhe da lista de quem está no combate,
+ * na cena ou na investigação.
  */
 export async function escolherAlvo(ator, titulo = game.i18n.localize("OP2.Combate.Atacar")) {
   const marcados = alvosMarcados({ exceto: ator });
   if (marcados.length === 1) return marcados[0];
+  if (!marcados.length) {
+    const clicado = await alvoPorClique(ator);
+    if (clicado !== undefined) return clicado;
+  }
 
   const candidatos = marcados.length > 1 ? marcados : alvosDisponiveis({ exceto: ator });
   if (!candidatos.length) {
@@ -301,22 +387,4 @@ export async function escolherAlvo(ator, titulo = game.i18n.localize("OP2.Combat
     rejectClose: false,
   });
   return uuid ? fromUuid(uuid) : null;
-}
-
-/**
- * Arma na mão decide entre RA e RB (spec §8.1). É pergunta, não leitura do
- * inventário: o playtest não define "empunhando", e a mesa resolve isso narrando.
- */
-async function perguntarSeArmado(titulo) {
-  const resposta = await foundry.applications.api.DialogV2.wait({
-    window: { title: titulo },
-    content: `<p>${game.i18n.localize("OP2.Combate.ArmadoPergunta")}</p>`,
-    buttons: [
-      { action: "sim", label: "OP2.Combate.Armado", icon: "fa-solid fa-khanda" },
-      { action: "nao", label: "OP2.Combate.Desarmado", icon: "fa-solid fa-hand-fist" },
-    ],
-    rejectClose: false,
-  });
-  if (!resposta) return null;
-  return resposta === "sim";
 }

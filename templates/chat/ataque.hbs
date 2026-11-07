@@ -11,7 +11,7 @@
   {{#if defesa}}
   <div class="op2-card__acoes">
     <button type="button" class="op2-botao op2-botao--pequeno" data-op2-acao="defender-ataque"
-      data-ator-id="{{alvoId}}" data-atacante-id="{{atacanteId}}" data-total="{{total}}"
+      data-ator-id="{{alvoId}}" data-ator-uuid="{{alvoUuid}}" data-atacante-id="{{atacanteId}}" data-total="{{total}}"
       data-ra="{{ra}}" data-rb="{{rb}}" data-dano-base="{{danoBase}}" data-dano-bonus="{{danoBonus}}" data-pericia="{{defesa.pericia}}">
       <i class="fa-solid fa-shield"></i> {{localize "OP2.Defesa.Rolar"}}
     </button>
@@ -19,7 +19,7 @@
   {{else if acertou}}
   <div class="op2-card__acoes">
     <button type="button" class="op2-botao op2-botao--pequeno op2-botao--perigo" data-op2-acao="dano-ataque"
-      data-ator-id="{{alvoId}}" data-quantidade="{{dano}}">
+      data-ator-id="{{alvoId}}" data-ator-uuid="{{alvoUuid}}" data-quantidade="{{dano}}">
       {{localize "OP2.Combate.AplicarDano" nome=alvoNome dano=dano}}
     </button>
   </div>

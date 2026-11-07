@@ -165,11 +165,12 @@ function ligar(elemento) {
       // currentTarget zera ao fim do dispatch: guardamos o botão antes do primeiro await.
       const clicado = evento.currentTarget;
       clicado.dataset.mensagemId ??= clicado.closest("[data-message-id]")?.dataset.messageId;
-      const { op2Acao, atorId } = clicado.dataset;
+      const { op2Acao, atorId, atorUuid } = clicado.dataset;
       const acao = ACOES[op2Acao];
       if (!acao) return;
 
-      const ator = game.actors.get(atorId);
+      // Token sem vínculo (duas Crias do mesmo ator): o uuid aponta o token certo.
+      const ator = (atorUuid && fromUuidSync(atorUuid)) || game.actors.get(atorId);
       if (!ator) return void ui.notifications.warn(game.i18n.localize("OP2.Aviso.AtorAusente"));
 
       clicado.disabled = true;

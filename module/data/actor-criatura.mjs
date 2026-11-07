@@ -33,6 +33,9 @@ export class CriaturaData extends NpcData {
       estrategia: new HTMLField({ required: true, initial: "", blank: true }),
     };
   }
+
+  /** A criatura tem todas as perícias: a da lista é a treinada; rola com o atributo dela. */
+  get pareiaPericias() { return true; }
 }
 
 export { dadosDoAtaque, danoDoAtaque } from "./ataque-criatura.mjs";

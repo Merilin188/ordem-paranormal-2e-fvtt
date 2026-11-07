@@ -31,9 +31,13 @@ import {
  */
 export async function rolarTeste(ator, {
   chavePericia, chaveAtributo, dt, oposto = false, semDT = false, contexto, rapido = false,
-  semCard = false, dadosExtras = [], ocultoDoMestre = false, passos = null,
+  semCard = false, dadosExtras = [], ocultoDoMestre = false, passos = null, arma = undefined,
 } = {}) {
   const sistema = ator.system;
+  // Redução até o fim da rodada (Erguer-se livre, Atrapalhar): desce o dado da perícia.
+  const { reducaoDoTeste } = await import("../cena/reducoes.mjs");
+  const reducao = await reducaoDoTeste(ator);
+  if (reducao.passos) passos = { ...(passos ?? {}), pericia: (passos?.pericia ?? 0) - reducao.passos };
   const pericia = sistema.resolverChave(chavePericia);
   if (!pericia) {
     ui.notifications.error(game.i18n.format("OP2.Aviso.PericiaDesconhecida", { chave: chavePericia }));
@@ -73,6 +77,7 @@ export async function rolarTeste(ator, {
   const notasDeHabilidade = (rapido ? [instintoAtivo(ator)?.id] : config.habilidades ?? [])
     .map((id) => ator.items?.get(id)).filter((i) => i?.system?.automacao === "instinto")
     .map((i) => ({ tipo: "instinto", habilidade: i.name }));
+  notasDeHabilidade.push(...reducao.notas);
   // Ajuda do aliado usada neste teste: o card diz de quem veio (Mentoria, se ele tem).
   if (base.ajuda?.passos) notasDeHabilidade.push(notaDaAjuda(base.ajuda));
 
@@ -112,7 +117,8 @@ export async function rolarTeste(ator, {
     componentes.push({ chave: `plano.${i}`, rotulo: game.i18n.localize("OP2.Poder.PlanoTitulo"), tipo: "extra", dado: "d6" });
   }
   // Arma com crítico facilitado (espada: dois valores 5+) nos testes de ataque.
-  const armaCritico = ["luta", "pontaria"].includes(chavePericia) ? melhorArma(ator)?.system?.criticoMinimo : 0;
+  const armaCritico = ["luta", "pontaria"].includes(chavePericia)
+    ? (arma === undefined ? melhorArma(ator) : arma)?.system?.criticoMinimo : 0;
 
   const roll = OP2Roll.paraComponentes(componentes, {
     criticoMinimo: armaCritico || 0,
@@ -255,6 +261,7 @@ function notasDeAjuste(ajustes = []) {
     if (a.tipo === "mentoria") return L("MentoriaNota", { nome: a.nome, de: a.de, para: a.para });
     if (a.tipo === "mentoriaRecusada") return L("MentoriaRecusada", { nome: a.nome, valor: a.valor });
     if (a.tipo === "instinto") return L("InstintoNota", { habilidade: a.habilidade });
+    if (a.tipo === "reducao") return L("ReducaoNota", { motivo: a.motivo, passos: a.passos });
     if (a.tipo === "ajuda") return a.mentoria
       ? L("AjudaNotaMentoria", { mentoria: a.mentoria, nome: a.de, passos: a.passos })
       : L("AjudaNota", { nome: a.de, passos: a.passos });

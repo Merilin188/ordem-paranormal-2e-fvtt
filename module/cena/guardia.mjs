@@ -78,6 +78,7 @@ async function trocarAlvo({ mensagemId, guardiaId }) {
   const ataque = {
     ...f.ataque,
     alvoId: guardia.id,
+    alvoUuid: guardia.uuid,
     alvoNome: guardia.name,
     texto: game.i18n.format("OP2.Combate.Acertou", { atacante: atacante?.name ?? "", alvo: guardia.name, total: f.ataque.total }),
     guardiaNota: P("GuardiaTrocou", { guardia: guardia.name, alvo: alvoAntigo?.name ?? "" }),

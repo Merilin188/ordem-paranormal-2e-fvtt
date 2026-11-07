@@ -6,6 +6,7 @@
  */
 import { campoAtributos, campoRecurso, campoDado } from "./campos.mjs";
 import { faces } from "../dice/escada.mjs";
+import { PERICIAS } from "../config.mjs";
 
 export class NpcData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
@@ -49,8 +50,21 @@ export class NpcData extends foundry.abstract.TypeDataModel {
     if (atributo) return { dado: atributo.dadoEfetivo, valor: atributo.valor, tipo: "atributo", chave };
 
     const pericia = this.pericias[chave];
-    if (pericia) return { dado: pericia.dadoEfetivo, valor: pericia.valor, tipo: "atributo", chave };
+    if (pericia) return { dado: pericia.dadoEfetivo, valor: pericia.valor, tipo: this.pareiaPericias ? "pericia" : "atributo", chave };
 
+    // Perícia do sistema que a ficha não lista: todo mundo tem todas, sem treino é d4
+    // — e rola com o atributo dela (a Intuição da criatura no Fintar, por exemplo).
+    if (PERICIAS[String(chave).split(".")[0]]) return { dado: "d4", valor: 4, tipo: "pericia", chave };
     return null;
+  }
+
+  /** NPC: perícia declarada é dado solo (spec §10.1). A criatura sobrescreve. */
+  get pareiaPericias() { return false; }
+
+  /** Atributo da perícia (o mesmo da ficha de personagem); Aptidão é Mente. */
+  atributoDe(chave) {
+    const base = String(chave).split(".")[0];
+    if (base.startsWith("aptidao")) return "mente";
+    return PERICIAS[base]?.atributo ?? null;
   }
 }

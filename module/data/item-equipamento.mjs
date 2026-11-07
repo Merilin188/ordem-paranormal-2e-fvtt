@@ -15,6 +15,8 @@ export class EquipamentoData extends foundry.abstract.TypeDataModel {
 
       /** Armas mudam o dano de RB para RA no combate corpo a corpo (spec §8.1). */
       arma: new BooleanField({ required: true, initial: false }),
+      /** Arma à distância: o Agredir sugere Pontaria (sem marcar, o nome decide: arco, pistola…). */
+      distancia: new BooleanField({ required: true, initial: false }),
       /** Modificador de dano da arma: dano = RA + modificador. */
       danoBonus: new NumberField({ required: true, initial: 0, integer: true, nullable: false }),
       /** Reduz uma perícia em N passos enquanto equipado (elmo: Percepção; cota de malha: Furtividade). */

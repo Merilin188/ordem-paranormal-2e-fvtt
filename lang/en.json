@@ -181,7 +181,8 @@
       "ArmaduraDica": "conta quando o item está equipado",
       "CriticoMinimo": "Crítico a partir de (0 = padrão)",
       "Escudo": "Escudo (reduz a RB do dano quando perde com 7+)",
-      "Penalidade": "Reduz a perícia (passos)"
+      "Penalidade": "Reduz a perícia (passos)",
+      "Distancia": "Ranged weapon (Aim)"
     },
     "Item": {
       "Novo": "New {tipo}",
@@ -823,8 +824,6 @@
       "Defender": "Defend",
       "Alvo": "Attack target (target on the map to skip this)",
       "SemAlvos": "There is no other character, NPC or creature in the combat, the scene or the investigation to attack.",
-      "ArmadoPergunta": "Are you wielding a weapon? Armed, damage is HR; unarmed, LR.",
-      "Armado": "Armed (HR)",
       "Desarmado": "Unarmed (LR)",
       "AtaqueContexto": "Attack against {alvo}",
       "DefesaContexto": "Defense against {atacante}",
@@ -846,7 +845,12 @@
       "Acertou": "{atacante} hits {alvo} (total {total} against DC 7).",
       "Errou": "{atacante} misses {alvo} (total {total} against DC 7).",
       "AtaqueDefendido": "{atacante} attacks {alvo} (total {total}). {alvo} defends: {defesa}.",
-      "DefendeuTexto": "{defensor} defends: takes no damage and deals none."
+      "DefendeuTexto": "{defensor} defends: takes no damage and deals none.",
+      "CliqueAlvo": "Click whoever you want to act against (Esc cancels).",
+      "CliqueProprio": "That is your own token: click the target.",
+      "Arma": "Weapon",
+      "PericiaAtaque": "Attack skill",
+      "ArmaAjuda": "With a weapon, damage is RA (+ its modifier); unarmed, RB. Melee uses Fighting, ranged uses Aim — you can change it."
     },
     "Impeto": {
       "Titulo": "Momentum",
@@ -1385,7 +1389,8 @@
       "GuardiaTrocou": "Guardian: {guardia} steps in front of {alvo} and becomes the target.",
       "GuardiaTarde": "{alvo} already answered this attack: the Guardian can no longer change the target.",
       "AjudaNota": "Dice step increased (+{passos}) thanks to {nome}'s help.",
-      "AjudaNotaMentoria": "Dice step increased (+{passos}) thanks to {nome}'s {mentoria}."
+      "AjudaNotaMentoria": "Dice step increased (+{passos}) thanks to {nome}'s {mentoria}.",
+      "ReducaoNota": "{passos} step(s) reduced until the end of the round: {motivo}."
     },
     "PericiasMundo": {
       "MenuNome": "World skills",
@@ -1844,13 +1849,26 @@
         "Derrubar": "{alvo} is knocked prone.",
         "Desarmar": "{alvo} drops a wielded item.",
         "Empurrar": "{alvo} is pushed a few meters.",
-        "Quebrar": "{nome} hits an item of {alvo} and deals the attack damage to the object."
+        "Quebrar": "{nome} hits an item of {alvo} and deals the attack damage to the object.",
+        "Atrapalhar": "{alvo} takes a step reduction on every test until the end of the round (already applied)."
       },
       "EfeitoForte": {
         "Derrubar": "Won by 5 or more: {alvo} takes {rb} impact damage (RB).",
         "Desarmar": "Won by 5 or more: {nome} may take the item (free hand) or throw it.",
         "Empurrar": "Won by 5 or more: {alvo} is off-balance (step reduction on the next test)."
-      }
+      },
+      "QualPericia": "{acao}: with which skill?",
+      "MotivoAtrapalhar": "hindered by {nome}",
+      "MotivoErguer": "stood up as a free action",
+      "AplicarCaido": "Apply Prone to {alvo}",
+      "AplicarDanoCaido": "Apply {dano} damage and Prone to {alvo}",
+      "CaidoAplicado": "{alvo} is Prone.",
+      "ErguerTitulo": "Stand up",
+      "ErguerPergunta": "How do you stand up?",
+      "ErguerPadrao": "Standard action (no more actions this turn)",
+      "ErguerLivre": "Free action (−1 step on tests this round)",
+      "ErguerNotaPadrao": "{nome} stands up as a standard action and acts no more this turn.",
+      "ErguerNotaLivre": "{nome} stands up as a free action: −1 step on every test until the end of the round."
     },
     "Defesa": {
       "Titulo": "Defend",
