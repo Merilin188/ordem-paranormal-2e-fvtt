@@ -68,8 +68,8 @@ export class CriaturaSheet extends NpcSheet {
 
   /**
    * Agredir com o ataque: escolhe o alvo (a mira do Foundry, ou uma lista), rola os
-   * dados do bloco ("2d10", "d8+d6") e abre o card de resposta — Revidar ou
-   * Esquivar — com o dano da fórmula (RA/RB + N). À distância, só Esquivar.
+   * dados do bloco ("2d10", "d8+d6") contra a DT 7, ou em teste oposto se o alvo
+   * escolher se defender (perguntado antes da rolagem); dano da fórmula (RA/RB + N).
    */
   static async #rolarAtaque(_evento, alvo) {
     const ator = this.actor;
@@ -83,11 +83,11 @@ export class CriaturaSheet extends NpcSheet {
       nome: ataque.nome,
       dano,
       distancia: ataque.alcance === "distancia",
-      rolar: async () => {
+      rolar: async ({ dt = null } = {}) => {
         const roll = OP2Roll.paraComponentes(
           dados.map((dado, i) => ({ chave: `ataque.${i}`, rotulo: ataque.nome, tipo: "extra", dado })),
           {
-            dt: null,
+            dt,
             escopoCritico: lerConfig("escopoCritico"),
             rotulo: `${ataque.nome}${ataque.nota ? ` (${ataque.nota})` : ""}`,
             atorId: ator.id,

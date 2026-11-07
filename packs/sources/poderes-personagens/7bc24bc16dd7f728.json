@@ -6,7 +6,7 @@
     "perfil": "",
     "custo": "",
     "custoPD": 0,
-    "descricao": "<p><strong>Uma vez por rodada</strong>, quando sofre um ataque, pode fazer um <strong>teste de Acrobacia (+d6)</strong> oposto ao teste de ataque como uma <strong>ação livre</strong>. Se vencer, evita o ataque.</p><p>No card de ataque, use <em>Defender → Esquivar</em>: o +d6 já entra no teste.</p>",
+    "descricao": "<p><strong>Uma vez por rodada</strong>, quando sofre um ataque, pode fazer um <strong>teste de Acrobacia (+d6)</strong> oposto ao teste de ataque como uma <strong>ação livre</strong>. Se vencer, evita o ataque.</p><p>Quando alguém declara você como alvo, uma janela pergunta, antes da rolagem do atacante, se você quer usar a Esquiva; aceitando, o seu teste abre em seguida.</p>",
     "efeito": {
       "tipo": "nenhum",
       "passos": 1,

@@ -163,8 +163,10 @@ export async function executarAcaoDeCombate(ator, titulo, texto) {
   await declarar(ator, titulo, texto);
   if (titulo === "Defender-se") {
     // Vale para um ataque desta rodada: o Esquivar do card consome a declaração.
-    const { leituraDeCombate, chaveDaRodada } = await import("./poderes.mjs");
-    await ator.setFlag(SYSTEM_ID, "defesaRodada", chaveDaRodada());
+    // Fica Defendendo-se até usar num ataque (a janela pergunta antes da rolagem) ou
+    // até a próxima rodada.
+    const { leituraDeCombate } = await import("./poderes.mjs");
+    await ator.toggleStatusEffect("defendendo", { active: true });
     return leituraDeCombate(ator);
   }
   if (titulo === "Erguer-se") return ator.toggleStatusEffect("caido", { active: false });

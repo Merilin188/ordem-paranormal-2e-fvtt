@@ -828,13 +828,9 @@
       "Desarmado": "Desarmado (RB)",
       "AtaqueContexto": "Ataque contra {alvo}",
       "DefesaContexto": "Defesa contra {atacante}",
-      "Ataque": "{atacante} ataca {alvo} — teste oposto de Luta, resultado {total}.",
-      "EsquivaDica": "Revidar é teste de Luta e pode causar dano. Esquivar é Acrobacia +d6 (vencendo, ninguém sofre nem causa dano) — vale para quem declarou Defender-se nesta rodada ou tem a habilidade Esquiva (1× por rodada, ação livre).",
-      "Revidar": "Revidar (Luta)",
-      "Esquivar": "Esquivar (Acrobacia +d6)",
+      "Ataque": "{atacante} ataca {alvo} — resultado {total}.",
       "Resultado": "Resultado do ataque",
       "Venceu": "{vencedor} vence o teste oposto e causa {dano} de dano em {perdedor}.",
-      "EsquivouTexto": "{defensor} esquiva: ninguém sofre nem causa dano.",
       "Empate": "Empate no teste oposto — ninguém causa dano.",
       "AplicarDano": "Aplicar {dano} de dano em {nome}",
       "Fase": {
@@ -847,9 +843,10 @@
       "FaseAjuda": "Em que fase cada um age nesta rodada? Geral (qualquer ação, exceto ataques) → Ataques à distância → Ataques corpo a corpo. Quem age numa fase não age nas seguintes.",
       "Declarar": "Declarar",
       "FasesDeclaradas": "Fases declaradas",
-      "EmpateMutuo": "Empate: os dois atingiram a DT 7 e se acertam.",
-      "EsquivaDicaDistancia": "Ataque à distância: não dá para revidar em Luta. Esquivar é Acrobacia +d6 — para quem declarou Defender-se nesta rodada ou tem a habilidade Esquiva (1× por rodada, ação livre).",
-      "SemEsquiva": "{nome} não pode esquivar agora: declare Defender-se nesta rodada (Ações de combate) ou tenha a habilidade Esquiva ainda não usada na rodada."
+      "Acertou": "{atacante} acerta {alvo} (total {total} contra DT 7).",
+      "Errou": "{atacante} erra {alvo} (total {total} contra DT 7).",
+      "AtaqueDefendido": "{atacante} ataca {alvo} (total {total}). {alvo} se defende: {defesa}.",
+      "DefendeuTexto": "{defensor} se defende: não sofre nem causa dano."
     },
     "Impeto": {
       "Titulo": "Ímpeto",
@@ -1218,7 +1215,8 @@
       "atordoado": "Perde a próxima ação",
       "apavorado": "Apavorado (dado de pavor)",
       "cego": "Cego",
-      "sangrando": "Sangrando"
+      "sangrando": "Sangrando",
+      "defendendo": "Defendendo-se"
     },
     "Guia": {
       "Titulo": "Guia rápido de combate",
@@ -1594,7 +1592,7 @@
       "Ataques": "Ações de ataque",
       "AdicionarAtaque": "Novo ataque",
       "NovoAtaque": "Ataque",
-      "RolarAtaque": "Agredir: escolhe o alvo, rola e abre Revidar/Esquivar para ele",
+      "RolarAtaque": "Agredir: escolhe o alvo, pergunta se ele se defende e rola o ataque",
       "CorpoACorpo": "Corpo a corpo",
       "Distancia": "À distância",
       "Nome": "Nome",
@@ -1823,7 +1821,7 @@
       "Titulo": "Ações de combate",
       "Botao": "Ações de combate",
       "Dica": "Lê e executa as ações de combate deste personagem: declara no chat e aciona o que depende da ação (Leitura de Combate, ataque, manobras).",
-      "Ajuda": "Executar declara a ação no chat. Agredir abre o ataque; Defender-se ativa a Leitura de Combate; Mirar, Fintar e as manobras pedem o alvo (ou usam o marcado no mapa); Fintar e as manobras rolam o teste e o alvo resiste pelo card; cair e levantar marcam Caído.",
+      "Ajuda": "Executar declara a ação no chat. Agredir abre o ataque; Defender-se deixa o personagem Defendendo-se até o próximo ataque contra ele na rodada (a janela pergunta antes da rolagem) e ativa a Leitura de Combate; Mirar, Fintar e as manobras pedem o alvo; Fintar e as manobras rolam o teste e o alvo resiste pelo card; cair e levantar marcam Caído.",
       "Executar": "Executar",
       "Rotulo": "Ação de combate",
       "Declara": "{nome} declara: {acao}.",
@@ -1853,6 +1851,19 @@
         "Desarmar": "Venceu por 5 ou mais: {nome} pode pegar o item (mão livre) ou arremessá-lo.",
         "Empurrar": "Venceu por 5 ou mais: {alvo} fica desequilibrado (redução de passo no próximo teste)."
       }
+    },
+    "Defesa": {
+      "Titulo": "Defender-se",
+      "Pergunta": "{atacante} vai atacar {alvo} com {ataque} ({alcance}). Quer se defender? O teste é oposto ao ataque; vencendo, não sofre dano (nem causa).",
+      "Ajuda": "Defendendo-se: a declaração da rodada se gasta neste ataque. Esquiva: uma vez por rodada, ação livre. Deixar: o ataque é contra a DT 7.",
+      "Corpo": "corpo a corpo",
+      "Distancia": "à distância",
+      "OpcaoDefendendo": "Defendendo-se: {pericia} +d6",
+      "OpcaoEsquiva": "{habilidade}: {pericia} +d6",
+      "Nao": "Não se defender",
+      "Aguardando": "Esperando {nome} decidir se vai se defender…",
+      "Rolar": "Rolar a defesa",
+      "JaRolou": "A defesa deste ataque já foi rolada."
     }
   }
 }

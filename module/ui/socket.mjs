@@ -38,8 +38,46 @@ export function registrarAcaoDeMestre(nome, executar) {
   ACOES[nome] = executar;
 }
 
+/** Perguntas que um cliente responde para outro (a defesa antes do ataque). */
+const PERGUNTAS = {};
+const PENDENTES = new Map();
+
+export function registrarPergunta(nome, responder) {
+  PERGUNTAS[nome] = responder;
+}
+
+/**
+ * Pergunta a um usuário e espera a resposta (null se ele não responder a tempo).
+ * Para o próprio usuário, responde direto.
+ */
+export function perguntarA(usuario, nome, dados, { tempoMs = 120000 } = {}) {
+  if (!usuario || usuario.id === game.user.id) return Promise.resolve(PERGUNTAS[nome]?.(dados) ?? null);
+  const id = foundry.utils.randomID();
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => { PENDENTES.delete(id); resolve(null); }, tempoMs);
+    PENDENTES.set(id, (valor) => { clearTimeout(timer); PENDENTES.delete(id); resolve(valor); });
+    game.socket.emit(CANAL, { pergunta: nome, dados, para: usuario.id, de: game.user.id, id });
+  });
+}
+
+/** Quem responde por um ator: um dono jogador conectado; sem ele, o mestre ativo. */
+export function responsavelPor(ator) {
+  const jogadores = game.users.filter((u) => u.active && !u.isGM && ator.testUserPermission(u, "OWNER"));
+  return jogadores.find((u) => u.character?.id === ator.id) ?? jogadores[0] ?? game.users.activeGM ?? null;
+}
+
 export function registrarSocket() {
-  game.socket.on(CANAL, async ({ acao, dados, todos = false } = {}) => {
+  game.socket.on(CANAL, async (msg = {}) => {
+    if (msg.pergunta) {
+      if (msg.para !== game.user.id) return;
+      const valor = (await PERGUNTAS[msg.pergunta]?.(msg.dados)) ?? null;
+      return void game.socket.emit(CANAL, { resposta: msg.id, para: msg.de, valor });
+    }
+    if (msg.resposta) {
+      if (msg.para === game.user.id) PENDENTES.get(msg.resposta)?.(msg.valor);
+      return;
+    }
+    const { acao, dados, todos = false } = msg;
     if (todos) {
       const executar = TODOS[acao];
       if (!executar) return void console.warn(`${SYSTEM_ID} | ação de todos desconhecida: ${acao}`);

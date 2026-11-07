@@ -48,13 +48,20 @@ test("empate não move nada", () => {
   }), { dano: 0, alvo: null });
 });
 
-test("esquiva: Defender-se declarado ou a habilidade, uma vez por rodada", async () => {
-  const { modoDaEsquiva } = await import("../cena/combate.mjs");
-  const base = { ehPersonagem: true, declarouDefesa: false, temEsquiva: false, esquivaUsada: false };
-  assert.equal(modoDaEsquiva(base), null);
-  assert.equal(modoDaEsquiva({ ...base, declarouDefesa: true }), "declarada");
-  assert.equal(modoDaEsquiva({ ...base, temEsquiva: true }), "habilidade");
-  assert.equal(modoDaEsquiva({ ...base, temEsquiva: true, esquivaUsada: true }), null);
-  assert.equal(modoDaEsquiva({ ...base, temEsquiva: true, esquivaUsada: true, declarouDefesa: true }), "declarada");
-  assert.equal(modoDaEsquiva({ ...base, ehPersonagem: false }), "livre");
+test("defesa: Defendendo-se (Acrobacia, ou Luta contra corpo a corpo) ou Esquiva, uma vez por rodada", async () => {
+  const { opcoesDeDefesa } = await import("../cena/combate.mjs");
+  const base = { defendendo: false, temEsquiva: false, esquivaUsada: false, distancia: false };
+  assert.deepEqual(opcoesDeDefesa(base), []);
+  assert.deepEqual(opcoesDeDefesa({ ...base, defendendo: true }).map((o) => o.pericia), ["acrobacia", "luta"]);
+  assert.deepEqual(opcoesDeDefesa({ ...base, defendendo: true, distancia: true }).map((o) => o.pericia), ["acrobacia"]);
+  assert.deepEqual(opcoesDeDefesa({ ...base, temEsquiva: true }), [{ modo: "habilidade", pericia: "acrobacia" }]);
+  assert.deepEqual(opcoesDeDefesa({ ...base, temEsquiva: true, esquivaUsada: true }), []);
+});
+
+test("ataque sem defesa: DT 7; critico acerta, falha critica erra", async () => {
+  const { acertaContraDT } = await import("../cena/combate.mjs");
+  assert.equal(acertaContraDT({ total: 7 }), true);
+  assert.equal(acertaContraDT({ total: 6 }), false);
+  assert.equal(acertaContraDT({ total: 4, critico: true }), true);
+  assert.equal(acertaContraDT({ total: 9, falhaCritica: true }), false);
 });

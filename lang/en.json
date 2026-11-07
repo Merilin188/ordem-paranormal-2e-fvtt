@@ -828,13 +828,9 @@
       "Desarmado": "Unarmed (LR)",
       "AtaqueContexto": "Attack against {alvo}",
       "DefesaContexto": "Defense against {atacante}",
-      "Ataque": "{atacante} attacks {alvo} — opposed Fight check, result {total}.",
-      "EsquivaDica": "Strike back is a Fighting test and can deal damage. Dodge is Acrobatics +d6 (winning, nobody takes or deals damage) — for whoever declared Defend this round or has the Dodge ability (once per round, free action).",
-      "Revidar": "Fight back (Fight)",
-      "Esquivar": "Dodge (Acrobatics +d6)",
+      "Ataque": "{atacante} attacks {alvo} — result {total}.",
       "Resultado": "Attack result",
-      "Venceu": "{vencedor} wins the opposed check and deals {dano} damage to {perdedor}.",
-      "EsquivouTexto": "{defensor} dodges: nobody takes or deals damage.",
+      "Venceu": "{vencedor} wins the opposed test and deals {dano} damage to {perdedor}.",
       "Empate": "Tie on the opposed check — nobody deals damage.",
       "AplicarDano": "Apply {dano} damage to {nome}",
       "Fase": {
@@ -847,9 +843,10 @@
       "FaseAjuda": "Em que fase cada um age nesta rodada? Geral (qualquer ação, exceto ataques) → Ataques à distância → Ataques corpo a corpo. Quem age numa fase não age nas seguintes.",
       "Declarar": "Declarar",
       "FasesDeclaradas": "Fases declaradas",
-      "EmpateMutuo": "Empate: os dois atingiram a DT 7 e se acertam.",
-      "EsquivaDicaDistancia": "Ranged attack: you cannot strike back with Fighting. Dodge is Acrobatics +d6 — for whoever declared Defend this round or has the Dodge ability (once per round, free action).",
-      "SemEsquiva": "{nome} cannot dodge now: declare Defend this round (Combat actions) or have the Dodge ability not yet used this round."
+      "Acertou": "{atacante} hits {alvo} (total {total} against DC 7).",
+      "Errou": "{atacante} misses {alvo} (total {total} against DC 7).",
+      "AtaqueDefendido": "{atacante} attacks {alvo} (total {total}). {alvo} defends: {defesa}.",
+      "DefendeuTexto": "{defensor} defends: takes no damage and deals none."
     },
     "Impeto": {
       "Titulo": "Momentum",
@@ -1218,7 +1215,8 @@
       "atordoado": "Perde a próxima ação",
       "apavorado": "Apavorado (dado de pavor)",
       "cego": "Cego",
-      "sangrando": "Sangrando"
+      "sangrando": "Sangrando",
+      "defendendo": "Defending"
     },
     "Guia": {
       "Titulo": "Guia rápido de combate",
@@ -1594,7 +1592,7 @@
       "Ataques": "Attack actions",
       "AdicionarAtaque": "New attack",
       "NovoAtaque": "Attack",
-      "RolarAtaque": "Strike: picks the target, rolls and opens Strike back/Dodge for them",
+      "RolarAtaque": "Strike: picks the target, asks whether they defend and rolls the attack",
       "CorpoACorpo": "Melee",
       "Distancia": "Ranged",
       "Nome": "Name",
@@ -1823,7 +1821,7 @@
       "Titulo": "Combat actions",
       "Botao": "Combat actions",
       "Dica": "Read and run this character's combat actions: declares it in chat and triggers what depends on the action (Combat Reading, attack, maneuvers).",
-      "Ajuda": "Execute declares the action in chat. Strike opens the attack; Defend triggers Combat Reading; Aim, Feint and maneuvers ask for the target (or use the one marked on the map); Feint and maneuvers roll the test and the target resists from the card; falling and standing toggle Prone.",
+      "Ajuda": "Execute declares the action in chat. Strike opens the attack; Defend keeps the character Defending until the next attack against them this round (a window asks before the roll) and triggers Combat Reading; Aim, Feint and maneuvers ask for the target; Feint and maneuvers roll the test and the target resists from the card; falling and standing toggle Prone.",
       "Executar": "Run",
       "Rotulo": "Combat action",
       "Declara": "{nome} declares: {acao}.",
@@ -1853,6 +1851,19 @@
         "Desarmar": "Won by 5 or more: {nome} may take the item (free hand) or throw it.",
         "Empurrar": "Won by 5 or more: {alvo} is off-balance (step reduction on the next test)."
       }
+    },
+    "Defesa": {
+      "Titulo": "Defend",
+      "Pergunta": "{atacante} is about to attack {alvo} with {ataque} ({alcance}). Defend? The test is opposed to the attack; winning, you take no damage (and deal none).",
+      "Ajuda": "Defending: this round's declaration is spent on this attack. Dodge: once per round, free action. Skip: the attack is against DC 7.",
+      "Corpo": "melee",
+      "Distancia": "ranged",
+      "OpcaoDefendendo": "Defending: {pericia} +d6",
+      "OpcaoEsquiva": "{habilidade}: {pericia} +d6",
+      "Nao": "Don't defend",
+      "Aguardando": "Waiting for {nome} to decide whether to defend…",
+      "Rolar": "Roll the defense",
+      "JaRolou": "The defense for this attack was already rolled."
     }
   }
 }

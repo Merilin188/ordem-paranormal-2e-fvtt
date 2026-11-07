@@ -2,12 +2,12 @@
  * Guardiã: quando um aliado sofre um ataque, a guardiã pode gastar 2 PD (uma vez por
  * rodada) para se tornar o alvo. Assim que o card de ataque nasce, quem joga com uma
  * personagem guardiã recebe uma janela flutuante; aceitando, o card troca o alvo —
- * os botões Revidar/Esquivar passam a ser dela.
+ * o dano passa a ser dela. Só aparece em ataque que acertou e sem defesa do alvo.
  *
  * "Alcance curto" fica com a mesa: a janela lembra a condição, não mede no mapa.
  */
 import { SYSTEM_ID } from "../config.mjs";
-import { comoMestre, registrarAcaoDeMestre } from "../ui/socket.mjs";
+import { comoMestre, registrarAcaoDeMestre, responsavelPor } from "../ui/socket.mjs";
 
 const { DialogV2 } = foundry.applications.api;
 const P = (chave, dados) => (dados ? game.i18n.format(`OP2.Poder.${chave}`, dados) : game.i18n.localize(`OP2.Poder.${chave}`));
@@ -19,15 +19,9 @@ export function podeProteger({ temHabilidade, ehAlvo, ehAtacante, morto, pd, usa
   return Boolean(temHabilidade) && !ehAlvo && !ehAtacante && !morto && (pd ?? 0) >= CUSTO && !usadaNaRodada;
 }
 
-/** Quem responde pela personagem: um dono jogador conectado; sem ele, o mestre ativo. */
-function responsavel(ator) {
-  const jogadores = game.users.filter((u) => u.active && !u.isGM && ator.testUserPermission(u, "OWNER"));
-  return jogadores.find((u) => u.character?.id === ator.id) ?? jogadores[0] ?? game.users.activeGM ?? null;
-}
-
 async function oferecer(mensagem) {
   const f = mensagem.flags?.[SYSTEM_ID];
-  if (f?.tipo !== "ataque" || !f.ataque) return;
+  if (f?.tipo !== "ataque" || !f.ataque || f.ataque.defesa || !f.ataque.acertou) return;
   const alvo = game.actors.get(f.ataque.alvoId);
   if (alvo?.type !== "personagem") return;
   const { poderDe, chaveDaRodada } = await import("./poderes.mjs");
@@ -41,7 +35,7 @@ async function oferecer(mensagem) {
       pd: guardia.system.recursos?.pd?.value,
       usadaNaRodada: guardia.getFlag(SYSTEM_ID, "guardiaRodada") === rodada,
     });
-    if (!ok || responsavel(guardia)?.id !== game.user.id) continue;
+    if (!ok || responsavelPor(guardia)?.id !== game.user.id) continue;
     void perguntar(mensagem, guardia, alvo, f.ataque);
   }
 }
@@ -84,7 +78,8 @@ async function trocarAlvo({ mensagemId, guardiaId }) {
   const ataque = {
     ...f.ataque,
     alvoId: guardia.id,
-    texto: game.i18n.format("OP2.Combate.Ataque", { atacante: atacante?.name ?? "", alvo: guardia.name, total: f.ataque.total }),
+    alvoNome: guardia.name,
+    texto: game.i18n.format("OP2.Combate.Acertou", { atacante: atacante?.name ?? "", alvo: guardia.name, total: f.ataque.total }),
     guardiaNota: P("GuardiaTrocou", { guardia: guardia.name, alvo: alvoAntigo?.name ?? "" }),
   };
   const { renderizar } = await import("../dice/teste.mjs");

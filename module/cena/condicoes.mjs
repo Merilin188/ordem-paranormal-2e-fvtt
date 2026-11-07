@@ -20,6 +20,7 @@ export const CONDICOES = [
   C("apavorado", "icons/svg/terror.svg"),
   C("cego", "icons/svg/blind.svg"),
   C("sangrando", "icons/svg/degen.svg"),
+  C("defendendo", "icons/svg/shield.svg"),
 ];
 
 /* ---------------- Iniciativa por fases ---------------- */
@@ -83,9 +84,17 @@ export function criarClasseDeCombate(Base) {
       if (this.round > 1 && extras.length) await this.deleteEmbeddedDocuments("Combatant", extras.map((c) => c.id));
       const restantes = this.combatants.filter((c) => !c.getFlag(SYSTEM_ID, "antecipacao"));
       await this.updateEmbeddedDocuments("Combatant", restantes.map((c) => ({ _id: c.id, initiative: null })));
+      await tirarDefendendo(this);
       await iniciarDeclaracao(this);
     }
   };
+}
+
+/** Defender-se vale para a rodada: na rodada nova (e no fim do combate) o status sai. */
+async function tirarDefendendo(combate) {
+  for (const c of combate.combatants) {
+    if (c.actor?.statuses?.has("defendendo")) await c.actor.toggleStatusEffect("defendendo", { active: false });
+  }
 }
 
 /** No tracker, o número da iniciativa vira o nome da fase. */
@@ -127,6 +136,7 @@ export function registrarCondicoes() {
   CONFIG.Combat.initiative = { formula: "0", decimals: 0 };
 
   Hooks.on("renderCombatTracker", rotularFases);
+  Hooks.on("deleteCombat", (combate) => { if (game.users.activeGM?.id === game.user.id) void tirarDefendendo(combate); });
 
   // PV ou PD chegando a 0 (por dano ou edição manual): pede o teste de lesão/trauma.
   Hooks.on("preUpdateActor", (ator, mudancas, opcoes) => {

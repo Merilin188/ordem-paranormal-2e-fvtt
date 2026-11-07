@@ -54,14 +54,24 @@ export function resolverAtaque({ vencedor, esquiva, leituraAtacante, leituraDefe
 }
 
 /**
- * Como o personagem esquiva (botão Esquivar do card de ataque):
- * "declarada" — declarou Defender-se nesta rodada (a ação dele);
- * "habilidade" — tem Esquiva e ainda não usou nesta rodada (ação livre);
- * "livre" — NPC ou criatura, sem esse controle; null — não pode.
+ * Como o alvo pode se defender de um ataque, perguntado ANTES da rolagem do atacante:
+ * "declarada" — está Defendendo-se (declarou Defender-se): Acrobacia +d6, ou Luta +d6
+ * contra corpo a corpo; "habilidade" — tem Esquiva ainda não usada na rodada
+ * (Acrobacia +d6, ação livre). Lista vazia: o ataque é contra a DT 7.
  */
-export function modoDaEsquiva({ ehPersonagem, declarouDefesa, temEsquiva, esquivaUsada }) {
-  if (!ehPersonagem) return "livre";
-  if (declarouDefesa) return "declarada";
-  if (temEsquiva && !esquivaUsada) return "habilidade";
-  return null;
+export function opcoesDeDefesa({ defendendo, temEsquiva, esquivaUsada, distancia }) {
+  const opcoes = [];
+  if (defendendo) {
+    opcoes.push({ modo: "declarada", pericia: "acrobacia" });
+    if (!distancia) opcoes.push({ modo: "declarada", pericia: "luta" });
+  }
+  if (temEsquiva && !esquivaUsada) opcoes.push({ modo: "habilidade", pericia: "acrobacia" });
+  return opcoes;
+}
+
+/** Ataque sem defesa: crítico acerta; falha crítica erra; senão, total contra a DT 7. */
+export function acertaContraDT({ total, critico = false, falhaCritica = false }, dt = 7) {
+  if (critico) return true;
+  if (falhaCritica) return false;
+  return total >= dt;
 }

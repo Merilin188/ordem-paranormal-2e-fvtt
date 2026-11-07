@@ -11,7 +11,6 @@ import { rolarSobrecarga } from "../cena/rodada.mjs";
 import { marcarHackSocialResolvido, marcarHackTecnicoResolvido } from "../cena/acoes-desafio.mjs";
 import { iniciarHackTecnico, encerrarHackTecnico } from "../cena/timer-hack.mjs";
 import { rolarTesteDeQueda } from "../cena/ferimentos.mjs";
-import { defender } from "../cena/acoes-combate.mjs";
 import { concederPasso } from "../cena/acoes-recurso.mjs";
 import { preencherImpeto } from "../cena/impeto.mjs";
 
@@ -52,25 +51,22 @@ const ACOES = {
       ator: ator.name, custo: CUSTO_PD_EXAMINAR,
     }));
   },
-  // Teste oposto de Luta (spec §8.1): o card do ataque espera a resposta do
-  // defensor — revidar, ou só se defender com Acrobacia +d6.
+  // Defesa escolhida antes do ataque: o teste oposto do alvo (o botão é a reserva
+  // do teste que abre sozinho).
   async "defender-ataque"(ator, dataset) {
     if (!game.user.isGM && !ator.isOwner) {
       ui.notifications.warn(game.i18n.localize("OP2.Aviso.SemPermissao"));
       return;
     }
-    // Respondeu: a Guardiã não troca mais o alvo deste ataque.
+    const { rolarDefesaDoCard } = await import("../cena/acoes-combate.mjs");
+    await rolarDefesaDoCard(ator, dataset);
+  },
+  // Dano do ataque que acertou: marca o card como respondido (a Guardiã não troca mais).
+  async "dano-ataque"(ator, dataset) {
     const { marcarAtaqueRespondido } = await import("../cena/guardia.mjs");
     await marcarAtaqueRespondido(dataset.mensagemId);
-    await defender(ator, {
-      atacanteId: dataset.atacanteId,
-      totalAtaque: Number(dataset.total),
-      raAtaque: Number(dataset.ra),
-      rbAtaque: Number(dataset.rb),
-      armadoAtacante: dataset.armado === "true",
-      esquiva: dataset.esquiva === "true",
-      danoAtacante: dataset.danoBase ? { base: dataset.danoBase, bonus: Number(dataset.danoBonus) || 0 } : null,
-    });
+    await aplicarDano(ator, Number(dataset.quantidade), "pv");
+    ui.notifications.info(game.i18n.format("OP2.Chat.DanoAplicado", { quantidade: dataset.quantidade, alvos: ator.name }));
   },
   // O dano do combate já sabe em quem cai — não usa a seleção de tokens.
   async "aplicar-dano-alvo"(ator, dataset) {
