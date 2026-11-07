@@ -19,7 +19,7 @@
   {{#if temDano}}
     <div class="op2-card__acoes">
       <button type="button" class="op2-botao op2-botao--pequeno op2-botao--perigo"
-        data-op2-acao="aplicar-dano-alvo" data-ator-id="{{quemSofreId}}"
+        data-op2-acao="aplicar-dano-alvo" data-ator-id="{{quemSofreId}}" data-ator-uuid="{{quemSofreUuid}}"
         data-quantidade="{{dano}}" data-recurso="pv">
         {{localize "OP2.Combate.AplicarDano" nome=quemSofreNome dano=dano}}
       </button>

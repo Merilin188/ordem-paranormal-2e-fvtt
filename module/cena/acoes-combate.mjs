@@ -216,6 +216,7 @@ export async function defender(defensor, { atacanteId, totalAtaque, raAtaque, rb
     temDano: danoFinal > 0 && Boolean(quemSofre),
     dano: danoFinal,
     quemSofreId: quemSofre?.id ?? "",
+    quemSofreUuid: quemSofre?.uuid ?? "",
     quemSofreNome: quemSofre?.name ?? "",
   });
 
