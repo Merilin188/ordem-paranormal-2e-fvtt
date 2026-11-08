@@ -19,7 +19,7 @@ import { excluirDesafio, excluirPontoDeInteresse } from "./excluir-desafio.mjs";
 import { quemSustenta } from "./acoes-desafio.mjs";
 import { escolherCategoria, criarDesafioDaCategoria, rotuloCategoria } from "./categorias-desafio.mjs";
 import { SYSTEM_ID } from "../config.mjs";
-import { periciasDoQuadro, chaveInfo, danoSobrecarga } from "./investigacao.mjs";
+import { periciasDoQuadro, chaveInfo, danoSobrecarga, grupoDaLinha } from "./investigacao.mjs";
 import { pontoTrancado } from "./acesso-poi.mjs";
 import { semPrefixoDoPonto, desafioResolvido } from "./desafios.mjs";
 import { rodadaRelativa, proximaRodadaDaCena, linhaDaRodada } from "./eventos.mjs";
@@ -309,16 +309,18 @@ export function PainelInvestigacaoMixin(Base) {
           // o gate de `poisInvestigados` competia com o toggle e escondia o que
           // devia mostrar).
           descricaoBasica: await editor.enrichHTML(poi.system.descricaoBasica, { relativeTo: poi }),
-          quadro: periciasDoQuadro(poi.system.informacoes).map((chave) => ({
+          // Um grupo por conjunto de perícias: "Aptidão (Artes) ou Aptidão (Folclore)"
+          // junta as linhas que as duas acham.
+          quadro: [...new Set(poi.system.informacoes.map(grupoDaLinha))].map((chave) => ({
             chave,
-            rotulo: rotuloDePericia(chave),
+            rotulo: chave.split("|").map(rotuloDePericia).join(` ${game.i18n.localize("OP2.POI.Ou")} `),
             infos: poi.system.informacoes
               // O jogador lê o que o mestre abriu e o que o personagem DELE
               // descobriu — nada mais. Antes bastava não ser rascunho pra linha
               // aparecer pronta na tela, e aí não sobrava nada pra procurar
               // (achado em uso real).
               // …e o que alguém contou ao grupo, que é da mesa inteira.
-              .filter((info) => info.pericia === chave
+              .filter((info) => grupoDaLinha(info) === chave
                 && (ehGM || info.aberta || contada(info) || this.#jaDescobriu(uuid, info.id)))
               .map((info) => ({
                 ...info,

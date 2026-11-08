@@ -257,7 +257,11 @@
       "Mostrar": "Mostrar",
       "Excluir": "Excluir ponto de interesse",
       "ExcluirConfirma": "Excluir o ponto <strong>{nome}</strong> de vez? Ele sai das investigações e do mapa.",
-      "ExcluirDesafiosJunto": "Excluir também os {n} desafio(s) deste ponto"
+      "ExcluirDesafiosJunto": "Excluir também os {n} desafio(s) deste ponto",
+      "Ou": "ou",
+      "AdicionarAlternativa": "ou outra perícia",
+      "AdicionarAlternativaDica": "A mesma informação também pode ser achada por outra perícia, com a mesma DT (ex.: Aptidão (artes ou folclore)).",
+      "RemoverAlternativa": "Remover esta perícia alternativa"
     },
     "Acoes": {
       "Titulo": "Ações de investigação",

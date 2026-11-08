@@ -9,7 +9,7 @@
  */
 import { SYSTEM_ID, DT_RECAPITULAR, DT_COMPARTILHAR, CUSTO_PD_EXAMINAR } from "../config.mjs";
 import { resolverInvestigacao, resolverExaminar, chaveInfo, motivoSemRevelacao, descobrivel,
-  infosAlcancaveis,
+  infosAlcancaveis, aceitaPericia, periciasDaLinha,
 } from "./investigacao.mjs";
 import { pontoTrancado } from "./acesso-poi.mjs";
 import { alvosDaCenaAtiva, alvosMarcados } from "./encerrar-investigacao.mjs";
@@ -171,7 +171,7 @@ registrarAcaoDeMestre("contarLinha", async ({ uuid, infoId, atorId }) => {
   await enviarCard(ator, "pista-contada", {
     titulo: game.i18n.format("OP2.Investigacao.ContouAoGrupo", { ator: ator.name }),
     poiNome: poi.name,
-    rotuloPericia: rotuloDePericia(info.pericia),
+    rotuloPericia: periciasDaLinha(info).map(rotuloDePericia).join(` ${game.i18n.localize("OP2.POI.Ou")} `),
     texto: info.texto,
   });
 });
@@ -313,13 +313,13 @@ export async function examinar(ator, poiUuid, chavePericia, { rapido = false } =
   }
 
   const marcar = (ids, semRolar) => infosPorId(poi, ids)
-    .map((info) => ({ ...info, rotuloPericia: rotuloDePericia(info.pericia), semRolar }));
+    .map((info) => ({ ...info, rotuloPericia: rotuloDePericia(chavePericia), semRolar }));
 
   // O que ainda falta desta perícia depois desta ação: o card diz se a rolagem "não
   // alcançou o resto" ou se simplesmente não havia mais nada para achar.
   const reveladosAgora = idsRevelados(ator, poiUuid);
   const restantes = quadro
-    .filter((info) => descobrivel(info) && info.pericia === chavePericia && !reveladosAgora.has(info.id)).length;
+    .filter((info) => descobrivel(info) && aceitaPericia(info, chavePericia) && !reveladosAgora.has(info.id)).length;
 
   // "Quando examina um ponto de interesse e recebe uma informação nova, você recupera
   // 1 PD" (Amor pela Descoberta): houve informação nova, de graça ou pelo teste.

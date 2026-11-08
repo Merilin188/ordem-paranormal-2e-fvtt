@@ -170,6 +170,31 @@
                 </button>
               {{/if}}
             </div>
+            {{!-- A mesma linha achada por outra perícia: "artes ou folclore". --}}
+            <div class="op2-poi__info-alternativas">
+              {{#each alternativas}}
+                <span class="op2-poi__alternativa">
+                  <span class="op2-poi__ou">{{localize "OP2.POI.Ou"}}</span>
+                  <select name="system.informacoes.{{../indice}}.periciasAlternativas.{{j}}" {{#unless @root.editavel}}disabled{{/unless}}>
+                    {{#each @root.opcoesPericia}}
+                      <option value="{{chave}}" {{#if (op2Eq chave ../chave)}}selected{{/if}}>{{rotulo}}</option>
+                    {{/each}}
+                  </select>
+                  {{#if @root.editavel}}
+                    <button type="button" class="op2-botao-icone" data-action="removerAlternativa" data-info-id="{{../id}}" data-indice="{{j}}"
+                      aria-label="{{localize 'OP2.POI.RemoverAlternativa'}}" data-tooltip="{{localize 'OP2.POI.RemoverAlternativa'}}">
+                      <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                    </button>
+                  {{/if}}
+                </span>
+              {{/each}}
+              {{#if @root.editavel}}
+                <button type="button" class="op2-botao op2-botao--pequeno op2-poi__mais-pericia" data-action="adicionarAlternativa"
+                  data-info-id="{{id}}" data-tooltip="{{localize 'OP2.POI.AdicionarAlternativaDica'}}">
+                  <i class="fa-solid fa-plus" aria-hidden="true"></i> {{localize "OP2.POI.AdicionarAlternativa"}}
+                </button>
+              {{/if}}
+            </div>
             <textarea name="system.informacoes.{{indice}}.texto" rows="2"
               {{#unless @root.editavel}}disabled{{/unless}}>{{texto}}</textarea>
             {{#if temRevelacao}}

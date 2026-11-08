@@ -53,6 +53,9 @@ export class PontoInteresseData extends foundry.abstract.TypeDataModel {
       informacoes: new ArrayField(new SchemaField({
         id: new StringField({ required: true, blank: false }),
         pericia: new StringField({ required: true, initial: "percepcao", blank: false }),
+        // "Aptidão (artes ou folclore)", "Acrobacia ou Sobrevivência": a mesma linha
+        // achada por outra perícia. Qualquer uma delas serve, com a mesma DT.
+        periciasAlternativas: new ArrayField(new StringField({ required: true, blank: false }), { required: true, initial: [] }),
         dt: new NumberField({ required: true, initial: 7, min: 0, integer: true, nullable: false }),
         texto: new HTMLField({ required: true, initial: "", blank: true }),
         // Três estados por linha, não dois. Com só `oculta` não existia o estado

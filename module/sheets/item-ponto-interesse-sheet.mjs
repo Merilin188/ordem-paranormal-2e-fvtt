@@ -37,6 +37,8 @@ export class PontoInteresseSheet extends OP2ItemSheet {
       alternarForaDaTranca: PontoInteresseSheet.#alternarForaDaTranca,
       excluirDesafioVinculado: PontoInteresseSheet.#excluirDesafioVinculado,
       excluirPonto: PontoInteresseSheet.#excluirPonto,
+      adicionarAlternativa: PontoInteresseSheet.#adicionarAlternativa,
+      removerAlternativa: PontoInteresseSheet.#removerAlternativa,
     },
   };
 
@@ -82,6 +84,57 @@ export class PontoInteresseSheet extends OP2ItemSheet {
 
   static async #excluirDesafioVinculado(_evento, alvo) {
     if (await excluirDesafio(alvo.dataset.uuid)) this.render();
+  }
+
+  /** "ou outra perícia": a mesma linha achada por mais de uma perícia. */
+  static async #adicionarAlternativa(_evento, alvo) {
+    const opcoes = PontoInteresseSheet.#chavesDePericia();
+    const informacoes = this.item.system.toObject().informacoes.map((i) => {
+      if (i.id !== alvo.dataset.infoId) return i;
+      const usadas = new Set([i.pericia, ...(i.periciasAlternativas ?? [])]);
+      const livre = opcoes.find((c) => !usadas.has(c));
+      return livre ? { ...i, periciasAlternativas: [...(i.periciasAlternativas ?? []), livre] } : i;
+    });
+    await this.item.update({ "system.informacoes": informacoes });
+  }
+
+  static async #removerAlternativa(_evento, alvo) {
+    const indice = Number(alvo.dataset.indice);
+    const informacoes = this.item.system.toObject().informacoes.map((i) => (i.id === alvo.dataset.infoId
+      ? { ...i, periciasAlternativas: (i.periciasAlternativas ?? []).filter((_c, j) => j !== indice) } : i));
+    await this.item.update({ "system.informacoes": informacoes });
+  }
+
+  static #chavesDePericia() {
+    return [
+      ...Object.keys(PERICIAS).filter((c) => !PERICIAS[c].especializada),
+      ...APTIDOES_PADRAO.map((sub) => `aptidao.${sub}`),
+    ];
+  }
+
+  /**
+   * O envio do formulário manda só o que tem campo (perícia, DT, texto…), e o
+   * Foundry troca o quadro INTEIRO pelo que chegou: o resto da linha voltava ao
+   * padrão (rascunho/aberta, contada ao grupo, alternativas). Cada linha enviada é
+   * mesclada sobre a linha guardada, pelo id.
+   */
+  _processFormData(evento, form, formData) {
+    const dados = super._processFormData(evento, form, formData);
+    const enviadas = dados?.system?.informacoes;
+    if (enviadas && typeof enviadas === "object") {
+      const guardadas = new Map(this.item.system.toObject().informacoes.map((i) => [i.id, i]));
+      const lista = Array.isArray(enviadas) ? enviadas
+        : Object.keys(enviadas).sort((a, b) => Number(a) - Number(b)).map((k) => enviadas[k]);
+      dados.system.informacoes = lista.filter(Boolean).map((nova) => {
+        const linha = { ...(guardadas.get(nova.id) ?? {}), ...nova };
+        const alt = nova.periciasAlternativas;
+        if (alt && !Array.isArray(alt)) {
+          linha.periciasAlternativas = Object.keys(alt).sort((a, b) => Number(a) - Number(b)).map((k) => alt[k]);
+        }
+        return linha;
+      });
+    }
+    return dados;
   }
 
   static async #excluirPonto() {
@@ -175,6 +228,7 @@ export class PontoInteresseSheet extends OP2ItemSheet {
         indice,
         // Linha antiga em HTML: mostra (e, ao salvar, grava) texto puro.
         texto: textoPuroDaLinha(info.texto),
+        alternativas: (info.periciasAlternativas ?? []).map((chave, j) => ({ chave, j })),
         // Três estados por linha, um botão só (o mesmo do painel).
         estado: info.oculta ? "rascunho" : (info.aberta ? "aberta" : "descobrivel"),
         reveladoPor: ehGM ? personagens.filter((a) => a.system.estado?.infosReveladas?.has(chaveInfo(uuid, info.id))).map((a) => a.name).join(", ") : "",

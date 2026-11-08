@@ -257,7 +257,11 @@
       "Mostrar": "Show",
       "Excluir": "Delete point of interest",
       "ExcluirConfirma": "Delete the point <strong>{nome}</strong> for good? It leaves the investigations and the map.",
-      "ExcluirDesafiosJunto": "Also delete the {n} challenge(s) of this point"
+      "ExcluirDesafiosJunto": "Also delete the {n} challenge(s) of this point",
+      "Ou": "or",
+      "AdicionarAlternativa": "or another skill",
+      "AdicionarAlternativaDica": "The same information can also be found with another skill, at the same DC (e.g. Aptitude (arts or folklore)).",
+      "RemoverAlternativa": "Remove this alternative skill"
     },
     "Acoes": {
       "Titulo": "Investigation actions",

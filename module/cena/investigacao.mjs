@@ -44,9 +44,24 @@ export function infosAlcancaveis(informacoes, trancado) {
   return trancado ? informacoes.filter((info) => info.foraDaTranca) : informacoes;
 }
 
+/** As perícias que acham a linha: a principal e as alternativas ("artes ou folclore"). */
+export function periciasDaLinha(info) {
+  return [...new Set([info.pericia, ...(info.periciasAlternativas ?? [])].filter(Boolean))];
+}
+
+/** A perícia serve para esta linha? */
+export function aceitaPericia(info, chavePericia) {
+  return periciasDaLinha(info).includes(chavePericia);
+}
+
+/** Chave do grupo da linha no painel: as perícias dela juntas ("aptidao.artes|aptidao.folclore"). */
+export function grupoDaLinha(info) {
+  return periciasDaLinha(info).join("|");
+}
+
 /** Perícias presentes no quadro, sem repetição, na ordem em que aparecem. */
 export function periciasDoQuadro(informacoes) {
-  return [...new Set(informacoes.map((info) => info.pericia))];
+  return [...new Set(informacoes.flatMap(periciasDaLinha))];
 }
 
 /**
@@ -61,7 +76,7 @@ export function periciasDoQuadro(informacoes) {
  */
 export function resolverInvestigacao(informacoes, chavePericia, valorPericia, idsJaRevelados = new Set()) {
   return informacoes
-    .filter((info) => descobrivel(info) && info.pericia === chavePericia
+    .filter((info) => descobrivel(info) && aceitaPericia(info, chavePericia)
       && info.dt <= valorPericia && !idsJaRevelados.has(info.id))
     .sort((a, b) => a.dt - b.dt)
     .map((info) => info.id);
@@ -79,7 +94,7 @@ export function resolverInvestigacao(informacoes, chavePericia, valorPericia, id
  *   `dtMinima` só existe em "dado-pequeno" — é o que faltaria alcançar.
  */
 export function motivoSemRevelacao(informacoes, chavePericia, valorPericia, idsJaRevelados = new Set()) {
-  const daPericia = informacoes.filter((info) => descobrivel(info) && info.pericia === chavePericia);
+  const daPericia = informacoes.filter((info) => descobrivel(info) && aceitaPericia(info, chavePericia));
   if (!daPericia.length) return { motivo: "sem-pericia", dtMinima: null };
 
   const naoRevelados = daPericia.filter((info) => !idsJaRevelados.has(info.id));
@@ -104,7 +119,7 @@ export function motivoSemRevelacao(informacoes, chavePericia, valorPericia, idsJ
  */
 export function resolverExaminar(informacoes, chavePericia, total, idsJaRevelados = new Set(), { ignorarDT = false } = {}) {
   const revelaveis = informacoes
-    .filter((info) => descobrivel(info) && info.pericia === chavePericia
+    .filter((info) => descobrivel(info) && aceitaPericia(info, chavePericia)
       && !idsJaRevelados.has(info.id)
       && (ignorarDT || info.dt <= total))
     .sort((a, b) => a.dt - b.dt)

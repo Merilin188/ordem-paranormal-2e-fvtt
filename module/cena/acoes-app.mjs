@@ -29,7 +29,7 @@ import { usarHabilidadeOuItem } from "./acoes-recurso.mjs";
 import { abrirDestrancar } from "./destrancar-app.mjs";
 import { guardarRolagem, restaurarRolagem, esquecerRolagem } from "../ui/rolagem.mjs";
 import { semPrefixoDoPonto, desafioResolvido } from "./desafios.mjs";
-import { chaveInfo } from "./investigacao.mjs";
+import { chaveInfo, periciasDaLinha } from "./investigacao.mjs";
 import { pontoTrancado } from "./acesso-poi.mjs";
 import { marcadoresDoPonto } from "./marcadores.mjs";
 import { filtrosVazios, filtrando } from "./filtros-painel.mjs";
@@ -493,6 +493,6 @@ function resumoDoQuadro(poi, ator) {
     || ator.system.estado.infosReveladas.has(chaveInfo(poi.uuid, info.id)));
   return {
     progresso: visiveis.length > 0 ? "andamento" : "intocado",
-    pericias: [...new Set(visiveis.map((info) => info.pericia))].join(" "),
+    pericias: [...new Set(visiveis.flatMap(periciasDaLinha))].join(" "),
   };
 }

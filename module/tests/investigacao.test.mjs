@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   chaveInfo, periciasDoQuadro, resolverInvestigacao, resolverExaminar, danoSobrecarga,
-  estaTrancado, infosAlcancaveis,
+  estaTrancado, infosAlcancaveis, aceitaPericia, grupoDaLinha,
 } from "../cena/investigacao.mjs";
 import { TABELA_SOBRECARGA_PADRAO } from "../config.mjs";
 
@@ -101,4 +101,18 @@ test("ponto bloqueado: trancado, Examinar só alcança as linhas de fora da tran
   assert.deepEqual(infosAlcancaveis(quadro, true).map((i) => i.id), ["fora"]);
   assert.deepEqual(infosAlcancaveis(quadro, false).map((i) => i.id), ["fora", "dentro"]);
   assert.deepEqual(resolverInvestigacao(infosAlcancaveis(quadro, true), "percepcao", 12), []);
+});
+
+test("perícias alternativas: a mesma linha achada por qualquer uma delas", () => {
+  const quadro = [
+    { id: "a", pericia: "aptidao.artes", periciasAlternativas: ["aptidao.folclore"], dt: 6 },
+    { id: "b", pericia: "acrobacia", periciasAlternativas: ["sobrevivencia"], dt: 6 },
+    { id: "c", pericia: "percepcao", dt: 6 },
+  ];
+  assert.deepEqual(resolverInvestigacao(quadro, "aptidao.folclore", 6), ["a"]);
+  assert.deepEqual(resolverInvestigacao(quadro, "aptidao.artes", 6), ["a"]);
+  assert.deepEqual(resolverExaminar(quadro, "sobrevivencia", 7).revelaveis, ["b"]);
+  assert.deepEqual(periciasDoQuadro(quadro), ["aptidao.artes", "aptidao.folclore", "acrobacia", "sobrevivencia", "percepcao"]);
+  assert.equal(grupoDaLinha(quadro[0]), "aptidao.artes|aptidao.folclore");
+  assert.equal(aceitaPericia(quadro[2], "sobrevivencia"), false);
 });

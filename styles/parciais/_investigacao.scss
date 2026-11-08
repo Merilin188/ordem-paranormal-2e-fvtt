@@ -1695,3 +1695,24 @@ details[open] > summary.op2-painel-titulo::before { transform: rotate(45deg); }
 // Lixeiras da ficha do ponto: excluir o ponto (topo) e um desafio dele.
 .op2-poi .op2-item-ficha__topo .op2-poi__excluir { flex: 0 0 auto; border-radius: 0; }
 .op2-poi__lixeira { color: var(--op2-vermelho-claro); }
+
+// "ou outra perícia": as alternativas de uma linha do quadro, abaixo da principal.
+.op2-poi__info-alternativas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--op2-e1) var(--op2-e2);
+  margin-block: var(--op2-e1);
+}
+.op2-poi__alternativa {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--op2-e1);
+  select { min-width: 10rem; }
+}
+.op2-poi__ou {
+  font-family: var(--op2-fonte-mono);
+  font-size: 0.8em;
+  text-transform: uppercase;
+  color: var(--op2-texto-fraco);
+}
