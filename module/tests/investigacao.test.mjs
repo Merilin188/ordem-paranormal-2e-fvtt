@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   chaveInfo, periciasDoQuadro, resolverInvestigacao, resolverExaminar, danoSobrecarga,
+  estaTrancado, infosAlcancaveis,
 } from "../cena/investigacao.mjs";
 import { TABELA_SOBRECARGA_PADRAO } from "../config.mjs";
 
@@ -81,4 +82,23 @@ test("sobrecarga: a tabela editada pela cena é a que vale", () => {
   const tabela = [{ rodada: 1, dano: "1d4" }];
   assert.equal(danoSobrecarga(tabela, 1), "1d4");
   assert.equal(danoSobrecarga(tabela, 7), "1d4");
+});
+
+test("ponto bloqueado: só tranca quando bloqueado, sem liberação e sem desafio vencido", () => {
+  assert.equal(estaTrancado(undefined, []), false);
+  assert.equal(estaTrancado({ bloqueado: false }, [false]), false);
+  assert.equal(estaTrancado({ bloqueado: true, liberado: false }, []), true);
+  assert.equal(estaTrancado({ bloqueado: true, liberado: false }, [false, false]), true);
+  assert.equal(estaTrancado({ bloqueado: true, liberado: false }, [false, true]), false);
+  assert.equal(estaTrancado({ bloqueado: true, liberado: true }, [false]), false);
+});
+
+test("ponto bloqueado: trancado, Examinar só alcança as linhas de fora da tranca", () => {
+  const quadro = [
+    { id: "fora", pericia: "oficio", dt: 8, foraDaTranca: true },
+    { id: "dentro", pericia: "percepcao", dt: 5 },
+  ];
+  assert.deepEqual(infosAlcancaveis(quadro, true).map((i) => i.id), ["fora"]);
+  assert.deepEqual(infosAlcancaveis(quadro, false).map((i) => i.id), ["fora", "dentro"]);
+  assert.deepEqual(resolverInvestigacao(infosAlcancaveis(quadro, true), "percepcao", 12), []);
 });

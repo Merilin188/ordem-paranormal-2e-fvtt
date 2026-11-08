@@ -75,7 +75,23 @@ export class PontoInteresseData extends foundry.abstract.TypeDataModel {
         // para os outros — como `aberta`, mas por decisão do jogador, não do mestre.
         // Guarda os ids dos atores que contaram; vazio é o padrão.
         contadaPor: new ArrayField(new StringField({ required: true, blank: false }), { required: true, initial: [] }),
+        // Ponto trancado (`acesso.bloqueado`): a linha fica do lado de FORA da tranca e
+        // pode ser achada antes de abrir. É o "Ofício (metalurgia) DT 8: você analisa a
+        // construção do baú" — lê-se o baú fechado; o que tem dentro, não.
+        foraDaTranca: new BooleanField({ required: true, initial: false }),
       })),
+
+      /**
+       * Ponto bloqueado por um desafio de acesso (o baú trancado, a porta emperrada):
+       * enquanto nenhum desafio do ponto estiver vencido, Examinar só alcança as
+       * linhas marcadas `foraDaTranca`. Vencer o desafio (ou o mestre liberar à mão)
+       * grava `liberado` e narra `aoLiberar` no chat.
+       */
+      acesso: new SchemaField({
+        bloqueado: new BooleanField({ required: true, initial: false }),
+        liberado: new BooleanField({ required: true, initial: false }),
+        aoLiberar: new HTMLField({ required: true, initial: "", blank: true }),
+      }),
 
       ferramentas: new SchemaField(ferramentas),
 

@@ -1905,6 +1905,31 @@
       "Mira": "+1d6: aimed at {alvo} last round (Aim).",
       "MirarRotulo": "Aim",
       "ReducaoAtaque": "{passos} step(s) reduced until the end of the round ({motivo}): {de} → {para}."
+    },
+    "Acesso": {
+      "Titulo": "Access challenge",
+      "Bloqueado": "Locked until an access challenge is overcome",
+      "BloqueadoAjuda": "While the point is locked, Examine only finds the lines marked with the open padlock (outside the lock). Overcoming any challenge of this point opens the rest.",
+      "EstadoTrancado": "Locked",
+      "EstadoLiberado": "Unlocked",
+      "Liberar": "Unlock now",
+      "LiberarDica": "Opens the point without the challenge and narrates what is inside in the chat.",
+      "Trancar": "Lock again",
+      "TrancarDica": "Locks it again. A challenge already overcome still opens the point.",
+      "CriarDesafio": "Create access challenge",
+      "NomeDesafio": "{ponto} (access)",
+      "DesafioVencido": "Overcome",
+      "AoLiberar": "On opening",
+      "AoLiberarAjuda": "Narrated in the chat when the point is unlocked (what was inside). Leave blank to just announce it opened.",
+      "LinhaDentro": "Inside the lock: only shows up after opening. Click to make it findable while locked.",
+      "LinhaFora": "Outside the lock: can be found while the point is locked. Click to keep it inside.",
+      "Trancado": "{ponto} is locked. Overcome the access challenge to find out what is inside.",
+      "TrancadoDica": "Locked by an access challenge: what is inside only shows up after opening.",
+      "CardTrancado": "The rest of this point is locked: overcome the access challenge to examine what is inside.",
+      "Liberado": "Access unlocked",
+      "LiberadoPorDesafio": "The challenge \"{desafio}\" was overcome and the point is open.",
+      "LiberadoPeloMestre": "The GM opened the point.",
+      "AgoraExaminar": "What was inside can now be examined."
     }
   }
 }

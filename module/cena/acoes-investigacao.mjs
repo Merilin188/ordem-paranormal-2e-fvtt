@@ -9,7 +9,9 @@
  */
 import { SYSTEM_ID, DT_RECAPITULAR, DT_COMPARTILHAR, CUSTO_PD_EXAMINAR } from "../config.mjs";
 import { resolverInvestigacao, resolverExaminar, chaveInfo, motivoSemRevelacao, descobrivel,
+  infosAlcancaveis,
 } from "./investigacao.mjs";
+import { pontoTrancado } from "./acesso-poi.mjs";
 import { alvosDaCenaAtiva, alvosMarcados } from "./encerrar-investigacao.mjs";
 import { investigacaoAtiva } from "./investigacao-ativa.mjs";
 import { rolarTeste, rotuloDePericia, renderizar } from "../dice/teste.mjs";
@@ -20,6 +22,25 @@ import { lerConfig } from "../settings/register.mjs";
 import { renderDoPerfil } from "../ui/perfil.mjs";
 
 const CHAT = "systems/ordem-paranormal-2e/templates/chat";
+
+/**
+ * Ponto bloqueado por desafio de acesso: Examinar só alcança as linhas de fora da
+ * tranca. Se não sobra nada lá fora para ESTE personagem achar, nem rola — avisa
+ * que está trancado, sem custar PD por uma tranca que ele não tinha como saber.
+ * @returns {{trancado: boolean, infos: object[]}|null} null = barrado (já avisou)
+ */
+function quadroAlcancavel(ator, poi) {
+  const trancado = pontoTrancado(poi);
+  const infos = infosAlcancaveis(poi.system.informacoes, trancado);
+  if (trancado) {
+    const jaTem = idsRevelados(ator, poi.uuid);
+    if (!infos.some((info) => descobrivel(info) && !jaTem.has(info.id))) {
+      ui.notifications.warn(game.i18n.format("OP2.Acesso.Trancado", { ponto: poi.name }));
+      return null;
+    }
+  }
+  return { trancado, infos };
+}
 
 /** @returns {Promise<Item|null>} */
 async function carregarPoi(poiUuid) {
@@ -224,12 +245,16 @@ export async function examinar(ator, poiUuid, chavePericia, { rapido = false } =
     return null;
   }
 
+  const alcance = quadroAlcancavel(ator, poi);
+  if (!alcance) return null;
+  const { trancado, infos: quadro } = alcance;
+
   const primeiraVez = !ator.system.estado.poisInvestigados.has(poiUuid);
 
   // Passo 1: o que o tamanho do dado alcança, sem rolar. Vai gravado antes do
   // teste porque não depende dele — é o que o personagem percebe ao olhar.
   const gratis = resolverInvestigacao(
-    poi.system.informacoes, chavePericia, resolvido.valor, idsRevelados(ator, poiUuid),
+    quadro, chavePericia, resolvido.valor, idsRevelados(ator, poiUuid),
   );
   await gravarRevelacoes(ator, poiUuid, gratis, { investigado: true });
 
@@ -247,7 +272,7 @@ export async function examinar(ator, poiUuid, chavePericia, { rapido = false } =
 
   // Passo 2: o teste tenta o que ficou acima do dado.
   const { revelaveis } = resolverExaminar(
-    poi.system.informacoes, chavePericia, roll.total, idsRevelados(ator, poiUuid),
+    quadro, chavePericia, roll.total, idsRevelados(ator, poiUuid),
     { ignorarDT: roll.critico },
   );
   await gravarRevelacoes(ator, poiUuid, revelaveis);
@@ -265,7 +290,7 @@ export async function examinar(ator, poiUuid, chavePericia, { rapido = false } =
   const perdePD = gratis.length === 0 && revelaveis.length === 0;
   if (perdePD) {
     const sem = motivoSemRevelacao(
-      poi.system.informacoes, chavePericia, resolvido.valor, idsRevelados(ator, poiUuid),
+      quadro, chavePericia, resolvido.valor, idsRevelados(ator, poiUuid),
     );
     await enviarCard(ator, "examinar-custo", {
       titulo: `${game.i18n.localize("OP2.Investigacao.Examinar")} — ${rotuloDePericia(chavePericia)}`,
@@ -282,6 +307,7 @@ export async function examinar(ator, poiUuid, chavePericia, { rapido = false } =
       // A DT que falta é dado de mestre: o jogador vê que o dado é pequeno, não o
       // número exato de que precisaria.
       dtMinima: sem.dtMinima ?? null,
+      trancado,
     });
     return { roll, revelaveis: [], perdePD: true };
   }
@@ -292,7 +318,7 @@ export async function examinar(ator, poiUuid, chavePericia, { rapido = false } =
   // O que ainda falta desta perícia depois desta ação: o card diz se a rolagem "não
   // alcançou o resto" ou se simplesmente não havia mais nada para achar.
   const reveladosAgora = idsRevelados(ator, poiUuid);
-  const restantes = poi.system.informacoes
+  const restantes = quadro
     .filter((info) => descobrivel(info) && info.pericia === chavePericia && !reveladosAgora.has(info.id)).length;
 
   // "Quando examina um ponto de interesse e recebe uma informação nova, você recupera
@@ -322,6 +348,7 @@ export async function examinar(ator, poiUuid, chavePericia, { rapido = false } =
     quantidadeGratis: gratis.length,
     restantes,
     pdRecuperado,
+    trancado,
   }, { whisper: sussurroPara(ator) });
 
   return { roll, revelaveis: [...gratis, ...revelaveis], perdePD: false, pdRecuperado: pdRecuperado?.pd ?? 0 };
@@ -510,6 +537,7 @@ export async function registrarTravaDeCena(trava, ator) {
 export async function dialogoExaminar(ator, poiUuid) {
   const poi = await carregarPoi(poiUuid);
   if (!poi) return null;
+  if (!quadroAlcancavel(ator, poi)) return null;
 
   const chavePericia = await escolherPericia(ator, {
     titulo: `${game.i18n.localize("OP2.Investigacao.Examinar")} — ${poi.name}`,

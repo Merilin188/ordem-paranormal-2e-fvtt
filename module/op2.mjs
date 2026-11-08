@@ -15,6 +15,7 @@ import { registrarAcoesCombate } from "./cena/acoes-combate-app.mjs";
 import { registrarDefesa } from "./cena/acoes-combate.mjs";
 import { registrarReducoes } from "./cena/reducoes.mjs";
 import { registrarExcluirDesafio } from "./cena/excluir-desafio.mjs";
+import { registrarAcessoPoi } from "./cena/acesso-poi.mjs";
 import { SYSTEM_ID, OP2, ICONES_PADRAO } from "./config.mjs";
 import { PersonagemData } from "./data/actor-personagem.mjs";
 import { NpcData } from "./data/actor-npc.mjs";
@@ -134,6 +135,7 @@ Hooks.once("init", () => {
   registrarCriticoExtra();
   registrarSoltarSustentar();
   registrarExcluirDesafio();
+  registrarAcessoPoi();
   registrarSocket();
   registrarPainelInvestigacao();
   registrarMarcadores();

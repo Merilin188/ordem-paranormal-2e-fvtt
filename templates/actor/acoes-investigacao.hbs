@@ -115,6 +115,11 @@
             <div class="op2-acoes__linha-topo">
               <img src="{{img}}" alt="">
               <strong>{{nome}}</strong>
+              {{#if trancado}}
+                <span class="op2-tag op2-tag--pequena op2-tag--trancado" data-tooltip="{{localize 'OP2.Acesso.TrancadoDica'}}">
+                  <i class="fa-solid fa-lock" aria-hidden="true"></i> {{localize "OP2.Acesso.EstadoTrancado"}}
+                </span>
+              {{/if}}
               {{#if totalDesafios}}
                 <button type="button" class="op2-acoes__atalho" data-action="irParaDesafios" data-nome="{{nome}}"
                   data-tooltip="{{localize 'OP2.Acoes.VerDesafios'}}">

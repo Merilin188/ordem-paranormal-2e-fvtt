@@ -30,6 +30,7 @@ import { abrirDestrancar } from "./destrancar-app.mjs";
 import { guardarRolagem, restaurarRolagem, esquecerRolagem } from "../ui/rolagem.mjs";
 import { semPrefixoDoPonto, desafioResolvido } from "./desafios.mjs";
 import { chaveInfo } from "./investigacao.mjs";
+import { pontoTrancado } from "./acesso-poi.mjs";
 import { marcadoresDoPonto } from "./marcadores.mjs";
 import { filtrosVazios, filtrando } from "./filtros-painel.mjs";
 import {
@@ -319,6 +320,8 @@ export class AcoesInvestigacaoApp extends HandlebarsApplicationMixin(Application
         indice,
         ...resumoDoQuadro(poi, ator),
         marcado: marcadoresDoPonto(canvas?.scene, poi.uuid).length > 0,
+        // Bloqueado por desafio de acesso: o jogador vê o cadeado antes de gastar ação.
+        trancado: pontoTrancado(poi),
         // Quantos desafios deste ponto estão à vista: um atalho leva à aba Desafios já
         // filtrada por ele. Com os botões do desafio dentro do ponto, as duas coisas se
         // embaralhavam (achado em uso real).

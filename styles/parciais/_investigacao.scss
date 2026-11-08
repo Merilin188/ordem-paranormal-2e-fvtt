@@ -1655,3 +1655,39 @@ details[open] > summary.op2-painel-titulo::before { transform: rotate(45deg); }
   flex-direction: column;
   gap: var(--op2-e2);
 }
+
+// Ponto bloqueado por desafio de acesso (o baú trancado).
+.op2-poi__acesso {
+  legend i { margin-right: var(--op2-e1); }
+  &.op2-poi__acesso--trancado { border-color: var(--op2-vermelho); }
+}
+
+.op2-poi__acesso-estado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--op2-e2);
+  margin-block: var(--op2-e1) var(--op2-e2);
+}
+
+.op2-tag--trancado,
+.op2-poi__acesso-tag {
+  border-color: var(--op2-vermelho);
+  color: var(--op2-vermelho-claro);
+  white-space: nowrap;
+}
+
+.op2-poi__acesso-tag--aberto {
+  border-color: var(--op2-sucesso);
+  color: var(--op2-sucesso);
+}
+
+// Linha de dentro da tranca: cadeado fechado, apagado; de fora: aberto, em destaque.
+.op2-poi__info-tranca { color: var(--op2-texto-fraco); }
+.op2-poi__info-tranca--fora { color: var(--op2-sucesso); }
+
+.op2-card__trancado {
+  margin-top: var(--op2-e2);
+  color: var(--op2-vermelho-claro);
+  font-size: 0.85em;
+}

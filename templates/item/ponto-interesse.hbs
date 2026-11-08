@@ -38,6 +38,78 @@
       <p class="op2-ajuda">{{localize "OP2.POI.DescricaoBasicaAjuda"}}</p>
     </label>
 
+    {{!-- Bloqueio por desafio de acesso (o baú trancado): só o mestre configura. Os
+          desafios do ponto moram aqui; arrastar um Desafio de acesso para cá liga os
+          dois, e ao vincular o ponto a uma investigação os desafios vão junto. --}}
+    {{#if ehGM}}
+      <fieldset class="op2-poi__desafios op2-poi__acesso{{#if acesso.trancado}} op2-poi__acesso--trancado{{/if}}">
+        <legend><i class="fa-solid {{#if acesso.trancado}}fa-lock{{else}}fa-lock-open{{/if}}" aria-hidden="true"></i> {{localize "OP2.Acesso.Titulo"}}</legend>
+        <label class="op2-campo op2-campo--inline">
+          <input type="checkbox" name="system.acesso.bloqueado" {{#if acesso.bloqueado}}checked{{/if}} {{#unless editavel}}disabled{{/unless}}>
+          <span>{{localize "OP2.Acesso.Bloqueado"}}</span>
+        </label>
+        <p class="op2-ajuda">{{localize "OP2.Acesso.BloqueadoAjuda"}}</p>
+
+        {{#if acesso.bloqueado}}
+          <div class="op2-poi__acesso-estado">
+            {{#if acesso.trancado}}
+              <span class="op2-tag op2-tag--pequena op2-poi__acesso-tag"><i class="fa-solid fa-lock" aria-hidden="true"></i> {{localize "OP2.Acesso.EstadoTrancado"}}</span>
+              {{#if editavel}}
+                <button type="button" class="op2-botao op2-botao--pequeno" data-action="liberarAcesso"
+                  data-tooltip="{{localize 'OP2.Acesso.LiberarDica'}}">
+                  <i class="fa-solid fa-lock-open" aria-hidden="true"></i> {{localize "OP2.Acesso.Liberar"}}
+                </button>
+              {{/if}}
+            {{else}}
+              <span class="op2-tag op2-tag--pequena op2-poi__acesso-tag op2-poi__acesso-tag--aberto"><i class="fa-solid fa-lock-open" aria-hidden="true"></i> {{localize "OP2.Acesso.EstadoLiberado"}}</span>
+              {{#if editavel}}{{#if acesso.liberado}}
+                <button type="button" class="op2-botao op2-botao--pequeno" data-action="trancarDeNovo"
+                  data-tooltip="{{localize 'OP2.Acesso.TrancarDica'}}">
+                  <i class="fa-solid fa-lock" aria-hidden="true"></i> {{localize "OP2.Acesso.Trancar"}}
+                </button>
+              {{/if}}{{/if}}
+            {{/if}}
+          </div>
+        {{/if}}
+
+        <ol class="op2-painel-ordem">
+          {{#each desafiosVinculados}}
+            <li class="op2-painel-ordem__linha">
+              <img src="{{img}}" alt=""> <span>{{nome}}</span>
+              {{#if resolvido}}
+                <span class="op2-tag op2-tag--pequena op2-poi__acesso-tag--aberto">{{localize "OP2.Acesso.DesafioVencido"}}</span>
+              {{/if}}
+              <button type="button" class="op2-botao-icone" data-action="abrirDesafioVinculado" data-uuid="{{uuid}}"
+                aria-label="{{localize 'OP2.Painel.AbrirDesafio'}}" data-tooltip="{{localize 'OP2.Painel.AbrirDesafio'}}">
+                <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+              </button>
+              {{#if @root.editavel}}
+                <button type="button" class="op2-botao-icone" data-action="removerDesafioVinculado" data-uuid="{{uuid}}"
+                  aria-label="{{localize 'OP2.Painel.RemoverDesafio'}}" data-tooltip="{{localize 'OP2.Painel.RemoverDesafio'}}">
+                  <i class="fa-solid fa-link-slash" aria-hidden="true"></i>
+                </button>
+              {{/if}}
+            </li>
+          {{/each}}
+        </ol>
+        {{#if editavel}}
+          <button type="button" class="op2-botao op2-botao--pequeno" data-action="criarDesafioAcesso">
+            <i class="fa-solid fa-plus" aria-hidden="true"></i> {{localize "OP2.Acesso.CriarDesafio"}}
+          </button>
+        {{/if}}
+        <p class="op2-ajuda">{{localize "OP2.POI.DesafiosAjuda"}}</p>
+
+        {{#if acesso.bloqueado}}
+          <div class="op2-campo">
+            <span>{{localize "OP2.Acesso.AoLiberar"}}</span>
+            {{formInput fields.acesso.fields.aoLiberar value=acesso.aoLiberar enriched=acesso.aoLiberarEnriquecido
+              toggled=true editable=editavel name="system.acesso.aoLiberar"}}
+            <p class="op2-ajuda">{{localize "OP2.Acesso.AoLiberarAjuda"}}</p>
+          </div>
+        {{/if}}
+      </fieldset>
+    {{/if}}
+
     <fieldset class="op2-poi__quadro">
       <legend>{{localize "OP2.POI.Quadro"}}</legend>
       <p class="op2-ajuda">{{localize "OP2.POI.QuadroAjuda"}}</p>
@@ -46,6 +118,9 @@
         {{#each informacoes}}
           <li class="op2-poi__info">
             <input type="hidden" name="system.informacoes.{{indice}}.id" value="{{id}}">
+            {{!-- Editar o texto da linha não pode soltar a marcação da tranca. --}}
+            <input type="hidden" name="system.informacoes.{{indice}}.foraDaTranca" data-dtype="Boolean"
+              value="{{#if foraDaTranca}}true{{else}}false{{/if}}">
             <div class="op2-poi__info-linha">
               <select name="system.informacoes.{{indice}}.pericia" {{#unless @root.editavel}}disabled{{/unless}}>
                 {{#each @root.opcoesPericia}}
@@ -66,6 +141,17 @@
                 data-tooltip="{{localize (op2Concat 'OP2.POI.Visibilidade.' estado)}}">
                 <i class="fa-solid {{#if (op2Eq estado 'rascunho')}}fa-eye-slash{{else if (op2Eq estado 'aberta')}}fa-eye{{else}}fa-magnifying-glass{{/if}}" aria-hidden="true"></i>
               </button>
+              {{!-- Ponto bloqueado: a linha fica dentro (padrão) ou fora da tranca. --}}
+              {{#if @root.acesso.bloqueado}}
+                <button type="button"
+                  class="op2-botao-icone op2-poi__info-tranca{{#if foraDaTranca}} op2-poi__info-tranca--fora{{/if}}"
+                  data-action="alternarForaDaTranca" data-info-id="{{id}}"
+                  {{#unless @root.editavel}}disabled{{/unless}}
+                  aria-label="{{#if foraDaTranca}}{{localize 'OP2.Acesso.LinhaFora'}}{{else}}{{localize 'OP2.Acesso.LinhaDentro'}}{{/if}}"
+                  data-tooltip="{{#if foraDaTranca}}{{localize 'OP2.Acesso.LinhaFora'}}{{else}}{{localize 'OP2.Acesso.LinhaDentro'}}{{/if}}">
+                  <i class="fa-solid {{#if foraDaTranca}}fa-lock-open{{else}}fa-lock{{/if}}" aria-hidden="true"></i>
+                </button>
+              {{/if}}
               {{#if @root.editavel}}
                 <button type="button" class="op2-botao op2-botao--pequeno op2-botao--perigo"
                   data-action="removerInformacao" data-info-id="{{id}}"
@@ -181,34 +267,6 @@
             {{/each}}
           </select>
         {{/if}}
-      </fieldset>
-
-      {{!-- Os desafios deste ponto (a porta, o cadeado, o painel): arrastar um Desafio
-            de acesso para cá liga os dois; ao vincular o ponto a uma investigação,
-            os desafios vão junto. --}}
-      <fieldset class="op2-poi__desafios">
-        <legend>{{localize "OP2.POI.Desafios"}}</legend>
-        {{#unless desafiosVinculados.length}}
-          <p class="op2-ajuda">{{localize "OP2.POI.DesafiosVazio"}}</p>
-        {{/unless}}
-        <ol class="op2-painel-ordem">
-          {{#each desafiosVinculados}}
-            <li class="op2-painel-ordem__linha">
-              <img src="{{img}}" alt=""> <span>{{nome}}</span>
-              <button type="button" class="op2-botao-icone" data-action="abrirDesafioVinculado" data-uuid="{{uuid}}"
-                aria-label="{{localize 'OP2.Painel.AbrirDesafio'}}">
-                <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
-              </button>
-              {{#if @root.editavel}}
-                <button type="button" class="op2-botao-icone" data-action="removerDesafioVinculado" data-uuid="{{uuid}}"
-                  aria-label="{{localize 'OP2.Painel.RemoverDesafio'}}">
-                  <i class="fa-solid fa-link-slash" aria-hidden="true"></i>
-                </button>
-              {{/if}}
-            </li>
-          {{/each}}
-        </ol>
-        <p class="op2-ajuda">{{localize "OP2.POI.DesafiosAjuda"}}</p>
       </fieldset>
 
       <label class="op2-campo op2-campo--inline">

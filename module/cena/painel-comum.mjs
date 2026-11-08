@@ -20,6 +20,7 @@ import { quemSustenta } from "./acoes-desafio.mjs";
 import { escolherCategoria, criarDesafioDaCategoria, rotuloCategoria } from "./categorias-desafio.mjs";
 import { SYSTEM_ID } from "../config.mjs";
 import { periciasDoQuadro, chaveInfo, danoSobrecarga } from "./investigacao.mjs";
+import { pontoTrancado } from "./acesso-poi.mjs";
 import { semPrefixoDoPonto, desafioResolvido } from "./desafios.mjs";
 import { rodadaRelativa, proximaRodadaDaCena, linhaDaRodada } from "./eventos.mjs";
 import { marcarNoMapa, desmarcarDoMapa, marcadoresDoPonto } from "./marcadores.mjs";
@@ -289,6 +290,7 @@ export function PainelInvestigacaoMixin(Base) {
           progresso: progressoDoPonto(poi.system.informacoes, linhasVisiveis, { mestre: ehGM }),
           pericias: ehGM ? periciasDoQuadro(poi.system.informacoes).join(" ") : "",
           oculto,
+          trancado: pontoTrancado(poi),
           marcado: temMarcador(uuid),
           recolhido: recolhidos.has(uuid),
           notasAbertas: notas.has(uuid),

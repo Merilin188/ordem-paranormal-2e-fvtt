@@ -27,6 +27,23 @@ export function contadaAoGrupo(info) {
   return (info.contadaPor?.length ?? 0) > 0;
 }
 
+/**
+ * O ponto está trancado? Só quando o mestre o bloqueou, ninguém o liberou ainda e
+ * nenhum dos desafios dele foi vencido. Bloqueado sem desafio fica trancado até o
+ * mestre liberar à mão.
+ * @param {{bloqueado?: boolean, liberado?: boolean}|undefined} acesso
+ * @param {boolean[]} resolvidos um por desafio do ponto
+ */
+export function estaTrancado(acesso, resolvidos = []) {
+  if (!acesso?.bloqueado || acesso.liberado) return false;
+  return !resolvidos.some(Boolean);
+}
+
+/** As linhas que se alcançam agora: com o ponto trancado, só as de fora da tranca. */
+export function infosAlcancaveis(informacoes, trancado) {
+  return trancado ? informacoes.filter((info) => info.foraDaTranca) : informacoes;
+}
+
 /** Perícias presentes no quadro, sem repetição, na ordem em que aparecem. */
 export function periciasDoQuadro(informacoes) {
   return [...new Set(informacoes.map((info) => info.pericia))];

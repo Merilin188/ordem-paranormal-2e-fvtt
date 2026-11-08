@@ -12,6 +12,8 @@ import { cicloVisibilidadeInfo, limparRevelacao } from "../cena/acoes-investigac
 import { vincularDesafioAoPonto, removerDesafioDoPonto, todasInvestigacoes, alternarOculto } from "../cena/investigacao-ativa.mjs";
 import { chaveInfo } from "../cena/investigacao.mjs";
 import { textoPuroDaLinha } from "../cena/texto-linha.mjs";
+import { desafioResolvido } from "../cena/desafios.mjs";
+import { pontoTrancado, liberarAcesso, trancarDeNovo, criarDesafioDoPonto } from "../cena/acesso-poi.mjs";
 
 export class PontoInteresseSheet extends OP2ItemSheet {
   static DEFAULT_OPTIONS = {
@@ -28,6 +30,10 @@ export class PontoInteresseSheet extends OP2ItemSheet {
       removerDesafioVinculado: PontoInteresseSheet.#removerDesafioVinculado,
       alternarOcultoNaInvestigacao: PontoInteresseSheet.#alternarOcultoNaInvestigacao,
       limparRevelacao: PontoInteresseSheet.#limparRevelacao,
+      criarDesafioAcesso: PontoInteresseSheet.#criarDesafioAcesso,
+      liberarAcesso: PontoInteresseSheet.#liberarAcesso,
+      trancarDeNovo: PontoInteresseSheet.#trancarDeNovo,
+      alternarForaDaTranca: PontoInteresseSheet.#alternarForaDaTranca,
     },
   };
 
@@ -65,6 +71,25 @@ export class PontoInteresseSheet extends OP2ItemSheet {
   static async #limparRevelacao(_evento, alvo) {
     await limparRevelacao(this.item.uuid, alvo.dataset.infoId);
     await this.render();
+  }
+
+  static async #criarDesafioAcesso() {
+    await criarDesafioDoPonto(this.item);
+  }
+
+  static async #liberarAcesso() {
+    await liberarAcesso(this.item);
+  }
+
+  static async #trancarDeNovo() {
+    await trancarDeNovo(this.item);
+  }
+
+  /** A linha pode ser achada com o ponto trancado (lê-se o baú, não o que há dentro). */
+  static async #alternarForaDaTranca(_evento, alvo) {
+    const informacoes = this.item.system.informacoes
+      .map((i) => (i.id === alvo.dataset.infoId ? { ...i, foraDaTranca: !i.foraDaTranca } : { ...i }));
+    await this.item.update({ "system.informacoes": informacoes });
   }
 
   static async #abrirDesafioVinculado(_evento, alvo) {
@@ -146,6 +171,12 @@ export class PontoInteresseSheet extends OP2ItemSheet {
       })).map((info) => ({ ...info, temRevelacao: Boolean(info.reveladoPor || info.contadaPor) })),
       descricaoBasicaEnriquecida: await enriquecer(this.item.system.descricaoBasica),
       descricaoContextualEnriquecida: await enriquecer(this.item.system.descricaoContextual),
+      // Bloqueio por desafio de acesso: o que o mestre vê do estado da tranca.
+      acesso: {
+        ...this.item.system.acesso,
+        trancado: pontoTrancado(this.item),
+        aoLiberarEnriquecido: await enriquecer(this.item.system.acesso.aoLiberar),
+      },
       // Perícias válidas no quadro: as 19 comuns + cada campo de Aptidão.
       opcoesPericia: [
         ...Object.keys(PERICIAS).filter((c) => !PERICIAS[c].especializada),
@@ -172,7 +203,7 @@ export class PontoInteresseSheet extends OP2ItemSheet {
       // Os desafios deste ponto: a porta trancada do Depósito A é do Depósito A.
       desafiosVinculados: this.item.system.desafios.map((uuid) => fromUuidSync(uuid))
         .filter((d) => d?.type === "desafio-acesso")
-        .map((d) => ({ uuid: d.uuid, nome: d.name, img: d.img })),
+        .map((d) => ({ uuid: d.uuid, nome: d.name, img: d.img, resolvido: desafioResolvido(d.system) })),
     };
   }
 

@@ -1905,6 +1905,31 @@
       "Mira": "+1d6: mirou em {alvo} na rodada anterior (Mirar).",
       "MirarRotulo": "Mirar",
       "ReducaoAtaque": "Redução de {passos} passo(s) até o fim da rodada ({motivo}): {de} → {para}."
+    },
+    "Acesso": {
+      "Titulo": "Desafio de acesso",
+      "Bloqueado": "Bloqueado até vencer um desafio de acesso",
+      "BloqueadoAjuda": "Com o ponto trancado, Examinar só acha as linhas marcadas com o cadeado aberto (fora da tranca). Vencer qualquer desafio deste ponto abre o resto.",
+      "EstadoTrancado": "Trancado",
+      "EstadoLiberado": "Liberado",
+      "Liberar": "Liberar agora",
+      "LiberarDica": "Abre o ponto sem o desafio e narra no chat o que há dentro.",
+      "Trancar": "Trancar de novo",
+      "TrancarDica": "Volta a trancar. Um desafio já vencido continua abrindo o ponto.",
+      "CriarDesafio": "Criar desafio de acesso",
+      "NomeDesafio": "{ponto} (acesso)",
+      "DesafioVencido": "Vencido",
+      "AoLiberar": "Ao abrir",
+      "AoLiberarAjuda": "Narrado no chat quando o ponto é liberado (o que havia dentro). Fica em branco para só avisar que abriu.",
+      "LinhaDentro": "Dentro da tranca: só aparece depois de abrir. Clique para deixar achável com o ponto trancado.",
+      "LinhaFora": "Fora da tranca: dá para achar com o ponto trancado. Clique para guardar dentro.",
+      "Trancado": "{ponto} está trancado. Vença o desafio de acesso para descobrir o que há dentro.",
+      "TrancadoDica": "Bloqueado por um desafio de acesso: o que há dentro só aparece depois de abrir.",
+      "CardTrancado": "O resto deste ponto está trancado: vença o desafio de acesso para examinar o que há dentro.",
+      "Liberado": "Acesso liberado",
+      "LiberadoPorDesafio": "O desafio \"{desafio}\" foi vencido e o ponto está aberto.",
+      "LiberadoPeloMestre": "O mestre abriu o ponto.",
+      "AgoraExaminar": "O que havia dentro agora pode ser examinado."
     }
   }
 }

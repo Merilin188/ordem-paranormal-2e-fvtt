@@ -1,0 +1,15 @@
+{{!-- O ponto bloqueado abriu: diz como (desafio vencido ou o mestre) e narra o que
+      havia dentro. As linhas de dentro passam a ser achadas por Examinar. --}}
+<div class="op2 op2-card op2-card--investigacao op2-card--acesso">
+  <header class="op2-card__topo">
+    <span class="op2-tag op2-tag--pequena"><i class="fa-solid fa-lock-open" aria-hidden="true"></i> {{localize "OP2.Acesso.Liberado"}}</span>
+    <span class="op2-card__dt">{{poiNome}}</span>
+  </header>
+  <p class="op2-card__texto">{{como}}</p>
+  {{#if texto}}
+    <div class="op2-card__texto op2-card__acesso-texto">{{{texto}}}</div>
+  {{/if}}
+  {{#if temDentro}}
+    <p class="op2-ajuda">{{localize "OP2.Acesso.AgoraExaminar"}}</p>
+  {{/if}}
+</div>
