@@ -1736,12 +1736,16 @@ details[open] > summary.op2-painel-titulo::before { transform: rotate(45deg); }
   file-picker { display: flex; gap: var(--op2-e1); }
   file-picker input { flex: 1 1 auto; min-width: 0; }
 }
-.op2-poi__transicao-linha {
-  display: flex;
-  align-items: center;
+.op2-poi__transicao-topo {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: end;
   gap: var(--op2-e2);
-  input[type="text"] { flex: 1 1 auto; min-width: 0; }
-  select { flex: 0 0 auto; }
+}
+.op2-poi__transicao-nome { margin: 0; min-width: 0; }
+.op2-poi__transicao {
+  .op2-campo { margin: 0; min-width: 0; }
+  input[type="text"], select { width: 100%; min-width: 0; box-sizing: border-box; }
 }
 .op2-poi__transicao-miniatura {
   width: 4.5rem;

@@ -131,3 +131,20 @@ test("transições: a padrão é a marcada, senão a primeira com imagem; só um
   assert.equal(nomeDaTransicao(lista[1]), "HANDOUT NICHO PAREDE SEM RUNAS");
   assert.equal(nomeDaTransicao({ ...lista[1], nome: " Nichos " }), "Nichos");
 });
+
+test("transições: cena existente vale pela cena escolhida; cena nova no padrão da mesa", async () => {
+  const { transicaoValida, transicaoPadrao, dadosDaCenaNova } = await import("../cena/transicoes.mjs");
+  assert.equal(transicaoValida({ modo: "existente", cenaUuid: "", imagem: "x.jpg" }), false);
+  assert.equal(transicaoValida({ modo: "existente", cenaUuid: "Scene.a" }), true);
+  assert.equal(transicaoValida({ modo: "janela", imagem: "x.jpg" }), true);
+  assert.equal(transicaoPadrao([{ id: "a", modo: "existente", cenaUuid: "" }, { id: "b", modo: "cena", imagem: "y" }]).id, "b");
+  const v14 = dadosDaCenaNova({ nome: "Altar", imagem: "h/altar.jpg", largura: 4961, altura: 3366, v14: true });
+  assert.equal(v14.levels[0].background.src, "h/altar.jpg");
+  assert.equal(v14.levels[0].background.color, "#000000");
+  assert.equal(v14.background, undefined);
+  assert.equal(v14.padding, 0.15);
+  assert.deepEqual(v14.grid, { type: 1, alpha: 0 });
+  const v13 = dadosDaCenaNova({ nome: "Altar", imagem: "h/altar.jpg", largura: 10, altura: 10, v14: false });
+  assert.equal(v13.background.src, "h/altar.jpg");
+  assert.equal(v13.levels, undefined);
+});

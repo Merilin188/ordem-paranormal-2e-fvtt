@@ -238,30 +238,53 @@
           {{#each transicoes}}
             <li class="op2-poi__transicao{{#if padrao}} op2-poi__transicao--padrao{{/if}}">
               <input type="hidden" name="system.transicoes.{{indice}}.id" value="{{id}}">
-              <input type="hidden" name="system.transicoes.{{indice}}.cenaUuid" value="{{cenaUuid}}">
               <input type="hidden" name="system.transicoes.{{indice}}.padrao" data-dtype="Boolean"
                 value="{{#if padrao}}true{{else}}false{{/if}}">
-              <div class="op2-poi__transicao-linha">
-                {{#if imagem}}<img class="op2-poi__transicao-miniatura" src="{{imagem}}" alt="">{{/if}}
-                <input type="text" name="system.transicoes.{{indice}}.nome" value="{{nome}}"
-                  placeholder="{{nomeSugerido}}" aria-label="{{localize 'OP2.Transicao.Nome'}}" {{#unless @root.editavel}}disabled{{/unless}}>
-                <select name="system.transicoes.{{indice}}.modo" aria-label="{{localize 'OP2.Transicao.Modo'}}" {{#unless @root.editavel}}disabled{{/unless}}>
+              <div class="op2-poi__transicao-topo">
+                {{#if miniatura}}<img class="op2-poi__transicao-miniatura" src="{{miniatura}}" alt="">{{/if}}
+                <label class="op2-campo op2-poi__transicao-nome">
+                  <span>{{localize "OP2.Transicao.Nome"}}</span>
+                  <input type="text" name="system.transicoes.{{indice}}.nome" value="{{nome}}"
+                    placeholder="{{nomeSugerido}}" {{#unless @root.editavel}}disabled{{/unless}}>
+                </label>
+              </div>
+              <label class="op2-campo">
+                <span>{{localize "OP2.Transicao.Modo"}}</span>
+                <select name="system.transicoes.{{indice}}.modo" {{#unless @root.editavel}}disabled{{/unless}}>
                   <option value="cena" {{#if (op2Eq modo "cena")}}selected{{/if}}>{{localize "OP2.Transicao.ModoCena"}}</option>
+                  <option value="existente" {{#if (op2Eq modo "existente")}}selected{{/if}}>{{localize "OP2.Transicao.ModoExistente"}}</option>
                   <option value="janela" {{#if (op2Eq modo "janela")}}selected{{/if}}>{{localize "OP2.Transicao.ModoJanela"}}</option>
                 </select>
-              </div>
-              <file-picker name="system.transicoes.{{indice}}.imagem" type="image" value="{{imagem}}"
-                {{#unless @root.editavel}}disabled{{/unless}}></file-picker>
+              </label>
+              {{#if ehExistente}}
+                <label class="op2-campo">
+                  <span>{{localize "OP2.Transicao.Cena"}}</span>
+                  <select name="system.transicoes.{{indice}}.cenaUuid" {{#unless @root.editavel}}disabled{{/unless}}>
+                    <option value="">{{localize "OP2.Transicao.EscolherCena"}}</option>
+                    {{#each @root.cenasDoMundo}}
+                      <option value="{{uuid}}" {{#if (op2Eq uuid ../cenaUuid)}}selected{{/if}}>{{nome}}</option>
+                    {{/each}}
+                  </select>
+                </label>
+                <input type="hidden" name="system.transicoes.{{indice}}.imagem" value="{{imagem}}">
+              {{else}}
+                <input type="hidden" name="system.transicoes.{{indice}}.cenaUuid" value="{{cenaUuid}}">
+                <div class="op2-campo">
+                  <span>{{localize "OP2.Transicao.Imagem"}}</span>
+                  <file-picker name="system.transicoes.{{indice}}.imagem" type="image" value="{{imagem}}"
+                    {{#unless @root.editavel}}disabled{{/unless}}></file-picker>
+                </div>
+              {{/if}}
               <div class="op2-poi__transicao-acoes">
                 <button type="button" class="op2-botao op2-botao--pequeno op2-poi__transicao-mostrar" data-action="mostrarTransicao" data-id="{{id}}"
-                  data-tooltip="{{#if (op2Eq modo 'janela')}}{{localize 'OP2.Transicao.MostrarJanelaDica'}}{{else}}{{localize 'OP2.Transicao.MostrarCenaDica'}}{{/if}}">
+                  data-tooltip="{{#if (op2Eq modo 'janela')}}{{localize 'OP2.Transicao.MostrarJanelaDica'}}{{else if ehExistente}}{{localize 'OP2.Transicao.MostrarExistenteDica'}}{{else}}{{localize 'OP2.Transicao.MostrarCenaDica'}}{{/if}}">
                   <i class="fa-solid fa-play" aria-hidden="true"></i> {{localize "OP2.Transicao.Mostrar"}}
                 </button>
                 <button type="button" class="op2-botao op2-botao--pequeno{{#if padrao}} ativo{{/if}}" data-action="marcarTransicaoPadrao" data-id="{{id}}"
                   aria-pressed="{{#if padrao}}true{{else}}false{{/if}}" data-tooltip="{{localize 'OP2.Transicao.PadraoDica'}}">
                   <i class="fa-{{#if padrao}}solid{{else}}regular{{/if}} fa-star" aria-hidden="true"></i> {{localize "OP2.Transicao.Padrao"}}
                 </button>
-                {{#if cenaUuid}}<span class="op2-ajuda op2-poi__transicao-cena"><i class="fa-solid fa-map" aria-hidden="true"></i> {{localize "OP2.Transicao.CenaCriada"}}</span>{{/if}}
+                {{#if cenaCriada}}<span class="op2-ajuda op2-poi__transicao-cena"><i class="fa-solid fa-map" aria-hidden="true"></i> {{localize "OP2.Transicao.CenaCriada"}}</span>{{/if}}
                 {{#if @root.editavel}}
                   <button type="button" class="op2-botao-icone op2-poi__lixeira" data-action="removerTransicao" data-id="{{id}}"
                     aria-label="{{localize 'OP2.Transicao.Remover'}}" data-tooltip="{{localize 'OP2.Transicao.Remover'}}">

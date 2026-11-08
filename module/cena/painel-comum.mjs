@@ -16,7 +16,7 @@
  * lado do jogador.
  */
 import { excluirDesafio, excluirPontoDeInteresse } from "./excluir-desafio.mjs";
-import { escolherEMostrar } from "./transicoes.mjs";
+import { escolherEMostrar, transicaoValida } from "./transicoes.mjs";
 import { quemSustenta } from "./acoes-desafio.mjs";
 import { escolherCategoria, criarDesafioDaCategoria, rotuloCategoria } from "./categorias-desafio.mjs";
 import { SYSTEM_ID } from "../config.mjs";
@@ -294,7 +294,7 @@ export function PainelInvestigacaoMixin(Base) {
           pericias: ehGM ? periciasDoQuadro(poi.system.informacoes).join(" ") : "",
           oculto,
           trancado: pontoTrancado(poi),
-          temTransicoes: ehGM && (poi.system.transicoes ?? []).some((t) => t.imagem),
+          temTransicoes: ehGM && (poi.system.transicoes ?? []).some(transicaoValida),
           marcado: temMarcador(uuid),
           recolhido: recolhidos.has(uuid),
           notasAbertas: notas.has(uuid),

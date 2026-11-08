@@ -15,7 +15,9 @@ import { textoPuroDaLinha } from "../cena/texto-linha.mjs";
 import { desafioResolvido } from "../cena/desafios.mjs";
 import { pontoTrancado, liberarAcesso, trancarDeNovo, criarDesafioDoPonto } from "../cena/acesso-poi.mjs";
 import { excluirDesafio, excluirPontoDeInteresse } from "../cena/excluir-desafio.mjs";
-import { novaTransicao, marcarPadrao, nomeDaTransicao, mostrarTransicao, escolherEMostrar } from "../cena/transicoes.mjs";
+import {
+  novaTransicao, marcarPadrao, nomeDaTransicao, mostrarTransicao, escolherEMostrar, transicaoValida,
+} from "../cena/transicoes.mjs";
 
 export class PontoInteresseSheet extends OP2ItemSheet {
   static DEFAULT_OPTIONS = {
@@ -298,10 +300,22 @@ export class PontoInteresseSheet extends OP2ItemSheet {
       ferramentasDisponiveis: FERRAMENTAS_POI
         .filter((chave) => !ferramentas[chave] && !this.#ferramentasNovas.has(chave))
         .map((chave) => ({ chave, rotulo: rotuloFerramenta(chave) })),
-      transicoes: this.item.system.transicoes.map((t, indice) => ({
-        ...t, indice, nomeSugerido: nomeDaTransicao({ ...t, nome: "" }, this.item),
-      })),
-      temTransicoes: this.item.system.transicoes.some((t) => t.imagem),
+      transicoes: this.item.system.transicoes.map((t, indice) => {
+        const cena = t.cenaUuid ? fromUuidSync(t.cenaUuid) : null;
+        return {
+          ...t, indice,
+          nomeSugerido: nomeDaTransicao({ ...t, nome: "" }, this.item),
+          ehExistente: t.modo === "existente",
+          // A miniatura: a imagem, ou a da cena escolhida.
+          miniatura: t.modo === "existente" ? (cena?.thumb ?? "") : t.imagem,
+          cenaCriada: t.modo === "cena" && Boolean(cena),
+        };
+      }),
+      // As cenas do mundo para "levar para cena existente" (as de transição por último).
+      cenasDoMundo: game.scenes.contents
+        .map((c) => ({ uuid: c.uuid, nome: c.name, transicao: Boolean(c.getFlag("ordem-paranormal-2e", "transicao")) }))
+        .sort((a, b) => (a.transicao - b.transicao) || a.nome.localeCompare(b.nome)),
+      temTransicoes: this.item.system.transicoes.some(transicaoValida),
       // Os desafios deste ponto: a porta trancada do Depósito A é do Depósito A.
       desafiosVinculados: this.item.system.desafios.map((uuid) => fromUuidSync(uuid))
         .filter((d) => d?.type === "desafio-acesso")

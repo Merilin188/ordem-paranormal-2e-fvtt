@@ -113,9 +113,11 @@ export class PontoInteresseData extends foundry.abstract.TypeDataModel {
         id: new StringField({ required: true, blank: false }),
         nome: new StringField({ required: true, initial: "", blank: true }),
         imagem: new StringField({ required: true, initial: "", blank: true }),
-        modo: new StringField({ required: true, initial: "cena", choices: ["cena", "janela"], blank: false }),
+        // "cena": cria uma cena a partir da imagem (no primeiro uso); "existente": leva
+        // para uma cena que o mestre escolheu; "janela": abre a imagem para todos.
+        modo: new StringField({ required: true, initial: "cena", choices: ["cena", "existente", "janela"], blank: false }),
         padrao: new BooleanField({ required: true, initial: false }),
-        // A cena criada no primeiro uso (modo "cena"), reaproveitada depois.
+        // A cena criada no primeiro uso (modo "cena") ou a escolhida (modo "existente").
         cenaUuid: new StringField({ required: true, initial: "", blank: true }),
       }), { initial: [] }),
       // Desafios de acesso deste ponto (uuids de Item): a porta trancada do Depósito A
