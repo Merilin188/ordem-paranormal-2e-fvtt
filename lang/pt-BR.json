@@ -1928,7 +1928,9 @@
       "Finta": "+2 passos: fintou {alvo} (Fintar vencido).",
       "Mira": "+1d6: mirou em {alvo} na rodada anterior (Mirar).",
       "MirarRotulo": "Mirar",
-      "ReducaoAtaque": "Redução de {passos} passo(s) até o fim da rodada ({motivo}): {de} → {para}."
+      "ReducaoAtaque": "Redução de {passos} passo(s) até o fim da rodada ({motivo}): {de} → {para}.",
+      "Fadiga": "Fadiga de {passos} rodada(s) sustentando: −{passos} passo(s) em {pericia}, {de} → {para}.",
+      "FadigaPiso": "Fadiga de {passos} rodada(s) sustentando: {pericia} já está no {de}, o menor dado, e não desce mais."
     },
     "Acesso": {
       "Titulo": "Desafio de acesso",

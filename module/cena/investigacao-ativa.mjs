@@ -86,9 +86,21 @@ export async function adicionarParticipante(investigacao, atorUuid) {
   await investigacao.update({ "system.participantes": [...participantes, atorUuid] });
 }
 
+/**
+ * Tira o ator do roster e de tudo que aponta para ele (ordem, ocultos, já agiu). O
+ * uuid gravado pode não ser o mesmo que a linha mostra (ator de token gravado por um
+ * caminho, resolvido por outro): sai tudo que resolve para o mesmo ator.
+ */
 export async function removerParticipante(investigacao, atorUuid) {
-  const participantes = investigacao.system.participantes.filter((uuid) => uuid !== atorUuid);
-  await investigacao.update({ "system.participantes": participantes });
+  const mesmo = (uuid) => uuid === atorUuid || globalThis.fromUuidSync?.(uuid)?.uuid === atorUuid;
+  const sem = (lista) => (lista ?? []).filter((uuid) => !mesmo(uuid));
+  const s = investigacao.system;
+  await investigacao.update({
+    "system.participantes": sem(s.participantes),
+    "system.ordemParticipantes": sem(s.ordemParticipantes),
+    "system.participantesOcultos": sem(s.participantesOcultos),
+    "system.jaAgiram": sem(s.jaAgiram),
+  });
 }
 
 export async function definirOrdemParticipantes(investigacao, ordem) {

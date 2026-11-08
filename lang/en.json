@@ -1928,7 +1928,9 @@
       "Finta": "+2 steps: feinted {alvo} (Feint won).",
       "Mira": "+1d6: aimed at {alvo} last round (Aim).",
       "MirarRotulo": "Aim",
-      "ReducaoAtaque": "{passos} step(s) reduced until the end of the round ({motivo}): {de} → {para}."
+      "ReducaoAtaque": "{passos} step(s) reduced until the end of the round ({motivo}): {de} → {para}.",
+      "Fadiga": "Fatigue from {passos} round(s) holding: −{passos} step(s) in {pericia}, {de} → {para}.",
+      "FadigaPiso": "Fatigue from {passos} round(s) holding: {pericia} is already at {de}, the lowest die, and goes no lower."
     },
     "Acesso": {
       "Titulo": "Access challenge",

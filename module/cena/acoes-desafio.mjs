@@ -312,10 +312,19 @@ export async function testarFadigaDeSustentar(ator) {
   const atributo = ator.system.atributos[pericia.atributo];
   const rotulo = `${game.i18n.localize("OP2.Desafio.Sustentar")} — ${game.i18n.localize("OP2.Desafio.Fadiga")} ${fadiga}`;
 
+  // Regra de ouro: o card diz que o dado desceu, quanto e por quê.
+  const de = pericia.dadoEfetivo;
+  const para = stepDie(de, -fadiga);
+  const nota = game.i18n.format(para === de ? "OP2.Motivo.FadigaPiso" : "OP2.Motivo.Fadiga", {
+    passos: fadiga, pericia: rotuloDePericia("atletismo"), de, para,
+  });
   const roll = OP2Roll.paraComponentes([
-    { chave: "pericia.atletismo", rotulo: rotuloDePericia("atletismo"), tipo: "pericia", dado: stepDie(pericia.dadoEfetivo, -fadiga) },
+    { chave: "pericia.atletismo", rotulo: rotuloDePericia("atletismo"), tipo: "pericia", dado: para },
     { chave: `atributo.${pericia.atributo}`, rotulo: game.i18n.localize(`OP2.Atributo.${pericia.atributo}`), tipo: "atributo", dado: atributo.dadoEfetivo },
-  ], { dt: lerConfig("dtPadrao"), escopoCritico: lerConfig("escopoCritico"), rotulo, atorId: ator.id });
+  ], {
+    dt: lerConfig("dtPadrao"), escopoCritico: lerConfig("escopoCritico"), rotulo, atorId: ator.id,
+    ajustes: [{ tipo: "texto", texto: nota }],
+  });
   await roll.evaluate();
   await enviarParaChat(roll, ator);
 
