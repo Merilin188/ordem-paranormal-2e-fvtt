@@ -1960,6 +1960,29 @@
       "EscolherAbordagensAjuda": "Marque as abordagens que fazem sentido neste obstáculo. Dá para mudar depois, na ficha do desafio.",
       "Criar": "Criar",
       "ExcluirDesafio": "Excluir desafio (de vez)"
+    },
+    "Transicao": {
+      "Titulo": "Transições de cena",
+      "Ajuda": "Leve a mesa até a imagem deste lugar: trocando de cena (todos os jogadores vão para ela) ou abrindo uma janela grande com a imagem, sem sair da cena. Só o mestre vê isto. A padrão é a do botão rápido no painel e no topo da ficha.",
+      "Nova": "Nova transição de cena",
+      "Nome": "Nome da transição",
+      "Modo": "Como mostrar",
+      "ModoCena": "Levar para uma cena",
+      "ModoJanela": "Abrir numa janela",
+      "Mostrar": "Mostrar aos jogadores",
+      "MostrarCenaDica": "Ativa a cena desta imagem (criada no primeiro uso) e leva todos os jogadores para ela.",
+      "MostrarJanelaDica": "Abre a imagem numa janela grande para todos, sem trocar de cena.",
+      "Padrao": "Padrão",
+      "PadraoDica": "A transição usada pelo botão rápido do painel e do topo da ficha.",
+      "CenaCriada": "cena criada",
+      "Remover": "Remover transição",
+      "LevarAMesa": "Levar a mesa",
+      "LevarAMesaDica": "Transição de cena: leva os jogadores até a imagem deste ponto (só o mestre vê este botão).",
+      "Escolher": "Levar a mesa: {ponto}",
+      "EscolherAjuda": "Este ponto tem mais de uma transição. Qual mostrar?",
+      "SemImagem": "Esta transição ainda não tem imagem.",
+      "Nenhuma": "Este ponto não tem transição de cena com imagem.",
+      "Levou": "A mesa foi para \"{cena}\". Para voltar, ative \"{volta}\" na barra de cenas."
     }
   }
 }

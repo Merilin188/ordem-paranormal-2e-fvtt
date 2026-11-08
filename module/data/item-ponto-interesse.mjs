@@ -107,6 +107,17 @@ export class PontoInteresseData extends foundry.abstract.TypeDataModel {
 
       /** O Laser de Varredura revela quais POIs reagem às demais ferramentas (spec §9). */
       reveladoPorLaser: new BooleanField({ required: true, initial: false }),
+      // Transições de cena (só do mestre): levar a mesa até a imagem do lugar, trocando
+      // de cena ou abrindo uma janela para todos (`module/cena/transicoes.mjs`).
+      transicoes: new ArrayField(new SchemaField({
+        id: new StringField({ required: true, blank: false }),
+        nome: new StringField({ required: true, initial: "", blank: true }),
+        imagem: new StringField({ required: true, initial: "", blank: true }),
+        modo: new StringField({ required: true, initial: "cena", choices: ["cena", "janela"], blank: false }),
+        padrao: new BooleanField({ required: true, initial: false }),
+        // A cena criada no primeiro uso (modo "cena"), reaproveitada depois.
+        cenaUuid: new StringField({ required: true, initial: "", blank: true }),
+      }), { initial: [] }),
       // Desafios de acesso deste ponto (uuids de Item): a porta trancada do Depósito A
       // é do Depósito A. Um desafio também pode ficar solto, sem ponto (achado em uso
       // real: "geralmente o desafio é atrelado a um ponto, e não dá pra saber").

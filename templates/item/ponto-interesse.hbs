@@ -2,6 +2,12 @@
   <header class="op2-item-ficha__topo">
     <img src="{{item.img}}" alt="" data-action="editImage" data-edit="img">
     <input type="text" class="op2-nome" name="name" value="{{item.name}}" {{#unless editavel}}disabled{{/unless}}>
+    {{#if ehGM}}{{#if temTransicoes}}
+      <button type="button" class="op2-botao op2-botao--pequeno op2-poi__levar" data-action="levarAMesa"
+        aria-label="{{localize 'OP2.Transicao.LevarAMesa'}}" data-tooltip="{{localize 'OP2.Transicao.LevarAMesaDica'}}">
+        <i class="fa-solid fa-panorama" aria-hidden="true"></i>
+      </button>
+    {{/if}}{{/if}}
     {{#if ehGM}}{{#if editavel}}
       <button type="button" class="op2-botao op2-botao--pequeno op2-botao--perigo op2-poi__excluir" data-action="excluirPonto"
         aria-label="{{localize 'OP2.POI.Excluir'}}" data-tooltip="{{localize 'OP2.POI.Excluir'}}">
@@ -221,6 +227,58 @@
         </button>
       {{/if}}
     </fieldset>
+
+    {{!-- Transições de cena: só o mestre vê. Leva a mesa até a imagem do lugar,
+          trocando de cena ou abrindo uma janela grande para todos. --}}
+    {{#if ehGM}}
+      <fieldset class="op2-poi__transicoes">
+        <legend><i class="fa-solid fa-panorama" aria-hidden="true"></i> {{localize "OP2.Transicao.Titulo"}}</legend>
+        <p class="op2-ajuda">{{localize "OP2.Transicao.Ajuda"}}</p>
+        <ol class="op2-poi__transicoes-lista">
+          {{#each transicoes}}
+            <li class="op2-poi__transicao{{#if padrao}} op2-poi__transicao--padrao{{/if}}">
+              <input type="hidden" name="system.transicoes.{{indice}}.id" value="{{id}}">
+              <input type="hidden" name="system.transicoes.{{indice}}.cenaUuid" value="{{cenaUuid}}">
+              <input type="hidden" name="system.transicoes.{{indice}}.padrao" data-dtype="Boolean"
+                value="{{#if padrao}}true{{else}}false{{/if}}">
+              <div class="op2-poi__transicao-linha">
+                {{#if imagem}}<img class="op2-poi__transicao-miniatura" src="{{imagem}}" alt="">{{/if}}
+                <input type="text" name="system.transicoes.{{indice}}.nome" value="{{nome}}"
+                  placeholder="{{nomeSugerido}}" aria-label="{{localize 'OP2.Transicao.Nome'}}" {{#unless @root.editavel}}disabled{{/unless}}>
+                <select name="system.transicoes.{{indice}}.modo" aria-label="{{localize 'OP2.Transicao.Modo'}}" {{#unless @root.editavel}}disabled{{/unless}}>
+                  <option value="cena" {{#if (op2Eq modo "cena")}}selected{{/if}}>{{localize "OP2.Transicao.ModoCena"}}</option>
+                  <option value="janela" {{#if (op2Eq modo "janela")}}selected{{/if}}>{{localize "OP2.Transicao.ModoJanela"}}</option>
+                </select>
+              </div>
+              <file-picker name="system.transicoes.{{indice}}.imagem" type="image" value="{{imagem}}"
+                {{#unless @root.editavel}}disabled{{/unless}}></file-picker>
+              <div class="op2-poi__transicao-acoes">
+                <button type="button" class="op2-botao op2-botao--pequeno op2-poi__transicao-mostrar" data-action="mostrarTransicao" data-id="{{id}}"
+                  data-tooltip="{{#if (op2Eq modo 'janela')}}{{localize 'OP2.Transicao.MostrarJanelaDica'}}{{else}}{{localize 'OP2.Transicao.MostrarCenaDica'}}{{/if}}">
+                  <i class="fa-solid fa-play" aria-hidden="true"></i> {{localize "OP2.Transicao.Mostrar"}}
+                </button>
+                <button type="button" class="op2-botao op2-botao--pequeno{{#if padrao}} ativo{{/if}}" data-action="marcarTransicaoPadrao" data-id="{{id}}"
+                  aria-pressed="{{#if padrao}}true{{else}}false{{/if}}" data-tooltip="{{localize 'OP2.Transicao.PadraoDica'}}">
+                  <i class="fa-{{#if padrao}}solid{{else}}regular{{/if}} fa-star" aria-hidden="true"></i> {{localize "OP2.Transicao.Padrao"}}
+                </button>
+                {{#if cenaUuid}}<span class="op2-ajuda op2-poi__transicao-cena"><i class="fa-solid fa-map" aria-hidden="true"></i> {{localize "OP2.Transicao.CenaCriada"}}</span>{{/if}}
+                {{#if @root.editavel}}
+                  <button type="button" class="op2-botao-icone op2-poi__lixeira" data-action="removerTransicao" data-id="{{id}}"
+                    aria-label="{{localize 'OP2.Transicao.Remover'}}" data-tooltip="{{localize 'OP2.Transicao.Remover'}}">
+                    <i class="fa-solid fa-trash" aria-hidden="true"></i>
+                  </button>
+                {{/if}}
+              </div>
+            </li>
+          {{/each}}
+        </ol>
+        {{#if editavel}}
+          <button type="button" class="op2-botao op2-botao--pequeno" data-action="adicionarTransicao">
+            <i class="fa-solid fa-plus" aria-hidden="true"></i> {{localize "OP2.Transicao.Nova"}}
+          </button>
+        {{/if}}
+      </fieldset>
+    {{/if}}
   </section>
 
   {{!-- Descrição contextual e ferramentas são só do mestre (spec §6.2). --}}

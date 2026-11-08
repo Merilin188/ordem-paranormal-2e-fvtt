@@ -116,3 +116,18 @@ test("perícias alternativas: a mesma linha achada por qualquer uma delas", () =
   assert.equal(grupoDaLinha(quadro[0]), "aptidao.artes|aptidao.folclore");
   assert.equal(aceitaPericia(quadro[2], "sobrevivencia"), false);
 });
+
+test("transições: a padrão é a marcada, senão a primeira com imagem; só uma padrão", async () => {
+  const { transicaoPadrao, marcarPadrao, nomeDaTransicao } = await import("../cena/transicoes.mjs");
+  const lista = [
+    { id: "a", imagem: "", padrao: true },
+    { id: "b", imagem: "x/HANDOUT%20NICHO%20PAREDE%20SEM%20RUNAS.jpg", padrao: false },
+    { id: "c", imagem: "x/HANDOUT NICHO PAREDE.jpg", padrao: false },
+  ];
+  assert.equal(transicaoPadrao(lista).id, "b");
+  assert.equal(transicaoPadrao(marcarPadrao(lista, "c")).id, "c");
+  assert.deepEqual(marcarPadrao(lista, "c").map((t) => t.padrao), [false, false, true]);
+  assert.equal(transicaoPadrao([]), null);
+  assert.equal(nomeDaTransicao(lista[1]), "HANDOUT NICHO PAREDE SEM RUNAS");
+  assert.equal(nomeDaTransicao({ ...lista[1], nome: " Nichos " }), "Nichos");
+});

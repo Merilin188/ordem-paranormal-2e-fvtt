@@ -15,6 +15,7 @@ import { textoPuroDaLinha } from "../cena/texto-linha.mjs";
 import { desafioResolvido } from "../cena/desafios.mjs";
 import { pontoTrancado, liberarAcesso, trancarDeNovo, criarDesafioDoPonto } from "../cena/acesso-poi.mjs";
 import { excluirDesafio, excluirPontoDeInteresse } from "../cena/excluir-desafio.mjs";
+import { novaTransicao, marcarPadrao, nomeDaTransicao, mostrarTransicao, escolherEMostrar } from "../cena/transicoes.mjs";
 
 export class PontoInteresseSheet extends OP2ItemSheet {
   static DEFAULT_OPTIONS = {
@@ -38,6 +39,11 @@ export class PontoInteresseSheet extends OP2ItemSheet {
       excluirDesafioVinculado: PontoInteresseSheet.#excluirDesafioVinculado,
       excluirPonto: PontoInteresseSheet.#excluirPonto,
       adicionarAlternativa: PontoInteresseSheet.#adicionarAlternativa,
+      adicionarTransicao: PontoInteresseSheet.#adicionarTransicao,
+      removerTransicao: PontoInteresseSheet.#removerTransicao,
+      marcarTransicaoPadrao: PontoInteresseSheet.#marcarTransicaoPadrao,
+      mostrarTransicao: PontoInteresseSheet.#mostrarTransicao,
+      levarAMesa: PontoInteresseSheet.#levarAMesa,
       removerAlternativa: PontoInteresseSheet.#removerAlternativa,
     },
   };
@@ -135,6 +141,33 @@ export class PontoInteresseSheet extends OP2ItemSheet {
       });
     }
     return dados;
+  }
+
+  static async #adicionarTransicao() {
+    const transicoes = this.item.system.toObject().transicoes;
+    transicoes.push(novaTransicao({ padrao: transicoes.length === 0 }));
+    await this.item.update({ "system.transicoes": transicoes });
+  }
+
+  static async #removerTransicao(_evento, alvo) {
+    let transicoes = this.item.system.toObject().transicoes.filter((t) => t.id !== alvo.dataset.id);
+    // Tirou a padrão: a primeira que sobrou assume.
+    if (transicoes.length && !transicoes.some((t) => t.padrao)) transicoes = marcarPadrao(transicoes, transicoes[0].id);
+    await this.item.update({ "system.transicoes": transicoes });
+  }
+
+  static async #marcarTransicaoPadrao(_evento, alvo) {
+    await this.item.update({ "system.transicoes": marcarPadrao(this.item.system.toObject().transicoes, alvo.dataset.id) });
+  }
+
+  static async #mostrarTransicao(_evento, alvo) {
+    // Salva o que está digitado antes (imagem recém-escolhida, modo trocado).
+    await this.submit();
+    await mostrarTransicao(this.item, alvo.dataset.id);
+  }
+
+  static async #levarAMesa() {
+    await escolherEMostrar(this.item);
   }
 
   static async #excluirPonto() {
@@ -265,6 +298,10 @@ export class PontoInteresseSheet extends OP2ItemSheet {
       ferramentasDisponiveis: FERRAMENTAS_POI
         .filter((chave) => !ferramentas[chave] && !this.#ferramentasNovas.has(chave))
         .map((chave) => ({ chave, rotulo: rotuloFerramenta(chave) })),
+      transicoes: this.item.system.transicoes.map((t, indice) => ({
+        ...t, indice, nomeSugerido: nomeDaTransicao({ ...t, nome: "" }, this.item),
+      })),
+      temTransicoes: this.item.system.transicoes.some((t) => t.imagem),
       // Os desafios deste ponto: a porta trancada do Depósito A é do Depósito A.
       desafiosVinculados: this.item.system.desafios.map((uuid) => fromUuidSync(uuid))
         .filter((d) => d?.type === "desafio-acesso")

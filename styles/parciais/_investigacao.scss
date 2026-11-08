@@ -1716,3 +1716,46 @@ details[open] > summary.op2-painel-titulo::before { transform: rotate(45deg); }
   text-transform: uppercase;
   color: var(--op2-texto-fraco);
 }
+
+// Transições de cena (só do mestre), no fim da aba Investigação da ficha do ponto.
+.op2-poi__transicoes-lista {
+  list-style: none;
+  margin: 0 0 var(--op2-e2);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--op2-e2);
+}
+.op2-poi__transicao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--op2-e1);
+  padding: var(--op2-e2);
+  border: 1px solid var(--op2-linha);
+  &.op2-poi__transicao--padrao { border-color: var(--op2-vermelho); }
+  file-picker { display: flex; gap: var(--op2-e1); }
+  file-picker input { flex: 1 1 auto; min-width: 0; }
+}
+.op2-poi__transicao-linha {
+  display: flex;
+  align-items: center;
+  gap: var(--op2-e2);
+  input[type="text"] { flex: 1 1 auto; min-width: 0; }
+  select { flex: 0 0 auto; }
+}
+.op2-poi__transicao-miniatura {
+  width: 4.5rem;
+  height: 3rem;
+  object-fit: cover;
+  border: 1px solid var(--op2-linha);
+  flex: 0 0 auto;
+}
+.op2-poi__transicao-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--op2-e2);
+  .op2-poi__lixeira { margin-left: auto; }
+}
+.op2-poi__transicao-cena { margin: 0; }
+.op2-poi .op2-item-ficha__topo .op2-poi__levar { flex: 0 0 auto; border-radius: 0; }

@@ -1960,6 +1960,29 @@
       "EscolherAbordagensAjuda": "Tick the approaches that make sense for this obstacle. You can change them later on the challenge sheet.",
       "Criar": "Create",
       "ExcluirDesafio": "Delete challenge (for good)"
+    },
+    "Transicao": {
+      "Titulo": "Scene transitions",
+      "Ajuda": "Take the table to the image of this place: switching scenes (every player goes there) or opening a large window with the image, without leaving the scene. Only the GM sees this. The default one is used by the quick button on the panel and at the top of the sheet.",
+      "Nova": "New scene transition",
+      "Nome": "Transition name",
+      "Modo": "How to show",
+      "ModoCena": "Take to a scene",
+      "ModoJanela": "Open in a window",
+      "Mostrar": "Show to players",
+      "MostrarCenaDica": "Activates the scene for this image (created on first use) and takes every player there.",
+      "MostrarJanelaDica": "Opens the image in a large window for everyone, without switching scenes.",
+      "Padrao": "Default",
+      "PadraoDica": "The transition used by the quick button on the panel and at the top of the sheet.",
+      "CenaCriada": "scene created",
+      "Remover": "Remove transition",
+      "LevarAMesa": "Take the table",
+      "LevarAMesaDica": "Scene transition: takes the players to this point's image (only the GM sees this button).",
+      "Escolher": "Take the table: {ponto}",
+      "EscolherAjuda": "This point has more than one transition. Which one to show?",
+      "SemImagem": "This transition has no image yet.",
+      "Nenhuma": "This point has no scene transition with an image.",
+      "Levou": "The table went to \"{cena}\". To come back, activate \"{volta}\" in the scene bar."
     }
   }
 }
