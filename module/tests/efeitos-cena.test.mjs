@@ -35,6 +35,12 @@ test("presets: Home e Profundezas; profundezas sem desfoque e mais leve", async 
   assert.equal(presetDaCena({ name: "Home", id: "a" }, conf), "home");
   assert.equal(presetDaCena({ name: "profundezas da mata", id: "b" }, conf), "profundezas");
   assert.equal(presetDaCena({ name: "Limiar da Mata", id: "c" }, conf), null);
+  const { CENAS_DA_MATA } = await import("../ui/efeitos-cena.mjs");
+  const tres = { home: "Home", profundezas: CENAS_DA_MATA };
+  for (const nome of ["Profundezas da Mata", "rio das brumas", "Encosta Escura"]) {
+    assert.equal(presetDaCena({ name: nome, id: "x" }, tres), "profundezas", nome);
+  }
+  assert.equal(presetDaCena({ name: "Rio", id: "x" }, tres), null);
   assert.ok(!EFEITOS_PROFUNDEZAS.some((e) => e.action.includes("Blur")));
   const shake = (lista) => lista.find((e) => e.action === "fx.screenShake.start").intensityPx;
   const smear = (lista) => lista.find((e) => e.action === "fx.screenSmear.start").maxStrength;

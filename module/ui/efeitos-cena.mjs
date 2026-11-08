@@ -3,10 +3,10 @@
  * Efeitos ao entrar numa cena, por preset:
  * - "Home": tremor lento, desfoque que pulsa e rastro de movimento (FX Bus), mais
  *   vagalumes subindo.
- * - "Profundezas da Mata": os mesmos vagalumes, tremor e rastro mais leves (sem
- *   desfoque) e a mata que observa: olhos que abrem e fecham e silhuetas que surgem e
- *   somem entre as árvores. Durante a furtividade, a mata fica mais atenta (mais
- *   olhos, olhos que procuram, vultos que passam) e um batimento pulsa nas bordas.
+ * - A mata que observa ("Profundezas da Mata", "Rio das Brumas", "Encosta Escura"):
+ *   os mesmos vagalumes, tremor e rastro mais leves (sem desfoque) e olhos que abrem,
+ *   piscam e somem entre as árvores. Durante a furtividade, a mata fica mais atenta
+ *   (mais olhos, olhos que procuram) e um batimento pulsa nas bordas.
  *
  * Roda direto no cliente de cada um (jogadores e mestre), pelos handlers do runtime do FX Bus
  * (`globalThis.fxbus.handlers`). O `emit()` do FX Bus não serve aqui: jogador comum
@@ -40,11 +40,20 @@ export const PRESETS = Object.freeze({
 });
 const PARADAS = ["fx.screenShake.stop", "fx.screenBlur.stop", "fx.screenSmear.stop"];
 
-/** A cena configurada (nome ou id, sem diferenciar maiúsculas); vazio desliga. */
+/** Cenas padrão da mata que observa. */
+export const CENAS_DA_MATA = "Profundezas da Mata; Rio das Brumas; Encosta Escura";
+
+/**
+ * A cena está na configuração? Aceita várias, separadas por ";" ou ",", cada uma por
+ * nome ou id, sem diferenciar maiúsculas; vazio desliga.
+ */
 export function cenaTemEfeitos(cena, configurada) {
-  const alvo = String(configurada ?? "").trim().toLowerCase();
-  if (!alvo || !cena) return false;
-  return String(cena.name ?? "").trim().toLowerCase() === alvo || String(cena.id ?? "").toLowerCase() === alvo;
+  if (!cena) return false;
+  const nome = String(cena.name ?? "").trim().toLowerCase();
+  const id = String(cena.id ?? "").toLowerCase();
+  return String(configurada ?? "").split(/[;,]/)
+    .map((alvo) => alvo.trim().toLowerCase())
+    .some((alvo) => alvo && (alvo === nome || alvo === id));
 }
 
 /** Qual preset vale na cena: "home", "profundezas" ou null. */
@@ -204,7 +213,7 @@ function pararVagalumes() {
   enxame = null;
 }
 
-/* -- a mata que observa: olhos e silhuetas -------------------------------------- */
+/* -- a mata que observa: olhos ------------------------------------------------- */
 
 /** Olhos: vermelhos, brancos-pálidos e um âmbar raro. [cor, peso] */
 export const CORES_OLHOS = Object.freeze([[0xff2a1f, 3], [0xfff1d2, 4], [0xffc23a, 1]]);
@@ -221,11 +230,11 @@ export function envelope(idade, { entrada, fica, saida }) {
   return Math.max(0, r);
 }
 
-/** Ritmo da mata: com que frequência nascem olhos e vultos (multiplicador) e quantos cabem. */
+/** Ritmo da mata: com que frequência nascem olhos (multiplicador) e quantos cabem. */
 export function ritmoDaMata(furtividade) {
-  if (!furtividade?.ativa) return { olhos: 1, silhuetas: 1, maxOlhos: 6, procuram: false };
-  if (furtividade.fase === "criaturas") return { olhos: 3, silhuetas: 2.2, maxOlhos: 12, procuram: true };
-  return { olhos: 2, silhuetas: 1.5, maxOlhos: 9, procuram: false };
+  if (!furtividade?.ativa) return { olhos: 1, maxOlhos: 6, procuram: false };
+  if (furtividade.fase === "criaturas") return { olhos: 3, maxOlhos: 12, procuram: true };
+  return { olhos: 2, maxOlhos: 9, procuram: false };
 }
 
 let mata = null;
@@ -270,68 +279,11 @@ function criarOlhos(area, ritmo) {
   par.alpha = 0;
   mata.container.addChild(par);
   return {
-    tipo: "olhos", obj: par, idade: 0, x: ponto.x, y: ponto.y,
+    obj: par, idade: 0, x: ponto.x, y: ponto.y,
     tempos: { entrada: 1 + Math.random(), fica: 2 + Math.random() * 4.5, saida: 1.2 + Math.random() },
     piscaEm: 1.5 + Math.random() * 2.5, piscando: 0,
     // Na fase das criaturas, os olhos varrem a mata devagar, de um lado para o outro.
     vx: ritmo.procuram ? (Math.random() < 0.5 ? -1 : 1) * (6 + Math.random() * 8) : 0,
-  };
-}
-
-/** Vulto escuro: cabeça, tronco afinando, braços longos e pernas finas (em px de tela). */
-function desenharSilhueta(h, variante) {
-  const g = new PIXI.Graphics();
-  const cor = 0x040208;
-  const w = h * 0.2;
-  const cabecaY = -h * 0.9;
-  const inclina = variante === 2 ? h * 0.06 : 0;
-  g.beginFill(cor, 1);
-  g.drawEllipse(inclina, cabecaY, h * 0.065, h * 0.085);
-  g.drawPolygon([
-    -w / 2 + inclina * 0.6, -h * 0.8, w / 2 + inclina * 0.6, -h * 0.8,
-    w * 0.28, -h * 0.4, w * 0.1, -h * 0.36, -w * 0.1, -h * 0.36, -w * 0.28, -h * 0.4,
-  ]);
-  // Pernas
-  g.drawPolygon([-w * 0.22, -h * 0.4, -w * 0.08, -h * 0.4, -w * 0.12, 0, -w * 0.3, 0]);
-  g.drawPolygon([w * 0.08, -h * 0.4, w * 0.22, -h * 0.4, w * 0.3, 0, w * 0.12, 0]);
-  // Braços longos, quase até o chão
-  g.drawPolygon([-w / 2, -h * 0.78, -w * 0.38, -h * 0.76, -w * 0.62, -h * 0.22, -w * 0.74, -h * 0.24]);
-  g.drawPolygon([w / 2, -h * 0.78, w * 0.38, -h * 0.76, w * 0.62, -h * 0.22, w * 0.74, -h * 0.24]);
-  g.endFill();
-  if (variante === 1) {
-    // Galhada
-    g.lineStyle(h * 0.012, cor, 1);
-    for (const lado of [-1, 1]) {
-      g.moveTo(lado * h * 0.03, cabecaY - h * 0.06).lineTo(lado * h * 0.1, cabecaY - h * 0.2);
-      g.moveTo(lado * h * 0.07, cabecaY - h * 0.13).lineTo(lado * h * 0.15, cabecaY - h * 0.15);
-      g.moveTo(lado * h * 0.09, cabecaY - h * 0.18).lineTo(lado * h * 0.08, cabecaY - h * 0.27);
-    }
-  }
-  return { g, cabeca: { x: inclina, y: cabecaY } };
-}
-
-function criarSilhueta(area, ritmo) {
-  const ponto = pontoNaMata(area, 90);
-  if (!ponto) return null;
-  const h = 170 + Math.random() * 150;
-  const { g, cabeca } = desenharSilhueta(h, Math.floor(Math.random() * 3));
-  const vulto = new PIXI.Container();
-  vulto.addChild(g);
-  const olhos = parDeOlhos(mata.textura, corPorPeso(Math.random(), CORES_OLHOS), 1.6, h * 0.05);
-  olhos.position.set(cabeca.x, cabeca.y);
-  olhos.alpha = 0;
-  vulto.addChild(olhos);
-  vulto.filters = [new PIXI.BlurFilter(5)];
-  vulto.position.set(ponto.x, ponto.y + (h * 0.35) / area.escala);
-  vulto.scale.set(1 / area.escala);
-  vulto.alpha = 0;
-  mata.fundo.addChild(vulto);
-  return {
-    tipo: "silhueta", obj: vulto, olhos, idade: 0,
-    tempos: { entrada: 2.5 + Math.random() * 1.5, fica: 3 + Math.random() * 5, saida: 2.5 + Math.random() * 1.5 },
-    fase: Math.random() * Math.PI * 2,
-    // Na fase das criaturas, o vulto atravessa a mata.
-    vx: ritmo.procuram ? (Math.random() < 0.5 ? -1 : 1) * (12 + Math.random() * 14) : 0,
   };
 }
 
@@ -347,10 +299,7 @@ function iniciarAssombracao() {
   const container = new PIXI.Container();
   container.eventMode = "none";
   container.name = "op2-mata";
-  // Vultos atrás dos olhos soltos.
-  const fundo = new PIXI.Container();
-  container.addChild(fundo);
-  mata = { container, fundo, textura: texturaDoBrilho(), aparicoes: [], proximoOlho: 1.5, proximaSilhueta: 7, relogio: 0, furtividade: lerFurtividade() };
+  mata = { container, textura: texturaDoBrilho(), aparicoes: [], proximoOlho: 1.5, relogio: 0, furtividade: lerFurtividade() };
   // Atrás dos vagalumes: eles brilham por cima da mata.
   const indice = enxame ? canvas.stage.getChildIndex(enxame.container) : canvas.stage.children.length;
   canvas.stage.addChildAt(container, indice);
@@ -366,21 +315,12 @@ function iniciarAssombracao() {
       atualizarBatimento(mata.furtividade);
     }
     const ritmo = ritmoDaMata(mata.furtividade);
-    const olhosVivos = mata.aparicoes.filter((a) => a.tipo === "olhos").length;
-    const vultosVivos = mata.aparicoes.length - olhosVivos;
+    const olhosVivos = mata.aparicoes.length;
     mata.proximoOlho -= dt * ritmo.olhos;
     if (mata.proximoOlho <= 0) {
       mata.proximoOlho = 2 + Math.random() * 4;
       if (olhosVivos < ritmo.maxOlhos) {
         const novo = criarOlhos(area, ritmo);
-        if (novo) mata.aparicoes.push(novo);
-      }
-    }
-    mata.proximaSilhueta -= dt * ritmo.silhuetas;
-    if (mata.proximaSilhueta <= 0) {
-      mata.proximaSilhueta = 12 + Math.random() * 14;
-      if (vultosVivos < 2) {
-        const novo = criarSilhueta(area, ritmo);
         if (novo) mata.aparicoes.push(novo);
       }
     }
@@ -393,20 +333,13 @@ function iniciarAssombracao() {
         continue;
       }
       a.obj.scale.set(1 / area.escala);
-      if (a.tipo === "olhos") {
-        a.x += (a.vx * dt) / area.escala;
-        a.obj.position.set(a.x, a.y + (Math.sin(t * 0.7 + a.idade) * 1.5) / area.escala);
-        // Piscar: some por um instante de tempos em tempos.
-        a.piscaEm -= dt;
-        if (a.piscaEm <= 0) { a.piscando = 0.14; a.piscaEm = 2 + Math.random() * 3; }
-        if (a.piscando > 0) a.piscando -= dt;
-        a.obj.alpha = luz * (a.piscando > 0 ? 0.05 : 0.95);
-      } else {
-        a.obj.x += (a.vx * dt) / area.escala;
-        a.obj.rotation = Math.sin(t * 0.35 + a.fase) * 0.025;
-        a.obj.alpha = luz * 0.62;
-        a.olhos.alpha = luz > 0.6 ? Math.min(1, (luz - 0.6) * 2.5) : 0;
-      }
+      a.x += (a.vx * dt) / area.escala;
+      a.obj.position.set(a.x, a.y + (Math.sin(t * 0.7 + a.idade) * 1.5) / area.escala);
+      // Piscar: some por um instante de tempos em tempos.
+      a.piscaEm -= dt;
+      if (a.piscaEm <= 0) { a.piscando = 0.14; a.piscaEm = 2 + Math.random() * 3; }
+      if (a.piscando > 0) a.piscando -= dt;
+      a.obj.alpha = luz * (a.piscando > 0 ? 0.05 : 0.95);
     }
   };
   canvas.app.ticker.add(mata.passo);
@@ -473,9 +406,15 @@ export function registrarEfeitosDeCena() {
   });
   game.settings.register(SYSTEM_ID, "cenaEfeitosProfundezas", {
     name: "OP2.EfeitosCena.NomeProfundezas", hint: "OP2.EfeitosCena.DicaProfundezas",
-    scope: "world", config: true, type: String, default: "Profundezas da Mata",
+    scope: "world", config: true, type: String, default: CENAS_DA_MATA,
     onChange: () => { ligados = true; quandoPronto(); },
   });
   Hooks.on("canvasTearDown", () => { ligados = false; pararVagalumes(); pararAssombracao(); });
   Hooks.on("canvasReady", quandoPronto);
+  // Mundo que gravou a cena única de antes: passa a valer a lista das três.
+  Hooks.once("ready", () => {
+    if (game.user.isGM && ler("cenaEfeitosProfundezas") === "Profundezas da Mata") {
+      void game.settings.set(SYSTEM_ID, "cenaEfeitosProfundezas", CENAS_DA_MATA);
+    }
+  });
 }

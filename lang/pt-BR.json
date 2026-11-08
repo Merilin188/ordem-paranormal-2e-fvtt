@@ -1818,8 +1818,8 @@
     "EfeitosCena": {
       "Nome": "Cena com efeitos do FX Bus (Home)",
       "Dica": "Nome (ou id) da cena que liga tremor, desfoque e rastro do FX Bus na tela de quem estiver nela (jogadores e mestre). Deixe vazio para desligar. Precisa do módulo FX Bus.",
-      "NomeProfundezas": "Cena da mata que observa",
-      "DicaProfundezas": "Nome (ou id) da cena com vagalumes, olhos e silhuetas na mata, tremor e rastro mais leves (sem desfoque) e, na furtividade, a mata mais atenta e um batimento nas bordas. Deixe vazio para desligar."
+      "NomeProfundezas": "Cenas da mata que observa",
+      "DicaProfundezas": "Nomes (ou ids) das cenas com vagalumes, olhos na mata, tremor e rastro mais leves (sem desfoque) e, na furtividade, a mata mais atenta e um batimento nas bordas. Separe as cenas com ponto e vírgula. Deixe vazio para desligar."
     },
     "Dados3D": {
       "Nome": "Dados 3D padronizados",
