@@ -63,14 +63,18 @@ class EquilibrioApp extends HandlebarsApplicationMixin(ApplicationV2) {
     const temDados = e?.dados?.length === 2;
     const ok = temDados && equilibrado(a, b);
     const desafio = e?.desafio ?? null;
+    // Lido do desafio na hora: o mestre pode revelar no meio da travessia.
+    const oculto = Boolean(desafio) && !game.user.isGM
+      && Boolean(fromUuidSync(desafio.uuid)?.system?.equilibrar?.ocultarSucessos);
     return {
       // Equilibrar-se num desafio: conta os sucessos; caindo, não rola de novo —
       // salva com um dado de equilíbrio ou aceita a queda (dano e recomeço).
       desafio: desafio ? {
         nome: desafio.nome,
         sucessos: desafio.sucessos,
-        necessarios: desafio.necessarios,
-        marcas: Array.from({ length: desafio.necessarios }, (_x, i) => i < desafio.sucessos),
+        necessarios: oculto ? "?" : desafio.necessarios,
+        marcas: oculto ? Array.from({ length: desafio.sucessos }, () => true)
+          : Array.from({ length: desafio.necessarios }, (_x, i) => i < desafio.sucessos),
         dano: desafio.dano,
       } : null,
       rolarBloqueado: Boolean(e?.d4Pendente) || Boolean(desafio && temDados && !ok),
@@ -148,7 +152,10 @@ class EquilibrioApp extends HandlebarsApplicationMixin(ApplicationV2) {
       });
     }
     const acrobacia = ator.system?.pericias?.acrobacia?.dadoEfetivo ?? "d4";
-    const linha = game.i18n.format("OP2.Equilibrio.Caiu", { n: e.desafio.necessarios });
+    const ocultar = fromUuidSync(e.desafio.uuid)?.system?.equilibrar?.ocultarSucessos ?? e.desafio.ocultar;
+    const linha = ocultar
+      ? game.i18n.localize("OP2.Equilibrio.CaiuOculto")
+      : game.i18n.format("OP2.Equilibrio.Caiu", { n: e.desafio.necessarios });
     await ator.setFlag(SYSTEM_ID, FLAG, {
       ...e, dados: [], d4Pendente: null, restantes: dadosDeEquilibrio(acrobacia),
       desafio: { ...e.desafio, sucessos: 0 }, historico: [...(e.historico ?? []), linha],
@@ -200,11 +207,15 @@ export async function iniciarEquilibrio(ator, { desafioUuid = null } = {}) {
   const desafio = item?.system?.equilibrar ? {
     uuid: item.uuid, nome: item.name, sucessos: 0,
     necessarios: item.system.equilibrar.sucessos, dano: item.system.equilibrar.dano,
+    ocultar: item.system.equilibrar.ocultarSucessos,
   } : null;
   await ator.setFlag(SYSTEM_ID, FLAG, { ativo: true, rodada: 0, restantes, dados: [], d4Pendente: null, historico: [], desafio });
-  const meta = desafio
-    ? ` ${game.i18n.format("OP2.Equilibrio.InicioDesafio", { desafio: esc(desafio.nome), n: desafio.necessarios })}`
-    : "";
+  let meta = "";
+  if (desafio) {
+    meta = ` ${desafio.ocultar
+      ? game.i18n.format("OP2.Equilibrio.InicioDesafioOculto", { desafio: esc(desafio.nome) })
+      : game.i18n.format("OP2.Equilibrio.InicioDesafio", { desafio: esc(desafio.nome), n: desafio.necessarios })}`;
+  }
   await ChatMessage.create({
     speaker: ChatMessage.getSpeaker({ alias: game.i18n.localize("OP2.Ferramentas.Mestre") }),
     content: `<div class="op2 op2-card op2-equilibrio-card">
@@ -231,5 +242,9 @@ export function registrarEquilibrio() {
   Hooks.on("updateActor", (ator) => {
     const app = janelas.get(ator.id);
     if (app?.rendered) app.render();
+  });
+  Hooks.on("updateItem", (item) => {
+    if (item.type !== "desafio-acesso") return;
+    for (const app of janelas.values()) if (app.rendered) app.render();
   });
 }

@@ -741,7 +741,8 @@
       "EquilibrarDano": "Dano ao cair (fórmula)",
       "EquilibrarVencido": "Já vencido (alguém chegou ao fim)",
       "EquilibrarDica": "Teste de equilíbrio: {n} sucesso(s) para vencer; caindo, sofre dano e recomeça.",
-      "EquilibrarResumo": "{n} sucesso(s)"
+      "EquilibrarResumo": "{n} sucesso(s)",
+      "EquilibrarOcultar": "Ocultar dos jogadores quantos sucessos são necessários"
     },
     "Ferramenta": {
       "Rotulo": "Ferramenta",
@@ -1260,7 +1261,9 @@
       "Cair": "Cair",
       "CairDica": "Aceita a queda: sofre o dano do desafio e começa a travessia de novo, com os dados de equilíbrio de volta.",
       "Caiu": "Caiu! Os sucessos voltam a zero e a travessia recomeça (precisa de {n}).",
-      "QuedaTitulo": "Queda: {desafio}"
+      "QuedaTitulo": "Queda: {desafio}",
+      "InicioDesafioOculto": "Desafio \"{desafio}\": quantos sucessos são necessários, só o mestre sabe.",
+      "CaiuOculto": "Caiu! Os sucessos voltam a zero e a travessia recomeça."
     },
     "Relacoes": {
       "Titulo": "Relacionamentos",

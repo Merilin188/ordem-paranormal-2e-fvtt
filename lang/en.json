@@ -741,7 +741,8 @@
       "EquilibrarDano": "Damage on a fall (formula)",
       "EquilibrarVencido": "Already overcome (someone reached the end)",
       "EquilibrarDica": "Balance test: {n} success(es) to overcome; on a fall, take damage and start over.",
-      "EquilibrarResumo": "{n} success(es)"
+      "EquilibrarResumo": "{n} success(es)",
+      "EquilibrarOcultar": "Hide from players how many successes are needed"
     },
     "Ferramenta": {
       "Rotulo": "Tool",
@@ -1260,7 +1261,9 @@
       "Cair": "Fall",
       "CairDica": "Accept the fall: take the challenge damage and start the crossing over, with the balance dice back.",
       "Caiu": "Fell! Successes go back to zero and the crossing starts over (needs {n}).",
-      "QuedaTitulo": "Fall: {desafio}"
+      "QuedaTitulo": "Fall: {desafio}",
+      "InicioDesafioOculto": "Challenge \"{desafio}\": how many successes are needed, only the GM knows.",
+      "CaiuOculto": "Fell! Successes go back to zero and the crossing starts over."
     },
     "Relacoes": {
       "Titulo": "Relacionamentos",

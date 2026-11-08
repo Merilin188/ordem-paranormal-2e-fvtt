@@ -44,6 +44,9 @@ export class DesafioAcessoData extends foundry.abstract.TypeDataModel {
         sucessos: new NumberField({ required: true, initial: 3, min: 1, integer: true, nullable: false }),
         dano: new StringField({ required: true, initial: "", blank: true }),
         resolvido: new BooleanField({ required: true, initial: false }),
+        // "O personagem descobre o número de sucessos necessários": até lá, o jogador
+        // vê os sucessos que já fez, não quantos faltam.
+        ocultarSucessos: new BooleanField({ required: true, initial: false }),
       }),
 
       /** Abordagem genérica: a perícia testada e o rótulo que aparece no botão. */

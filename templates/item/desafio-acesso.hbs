@@ -362,6 +362,11 @@
         </label>
       </div>
       <label class="op2-campo op2-campo--inline">
+        <input type="checkbox" name="system.equilibrar.ocultarSucessos" {{#if sistema.equilibrar.ocultarSucessos}}checked{{/if}}
+          {{#unless editavel}}disabled{{/unless}}>
+        <span>{{localize "OP2.Desafio.EquilibrarOcultar"}}</span>
+      </label>
+      <label class="op2-campo op2-campo--inline">
         <input type="checkbox" name="system.equilibrar.resolvido" {{#if sistema.equilibrar.resolvido}}checked{{/if}}
           {{#unless editavel}}disabled{{/unless}}>
         <span>{{localize "OP2.Desafio.EquilibrarVencido"}}</span>

@@ -437,7 +437,7 @@ export function PainelInvestigacaoMixin(Base) {
           temSustentar: abordagens.sustentar,
           temGenerico: abordagens.generico,
           temEquilibrar: abordagens.equilibrar,
-          equilibrarSucessos: desafio.system.equilibrar?.sucessos,
+          equilibrarSucessos: desafio.system.equilibrar?.ocultarSucessos && !ehGM ? "?" : desafio.system.equilibrar?.sucessos,
           equilibrarResolvido: desafio.system.equilibrar?.resolvido,
           genericoRotulo: generico.rotulo || game.i18n.localize("OP2.Desafio.Generico"),
           genericoResolvido: generico.resolvido,

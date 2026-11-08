@@ -70,7 +70,7 @@ function contextoDoDesafio(desafio, investigacao, indice) {
     hackSocialResolvido: desafio.system.hackSocial.resolvido,
     genericoResolvido: desafio.system.generico.resolvido,
     equilibrarResolvido: desafio.system.equilibrar.resolvido,
-    equilibrarSucessos: desafio.system.equilibrar.sucessos,
+    equilibrarSucessos: desafio.system.equilibrar.ocultarSucessos && !game.user.isGM ? "?" : desafio.system.equilibrar.sucessos,
     sustentarDt: desafio.system.sustentar.dt,
     genericoRotulo: desafio.system.generico.rotulo?.trim() || game.i18n.localize("OP2.Desafio.Generico"),
     abordagens,
