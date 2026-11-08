@@ -125,3 +125,10 @@ test("desafioResolvido: só uma abordagem LIGADA e vencida resolve", () => {
   assert.equal(desafioResolvido({ ...base, abordagens: { arrombar: true }, hackTecnico: { resolvido: true } }), false);
   assert.equal(desafioResolvido({ ...base, abordagens: { generico: true }, generico: { resolvido: true } }), true);
 });
+
+test("desafioResolvido: Equilibrar-se vencido resolve só com a abordagem ligada", () => {
+  const base = { pontuacaoAtual: 0, pontuacaoAlvo: 10, destrancado: false };
+  assert.equal(desafioResolvido({ ...base, abordagens: { equilibrar: true }, equilibrar: { resolvido: false } }), false);
+  assert.equal(desafioResolvido({ ...base, abordagens: { equilibrar: true }, equilibrar: { resolvido: true } }), true);
+  assert.equal(desafioResolvido({ ...base, abordagens: { arrombar: true }, equilibrar: { resolvido: true } }), false);
+});

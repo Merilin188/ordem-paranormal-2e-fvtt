@@ -142,6 +142,7 @@
   // Equilíbrio
   .op2-equilibrio__reserva { display: flex; justify-content: space-between; align-items: center; }
   .op2-equilibrio__d4s { display: flex; gap: 0.25rem; color: var(--op2-critico); }
+  .op2-equilibrio__marcas { display: flex; align-items: center; gap: 0.25rem; color: var(--op2-sucesso); strong { margin-left: 0.35rem; } }
   .op2-equilibrio__historico { margin: 0; padding-left: 1rem; font-size: 0.85em; color: var(--op2-tinta-fraca); max-height: 9rem; overflow-y: auto; }
   .op2-dt__principal--secundario { background: transparent; border-color: var(--op2-critico); color: var(--op2-critico); }
   .op2-equilibrio-card--ok { border-left: 3px solid var(--op2-sucesso); }

@@ -254,7 +254,10 @@
       "OcultoDosJogadores": "oculto dos jogadores",
       "VisivelParaJogadores": "visível para os jogadores",
       "Ocultar": "Ocultar",
-      "Mostrar": "Mostrar"
+      "Mostrar": "Mostrar",
+      "Excluir": "Excluir ponto de interesse",
+      "ExcluirConfirma": "Excluir o ponto <strong>{nome}</strong> de vez? Ele sai das investigações e do mapa.",
+      "ExcluirDesafiosJunto": "Excluir também os {n} desafio(s) deste ponto"
     },
     "Acoes": {
       "Titulo": "Ações de investigação",
@@ -731,7 +734,14 @@
       "SoltouPorVontade": "{ator} solta {nome}.",
       "SustentarComoContinua": "Ao fim de cada rodada, testa Atletismo de novo (com fadiga). Use Soltar quando o grupo não precisar mais.",
       "SustentadoPor": "Sustentado por {nome}",
-      "NinguemSustenta": "ninguém sustentando"
+      "NinguemSustenta": "ninguém sustentando",
+      "Equilibrar": "Equilibrar-se",
+      "EquilibrarAjuda": "A travessia é o teste de equilíbrio (2d10 por rodada). Vence com o número de sucessos abaixo; ao cair, sofre o dano e precisa começar de novo.",
+      "EquilibrarSucessos": "Sucessos necessários",
+      "EquilibrarDano": "Dano ao cair (fórmula)",
+      "EquilibrarVencido": "Já vencido (alguém chegou ao fim)",
+      "EquilibrarDica": "Teste de equilíbrio: {n} sucesso(s) para vencer; caindo, sofre dano e recomeça.",
+      "EquilibrarResumo": "{n} sucesso(s)"
     },
     "Ferramenta": {
       "Rotulo": "Ferramenta",
@@ -1243,7 +1253,14 @@
       "Rolar": "Rolar 2d10",
       "Encerrar": "Encerrar travessia",
       "Iniciar": "Iniciar travessia",
-      "Regra": "A cada rodada, rola 2d10: iguais ou com 1 de diferença, equilibra; senão, cai. Começa com dados de equilíbrio (d4) iguais à metade da Acrobacia; caindo, pode rolar um e somar a um dos d10. Os gastos não voltam até o fim da travessia."
+      "Regra": "A cada rodada, rola 2d10: iguais ou com 1 de diferença, equilibra; senão, cai. Começa com dados de equilíbrio (d4) iguais à metade da Acrobacia; caindo, pode rolar um e somar a um dos d10. Os gastos não voltam até o fim da travessia.",
+      "Sucessos": "Sucessos",
+      "InicioDesafio": "Desafio \"{desafio}\": precisa de {n} sucesso(s).",
+      "Venceu": "<strong>{nome}</strong> se equilibrou até o fim e venceu \"{desafio}\".",
+      "Cair": "Cair",
+      "CairDica": "Aceita a queda: sofre o dano do desafio e começa a travessia de novo, com os dados de equilíbrio de volta.",
+      "Caiu": "Caiu! Os sucessos voltam a zero e a travessia recomeça (precisa de {n}).",
+      "QuedaTitulo": "Queda: {desafio}"
     },
     "Relacoes": {
       "Titulo": "Relacionamentos",
@@ -1929,7 +1946,11 @@
       "Liberado": "Acesso liberado",
       "LiberadoPorDesafio": "O desafio \"{desafio}\" foi vencido e o ponto está aberto.",
       "LiberadoPeloMestre": "O mestre abriu o ponto.",
-      "AgoraExaminar": "O que havia dentro agora pode ser examinado."
+      "AgoraExaminar": "O que havia dentro agora pode ser examinado.",
+      "EscolherAbordagens": "Como se vence este desafio?",
+      "EscolherAbordagensAjuda": "Marque as abordagens que fazem sentido neste obstáculo. Dá para mudar depois, na ficha do desafio.",
+      "Criar": "Criar",
+      "ExcluirDesafio": "Excluir desafio (de vez)"
     }
   }
 }

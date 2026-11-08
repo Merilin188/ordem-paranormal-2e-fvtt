@@ -15,7 +15,7 @@
  * quem revelou o quê. Nenhum dado de regra (DT, reação de ferramenta) vaza para o
  * lado do jogador.
  */
-import { excluirDesafio } from "./excluir-desafio.mjs";
+import { excluirDesafio, excluirPontoDeInteresse } from "./excluir-desafio.mjs";
 import { quemSustenta } from "./acoes-desafio.mjs";
 import { escolherCategoria, criarDesafioDaCategoria, rotuloCategoria } from "./categorias-desafio.mjs";
 import { SYSTEM_ID } from "../config.mjs";
@@ -79,6 +79,7 @@ export function PainelInvestigacaoMixin(Base) {
         removerPoi: PainelInvestigacaoComum.#removerPoi,
         abrirDesafio: PainelInvestigacaoComum.#abrirDesafio,
         excluirDesafio: PainelInvestigacaoComum.#excluirDesafio,
+        excluirPoi: PainelInvestigacaoComum.#excluirPoi,
         removerDesafio: PainelInvestigacaoComum.#removerDesafio,
         ajustarPontuacaoDesafio: PainelInvestigacaoComum.#ajustarPontuacaoDesafio,
         novaRodada: PainelInvestigacaoComum.#novaRodada,
@@ -435,6 +436,9 @@ export function PainelInvestigacaoMixin(Base) {
           temHackSocial: abordagens.hackSocial,
           temSustentar: abordagens.sustentar,
           temGenerico: abordagens.generico,
+          temEquilibrar: abordagens.equilibrar,
+          equilibrarSucessos: desafio.system.equilibrar?.sucessos,
+          equilibrarResolvido: desafio.system.equilibrar?.resolvido,
           genericoRotulo: generico.rotulo || game.i18n.localize("OP2.Desafio.Generico"),
           genericoResolvido: generico.resolvido,
           dtObjeto: desafio.system.dtObjeto,
@@ -778,6 +782,10 @@ export function PainelInvestigacaoMixin(Base) {
     static async #abrirDesafio(_evento, alvo) {
       const desafio = await fromUuid(alvo.dataset.desafioUuid);
       desafio?.sheet?.render(true);
+    }
+
+    static async #excluirPoi(_evento, alvo) {
+      if (await excluirPontoDeInteresse(alvo.dataset.poiUuid)) this.render();
     }
 
     static async #excluirDesafio(_evento, alvo) {

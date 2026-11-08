@@ -1691,3 +1691,7 @@ details[open] > summary.op2-painel-titulo::before { transform: rotate(45deg); }
   color: var(--op2-vermelho-claro);
   font-size: 0.85em;
 }
+
+// Lixeiras da ficha do ponto: excluir o ponto (topo) e um desafio dele.
+.op2-poi .op2-item-ficha__topo .op2-poi__excluir { flex: 0 0 auto; border-radius: 0; }
+.op2-poi__lixeira { color: var(--op2-vermelho-claro); }

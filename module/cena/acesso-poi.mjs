@@ -11,6 +11,39 @@ import { estaTrancado } from "./investigacao.mjs";
 import { desafioResolvido } from "./desafios.mjs";
 import { renderizar } from "../dice/teste.mjs";
 import { todasInvestigacoes, vincularDesafio, vincularDesafioAoPonto } from "./investigacao-ativa.mjs";
+import { CATEGORIAS_DESAFIO } from "./categorias-desafio.mjs";
+
+/** As abordagens oferecidas ao criar o desafio pelo ponto, com as marcadas de início. */
+const ABORDAGENS = [
+  ["arrombar", "OP2.Desafio.Arrombar", true], ["destrancar", "OP2.Desafio.Destrancar", true],
+  ["equilibrar", "OP2.Desafio.Equilibrar", false], ["hackTecnico", "OP2.Desafio.HackTecnico", false],
+  ["hackSocial", "OP2.Desafio.HackSocial", false], ["sustentar", "OP2.Desafio.Sustentar", false],
+  ["generico", "OP2.Desafio.Generico", false],
+];
+
+/** Pergunta como se vence o desafio. Devolve as abordagens ({chave: bool}) ou null. */
+async function escolherAbordagens() {
+  const caixas = ABORDAGENS.map(([chave, rotulo, marcada]) => `<label class="op2-campo op2-campo--inline">
+      <input type="checkbox" name="${chave}" ${marcada ? "checked" : ""}><span>${game.i18n.localize(rotulo)}</span></label>`).join("");
+  const escolha = await foundry.applications.api.DialogV2.wait({
+    window: { title: game.i18n.localize("OP2.Acesso.EscolherAbordagens"), icon: "fa-solid fa-lock" },
+    classes: ["op2", "op2-dlg"],
+    content: `<p class="op2-ajuda">${game.i18n.localize("OP2.Acesso.EscolherAbordagensAjuda")}</p>
+      <div class="op2-desafio-abordagens__lista">${caixas}</div>`,
+    buttons: [
+      {
+        action: "criar", label: game.i18n.localize("OP2.Acesso.Criar"), icon: "fa-solid fa-plus", default: true,
+        callback: (_evento, botao) => Object.fromEntries(ABORDAGENS
+          .map(([chave]) => [chave, Boolean(botao.form?.elements[chave]?.checked)])),
+      },
+      { action: "cancelar", label: game.i18n.localize("Cancel") },
+    ],
+    rejectClose: false,
+  });
+  return escolha && typeof escolha === "object" ? escolha : null;
+}
+
+let criando = false;
 
 const CHAT = `systems/${SYSTEM_ID}/templates/chat`;
 
@@ -72,14 +105,29 @@ export async function trancarDeNovo(poi) {
  * investigações do ponto (oculto se o ponto está oculto) e bloqueia o ponto.
  */
 export async function criarDesafioDoPonto(poi) {
-  if (!game.user.isGM) return null;
-  const desafio = await Item.implementation.create({
-    name: game.i18n.format("OP2.Acesso.NomeDesafio", { ponto: poi.name }),
-    type: "desafio-acesso",
-    folder: poi.folder?.id ?? null,
-    system: { categoria: "acesso" },
-  });
-  if (!desafio) return null;
+  // Clique duplo criava dois desafios iguais.
+  if (!game.user.isGM || criando) return null;
+  criando = true;
+  try {
+    const abordagens = await escolherAbordagens();
+    if (!abordagens) return null;
+    // Só Equilibrar-se marcado: o ícone e a categoria de equilíbrio.
+    const soEquilibrio = abordagens.equilibrar && !Object.entries(abordagens).some(([c, v]) => v && c !== "equilibrar");
+    const desafio = await Item.implementation.create({
+      name: game.i18n.format("OP2.Acesso.NomeDesafio", { ponto: poi.name }),
+      type: "desafio-acesso",
+      img: (soEquilibrio ? CATEGORIAS_DESAFIO.equilibrio : CATEGORIAS_DESAFIO.acesso).icone,
+      folder: poi.folder?.id ?? null,
+      system: { categoria: "acesso", abordagens },
+    });
+    if (!desafio) return null;
+    return await ligarDesafioNovo(poi, desafio);
+  } finally {
+    criando = false;
+  }
+}
+
+async function ligarDesafioNovo(poi, desafio) {
   await vincularDesafioAoPonto(poi, desafio.uuid);
   for (const inv of todasInvestigacoes().filter((i) => i.system.pois.includes(poi.uuid))) {
     await vincularDesafio(inv, desafio.uuid, { oculto: inv.system.poisOcultos.includes(poi.uuid) });

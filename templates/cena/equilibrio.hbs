@@ -8,6 +8,13 @@
   {{#unless ativo}}
     <p class="op2-dt__vazio">{{localize "OP2.Equilibrio.Inativo"}}</p>
   {{else}}
+    {{#if desafio}}
+      <div class="op2-equilibrio__reserva">
+        <span class="op2-dt__rotulo">{{desafio.nome}} · {{localize "OP2.Equilibrio.Sucessos"}}</span>
+        <span class="op2-equilibrio__marcas">{{#each desafio.marcas}}<i class="fa-{{#if this}}solid{{else}}regular{{/if}} fa-circle-check"></i>{{/each}}
+          <strong>{{desafio.sucessos}} / {{desafio.necessarios}}</strong></span>
+      </div>
+    {{/if}}
     <div class="op2-equilibrio__reserva">
       <span class="op2-dt__rotulo">{{localize "OP2.Equilibrio.DadosRestantes"}}</span>
       <span class="op2-equilibrio__d4s">{{#each icones}}<i class="fa-solid fa-play fa-rotate-270"></i>{{else}}<em>0</em>{{/each}}</span>
@@ -36,7 +43,11 @@
       {{#if podeUsarDado}}
         <button type="button" class="op2-dt__principal op2-dt__principal--secundario" data-action="usarDado"><i class="fa-solid fa-dice-d6"></i> {{localize "OP2.Equilibrio.UsarDado"}}</button>
       {{/if}}
-      <button type="button" class="op2-dt__principal" data-action="rolar" {{#if d4Pendente}}disabled{{/if}}><i class="fa-solid fa-dice"></i> {{localize "OP2.Equilibrio.Rolar"}}</button>
+      {{#if podeCair}}
+        <button type="button" class="op2-dt__principal op2-dt__principal--secundario" data-action="cair"
+          data-tooltip="{{localize 'OP2.Equilibrio.CairDica'}}"><i class="fa-solid fa-person-falling-burst"></i> {{localize "OP2.Equilibrio.Cair"}}{{#if desafio.dano}} ({{desafio.dano}}){{/if}}</button>
+      {{/if}}
+      <button type="button" class="op2-dt__principal" data-action="rolar" {{#if rolarBloqueado}}disabled{{/if}}><i class="fa-solid fa-dice"></i> {{localize "OP2.Equilibrio.Rolar"}}</button>
       <div class="op2-dt__links"><a data-action="encerrar">{{localize "OP2.Equilibrio.Encerrar"}}</a></div>
     {{/if}}
 

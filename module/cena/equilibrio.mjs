@@ -11,9 +11,11 @@
  */
 import { SYSTEM_ID } from "../config.mjs";
 import { equilibrado, dadosDeEquilibrio } from "./tabelas-dados.mjs";
-import { paraTodos, registrarAcaoDeTodos } from "../ui/socket.mjs";
+import { paraTodos, registrarAcaoDeTodos, comoMestre, registrarAcaoDeMestre } from "../ui/socket.mjs";
 import { registrarAcaoDeChat } from "../ui/chat.mjs";
 import { mostrarDados3D } from "../dice/teste.mjs";
+import { cardDeDano } from "./rodada.mjs";
+import { aplicarDano } from "../dice/falha-critica.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const FLAG = "equilibrio";
@@ -41,6 +43,7 @@ class EquilibrioApp extends HandlebarsApplicationMixin(ApplicationV2) {
       usarDado: EquilibrioApp.#usarDado,
       somar: EquilibrioApp.#somar,
       encerrar: EquilibrioApp.#encerrar,
+      cair: EquilibrioApp.#cair,
     },
   };
 
@@ -59,7 +62,19 @@ class EquilibrioApp extends HandlebarsApplicationMixin(ApplicationV2) {
     const [a, b] = e?.dados ?? [];
     const temDados = e?.dados?.length === 2;
     const ok = temDados && equilibrado(a, b);
+    const desafio = e?.desafio ?? null;
     return {
+      // Equilibrar-se num desafio: conta os sucessos; caindo, não rola de novo —
+      // salva com um dado de equilíbrio ou aceita a queda (dano e recomeço).
+      desafio: desafio ? {
+        nome: desafio.nome,
+        sucessos: desafio.sucessos,
+        necessarios: desafio.necessarios,
+        marcas: Array.from({ length: desafio.necessarios }, (_x, i) => i < desafio.sucessos),
+        dano: desafio.dano,
+      } : null,
+      rolarBloqueado: Boolean(e?.d4Pendente) || Boolean(desafio && temDados && !ok),
+      podeCair: Boolean(desafio && temDados && !ok && !e?.d4Pendente),
       ator: ator ? { nome: ator.name, img: ator.img } : null,
       ativo: Boolean(e?.ativo),
       podeAgir: Boolean(ator?.isOwner),
@@ -80,6 +95,8 @@ class EquilibrioApp extends HandlebarsApplicationMixin(ApplicationV2) {
     const ator = this.ator;
     const e = estadoDe(ator);
     if (!ator?.isOwner || !e?.ativo) return;
+    // Caindo num desafio, não se rola de novo: salva com um dado ou aceita a queda.
+    if (e.desafio && e.dados?.length === 2 && !equilibrado(...e.dados)) return;
     const roll = await new Roll("2d10").evaluate();
     await mostrarDados3D(roll);
     const dados = roll.dice[0].results.map((r) => r.result);
@@ -88,6 +105,7 @@ class EquilibrioApp extends HandlebarsApplicationMixin(ApplicationV2) {
     const linha = `${game.i18n.localize("OP2.Equilibrio.Rodada")} ${rodada}: ${dados.join(" e ")} — ${game.i18n.localize(ok ? "OP2.Equilibrio.Equilibrou" : "OP2.Equilibrio.Caindo")}`;
     await ator.setFlag(SYSTEM_ID, FLAG, { ...e, rodada, dados, d4Pendente: null, historico: [...(e.historico ?? []), linha] });
     await card(ator, `<strong>${esc(ator.name)}</strong> — ${esc(linha)}`, ok ? "op2-equilibrio-card--ok" : "op2-equilibrio-card--caindo");
+    if (ok) await sucessoNoDesafio(ator, this);
   }
 
   static async #usarDado() {
@@ -110,6 +128,32 @@ class EquilibrioApp extends HandlebarsApplicationMixin(ApplicationV2) {
     const linha = `+${e.d4Pendente} → ${dados.join(" e ")} — ${game.i18n.localize(ok ? "OP2.Equilibrio.Equilibrou" : "OP2.Equilibrio.Caindo")}`;
     await ator.setFlag(SYSTEM_ID, FLAG, { ...e, dados, d4Pendente: null, historico: [...(e.historico ?? []), linha] });
     await card(ator, `<strong>${esc(ator.name)}</strong> ${game.i18n.localize("OP2.Equilibrio.UsouDado")} ${esc(linha)}`, ok ? "op2-equilibrio-card--ok" : "op2-equilibrio-card--caindo");
+    if (ok) await sucessoNoDesafio(ator, this);
+  }
+
+  /** Caiu (Equilibrar-se num desafio): sofre o dano do desafio e começa de novo. */
+  static async #cair() {
+    const ator = this.ator;
+    const e = estadoDe(ator);
+    if (!ator?.isOwner || !e?.desafio) return;
+    const formula = String(e.desafio.dano ?? "").trim();
+    let dano = 0;
+    if (formula && Roll.validate(formula)) {
+      const roll = await new Roll(formula).evaluate();
+      await mostrarDados3D(roll);
+      dano = roll.total;
+      if (dano > 0) await aplicarDano(ator, dano, "pv");
+      await cardDeDano(ator, roll, {
+        titulo: game.i18n.format("OP2.Equilibrio.QuedaTitulo", { desafio: e.desafio.nome }), recurso: "pv",
+      });
+    }
+    const acrobacia = ator.system?.pericias?.acrobacia?.dadoEfetivo ?? "d4";
+    const linha = game.i18n.format("OP2.Equilibrio.Caiu", { n: e.desafio.necessarios });
+    await ator.setFlag(SYSTEM_ID, FLAG, {
+      ...e, dados: [], d4Pendente: null, restantes: dadosDeEquilibrio(acrobacia),
+      desafio: { ...e.desafio, sucessos: 0 }, historico: [...(e.historico ?? []), linha],
+    });
+    await card(ator, `<strong>${esc(ator.name)}</strong> — ${esc(linha)}`, "op2-equilibrio-card--caindo");
   }
 
   static async #encerrar() {
@@ -122,6 +166,25 @@ class EquilibrioApp extends HandlebarsApplicationMixin(ApplicationV2) {
 }
 
 const janelas = new Map();
+
+/**
+ * Mais um equilíbrio na travessia de um desafio. Chegou aos sucessos necessários:
+ * o desafio é vencido (o mestre grava, é Item de mundo) e a travessia termina.
+ */
+async function sucessoNoDesafio(ator, app) {
+  const e = estadoDe(ator);
+  if (!e?.desafio) return;
+  const sucessos = (e.desafio.sucessos ?? 0) + 1;
+  if (sucessos < e.desafio.necessarios) {
+    await ator.setFlag(SYSTEM_ID, FLAG, { ...e, desafio: { ...e.desafio, sucessos } });
+    return;
+  }
+  await comoMestre("op2EquilibrarVencido", { uuid: e.desafio.uuid });
+  await card(ator, game.i18n.format("OP2.Equilibrio.Venceu", { nome: esc(ator.name), desafio: esc(e.desafio.nome) }), "op2-equilibrio-card--ok");
+  await ator.unsetFlag(SYSTEM_ID, FLAG);
+  paraTodos("op2EquilibrioFechar", { atorId: ator.id });
+  void app?.close();
+}
 function abrirLocal({ atorId }) {
   let app = janelas.get(atorId);
   if (!app) { app = new EquilibrioApp(atorId); janelas.set(atorId, app); }
@@ -129,16 +192,24 @@ function abrirLocal({ atorId }) {
 }
 
 /** Mestre começa a travessia de um personagem: abre a janela para ele e para o mestre. */
-export async function iniciarEquilibrio(ator) {
+export async function iniciarEquilibrio(ator, { desafioUuid = null } = {}) {
   if (!ator?.isOwner) return;
   const acrobacia = ator.system?.pericias?.acrobacia?.dadoEfetivo ?? "d4";
   const restantes = dadosDeEquilibrio(acrobacia);
-  await ator.setFlag(SYSTEM_ID, FLAG, { ativo: true, rodada: 0, restantes, dados: [], d4Pendente: null, historico: [] });
+  const item = desafioUuid ? await fromUuid(desafioUuid) : null;
+  const desafio = item?.system?.equilibrar ? {
+    uuid: item.uuid, nome: item.name, sucessos: 0,
+    necessarios: item.system.equilibrar.sucessos, dano: item.system.equilibrar.dano,
+  } : null;
+  await ator.setFlag(SYSTEM_ID, FLAG, { ativo: true, rodada: 0, restantes, dados: [], d4Pendente: null, historico: [], desafio });
+  const meta = desafio
+    ? ` ${game.i18n.format("OP2.Equilibrio.InicioDesafio", { desafio: esc(desafio.nome), n: desafio.necessarios })}`
+    : "";
   await ChatMessage.create({
     speaker: ChatMessage.getSpeaker({ alias: game.i18n.localize("OP2.Ferramentas.Mestre") }),
     content: `<div class="op2 op2-card op2-equilibrio-card">
       <header class="op2-card__topo"><span class="op2-tag op2-tag--pequena">${game.i18n.localize("OP2.Equilibrio.Titulo")}</span></header>
-      <p class="op2-card__texto">${game.i18n.format("OP2.Equilibrio.Inicio", { nome: esc(ator.name), n: restantes, dado: acrobacia })}</p>
+      <p class="op2-card__texto">${game.i18n.format("OP2.Equilibrio.Inicio", { nome: esc(ator.name), n: restantes, dado: acrobacia })}${meta}</p>
       <button type="button" data-op2-acao="abrir-equilibrio" data-ator-id="${ator.id}"><i class="fa-solid fa-person-falling"></i> ${game.i18n.localize("OP2.Equilibrio.Abrir")}</button>
     </div>`,
     flags: { [SYSTEM_ID]: { tipo: "equilibrio-inicio", atorId: ator.id } },
@@ -148,6 +219,10 @@ export async function iniciarEquilibrio(ator) {
 }
 
 export function registrarEquilibrio() {
+  registrarAcaoDeMestre("op2EquilibrarVencido", async ({ uuid }) => {
+    const item = await fromUuid(uuid);
+    if (item?.type === "desafio-acesso") await item.update({ "system.equilibrar.resolvido": true });
+  });
   registrarAcaoDeTodos("op2EquilibrioAbrir", ({ atorId }) => {
     if (game.actors.get(atorId)?.isOwner) abrirLocal({ atorId });
   });

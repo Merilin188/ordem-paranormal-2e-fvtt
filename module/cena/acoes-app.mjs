@@ -69,6 +69,8 @@ function contextoDoDesafio(desafio, investigacao, indice) {
     hackTecnicoResolvido: desafio.system.hackTecnico.resolvido,
     hackSocialResolvido: desafio.system.hackSocial.resolvido,
     genericoResolvido: desafio.system.generico.resolvido,
+    equilibrarResolvido: desafio.system.equilibrar.resolvido,
+    equilibrarSucessos: desafio.system.equilibrar.sucessos,
     sustentarDt: desafio.system.sustentar.dt,
     genericoRotulo: desafio.system.generico.rotulo?.trim() || game.i18n.localize("OP2.Desafio.Generico"),
     abordagens,
@@ -119,6 +121,7 @@ export class AcoesInvestigacaoApp extends HandlebarsApplicationMixin(Application
       compartilhar: fechaDepois(AcoesInvestigacaoApp.#compartilhar),
       alcancar: fechaDepois(AcoesInvestigacaoApp.#alcancar),
       atravessar: fechaDepois(AcoesInvestigacaoApp.#atravessar),
+      equilibrarDesafio: fechaDepois(AcoesInvestigacaoApp.#equilibrarDesafio),
       sustentar: fechaDepois(AcoesInvestigacaoApp.#sustentar),
       sustentarDesafio: fechaDepois(AcoesInvestigacaoApp.#sustentarDesafio),
       excluirDesafio: AcoesInvestigacaoApp.#excluirDesafio,
@@ -380,6 +383,11 @@ export class AcoesInvestigacaoApp extends HandlebarsApplicationMixin(Application
   static async #atravessar() {
     const { iniciarEquilibrio } = await import("./equilibrio.mjs");
     await iniciarEquilibrio(this.ator);
+  }
+  /** Equilibrar-se num desafio: a travessia conta os sucessos dele. */
+  static async #equilibrarDesafio(_evento, alvo) {
+    const { iniciarEquilibrio } = await import("./equilibrio.mjs");
+    await iniciarEquilibrio(this.ator, { desafioUuid: alvo.dataset.desafioUuid });
   }
   static async #sustentar() { const r = await sustentar(this.ator); this.render(); return r; }
 

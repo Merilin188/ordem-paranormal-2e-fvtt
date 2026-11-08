@@ -46,6 +46,11 @@
         <span>{{localize "OP2.Desafio.Sustentar"}}</span>
       </label>
       <label class="op2-campo op2-campo--inline">
+        <input type="checkbox" name="system.abordagens.equilibrar" {{#if sistema.abordagens.equilibrar}}checked{{/if}}
+          {{#unless editavel}}disabled{{/unless}}>
+        <span>{{localize "OP2.Desafio.Equilibrar"}}</span>
+      </label>
+      <label class="op2-campo op2-campo--inline">
         <input type="checkbox" name="system.abordagens.generico" {{#if sistema.abordagens.generico}}checked{{/if}}
           {{#unless editavel}}disabled{{/unless}}>
         <span>{{localize "OP2.Desafio.Generico"}}</span>
@@ -336,6 +341,30 @@
         <span>{{localize "OP2.Desafio.SustentarAoFalhar"}}</span>
         <input type="text" name="system.sustentar.aoFalhar" value="{{sistema.sustentar.aoFalhar}}"
           {{#unless editavel}}disabled{{/unless}}>
+      </label>
+    </fieldset>
+  {{/if}}
+
+  {{#if sistema.abordagens.equilibrar}}
+    <fieldset class="op2-desafio-hack">
+      <legend>{{localize "OP2.Desafio.Equilibrar"}}</legend>
+      <p class="op2-ajuda">{{localize "OP2.Desafio.EquilibrarAjuda"}}</p>
+      <div class="op2-grade-campos">
+        <label class="op2-campo">
+          <span>{{localize "OP2.Desafio.EquilibrarSucessos"}}</span>
+          <input type="number" name="system.equilibrar.sucessos" value="{{sistema.equilibrar.sucessos}}" min="1" step="1"
+            {{#unless editavel}}disabled{{/unless}}>
+        </label>
+        <label class="op2-campo">
+          <span>{{localize "OP2.Desafio.EquilibrarDano"}}</span>
+          <input type="text" name="system.equilibrar.dano" value="{{sistema.equilibrar.dano}}" placeholder="1d6"
+            {{#unless editavel}}disabled{{/unless}}>
+        </label>
+      </div>
+      <label class="op2-campo op2-campo--inline">
+        <input type="checkbox" name="system.equilibrar.resolvido" {{#if sistema.equilibrar.resolvido}}checked{{/if}}
+          {{#unless editavel}}disabled{{/unless}}>
+        <span>{{localize "OP2.Desafio.EquilibrarVencido"}}</span>
       </label>
     </fieldset>
   {{/if}}

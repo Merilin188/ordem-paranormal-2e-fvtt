@@ -254,7 +254,10 @@
       "OcultoDosJogadores": "hidden from players",
       "VisivelParaJogadores": "visible to players",
       "Ocultar": "Hide",
-      "Mostrar": "Show"
+      "Mostrar": "Show",
+      "Excluir": "Delete point of interest",
+      "ExcluirConfirma": "Delete the point <strong>{nome}</strong> for good? It leaves the investigations and the map.",
+      "ExcluirDesafiosJunto": "Also delete the {n} challenge(s) of this point"
     },
     "Acoes": {
       "Titulo": "Investigation actions",
@@ -731,7 +734,14 @@
       "SoltouPorVontade": "{ator} lets go of {nome}.",
       "SustentarComoContinua": "At the end of each round, test Athletics again (with fatigue). Use Let go when the group no longer needs it.",
       "SustentadoPor": "Held by {nome}",
-      "NinguemSustenta": "nobody holding"
+      "NinguemSustenta": "nobody holding",
+      "Equilibrar": "Keep balance",
+      "EquilibrarAjuda": "The crossing is the balance test (2d10 per round). It is overcome with the number of successes below; on a fall, the character takes the damage and has to start over.",
+      "EquilibrarSucessos": "Successes needed",
+      "EquilibrarDano": "Damage on a fall (formula)",
+      "EquilibrarVencido": "Already overcome (someone reached the end)",
+      "EquilibrarDica": "Balance test: {n} success(es) to overcome; on a fall, take damage and start over.",
+      "EquilibrarResumo": "{n} success(es)"
     },
     "Ferramenta": {
       "Rotulo": "Tool",
@@ -1243,7 +1253,14 @@
       "Rolar": "Rolar 2d10",
       "Encerrar": "Encerrar travessia",
       "Iniciar": "Iniciar travessia",
-      "Regra": "A cada rodada, rola 2d10: iguais ou com 1 de diferença, equilibra; senão, cai. Começa com dados de equilíbrio (d4) iguais à metade da Acrobacia; caindo, pode rolar um e somar a um dos d10. Os gastos não voltam até o fim da travessia."
+      "Regra": "A cada rodada, rola 2d10: iguais ou com 1 de diferença, equilibra; senão, cai. Começa com dados de equilíbrio (d4) iguais à metade da Acrobacia; caindo, pode rolar um e somar a um dos d10. Os gastos não voltam até o fim da travessia.",
+      "Sucessos": "Successes",
+      "InicioDesafio": "Challenge \"{desafio}\": needs {n} success(es).",
+      "Venceu": "<strong>{nome}</strong> kept balance to the end and overcame \"{desafio}\".",
+      "Cair": "Fall",
+      "CairDica": "Accept the fall: take the challenge damage and start the crossing over, with the balance dice back.",
+      "Caiu": "Fell! Successes go back to zero and the crossing starts over (needs {n}).",
+      "QuedaTitulo": "Fall: {desafio}"
     },
     "Relacoes": {
       "Titulo": "Relacionamentos",
@@ -1929,7 +1946,11 @@
       "Liberado": "Access unlocked",
       "LiberadoPorDesafio": "The challenge \"{desafio}\" was overcome and the point is open.",
       "LiberadoPeloMestre": "The GM opened the point.",
-      "AgoraExaminar": "What was inside can now be examined."
+      "AgoraExaminar": "What was inside can now be examined.",
+      "EscolherAbordagens": "How is this challenge overcome?",
+      "EscolherAbordagensAjuda": "Tick the approaches that make sense for this obstacle. You can change them later on the challenge sheet.",
+      "Criar": "Create",
+      "ExcluirDesafio": "Delete challenge (for good)"
     }
   }
 }

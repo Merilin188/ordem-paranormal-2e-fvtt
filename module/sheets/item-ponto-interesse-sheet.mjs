@@ -14,6 +14,7 @@ import { chaveInfo } from "../cena/investigacao.mjs";
 import { textoPuroDaLinha } from "../cena/texto-linha.mjs";
 import { desafioResolvido } from "../cena/desafios.mjs";
 import { pontoTrancado, liberarAcesso, trancarDeNovo, criarDesafioDoPonto } from "../cena/acesso-poi.mjs";
+import { excluirDesafio, excluirPontoDeInteresse } from "../cena/excluir-desafio.mjs";
 
 export class PontoInteresseSheet extends OP2ItemSheet {
   static DEFAULT_OPTIONS = {
@@ -34,6 +35,8 @@ export class PontoInteresseSheet extends OP2ItemSheet {
       liberarAcesso: PontoInteresseSheet.#liberarAcesso,
       trancarDeNovo: PontoInteresseSheet.#trancarDeNovo,
       alternarForaDaTranca: PontoInteresseSheet.#alternarForaDaTranca,
+      excluirDesafioVinculado: PontoInteresseSheet.#excluirDesafioVinculado,
+      excluirPonto: PontoInteresseSheet.#excluirPonto,
     },
   };
 
@@ -75,6 +78,14 @@ export class PontoInteresseSheet extends OP2ItemSheet {
 
   static async #criarDesafioAcesso() {
     await criarDesafioDoPonto(this.item);
+  }
+
+  static async #excluirDesafioVinculado(_evento, alvo) {
+    if (await excluirDesafio(alvo.dataset.uuid)) this.render();
+  }
+
+  static async #excluirPonto() {
+    await excluirPontoDeInteresse(this.item.uuid);
   }
 
   static async #liberarAcesso() {

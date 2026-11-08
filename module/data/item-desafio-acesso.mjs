@@ -33,6 +33,17 @@ export class DesafioAcessoData extends foundry.abstract.TypeDataModel {
         // (Atletismo), um portão enferrujado (Máquinas), uma janela alta
         // (Acrobacia). O mestre diz qual perícia e como se chama.
         generico: new BooleanField({ required: true, initial: false }),
+        // EQUILIBRAR-SE: subir a escadaria lisa, atravessar a viga. A travessia é o
+        // teste de equilíbrio (2d10 por rodada); vence com N equilíbrios seguidos
+        // ("3 sucessos necessários"), e cair dá dano e recomeça do zero.
+        equilibrar: new BooleanField({ required: true, initial: false }),
+      }),
+
+      /** Equilibrar-se: sucessos para vencer, dano ao cair (fórmula) e se já venceu. */
+      equilibrar: new SchemaField({
+        sucessos: new NumberField({ required: true, initial: 3, min: 1, integer: true, nullable: false }),
+        dano: new StringField({ required: true, initial: "", blank: true }),
+        resolvido: new BooleanField({ required: true, initial: false }),
       }),
 
       /** Abordagem genérica: a perícia testada e o rótulo que aparece no botão. */
