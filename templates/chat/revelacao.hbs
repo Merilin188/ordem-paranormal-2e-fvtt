@@ -86,6 +86,29 @@
             data-ator-id="{{../atorId}}" data-poi-uuid="{{../poiUuid}}" data-info-id="{{id}}">
             <i class="fa-solid fa-bullhorn" aria-hidden="true"></i> {{localize "OP2.Investigacao.ContarAoGrupo"}}
           </button>
+          {{!-- Itens que a pista guarda: só o mestre vê. Ele tira o que não vai e
+                transfere o resto para a ficha de quem achou. --}}
+          {{#if itens.length}}
+            <div class="op2-card__itens-pista" data-op2-gm data-info-id="{{id}}">
+              <span class="op2-card__itens-titulo"><i class="fa-solid fa-box-open" aria-hidden="true"></i> {{localize "OP2.ItensPista.NoCard"}}</span>
+              <ul class="op2-card__itens-lista">
+                {{#each itens}}
+                  <li class="op2-card__item-pista" data-item-uuid="{{uuid}}">
+                    <img src="{{img}}" alt=""> <span>{{nome}}</span>
+                    <button type="button" class="op2-botao-icone" data-op2-acao="remover-item-pista"
+                      data-ator-id="{{../../atorId}}" data-info-id="{{../id}}" data-item-uuid="{{uuid}}"
+                      aria-label="{{localize 'OP2.ItensPista.Remover'}}" data-tooltip="{{localize 'OP2.ItensPista.Remover'}}">
+                      <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                    </button>
+                  </li>
+                {{/each}}
+              </ul>
+              <button type="button" class="op2-botao op2-botao--pequeno" data-op2-acao="transferir-itens-pista"
+                data-ator-id="{{../atorId}}" data-info-id="{{id}}" data-itens="{{itensUuids}}">
+                <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i> {{localize "OP2.ItensPista.Transferir" ator=../atorNome}}
+              </button>
+            </div>
+          {{/if}}
         </li>
       {{/each}}
     </ol>

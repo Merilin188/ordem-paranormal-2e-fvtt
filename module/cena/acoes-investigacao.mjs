@@ -12,6 +12,7 @@ import { resolverInvestigacao, resolverExaminar, chaveInfo, motivoSemRevelacao, 
   infosAlcancaveis, aceitaPericia, periciasDaLinha,
 } from "./investigacao.mjs";
 import { pontoTrancado } from "./acesso-poi.mjs";
+import { itensDaLinha } from "./itens-pista.mjs";
 import { alvosDaCenaAtiva, alvosMarcados } from "./encerrar-investigacao.mjs";
 import { investigacaoAtiva } from "./investigacao-ativa.mjs";
 import { rolarTeste, rotuloDePericia, renderizar } from "../dice/teste.mjs";
@@ -313,7 +314,13 @@ export async function examinar(ator, poiUuid, chavePericia, { rapido = false } =
   }
 
   const marcar = (ids, semRolar) => infosPorId(poi, ids)
-    .map((info) => ({ ...info, rotuloPericia: rotuloDePericia(chavePericia), semRolar }));
+    .map((info) => {
+      const itens = itensDaLinha(info);
+      return {
+        ...info, rotuloPericia: rotuloDePericia(chavePericia), semRolar,
+        itens, itensUuids: itens.map((i) => i.uuid).join(","),
+      };
+    });
 
   // O que ainda falta desta perícia depois desta ação: o card diz se a rolagem "não
   // alcançou o resto" ou se simplesmente não havia mais nada para achar.
@@ -333,6 +340,7 @@ export async function examinar(ator, poiUuid, chavePericia, { rapido = false } =
       ? await editorDeTexto().enrichHTML(poi.system.descricaoBasica, { relativeTo: poi })
       : null,
     infos: [...marcar(gratis, true), ...marcar(revelaveis, false)],
+    atorNome: ator.name,
     temInfos: true,
     poiUuid,
     ...rolagem,

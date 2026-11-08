@@ -1990,6 +1990,19 @@
       "Imagem": "Image",
       "SemCena": "This transition has no scene chosen yet.",
       "Pasta": "Scene transitions"
+    },
+    "ItensPista": {
+      "Titulo": "Clue items",
+      "NoCard": "Items of this clue (GM only)",
+      "Remover": "Remove this item (it won't go to the sheet)",
+      "Devolver": "Put this item back on the list",
+      "Transferir": "Transfer items to {ator}",
+      "Transferidos": "Items transferred",
+      "Nenhum": "No item to transfer.",
+      "Recebeu": "{ator} received: {itens}.",
+      "TirarDaPista": "Remove this item from the clue",
+      "ArrasteAqui": "Drag items onto this line: they stay stored in the clue, and you transfer them from the card when someone finds it.",
+      "SoItens": "Only inventory items can go in a clue."
     }
   }
 }

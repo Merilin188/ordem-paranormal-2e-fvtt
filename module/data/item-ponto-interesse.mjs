@@ -82,6 +82,9 @@ export class PontoInteresseData extends foundry.abstract.TypeDataModel {
         // pode ser achada antes de abrir. É o "Ofício (metalurgia) DT 8: você analisa a
         // construção do baú" — lê-se o baú fechado; o que tem dentro, não.
         foraDaTranca: new BooleanField({ required: true, initial: false }),
+        // Itens que esta pista guarda (uuids): o gládio e o elmo dentro do baú. Achar
+        // a pista não entrega nada — o mestre transfere pelo card (`itens-pista.mjs`).
+        itens: new ArrayField(new StringField({ required: true, blank: false }), { required: true, initial: [] }),
       })),
 
       /**

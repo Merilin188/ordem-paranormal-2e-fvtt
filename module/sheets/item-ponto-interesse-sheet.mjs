@@ -15,6 +15,7 @@ import { textoPuroDaLinha } from "../cena/texto-linha.mjs";
 import { desafioResolvido } from "../cena/desafios.mjs";
 import { pontoTrancado, liberarAcesso, trancarDeNovo, criarDesafioDoPonto } from "../cena/acesso-poi.mjs";
 import { excluirDesafio, excluirPontoDeInteresse } from "../cena/excluir-desafio.mjs";
+import { itensDaLinha, podeSerItemDePista } from "../cena/itens-pista.mjs";
 import {
   novaTransicao, marcarPadrao, nomeDaTransicao, mostrarTransicao, escolherEMostrar, transicaoValida,
 } from "../cena/transicoes.mjs";
@@ -41,6 +42,8 @@ export class PontoInteresseSheet extends OP2ItemSheet {
       excluirDesafioVinculado: PontoInteresseSheet.#excluirDesafioVinculado,
       excluirPonto: PontoInteresseSheet.#excluirPonto,
       adicionarAlternativa: PontoInteresseSheet.#adicionarAlternativa,
+      removerItemDaPista: PontoInteresseSheet.#removerItemDaPista,
+      abrirItemDaPista: PontoInteresseSheet.#abrirItemDaPista,
       adicionarTransicao: PontoInteresseSheet.#adicionarTransicao,
       removerTransicao: PontoInteresseSheet.#removerTransicao,
       marcarTransicaoPadrao: PontoInteresseSheet.#marcarTransicaoPadrao,
@@ -56,7 +59,7 @@ export class PontoInteresseSheet extends OP2ItemSheet {
    */
   get _dragDrop() {
     return this.#dragDrop ??= new foundry.applications.ux.DragDrop.implementation({
-      dropSelector: ".op2-poi__desafios",
+      dropSelector: ".op2-poi__desafios, .op2-poi__info",
       permissions: { drop: () => game.user.isGM && this.isEditable },
       callbacks: { drop: this._onDrop.bind(this) },
     });
@@ -71,7 +74,26 @@ export class PontoInteresseSheet extends OP2ItemSheet {
     } catch { return; }
     if (dados?.type !== "Item") return;
     const item = await fromUuid(dados.uuid);
+    // Solto numa linha do quadro: o item passa a ser guardado por aquela pista.
+    const linha = evento.target.closest?.(".op2-poi__info");
+    if (linha) {
+      if (!podeSerItemDePista(item)) return void ui.notifications.warn(game.i18n.localize("OP2.ItensPista.SoItens"));
+      const informacoes = this.item.system.toObject().informacoes.map((i) => (i.id === linha.dataset.infoId
+        ? { ...i, itens: [...new Set([...(i.itens ?? []), item.uuid])] } : i));
+      await this.item.update({ "system.informacoes": informacoes });
+      return;
+    }
     if (item?.type === "desafio-acesso") await vincularDesafioAoPonto(this.item, item.uuid);
+  }
+
+  static async #removerItemDaPista(_evento, alvo) {
+    const informacoes = this.item.system.toObject().informacoes.map((i) => (i.id === alvo.dataset.infoId
+      ? { ...i, itens: (i.itens ?? []).filter((u) => u !== alvo.dataset.uuid) } : i));
+    await this.item.update({ "system.informacoes": informacoes });
+  }
+
+  static async #abrirItemDaPista(_evento, alvo) {
+    (await fromUuid(alvo.dataset.uuid))?.sheet?.render(true);
   }
 
   static async #alternarOcultoNaInvestigacao(_evento, alvo) {
@@ -264,6 +286,7 @@ export class PontoInteresseSheet extends OP2ItemSheet {
         // Linha antiga em HTML: mostra (e, ao salvar, grava) texto puro.
         texto: textoPuroDaLinha(info.texto),
         alternativas: (info.periciasAlternativas ?? []).map((chave, j) => ({ chave, j })),
+        itensDaPista: itensDaLinha(info),
         // Três estados por linha, um botão só (o mesmo do painel).
         estado: info.oculta ? "rascunho" : (info.aberta ? "aberta" : "descobrivel"),
         reveladoPor: ehGM ? personagens.filter((a) => a.system.estado?.infosReveladas?.has(chaveInfo(uuid, info.id))).map((a) => a.name).join(", ") : "",

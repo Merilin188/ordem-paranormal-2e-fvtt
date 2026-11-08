@@ -1990,6 +1990,19 @@
       "Imagem": "Imagem",
       "SemCena": "Esta transição ainda não tem cena escolhida.",
       "Pasta": "Transições de cena"
+    },
+    "ItensPista": {
+      "Titulo": "Itens da pista",
+      "NoCard": "Itens desta pista (só o mestre vê)",
+      "Remover": "Tirar este item (não vai para a ficha)",
+      "Devolver": "Devolver este item à lista",
+      "Transferir": "Transferir itens para {ator}",
+      "Transferidos": "Itens transferidos",
+      "Nenhum": "Nenhum item para transferir.",
+      "Recebeu": "{ator} recebeu: {itens}.",
+      "TirarDaPista": "Tirar este item da pista",
+      "ArrasteAqui": "Arraste itens para esta linha: eles ficam guardados na pista, e você transfere pelo card quando alguém achar.",
+      "SoItens": "Só itens de inventário entram numa pista."
     }
   }
 }

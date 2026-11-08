@@ -132,7 +132,7 @@
 
       <ol class="op2-poi__infos">
         {{#each informacoes}}
-          <li class="op2-poi__info">
+          <li class="op2-poi__info" data-info-id="{{id}}">
             <input type="hidden" name="system.informacoes.{{indice}}.id" value="{{id}}">
             {{!-- Editar o texto da linha não pode soltar a marcação da tranca. --}}
             <input type="hidden" name="system.informacoes.{{indice}}.foraDaTranca" data-dtype="Boolean"
@@ -203,6 +203,25 @@
             </div>
             <textarea name="system.informacoes.{{indice}}.texto" rows="2"
               {{#unless @root.editavel}}disabled{{/unless}}>{{texto}}</textarea>
+            {{!-- Itens que esta pista guarda: arraste um item (do diretório ou de uma
+                  ficha) para a linha. O mestre transfere pelo card, não é automático. --}}
+            {{#if @root.ehGM}}
+              <div class="op2-poi__info-itens">
+                {{#each itensDaPista}}
+                  <span class="op2-poi__item-pista">
+                    <img src="{{img}}" alt="">
+                    <a data-action="abrirItemDaPista" data-uuid="{{uuid}}">{{nome}}</a>
+                    {{#if @root.editavel}}
+                      <button type="button" class="op2-botao-icone" data-action="removerItemDaPista" data-info-id="{{../id}}" data-uuid="{{uuid}}"
+                        aria-label="{{localize 'OP2.ItensPista.TirarDaPista'}}" data-tooltip="{{localize 'OP2.ItensPista.TirarDaPista'}}">
+                        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                      </button>
+                    {{/if}}
+                  </span>
+                {{/each}}
+                <span class="op2-ajuda op2-poi__itens-dica"><i class="fa-solid fa-box-open" aria-hidden="true"></i> {{localize "OP2.ItensPista.ArrasteAqui"}}</span>
+              </div>
+            {{/if}}
             {{#if temRevelacao}}
               <div class="op2-poi__info-revelado">
                 {{#if reveladoPor}}
