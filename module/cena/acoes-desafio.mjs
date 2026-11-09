@@ -20,6 +20,7 @@ import { rolarTeste, renderizar, enviarParaChat, rotuloDePericia } from "../dice
 import { enviarCardAoMestre } from "../ui/card-mestre.mjs";
 import { aplicarDano } from "../dice/falha-critica.mjs";
 import { stepDie } from "../dice/escada.mjs";
+import { iconeDado } from "../ui/dice-icons.mjs";
 import { OP2Roll } from "../dice/op2-roll.mjs";
 import { lerConfig } from "../settings/register.mjs";
 import { rodadaAtual } from "./rodada.mjs";
@@ -759,9 +760,10 @@ export async function perguntarFadiga(ator) {
       content: `
         <p>${game.i18n.format("OP2.Desafio.FadigaPergunta", { nome: esc(p.nome) })}</p>
         <ul class="op2-fadiga__dados">
-          <li><strong>${game.i18n.localize("OP2.DT")}</strong> ${p.dt}</li>
-          <li><strong>${esc(p.rotuloPericia)}</strong> ${p.para}${p.piso ? "" : ` <s>${p.de}</s>`}</li>
-          <li><strong>${esc(p.rotuloAtributo)}</strong> ${p.dadoAtributo}</li>
+          <li><strong>${game.i18n.localize("OP2.DT")}</strong> <span class="op2-fadiga__dt">${p.dt}</span></li>
+          <li><strong>${esc(p.rotuloPericia)}</strong> ${iconeDado(p.para, { titulo: p.para })}${p.piso ? ""
+            : ` <span class="op2-fadiga__antes" data-tooltip="${esc(game.i18n.format("OP2.Desafio.FadigaAntes", { de: p.de }))}">${iconeDado(p.de, { titulo: p.de })}</span>`}</li>
+          <li><strong>${esc(p.rotuloAtributo)}</strong> ${iconeDado(p.dadoAtributo, { titulo: p.dadoAtributo })}</li>
         </ul>
         <p class="op2-ajuda">${esc(reducao)}</p>
         <p class="op2-ajuda">${game.i18n.localize("OP2.Desafio.FadigaFalha")}</p>`,

@@ -758,7 +758,8 @@
       "FadigaTitulo": "Sustentando — {ator}",
       "FadigaPergunta": "Fim da rodada. Para continuar sustentando ({nome}), teste Atletismo:",
       "FadigaFalha": "Falhou: solta o que sustentava. Soltar agora não custa teste.",
-      "FadigaContinuar": "Continuar sustentando (rolar {de} + {atributo})"
+      "FadigaContinuar": "Continuar sustentando (rolar {de} + {atributo})",
+      "FadigaAntes": "Antes da fadiga: {de}"
     },
     "Ferramenta": {
       "Rotulo": "Ferramenta",

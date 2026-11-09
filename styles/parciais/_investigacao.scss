@@ -1847,6 +1847,20 @@ details[open] > summary.op2-painel-titulo::before { transform: rotate(45deg); }
   margin: var(--op2-e2) 0;
   padding: 0;
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: var(--op2-e3);
-  s { opacity: 0.6; }
+  li { display: inline-flex; align-items: center; gap: var(--op2-e1); }
+  .op2-dado { width: 2rem; height: 2rem; }
+}
+.op2-fadiga__dt { font-size: 1.2em; font-weight: bold; }
+// O dado de antes da fadiga: menor, apagado e riscado.
+.op2-fadiga__antes {
+  position: relative;
+  opacity: 0.45;
+  .op2-dado { width: 1.4rem; height: 1.4rem; }
+  &::after {
+    content: ""; position: absolute; left: -2px; right: -2px; top: 50%;
+    border-top: 2px solid var(--op2-vermelho-claro); transform: rotate(-20deg);
+  }
 }

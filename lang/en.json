@@ -758,7 +758,8 @@
       "FadigaTitulo": "Holding — {ator}",
       "FadigaPergunta": "End of the round. To keep holding ({nome}), test Athletics:",
       "FadigaFalha": "On a failure: lets go of what was held. Letting go now needs no test.",
-      "FadigaContinuar": "Keep holding (roll {de} + {atributo})"
+      "FadigaContinuar": "Keep holding (roll {de} + {atributo})",
+      "FadigaAntes": "Before fatigue: {de}"
     },
     "Ferramenta": {
       "Rotulo": "Tool",
