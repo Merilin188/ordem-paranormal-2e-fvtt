@@ -46,6 +46,7 @@ export class PersonagemSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       criarItem: PersonagemSheet.#criarItem,
       alternarEquipado: PersonagemSheet.#alternarEquipado,
       usarItem: PersonagemSheet.#usarItem,
+      usarLinha: PersonagemSheet.#usarLinha,
       ajustarCarga: PersonagemSheet.#ajustarCarga,
       editarItem: PersonagemSheet.#editarItem,
       apagarItem: PersonagemSheet.#apagarItem,
@@ -130,19 +131,42 @@ export class PersonagemSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
           acaoExtra: item.system.impeto.espacos >= 5,
         } : null,
         usavel: USAVEIS.includes(item.system.automacao),
+        dicaUsar: game.i18n.localize(USAVEIS.includes(item.system.automacao) ? "OP2.Poder.UsarDica" : "OP2.Item.UsarDica"),
         marcadores: item.system.automacao === "analise"
           ? Array.from({ length: 4 }, (_, i) => ({ n: i + 1, cheio: i < item.system.marcadores })) : null,
         estadoPoder: item.system.automacao === "lobo" && item.system.machucadoNaCena ? game.i18n.localize("OP2.Poder.LoboFerido")
           : item.system.automacao === "arsenal" ? ["tonico", "balsamo", "vespa"].filter((p) => !item.system.arsenal[p]).map((p) => game.i18n.localize(`OP2.Poder.Arsenal.${p}`)).join(" · ") || game.i18n.localize("OP2.Poder.ArsenalVazio")
             : "",
       }))),
-      equipamentos: this.actor.items.filter((i) => i.type === "equipamento").map((i) => Object.assign(i, {
-        op2TemUso: temUso(i),
-        op2Gasto: itemGasto(i.system),
-        op2Simbolo: Boolean(i.system.passiva?.simbolo),
-        op2MensagemGasto: i.system.mensagemGasto?.trim() || "",
+      // Inventário e ferramentas na mesma linha das habilidades: clicar no nome usa,
+      // a descrição fica embaixo, lápis edita e lixeira apaga.
+      equipamentos: await Promise.all(this.actor.items.filter((i) => i.type === "equipamento").map(async (item) => {
+        const gasto = itemGasto(item.system);
+        return {
+          item,
+          descricao: await enriquecer(item.system.descricao, item),
+          meta: [
+            item.system.quantidade !== 1 ? `×${item.system.quantidade}` : "",
+            item.system.arma ? game.i18n.localize("OP2.Equipamento.Arma") : "",
+          ].filter(Boolean).join(" · "),
+          equipado: item.system.equipado,
+          cargas: item.system.cargas.usa ? item.system.cargas : null,
+          simbolo: Boolean(item.system.passiva?.simbolo),
+          gasto,
+          dicaUsar: gasto && temUso(item)
+            ? (item.system.mensagemGasto?.trim() || game.i18n.localize("OP2.Uso.JaGastoCurto"))
+            : game.i18n.localize(temUso(item) ? "OP2.Uso.UsarDica" : "OP2.Item.UsarDica"),
+          dicaSimbolo: gasto ? (item.system.mensagemGasto?.trim() || game.i18n.localize("OP2.Uso.PassivaApagada"))
+            : game.i18n.localize("OP2.Uso.PassivaAtiva"),
+        };
       })),
-      ferramentas: this.actor.items.filter((i) => i.type === "ferramenta"),
+      ferramentas: await Promise.all(this.actor.items.filter((i) => i.type === "ferramenta").map(async (item) => ({
+        item,
+        descricao: await enriquecer(item.system.descricao, item),
+        meta: game.i18n.localize(`OP2.Ferramenta.Subtipo.${item.system.subtipo}`),
+        cargas: item.system.cargas?.usa ? item.system.cargas : null,
+        dicaUsar: game.i18n.localize("OP2.Item.UsarDica"),
+      }))),
       temReducao: Object.values(sistema.estado.reducoesTemporarias).some((n) => n > 0),
       // O aumento precisa aparecer na ficha: sem isso o jogador gasta os três espaços
       // do Ímpeto e não tem onde conferir que o dado subiu (achado em uso real).
@@ -466,6 +490,14 @@ export class PersonagemSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       render: renderDoPerfil(this.actor),
     });
     if (confirmado) await item.delete();
+  }
+
+  /** O clique no nome da linha: usa a habilidade ou o item (automação, efeito ou card). */
+  static async #usarLinha(_evento, alvo) {
+    const item = this.#itemDe(alvo);
+    if (!item) return;
+    const { usarRecurso } = await import("../cena/acoes-recurso.mjs");
+    await usarRecurso(this.actor, item);
   }
 
   /** Usa o item (cura, dano, dado de esconderijo…), escolhendo o efeito se for "um OU outro". */

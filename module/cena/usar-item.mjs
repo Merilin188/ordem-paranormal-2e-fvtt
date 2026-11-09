@@ -66,10 +66,8 @@ export async function usarItem(ator, item) {
   }
 
   const linhas = [];
-  const rolls = [];
   for (const uso of escolhidos) {
     const r = await aplicarUso(ator, uso);
-    if (r?.roll) rolls.push(r.roll);
     if (r?.linha) linhas.push(r.linha);
   }
 
@@ -84,7 +82,8 @@ export async function usarItem(ator, item) {
       <header class="op2-card__topo"><span class="op2-tag op2-tag--pequena"><img src="${esc(item.img)}" alt=""> ${esc(item.name)}</span></header>
       <p class="op2-card__texto">${esc(L("Usou", { ator: ator.name, item: item.name }))}</p>
       ${linhas.join("")}</div>`,
-    rolls,
+    // Sem `rolls`: os dados já rolaram em 3D (com eles na mensagem, o Dice So Nice
+    // rolava tudo DE NOVO — achado em uso real com a Runa de Brenna).
     flags: { [SYSTEM_ID]: { tipo: "uso-item", atorId: ator.id } },
   });
   return item;

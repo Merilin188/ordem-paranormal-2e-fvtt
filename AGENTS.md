@@ -45,6 +45,13 @@ permanentes). **v13 e v14 exercitados pelo e2e** (13.351: 532 verificações; 14
 
 ## Convenções
 
+- **Regra de ouro: revisar antes de entregar.** Toda mudança de tela é olhada
+  renderizada (`npm run preview`, e2e ou o HTML lado a lado com um componente que já
+  funciona) e reaproveita a classe/partial do equivalente em vez de inventar estilo.
+  Procure efeito duplicado: `mostrarDados3D()` + `rolls` na mensagem faz o Dice So
+  Nice rolar os dados DUAS vezes — card com dados já mostrados vai sem `rolls`.
+- **Regra de ouro: dado alterado tem motivo.** Toda automação que muda um dado (passo,
+  dado extra) escreve no card o motivo e o que mudou (`roll.options.ajustes`).
 - **Identificadores em pt-BR**: tipos, chaves, funções (`personagem`, `pericias`, `stepDie`
   é exceção por ser termo técnico consolidado). Comentários e docs em pt-BR.
 - **Sem `template.json`** — sempre `TypeDataModel`.

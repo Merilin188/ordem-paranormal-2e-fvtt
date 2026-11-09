@@ -92,7 +92,7 @@ export async function mostrarHabilidadeNoChat(ator, id, { aplicar = false } = {}
   const mensagem = await ChatMessage.create({
     speaker: ChatMessage.getSpeaker({ actor: ator }),
     content: `<div class="op2 op2-card op2-criatura-card">${partes.join("")}</div>`,
-    rolls: roll ? [roll] : [],
+    // Sem `rolls`: o dano já rolou em 3D (com ele aqui, rolava duas vezes).
     flags: { [SYSTEM_ID]: { tipo: "criatura-habilidade", atorId: ator.id } },
   });
   // O card sai primeiro (a armadura do alvo pode perguntar algo ao aplicar o dano).

@@ -617,6 +617,52 @@
   grid-template-columns: 2rem minmax(0, 1fr) auto 1.6rem;
 }
 
+// Linha única de item/habilidade (o padrão da habilidade da criatura): ícone · corpo.
+// No corpo, a cabeça é o nome (clicar USA) com os controles à direita (equipado,
+// cargas, lápis, lixeira); embaixo, a meta e a descrição.
+.op2-lista-itens .op2-item.op2-linha {
+  grid-template-columns: 2rem minmax(0, 1fr);
+  align-items: start;
+}
+.op2-linha__corpo { display: flex; min-width: 0; flex-direction: column; gap: 0.1rem; }
+.op2-linha__cabeca {
+  display: flex;
+  align-items: center;
+  gap: var(--op2-e1);
+  min-width: 0;
+  > .op2-botao-icone, > .op2-item__equipado { flex: none; width: 1.6rem; height: 1.6rem; border-radius: 0; }
+  > .op2-item__cargas { flex: none; }
+}
+.op2-linha__usar {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  align-items: center;
+  gap: var(--op2-e2);
+  padding: 0.2rem 0.4rem;
+  border: 1px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--op2-texto);
+  cursor: pointer;
+  text-align: left;
+  &:hover:not([disabled]) { border-color: var(--op2-vermelho); background: color-mix(in srgb, var(--op2-vermelho) 12%, transparent); }
+  &[disabled] { cursor: default; }
+}
+.op2-linha__nome {
+  overflow: hidden;
+  font-family: var(--op2-fonte-display);
+  font-size: 1rem;
+  letter-spacing: 0.03em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.op2-linha__acao--perigo:hover { color: var(--op2-vermelho-claro); }
+// Meta, descrição e extras (marcadores, ímpeto) alinhados com o texto do nome.
+.op2-linha__corpo > :not(.op2-linha__cabeca) { margin-left: calc(0.4rem + 1px); }
+.op2-lista-itens + .op2-painel__topo { margin-top: var(--op2-e3); }
+.op2-linha .op2-item__cargas .op2-botao-icone { width: 1.3rem; height: 1.3rem; border-radius: 0; }
+
 // A ficha de NPC não usa o grid de abas da ficha de personagem — é uma coluna simples
 // que precisa rolar sozinha, com espaço de verdade entre as seções.
 .op2-ficha--npc .window-content,

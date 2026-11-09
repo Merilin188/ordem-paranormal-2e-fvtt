@@ -187,7 +187,9 @@
     "Item": {
       "Novo": "Novo {tipo}",
       "Apagar": "Apagar item",
-      "ApagarConfirma": "Apagar <strong>{nome}</strong> desta ficha?"
+      "ApagarConfirma": "Apagar <strong>{nome}</strong> desta ficha?",
+      "Editar": "Editar",
+      "UsarDica": "Usar: leva ao chat com a descrição (o mestre decide o efeito)."
     },
     "Npc": {
       "Categoria": "Categoria",
@@ -1430,7 +1432,8 @@
       "GuardiaTarde": "{alvo} já respondeu a este ataque: a Guardiã não pode mais trocar o alvo.",
       "AjudaNota": "Passo de dados aumentado (+{passos}) devido à ajuda de {nome}.",
       "AjudaNotaMentoria": "Passo de dados aumentado (+{passos}) devido à {mentoria} de {nome}.",
-      "ReducaoNota": "Redução de {passos} passo(s) até o fim da rodada: {motivo}."
+      "ReducaoNota": "Redução de {passos} passo(s) até o fim da rodada: {motivo}.",
+      "UsarDica": "Usar: roda a automação da habilidade."
     },
     "PericiasMundo": {
       "MenuNome": "Perícias do mundo",

@@ -26,8 +26,20 @@ export async function usarHabilidadeOuItem(ator) {
 
   const itemId = await escolherItem(usaveis);
   if (!itemId) return null;
-  const item = ator.items.get(itemId);
-  // Item com efeitos de uso (cura, dano, esconderijo): usa de verdade.
+  return usarRecurso(ator, ator.items.get(itemId));
+}
+
+/**
+ * Usa um item ou habilidade da ficha — o clique no nome da linha. Habilidade com
+ * automação (Análise, Lobo…) roda a automação; equipamento com efeitos de uso rola
+ * e aplica; o resto vai ao chat com a descrição e o passo que o mestre concede.
+ */
+export async function usarRecurso(ator, item) {
+  if (!ator || !item) return null;
+  if (item.type === "habilidade") {
+    const { usarPoder, USAVEIS } = await import("./poderes.mjs");
+    if (USAVEIS.includes(item.system.automacao)) return usarPoder(ator, item);
+  }
   const { temUso, usarItem } = await import("./usar-item.mjs");
   if (temUso(item)) return usarItem(ator, item);
 

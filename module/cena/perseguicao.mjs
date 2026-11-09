@@ -403,7 +403,8 @@ async function consequencia(uuid, config, { soDano = false } = {}) {
   const recurso = c.recurso === "pd" ? "pd" : "pv";
   const formula = String(c.dano ?? "").trim();
   if (formula && Roll.validate(formula)) {
-    const roll = await rolar(formula);
+    // O card de dano leva o roll (o Dice So Nice anima): sem 3D antes, senão rola duas vezes.
+    const roll = await new Roll(formula).evaluate();
     const { aplicarDano } = await import("../dice/falha-critica.mjs");
     const { cardDeDano } = await import("./rodada.mjs");
     if (roll.total > 0) await aplicarDano(doc, roll.total, recurso);

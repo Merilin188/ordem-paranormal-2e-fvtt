@@ -18,6 +18,7 @@ const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SAIDA = process.argv[2] ?? join(RAIZ, "preview.html");
 
 instalarStubs();
+globalThis.CONFIG.statusEffects ??= [];
 
 /* ------------------------------------------------------------------ i18n -- */
 
@@ -38,6 +39,15 @@ globalThis.Handlebars = Handlebars;
 registrarHelpers();
 registrarHelpersDeDado();
 Handlebars.registerHelper("localize", traduzir);
+// Partials por caminho completo, como o Foundry registra (`{{> (op2Caminho ...)}}`).
+for (const pasta of ["partials", "actor/partials", "cena/partials"]) {
+  let arquivos = [];
+  try { arquivos = readdirSync(join(RAIZ, "templates", pasta)); } catch { continue; }
+  for (const arq of arquivos.filter((a) => a.endsWith(".hbs"))) {
+    Handlebars.registerPartial(`systems/ordem-paranormal-2e/templates/${pasta}/${arq}`,
+      readFileSync(join(RAIZ, "templates", pasta, arq), "utf8"));
+  }
+}
 Handlebars.registerHelper("formInput", (_campo, opcoes) =>
   new Handlebars.SafeString(
     `<div class="op2-prosemirror-fake">${opcoes?.hash?.value || "<em>vazio</em>"}</div>`));
@@ -85,11 +95,19 @@ const sistema = {
   aptidoes: Object.fromEntries(
     APTIDOES_PADRAO.map((c, i) => [c, { rotulo: "", die: ["d4", "d6", "d8"][i % 3] }])),
   recursos: { pv: { value: 6, max: 10 }, pd: { value: 11, max: 16 } },
+  armadura: { value: 0, max: 0, gastos: 0 },
+  lesoes: [],
+  traumas: [],
+  relacoes: [],
   estado: {
     testesFerimento: 0,
     testesTrauma: 0,
+    testesMorte: 0,
     // Uma redução ativa para o preview mostrar o dado base riscado e o botão de cena.
     reducoesTemporarias: { fisico: 1, mente: 0, emocao: 0 },
+    aumentosTemporarios: { fisico: 0, mente: 0, emocao: 0 },
+    infosReveladas: new Set(),
+    poisInvestigados: new Set(),
     acoesUsadasNaCena: new Set(),
   },
   biografia: "<p>Perdeu o emprego no laboratório. Não perdeu o hábito de anotar tudo.</p>",
@@ -111,7 +129,12 @@ const equipamentos = [
   { id: "e1", name: "Pé de cabra", img: "", type: "equipamento",
     system: { quantidade: 1, arma: true, cargas: { usa: false } } },
   { id: "e2", name: "Lanterna de Estouro UV", img: "", type: "equipamento",
-    system: { quantidade: 1, arma: false, cargas: { usa: true, value: 2, max: 3 } } },
+    system: { quantidade: 1, arma: false, cargas: { usa: true, value: 2, max: 3 }, descricao: "<p>Revela marcas invisíveis.</p>" } },
+  { id: "e3", name: "Runa da Brenna", img: "systems/ordem-paranormal-2e/assets/icons/runa-brenna.svg", type: "equipamento",
+    system: { quantidade: 1, arma: false, cargas: { usa: true, value: 1, max: 1 }, gastaAoUsar: true,
+      mensagemGasto: "Sua runa já foi apagada.", passiva: { status: "runa", simbolo: true },
+      usos: [{ formula: "1d10", tipo: "curaPV", texto: "" }],
+      descricao: "<p>Runa de proteção. Uso único, como ação livre: escolha recuperar 1d10 PV, recuperar 1d10 PD ou ganhar um dado de esconderijo d10.</p>" } },
 ];
 
 const ator = {
@@ -119,6 +142,8 @@ const ator = {
   img: "",
   system: sistema,
   isOwner: true,
+  statuses: new Set(),
+  effects: [],
   items: [...habilidades, ...equipamentos],
 };
 ator.items.filter = Array.prototype.filter.bind(ator.items);
@@ -217,6 +242,7 @@ const css = readFileSync(join(RAIZ, "styles/op2.css"), "utf8")
 const html = `<!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8">
 <title>Preview — Ordem Paranormal 2</title>
+<link rel="stylesheet" href="fa/css/all.min.css">
 <style>
   body { margin: 0; padding: 2rem; background: #060404; font-family: system-ui; }
   .janela { width: 880px; margin: 0 auto; border: 1px solid #2a201d; border-radius: 6px;
@@ -242,6 +268,15 @@ const html = `<!doctype html>
       ${parte("actor/personagem-inventario.hbs")}
       ${parte("actor/personagem-notas.hbs")}
       ${parte("actor/personagem-pericias.hbs")}
+    </form>
+  </div>
+
+  <div class="janela op2 op2-ficha op2-ficha--personagem">
+    <div class="barra">Inventário (aba aberta)</div>
+    <form class="window-content">
+      ${Handlebars.compile(readFileSync(join(RAIZ, "templates", "actor/personagem-inventario.hbs"), "utf8"))({
+        ...contexto, tabs: { ...contexto.tabs, inventario: { ...contexto.tabs.inventario, cssClass: "active" } },
+      })}
     </form>
   </div>
 

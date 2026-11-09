@@ -143,8 +143,8 @@ class EquilibrioApp extends HandlebarsApplicationMixin(ApplicationV2) {
     const formula = String(e.desafio.dano ?? "").trim();
     let dano = 0;
     if (formula && Roll.validate(formula)) {
+      // O card de dano leva o roll e o Dice So Nice o anima: sem 3D aqui também.
       const roll = await new Roll(formula).evaluate();
-      await mostrarDados3D(roll);
       dano = roll.total;
       if (dano > 0) await aplicarDano(ator, dano, "pv");
       await cardDeDano(ator, roll, {
