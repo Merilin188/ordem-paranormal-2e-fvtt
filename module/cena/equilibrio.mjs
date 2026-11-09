@@ -204,6 +204,10 @@ export async function iniciarEquilibrio(ator, { desafioUuid = null } = {}) {
   const acrobacia = ator.system?.pericias?.acrobacia?.dadoEfetivo ?? "d4";
   const restantes = dadosDeEquilibrio(acrobacia);
   const item = desafioUuid ? await fromUuid(desafioUuid) : null;
+  if (item) {
+    const { marcarQuemTenta } = await import("./acoes-desafio.mjs");
+    await marcarQuemTenta(item, ator);
+  }
   const desafio = item?.system?.equilibrar ? {
     uuid: item.uuid, nome: item.name, sucessos: 0,
     necessarios: item.system.equilibrar.sucessos, dano: item.system.equilibrar.dano,

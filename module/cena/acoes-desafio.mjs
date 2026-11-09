@@ -44,6 +44,15 @@ function gravarNoDesafio(desafio, dados) {
 }
 
 /**
+ * Quem está tentando o desafio: ao ser vencido, o card dos itens guardados vai para
+ * esse personagem (e o "Transferir" já o sugere).
+ */
+export async function marcarQuemTenta(desafio, ator) {
+  if (!desafio || !ator || desafio.getFlag(SYSTEM_ID, "ultimoAtorId") === ator.id) return;
+  await gravarNoDesafio(desafio, { [`flags.${SYSTEM_ID}.ultimoAtorId`]: ator.id });
+}
+
+/**
  * Rodada que conta para o teto de tentativas: a do desafio iniciado pelo mestre
  * (ferramentas do mestre), senão a da investigação ativa.
  */
@@ -87,6 +96,7 @@ async function enviarCard(ator, template, contexto, { whisper } = {}) {
 export async function arrombar(ator, desafioUuid, { rapido = false } = {}) {
   const desafio = await carregarDesafio(desafioUuid);
   if (!desafio) return null;
+  await marcarQuemTenta(desafio, ator);
   if (desafio.system.quebrado) {
     ui.notifications.warn(game.i18n.localize("OP2.Desafio.JaQuebrado"));
     return null;
@@ -189,6 +199,7 @@ export async function alcancar(ator, { modo, dt, rapido = false, desafio = null 
 export async function alcancarDesafio(ator, desafioUuid, { rapido = false } = {}) {
   const desafio = await carregarDesafio(desafioUuid);
   if (!desafio) return null;
+  await marcarQuemTenta(desafio, ator);
   const dt = desafio.system.alcancar?.dt ?? 7;
   const modo = await foundry.applications.api.DialogV2.wait({
     window: { title: `${game.i18n.localize("OP2.Desafio.Alcancar")} — ${desafio.name}`, icon: "fa-solid fa-person-walking" },
@@ -270,6 +281,7 @@ export async function sustentar(ator, { rapido = false, desafioUuid = null } = {
   // Sustentar um obstáculo concreto (a estante-porta do Ato I) usa a DT dele; solto,
   // é a DT padrão da mesa.
   const desafio = desafioUuid ? await carregarDesafio(desafioUuid) : null;
+  if (desafio) await marcarQuemTenta(desafio, ator);
   const contexto = desafio
     ? `${game.i18n.localize("OP2.Desafio.Sustentar")} — ${desafio.name}`
     : game.i18n.localize("OP2.Desafio.Sustentar");
@@ -435,6 +447,7 @@ export async function gerarSenhaDestrancar(desafioUuid, { tamanho, facesSenha } 
 export async function tentarDestrancar(ator, desafioUuid, palpite) {
   let desafio = await carregarDesafio(desafioUuid);
   if (!desafio) return null;
+  await marcarQuemTenta(desafio, ator);
   if (desafio.system.quebrado) {
     ui.notifications.warn(game.i18n.localize("OP2.Desafio.JaQuebrado"));
     return null;
@@ -526,6 +539,7 @@ export function posicoesDoPalpite(palpite, resultado) {
 export async function hackTecnico(ator, desafioUuid, { rapido = false } = {}) {
   const desafio = await carregarDesafio(desafioUuid);
   if (!desafio) return null;
+  await marcarQuemTenta(desafio, ator);
   if (desafio.system.hackTecnico.resolvido) {
     ui.notifications.warn(game.i18n.localize("OP2.Desafio.HackJaResolvido"));
     return null;
@@ -613,6 +627,7 @@ export async function marcarHackTecnicoResolvido(desafioUuid) {
 export async function hackSocial(ator, desafioUuid, { rapido = false } = {}) {
   const desafio = await carregarDesafio(desafioUuid);
   if (!desafio) return null;
+  await marcarQuemTenta(desafio, ator);
   if (desafio.system.hackSocial.resolvido) {
     ui.notifications.warn(game.i18n.localize("OP2.Desafio.HackJaResolvido"));
     return null;
@@ -685,6 +700,7 @@ export async function marcarHackSocialResolvido(desafioUuid) {
 export async function desafioGenerico(ator, desafioUuid, { rapido = false } = {}) {
   const desafio = await carregarDesafio(desafioUuid);
   if (!desafio) return null;
+  await marcarQuemTenta(desafio, ator);
   if (desafio.system.generico.resolvido) {
     ui.notifications.warn(game.i18n.localize("OP2.Desafio.GenericoJaResolvido"));
     return null;

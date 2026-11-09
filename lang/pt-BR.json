@@ -2067,8 +2067,13 @@
       "TransferirCurto": "Transferir",
       "QuemRecebe": "Quem recebe os itens?",
       "SemPersonagem": "Nenhum personagem para receber os itens.",
-      "Reanunciar": "Mandar o card dos itens agora",
-      "ReanunciarDica": "Manda (de novo) o card com estes itens para você transferir, mesmo sem o desafio vencido."
+      "Reanunciar": "Mandar o card dos itens…",
+      "ReanunciarDica": "Escolha para quem: todos, só o mestre, ou só o personagem que venceu o desafio.",
+      "VencedorAchou": "{ator} venceu \"{desafio}\" e encontrou:",
+      "ParaTodos": "Enviar para todos",
+      "ParaMestre": "Enviar somente para o mestre",
+      "ParaDescobridor": "Enviar somente para {ator} (quem venceu)",
+      "ParaDescobridorNinguem": "Enviar para quem venceu (ninguém tentou ainda)"
     }
   }
 }

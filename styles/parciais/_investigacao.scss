@@ -1764,6 +1764,26 @@ details[open] > summary.op2-painel-titulo::before { transform: rotate(45deg); }
 .op2-poi__transicao-cena { margin: 0; }
 .op2-poi .op2-item-ficha__topo .op2-poi__levar { flex: 0 0 auto; border-radius: 0; }
 
+// Menu flutuante (ex.: para quem mandar o card dos itens do desafio).
+.op2-menu-flutuante {
+  position: fixed;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  min-width: 15rem;
+  padding: var(--op2-e1);
+  background: var(--op2-fundo, #120c0c);
+  border: 1px solid var(--op2-vermelho);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 60%);
+  button {
+    display: flex; align-items: center; gap: var(--op2-e2);
+    width: 100%; padding: var(--op2-e1) var(--op2-e2); text-align: left;
+    border: 0; border-radius: 0; background: transparent; color: var(--op2-texto, inherit);
+    &:hover:not([disabled]), &:focus-visible { background: rgb(160 20 40 / 30%); }
+    &[disabled] { opacity: 0.45; cursor: not-allowed; }
+  }
+}
+
 // Itens guardados numa pista: na ficha do ponto (linha do quadro) e no card.
 .op2-poi__info-itens {
   display: flex;

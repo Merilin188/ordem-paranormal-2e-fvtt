@@ -2067,8 +2067,13 @@
       "TransferirCurto": "Transfer",
       "QuemRecebe": "Who receives the items?",
       "SemPersonagem": "No character to receive the items.",
-      "Reanunciar": "Send the items card now",
-      "ReanunciarDica": "Sends (again) the card with these items for you to transfer, even if the challenge isn't overcome."
+      "Reanunciar": "Send the items card…",
+      "ReanunciarDica": "Choose who gets it: everyone, the GM only, or only the character who overcame the challenge.",
+      "VencedorAchou": "{ator} overcame \"{desafio}\" and found:",
+      "ParaTodos": "Send to everyone",
+      "ParaMestre": "Send to the GM only",
+      "ParaDescobridor": "Send only to {ator} (who overcame it)",
+      "ParaDescobridorNinguem": "Send to who overcame it (nobody tried yet)"
     }
   }
 }

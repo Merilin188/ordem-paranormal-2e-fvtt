@@ -69,11 +69,17 @@ export class DesafioAcessoSheet extends OP2ItemSheet {
     (await fromUuid(alvo.dataset.uuid))?.sheet?.render(true);
   }
 
-  /** Mandar de novo o card dos itens (ex.: o mestre desfez e refez o desafio). */
-  static async #reanunciarItens() {
-    const { anunciarItensDoDesafio } = await import("../cena/itens-pista.mjs");
-    await this.item.unsetFlag("ordem-paranormal-2e", "itensAnunciados");
-    await anunciarItensDoDesafio(this.item);
+  /** Mandar o card dos itens agora, escolhendo para quem (menu flutuante). */
+  static async #reanunciarItens(_evento, alvo) {
+    const { anunciarItensDoDesafio, quemVenceu } = await import("../cena/itens-pista.mjs");
+    const vencedor = quemVenceu(this.item);
+    const L = (k, d) => (d ? game.i18n.format(`OP2.ItensPista.${k}`, d) : game.i18n.localize(`OP2.ItensPista.${k}`));
+    const para = await escolherNoMenu(alvo, [
+      { valor: "todos", icone: "fa-users", rotulo: L("ParaTodos") },
+      { valor: "mestre", icone: "fa-user-secret", rotulo: L("ParaMestre") },
+      { valor: "descobridor", icone: "fa-user-check", rotulo: vencedor ? L("ParaDescobridor", { ator: vencedor.name }) : L("ParaDescobridorNinguem"), desligado: !vencedor },
+    ]);
+    if (para) await anunciarItensDoDesafio(this.item, { para, forcar: true });
   }
 
   /** Sorteia a senha com o tamanho e as faces do cadastro; zera o histórico. */
@@ -209,4 +215,43 @@ export class DesafioAcessoSheet extends OP2ItemSheet {
     const segundos = Number(this.element.querySelector("[data-timer-segundos]")?.value) || undefined;
     await iniciarHackTecnico(this.item.uuid, null, indice >= 0 ? indice : -1, { segundos: indice >= 0 ? undefined : segundos });
   }
+}
+
+/**
+ * Menu flutuante preso ao botão: as opções em lista, fecha ao escolher, ao clicar
+ * fora ou com Esc. Devolve o valor escolhido (ou null).
+ */
+function escolherNoMenu(ancora, opcoes) {
+  return new Promise((resolver) => {
+    document.querySelector(".op2-menu-flutuante")?.remove();
+    const menu = document.createElement("div");
+    menu.className = "op2 op2-menu-flutuante";
+    menu.setAttribute("role", "menu");
+    for (const o of opcoes) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.setAttribute("role", "menuitem");
+      b.disabled = Boolean(o.desligado);
+      b.innerHTML = `<i class="fa-solid ${o.icone}" aria-hidden="true"></i> `;
+      b.append(document.createTextNode(o.rotulo));
+      b.addEventListener("click", () => fechar(o.valor));
+      menu.append(b);
+    }
+    document.body.append(menu);
+    const r = ancora.getBoundingClientRect();
+    const alto = menu.offsetHeight;
+    const cabeEmbaixo = r.bottom + alto + 8 < window.innerHeight;
+    menu.style.left = `${Math.max(8, Math.min(r.left, window.innerWidth - menu.offsetWidth - 8))}px`;
+    menu.style.top = `${cabeEmbaixo ? r.bottom + 4 : r.top - alto - 4}px`;
+    const fora = (ev) => { if (!menu.contains(ev.target)) fechar(null); };
+    const tecla = (ev) => { if (ev.key === "Escape") fechar(null); };
+    setTimeout(() => { document.addEventListener("pointerdown", fora, true); document.addEventListener("keydown", tecla, true); });
+    menu.querySelector("button:not([disabled])")?.focus();
+    function fechar(valor) {
+      document.removeEventListener("pointerdown", fora, true);
+      document.removeEventListener("keydown", tecla, true);
+      menu.remove();
+      resolver(valor);
+    }
+  });
 }

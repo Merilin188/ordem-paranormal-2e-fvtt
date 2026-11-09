@@ -72,6 +72,8 @@ async function transferirDoDesafio(_ator, dataset) {
   const mensagem = mensagemDo(dataset);
   if (!mensagem) return;
   if ((mensagem.getFlag(SYSTEM_ID, "itensTransferidos") ?? []).includes(dataset.infoId)) return;
+  const sugerido = dataset.sugerido ? game.actors.get(dataset.sugerido) : null;
+  if (sugerido) return entregar(sugerido, mensagem, dataset);
   const candidatos = game.actors.filter((a) => a.type === "personagem")
     .sort((a, b) => Number(b.hasPlayerOwner) - Number(a.hasPlayerOwner) || a.name.localeCompare(b.name));
   if (!candidatos.length) return void ui.notifications.warn(game.i18n.localize("OP2.ItensPista.SemPersonagem"));
@@ -157,34 +159,60 @@ function pintar(mensagem, html) {
 }
 
 /** Chamado no init. */
+/** Quem tentou o desafio por último (o que venceu, quando ele é vencido). */
+export function quemVenceu(desafio) {
+  const id = desafio?.getFlag(SYSTEM_ID, "ultimoAtorId");
+  return id ? game.actors.get(id) ?? null : null;
+}
+
 /**
- * Desafio vencido com itens guardados: um card só para o mestre, com os itens, o ×
- * de cada um e "Transferir itens…" (escolhe quem recebe). Uma vez por desafio.
+ * Para quem vai o card: "todos" (público), "mestre" (só os mestres) ou "descobridor"
+ * (os mestres e os donos do personagem que venceu). Sem personagem, cai no mestre.
  */
-export async function anunciarItensDoDesafio(desafio) {
-  if (!game.user.isGM || desafio.getFlag(SYSTEM_ID, "itensAnunciados")) return;
+export function destinatarios(para, ator) {
+  const mestres = game.users.filter((u) => u.isGM).map((u) => u.id);
+  if (para === "todos") return [];
+  if (para === "descobridor" && ator) {
+    const donos = game.users.filter((u) => !u.isGM && ator.testUserPermission(u, "OWNER")).map((u) => u.id);
+    return [...new Set([...mestres, ...donos])];
+  }
+  return mestres;
+}
+
+/**
+ * Desafio vencido com itens guardados: o card com os itens. Quem venceu vê o que
+ * achou; o × de cada item e o "Transferir" são só do mestre. Ao vencer, vai para
+ * quem venceu (e o mestre), uma vez; o botão da ficha manda de novo para quem o
+ * mestre escolher.
+ */
+export async function anunciarItensDoDesafio(desafio, { para = "descobridor", forcar = false } = {}) {
+  if (!game.user.isGM || (!forcar && desafio.getFlag(SYSTEM_ID, "itensAnunciados"))) return;
   const itens = (desafio.system.itens ?? []).map((uuid) => fromUuidSync(uuid)).filter(podeSerItemDePista);
   if (!itens.length) return;
   await desafio.setFlag(SYSTEM_ID, "itensAnunciados", true);
+  const vencedor = quemVenceu(desafio);
   const infoId = "desafio";
   const linhas = itens.map((i) => `<li class="op2-card__item-pista" data-item-uuid="${esc(i.uuid)}">
       <img src="${esc(i.img)}" alt=""> <span>${esc(i.name)}</span>
-      <button type="button" class="op2-botao-icone" data-op2-acao="remover-item-pista" data-info-id="${infoId}"
+      <button type="button" class="op2-botao-icone" data-op2-gm data-op2-acao="remover-item-pista" data-info-id="${infoId}"
         data-item-uuid="${esc(i.uuid)}" aria-label="${game.i18n.localize("OP2.ItensPista.Remover")}"
         data-tooltip="${game.i18n.localize("OP2.ItensPista.Remover")}"><i class="fa-solid fa-xmark"></i></button></li>`).join("");
   await ChatMessage.create({
     speaker: { alias: desafio.name },
-    whisper: game.users.filter((u) => u.isGM).map((u) => u.id),
+    whisper: destinatarios(para, vencedor),
     content: `<div class="op2 op2-card op2-card--investigacao">
       <header class="op2-card__topo"><span class="op2-tag op2-tag--pequena"><i class="fa-solid fa-box-open"></i> ${game.i18n.localize("OP2.ItensPista.Titulo")}</span>
         <span class="op2-card__dt">${esc(desafio.name)}</span></header>
-      <p class="op2-card__texto">${game.i18n.format("OP2.ItensPista.DesafioVencido", { desafio: esc(desafio.name) })}</p>
+      <p class="op2-card__texto">${vencedor
+        ? game.i18n.format("OP2.ItensPista.VencedorAchou", { ator: esc(vencedor.name), desafio: esc(desafio.name) })
+        : game.i18n.format("OP2.ItensPista.DesafioVencido", { desafio: esc(desafio.name) })}</p>
       <div class="op2-card__itens-pista" data-info-id="${infoId}">
-        <span class="op2-card__itens-titulo"><i class="fa-solid fa-box-open"></i> ${game.i18n.localize("OP2.ItensPista.NoCard")}</span>
         <ul class="op2-card__itens-lista">${linhas}</ul>
-        <button type="button" class="op2-botao op2-botao--pequeno" data-op2-acao="transferir-itens-desafio"
-          data-info-id="${infoId}" data-itens="${esc(itens.map((i) => i.uuid).join(","))}">
-          <i class="fa-solid fa-right-to-bracket"></i> ${game.i18n.localize("OP2.ItensPista.TransferirEscolher")}</button>
+        <button type="button" class="op2-botao op2-botao--pequeno" data-op2-gm data-op2-acao="transferir-itens-desafio"
+          data-info-id="${infoId}" data-itens="${esc(itens.map((i) => i.uuid).join(","))}" data-sugerido="${esc(vencedor?.id ?? "")}">
+          <i class="fa-solid fa-right-to-bracket"></i> ${vencedor
+            ? game.i18n.format("OP2.ItensPista.Transferir", { ator: esc(vencedor.name) })
+            : game.i18n.localize("OP2.ItensPista.TransferirEscolher")}</button>
       </div></div>`,
     flags: { [SYSTEM_ID]: { tipo: "itens-desafio", desafioUuid: desafio.uuid } },
   });
