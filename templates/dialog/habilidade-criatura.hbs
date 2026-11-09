@@ -1,0 +1,45 @@
+{{!-- Edição de uma habilidade de criatura: tudo num lugar só (nome, os dois textos,
+      dano, condição e efeito). --}}
+<div class="op2-habilidade-edicao">
+  <label class="op2-criatura-habilidade__campo">
+    <span>{{localize "OP2.Criatura.NomeHabilidade"}}</span>
+    <input type="text" name="nome" value="{{h.nome}}" autofocus>
+  </label>
+  <label class="op2-criatura-habilidade__campo">
+    <span><i class="fa-solid fa-users" aria-hidden="true"></i> {{localize "OP2.Criatura.TextoJogadores"}}</span>
+    <textarea name="texto" rows="4">{{h.texto}}</textarea>
+  </label>
+  <label class="op2-criatura-habilidade__campo op2-criatura-habilidade__campo--mestre">
+    <span><i class="fa-solid fa-user-secret" aria-hidden="true"></i> {{localize "OP2.Criatura.TextoMestre"}}</span>
+    <textarea name="textoMestre" rows="3">{{h.textoMestre}}</textarea>
+  </label>
+  <div class="op2-criatura-habilidade__linha">
+    <label>
+      <span>{{localize "OP2.Criatura.DanoHabilidade"}}</span>
+      <input type="text" name="dano" value="{{h.dano}}" placeholder="2d6">
+    </label>
+    <label>
+      <span>{{localize "OP2.Criatura.DanoEm"}}</span>
+      <select name="danoRecurso">
+        <option value="pv" {{#if (op2Eq h.danoRecurso "pv")}}selected{{/if}}>{{localize "OP2.Recurso.pv"}}</option>
+        <option value="pd" {{#if (op2Eq h.danoRecurso "pd")}}selected{{/if}}>{{localize "OP2.Recurso.pd"}}</option>
+      </select>
+    </label>
+  </div>
+  <div class="op2-criatura-habilidade__linha">
+    <label>
+      <span>{{localize "OP2.Criatura.Condicao"}}</span>
+      <select name="condicao">
+        <option value="">{{localize "OP2.Criatura.SemCondicao"}}</option>
+        {{#each condicoes}}
+          <option value="{{id}}" {{#if (op2Eq id ../h.condicao)}}selected{{/if}}>{{rotulo}}</option>
+        {{/each}}
+      </select>
+    </label>
+    <label class="op2-criatura-habilidade__efeito">
+      <span>{{localize "OP2.Criatura.EfeitoManual"}}</span>
+      <input type="text" name="efeito" value="{{h.efeito}}" placeholder="{{localize 'OP2.Criatura.EfeitoManualExemplo'}}">
+    </label>
+  </div>
+  <p class="op2-ajuda">{{localize "OP2.Criatura.UsarAjuda"}}</p>
+</div>

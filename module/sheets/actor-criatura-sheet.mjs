@@ -23,7 +23,8 @@ export class CriaturaSheet extends NpcSheet {
       rolarAtaque: CriaturaSheet.#rolarAtaque,
       adicionarHabilidade: CriaturaSheet.#adicionarHabilidade,
       removerHabilidade: CriaturaSheet.#remover,
-      mostrarHabilidade: CriaturaSheet.#mostrarHabilidade,
+      usarHabilidade: CriaturaSheet.#usarHabilidade,
+      editarHabilidade: CriaturaSheet.#editarHabilidade,
       importarFicha: CriaturaSheet.#importarFicha,
     },
   };
@@ -44,8 +45,10 @@ export class CriaturaSheet extends NpcSheet {
         invalido: !dadosDoAtaque(a.dados).length,
         corpo: a.alcance === "corpo",
       })),
-      habilidades: ordenar(sistema.habilidades).map(([id, h]) => ({ id, ...h })),
-      condicoesOpcoes: opcoesDeCondicao(),
+      habilidades: ordenar(sistema.habilidades).map(([id, h]) => ({
+        id, ...h,
+        condicaoRotulo: opcoesDeCondicao().find((c) => c.id === h.condicao)?.rotulo ?? "",
+      })),
     };
   }
 
@@ -157,8 +160,38 @@ export class CriaturaSheet extends NpcSheet {
     ui.notifications.info(L("Importada", { nome: this.actor.name }));
   }
 
-  static async #mostrarHabilidade(_evento, alvo) {
-    await mostrarHabilidadeNoChat(this.actor, alvo.dataset.id);
+  /** Usa a habilidade: card no chat, dano rolado e o que dá para aplicar nos alvos. */
+  static async #usarHabilidade(_evento, alvo) {
+    await mostrarHabilidadeNoChat(this.actor, alvo.dataset.id, { aplicar: true });
+  }
+
+  /** Edição completa da habilidade (nome, textos, dano, condição e efeito). */
+  static async #editarHabilidade(_evento, alvo) {
+    const id = alvo.dataset.id;
+    const h = this.actor.system.habilidades?.[id];
+    if (!h) return;
+    const content = await foundry.applications.handlebars.renderTemplate(
+      "systems/ordem-paranormal-2e/templates/dialog/habilidade-criatura.hbs",
+      { h, condicoes: opcoesDeCondicao() },
+    );
+    const dados = await foundry.applications.api.DialogV2.prompt({
+      window: { title: L("EditarHabilidadeTitulo", { nome: h.nome || L("NovaHabilidade") }), icon: "fa-solid fa-pen" },
+      classes: ["op2", "op2-dlg", "op2-habilidade-dialog"],
+      position: { width: 520 },
+      content,
+      ok: {
+        label: L("Salvar"), icon: "fa-solid fa-floppy-disk",
+        callback: (_e, botao) => {
+          const f = botao.form.elements;
+          return {
+            nome: f.nome.value.trim() || h.nome, texto: f.texto.value, textoMestre: f.textoMestre.value,
+            dano: f.dano.value.trim(), danoRecurso: f.danoRecurso.value, condicao: f.condicao.value, efeito: f.efeito.value.trim(),
+          };
+        },
+      },
+      rejectClose: false,
+    });
+    if (dados) await this.actor.update({ [`system.habilidades.${id}`]: dados });
   }
 }
 

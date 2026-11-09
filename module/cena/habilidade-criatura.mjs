@@ -31,9 +31,11 @@ export function danoValido(formula) {
 }
 
 /** Mostra a habilidade no chat, rolando o dano se houver. */
-export async function mostrarHabilidadeNoChat(ator, id) {
+export async function mostrarHabilidadeNoChat(ator, id, { aplicar = false } = {}) {
   const h = ator?.system.habilidades?.[id];
   if (!h) return null;
+  // Usar a habilidade com alvos marcados já aplica o dano e a condição neles.
+  const alvos = aplicar && game.user.isGM ? alvosDoMestre(ator) : [];
 
   let roll = null;
   if (danoValido(h.dano)) {
@@ -55,6 +57,14 @@ export async function mostrarHabilidadeNoChat(ator, id) {
   }
   if (condicaoNome) partes.push(`<p class="op2-criatura-card__efeito"><i class="fa-solid fa-circle-exclamation"></i> ${L("CondicaoNoCard", { condicao: esc(condicaoNome) })}</p>`);
   if (efeito) partes.push(`<p class="op2-criatura-card__efeito"><i class="fa-solid fa-wand-sparkles"></i> ${L("EfeitoNoCard", { efeito: esc(efeito) })}</p>`);
+  const aplica = alvos.length > 0 && ((roll && roll.total > 0) || condicao);
+  if (aplica) {
+    const oQue = [roll && roll.total > 0 ? `${roll.total} ${game.i18n.localize(`OP2.Recurso.${recurso}`)}` : "", condicaoNome]
+      .filter(Boolean).join(" + ");
+    partes.push(`<p class="op2-criatura-card__alvos"><i class="fa-solid fa-crosshairs"></i> ${L("AplicadoEm", {
+      alvos: esc(alvos.map((a) => a.name).join(", ")), efeito: esc(oQue),
+    })}</p>`);
+  }
 
   // O bloco do mestre: bastidor e os botões de aplicar (removido do DOM do jogador).
   const mestre = [];
@@ -69,6 +79,7 @@ export async function mostrarHabilidadeNoChat(ator, id) {
     botoes.push(`<button type="button" class="op2-botao op2-botao--pequeno" data-op2-acao="habilidade-condicao" ${base}
       data-condicao="${esc(condicao.id)}"><i class="fa-solid fa-circle-exclamation"></i> ${L("AplicarCondicaoAlvos", { condicao: esc(condicaoNome) })}</button>`);
   }
+  // Já aplicado nos alvos: os botões ficam para quem não estava marcado.
   if (botoes.length) {
     mestre.push(`<div class="op2-card__acoes">${botoes.join("")}</div>`);
     mestre.push(`<p class="op2-ajuda">${L("AlvosDica")}</p>`);
@@ -78,12 +89,20 @@ export async function mostrarHabilidadeNoChat(ator, id) {
       <span class="op2-criatura-card__mestre-titulo"><i class="fa-solid fa-user-secret"></i> ${L("SoMestre")}</span>${mestre.join("")}</div>`);
   }
 
-  return ChatMessage.create({
+  const mensagem = await ChatMessage.create({
     speaker: ChatMessage.getSpeaker({ actor: ator }),
     content: `<div class="op2 op2-card op2-criatura-card">${partes.join("")}</div>`,
     rolls: roll ? [roll] : [],
     flags: { [SYSTEM_ID]: { tipo: "criatura-habilidade", atorId: ator.id } },
   });
+  // O card sai primeiro (a armadura do alvo pode perguntar algo ao aplicar o dano).
+  if (aplica) {
+    for (const alvo of alvos) {
+      if (roll && roll.total > 0) await aplicarDano(alvo, roll.total, recurso);
+      if (condicao) await definirCondicao(alvo, condicao.id, true);
+    }
+  }
+  return mensagem;
 }
 
 /** Os alvos do mestre: os marcados (T); sem marca, os tokens selecionados (menos a criatura). */

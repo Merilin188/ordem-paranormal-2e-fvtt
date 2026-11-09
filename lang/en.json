@@ -1673,7 +1673,14 @@
       "AplicarCondicaoAlvos": "Apply {condicao} to targets",
       "AlvosDica": "Target (T key) or select the tokens before clicking.",
       "SemAlvos": "No target: target (T) or select the tokens.",
-      "CondicaoAplicada": "{condicao} applied to {alvos}."
+      "CondicaoAplicada": "{condicao} applied to {alvos}.",
+      "UsarDica": "Use: sends it to the chat, rolls the damage and applies it to the targets (T).",
+      "EditarHabilidade": "Edit ability",
+      "EditarHabilidadeTitulo": "Ability: {nome}",
+      "NomeHabilidade": "Name",
+      "Salvar": "Save",
+      "UsarAjuda": "On the sheet, clicking the name uses the ability: the card goes to the chat, the damage is rolled and, with targets marked (T key), damage and condition are applied to them.",
+      "AplicadoEm": "On {alvos}: {efeito}."
     },
     "Perseguicao": {
       "Titulo": "Chase",

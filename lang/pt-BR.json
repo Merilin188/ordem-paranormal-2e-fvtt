@@ -1673,7 +1673,14 @@
       "AplicarCondicaoAlvos": "Aplicar {condicao} nos alvos",
       "AlvosDica": "Marque os alvos (tecla T) ou selecione os tokens antes de clicar.",
       "SemAlvos": "Nenhum alvo: marque os alvos (T) ou selecione os tokens.",
-      "CondicaoAplicada": "{condicao} aplicada em {alvos}."
+      "CondicaoAplicada": "{condicao} aplicada em {alvos}.",
+      "UsarDica": "Usar: manda para o chat, rola o dano e aplica nos alvos marcados (T).",
+      "EditarHabilidade": "Editar habilidade",
+      "EditarHabilidadeTitulo": "Habilidade: {nome}",
+      "NomeHabilidade": "Nome",
+      "Salvar": "Salvar",
+      "UsarAjuda": "Na ficha, clicar no nome usa a habilidade: o card vai ao chat, o dano é rolado e, se houver alvos marcados (tecla T), dano e condição já são aplicados neles.",
+      "AplicadoEm": "Em {alvos}: {efeito}."
     },
     "Perseguicao": {
       "Titulo": "Perseguição",

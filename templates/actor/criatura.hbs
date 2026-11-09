@@ -104,51 +104,22 @@
       {{#if editavel}}<button type="button" class="op2-botao op2-botao--fantasma" data-action="adicionarHabilidade"><i class="fa-solid fa-plus"></i> {{localize "OP2.Criatura.AdicionarHabilidade"}}</button>{{/if}}
     </div>
     {{#each habilidades}}
-      <details class="op2-criatura-habilidade">
-        <summary>
-          <input type="text" name="system.habilidades.{{id}}.nome" value="{{nome}}" {{#unless @root.editavel}}disabled{{/unless}}>
-          <button type="button" class="op2-botao-icone" data-action="mostrarHabilidade" data-id="{{id}}" data-tooltip="{{localize 'OP2.Criatura.MostrarNoChat'}}"><i class="fa-solid fa-comment"></i></button>
-          {{#if @root.editavel}}<button type="button" class="op2-botao-icone" data-action="removerHabilidade" data-colecao="habilidades" data-id="{{id}}" data-tooltip="{{localize 'OP2.Criatura.Remover'}}"><i class="fa-solid fa-xmark"></i></button>{{/if}}
-        </summary>
-        <label class="op2-criatura-habilidade__campo">
-          <span><i class="fa-solid fa-users" aria-hidden="true"></i> {{localize "OP2.Criatura.TextoJogadores"}}</span>
-          <textarea name="system.habilidades.{{id}}.texto" rows="4" {{#unless @root.editavel}}disabled{{/unless}}>{{texto}}</textarea>
-        </label>
-        <label class="op2-criatura-habilidade__campo op2-criatura-habilidade__campo--mestre">
-          <span><i class="fa-solid fa-user-secret" aria-hidden="true"></i> {{localize "OP2.Criatura.TextoMestre"}}</span>
-          <textarea name="system.habilidades.{{id}}.textoMestre" rows="3" {{#unless @root.editavel}}disabled{{/unless}}>{{textoMestre}}</textarea>
-        </label>
-        <div class="op2-criatura-habilidade__linha">
-          <label>
-            <span>{{localize "OP2.Criatura.DanoHabilidade"}}</span>
-            <input type="text" name="system.habilidades.{{id}}.dano" value="{{dano}}" placeholder="2d6"
-              {{#unless @root.editavel}}disabled{{/unless}}>
-          </label>
-          <label>
-            <span>{{localize "OP2.Criatura.DanoEm"}}</span>
-            <select name="system.habilidades.{{id}}.danoRecurso" {{#unless @root.editavel}}disabled{{/unless}}>
-              <option value="pv" {{#if (op2Eq danoRecurso "pv")}}selected{{/if}}>{{localize "OP2.Recurso.pv"}}</option>
-              <option value="pd" {{#if (op2Eq danoRecurso "pd")}}selected{{/if}}>{{localize "OP2.Recurso.pd"}}</option>
-            </select>
-          </label>
-        </div>
-        <div class="op2-criatura-habilidade__linha">
-          <label>
-            <span>{{localize "OP2.Criatura.Condicao"}}</span>
-            <select name="system.habilidades.{{id}}.condicao" {{#unless @root.editavel}}disabled{{/unless}}>
-              <option value="">{{localize "OP2.Criatura.SemCondicao"}}</option>
-              {{#each @root.condicoesOpcoes}}
-                <option value="{{id}}" {{#if (op2Eq id ../condicao)}}selected{{/if}}>{{rotulo}}</option>
-              {{/each}}
-            </select>
-          </label>
-          <label class="op2-criatura-habilidade__efeito">
-            <span>{{localize "OP2.Criatura.EfeitoManual"}}</span>
-            <input type="text" name="system.habilidades.{{id}}.efeito" value="{{efeito}}"
-              placeholder="{{localize 'OP2.Criatura.EfeitoManualExemplo'}}" {{#unless @root.editavel}}disabled{{/unless}}>
-          </label>
-        </div>
-      </details>
+      <div class="op2-criatura-habilidade">
+        {{!-- Clicar no nome USA a habilidade: card no chat, dano rolado e, com alvos
+              marcados, dano e condição já aplicados. A edição fica no lápis. --}}
+        <button type="button" class="op2-criatura-habilidade__usar" data-action="usarHabilidade" data-id="{{id}}"
+          data-tooltip="{{localize 'OP2.Criatura.UsarDica'}}">
+          <span class="op2-criatura-habilidade__nome">{{nome}}</span>
+          {{#if dano}}<span class="op2-criatura-habilidade__marca"><i class="fa-solid fa-heart-crack" aria-hidden="true"></i> {{dano}}</span>{{/if}}
+          {{#if condicaoRotulo}}<span class="op2-criatura-habilidade__marca"><i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i> {{condicaoRotulo}}</span>{{/if}}
+        </button>
+        {{#if @root.editavel}}
+          <button type="button" class="op2-botao-icone" data-action="editarHabilidade" data-id="{{id}}"
+            aria-label="{{localize 'OP2.Criatura.EditarHabilidade'}}" data-tooltip="{{localize 'OP2.Criatura.EditarHabilidade'}}"><i class="fa-solid fa-pen" aria-hidden="true"></i></button>
+          <button type="button" class="op2-botao-icone" data-action="removerHabilidade" data-colecao="habilidades" data-id="{{id}}"
+            aria-label="{{localize 'OP2.Criatura.Remover'}}" data-tooltip="{{localize 'OP2.Criatura.Remover'}}"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+        {{/if}}
+      </div>
     {{else}}
       <p class="op2-vazio">{{localize "OP2.Criatura.SemHabilidades"}}</p>
     {{/each}}

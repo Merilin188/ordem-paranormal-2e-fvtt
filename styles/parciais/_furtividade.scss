@@ -280,6 +280,16 @@
   }
   .op2-criatura-rd { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem; input { width: 4rem; } }
   .op2-criatura-card h3 { margin: 0 0 0.3rem; border: 0; color: #e6a3b8; font-family: var(--op2-fonte-display); }
+  .op2-criatura-habilidade { display: flex; align-items: center; gap: 0.3rem;
+    > .op2-botao-icone { flex: none; width: 24px; height: 24px; } }
+  .op2-criatura-habilidade__usar {
+    flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem;
+    text-align: left; border-radius: 0; padding: 0.3rem 0.5rem; cursor: pointer;
+  }
+  .op2-criatura-habilidade__nome { font-weight: bold; flex: 1 1 auto; }
+  .op2-criatura-habilidade__marca { font-size: 0.8em; color: var(--op2-tinta-fraca); white-space: nowrap; }
+  .op2-criatura-card__alvos { margin: 0.25rem 0; font-weight: bold; }
+  .op2-habilidade-edicao { display: flex; flex-direction: column; gap: 0.2rem; }
   .op2-criatura-habilidade__campo {
     display: flex; flex-direction: column; gap: 0.15rem; margin-top: 0.4rem;
     span { font-size: 0.75em; text-transform: uppercase; color: var(--op2-tinta-fraca); }
