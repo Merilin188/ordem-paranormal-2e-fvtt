@@ -32,6 +32,10 @@
       <input type="number" name="system.danoBonus" value="{{sistema.danoBonus}}" {{#unless editavel}}disabled{{/unless}}>
     </label>
     <label class="op2-campo">
+      <span>{{localize "OP2.Equipamento.AtaqueBonus"}}</span>
+      <input type="number" name="system.ataqueBonus" value="{{sistema.ataqueBonus}}" {{#unless editavel}}disabled{{/unless}}>
+    </label>
+    <label class="op2-campo">
       <span>{{localize "OP2.Equipamento.CriticoMinimo"}}</span>
       <input type="number" name="system.criticoMinimo" value="{{sistema.criticoMinimo}}" min="0" max="12" {{#unless editavel}}disabled{{/unless}}>
     </label>

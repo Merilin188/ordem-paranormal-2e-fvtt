@@ -12,7 +12,7 @@
       {{/unless}}
     {{/each}}
     {{#if bonusCritico}}<span class="op2-card__mod op2-card__mod--critico" data-tooltip="{{localize 'OP2.CriticoExtra.Rotulo'}} ({{bonusCritico.dado}})">+{{bonusCritico.valor}}</span>{{/if}}
-    {{#if modificador}}<span class="op2-card__mod" data-tooltip="{{localize 'OP2.Marcas.Modificador'}}">{{#if (op2Eq (op2Sinal modificador) 1)}}+{{/if}}{{modificador}}</span>{{/if}}
+    {{#if modificador}}<span class="op2-card__mod" data-tooltip="{{localize 'OP2.Teste.ModificadorFixo'}}">{{#if (op2Eq (op2Sinal modificador) 1)}}+{{/if}}{{modificador}}</span>{{/if}}
     <span class="op2-card__igual" aria-hidden="true">=</span>
     <span class="op2-card__total">{{total}}</span>
   </div>

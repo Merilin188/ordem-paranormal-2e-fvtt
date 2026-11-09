@@ -182,7 +182,8 @@
       "CriticoMinimo": "Crítico a partir de (0 = padrão)",
       "Escudo": "Escudo (reduz a RB do dano quando perde com 7+)",
       "Penalidade": "Reduz a perícia (passos)",
-      "Distancia": "Ranged weapon (Aim)"
+      "Distancia": "Ranged weapon (Aim)",
+      "AtaqueBonus": "Attack test bonus (+N)"
     },
     "Item": {
       "Novo": "New {tipo}",
@@ -1984,7 +1985,8 @@
       "MirarRotulo": "Aim",
       "ReducaoAtaque": "{passos} step(s) reduced until the end of the round ({motivo}): {de} → {para}.",
       "Fadiga": "Fatigue from {passos} round(s) holding: −{passos} step(s) in {pericia}, {de} → {para}.",
-      "FadigaPiso": "Fatigue from {passos} round(s) holding: {pericia} is already at {de}, the lowest die, and goes no lower."
+      "FadigaPiso": "Fatigue from {passos} round(s) holding: {pericia} is already at {de}, the lowest die, and goes no lower.",
+      "AtaqueArma": "{arma}: {bonus} to the attack test (added to the total)."
     },
     "Acesso": {
       "Titulo": "Access challenge",
@@ -2123,6 +2125,9 @@
       "EsconderijoGuardado": "{ator} gains a {dado} hiding die: it is stored and joins the next hiding test.",
       "DanoAplicadoEm": "{n} damage ({recurso}) to {alvos}.",
       "DanoRolado": "{n} damage ({recurso}). The GM applies it to the targets."
+    },
+    "Teste": {
+      "ModificadorFixo": "Fixed modifier added to the total (injuries, traumas, weapon): the reason is in the notes below."
     }
   }
 }

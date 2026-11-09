@@ -182,7 +182,8 @@
       "CriticoMinimo": "Crítico a partir de (0 = padrão)",
       "Escudo": "Escudo (reduz a RB do dano quando perde com 7+)",
       "Penalidade": "Reduz a perícia (passos)",
-      "Distancia": "Arma à distância (Pontaria)"
+      "Distancia": "Arma à distância (Pontaria)",
+      "AtaqueBonus": "Bônus no teste de ataque (+N)"
     },
     "Item": {
       "Novo": "Novo {tipo}",
@@ -1984,7 +1985,8 @@
       "MirarRotulo": "Mirar",
       "ReducaoAtaque": "Redução de {passos} passo(s) até o fim da rodada ({motivo}): {de} → {para}.",
       "Fadiga": "Fadiga de {passos} rodada(s) sustentando: −{passos} passo(s) em {pericia}, {de} → {para}.",
-      "FadigaPiso": "Fadiga de {passos} rodada(s) sustentando: {pericia} já está no {de}, o menor dado, e não desce mais."
+      "FadigaPiso": "Fadiga de {passos} rodada(s) sustentando: {pericia} já está no {de}, o menor dado, e não desce mais.",
+      "AtaqueArma": "{arma}: {bonus} no teste de ataque (somado ao total)."
     },
     "Acesso": {
       "Titulo": "Desafio de acesso",
@@ -2123,6 +2125,9 @@
       "EsconderijoGuardado": "{ator} ganha um dado de esconderijo {dado}: fica guardado e entra no próximo teste de esconderijo.",
       "DanoAplicadoEm": "{n} de dano ({recurso}) em {alvos}.",
       "DanoRolado": "{n} de dano ({recurso}). O mestre aplica nos alvos."
+    },
+    "Teste": {
+      "ModificadorFixo": "Modificador fixo somado ao total (lesões, traumas, arma): o motivo está nas notas abaixo."
     }
   }
 }

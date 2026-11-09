@@ -126,8 +126,16 @@ export async function rolarTeste(ator, {
   // Todo dado que a ficha já entrega mudado (Caído, falha crítica, efeito, item) diz por quê.
   notasDeHabilidade.push(...motivosDosDados(ator, componentes, chavePericia));
   // Arma com crítico facilitado (espada: dois valores 5+) nos testes de ataque.
-  const armaCritico = ["luta", "pontaria"].includes(chavePericia)
-    ? (arma === undefined ? melhorArma(ator) : arma)?.system?.criticoMinimo : 0;
+  const armaDoAtaque = ["luta", "pontaria"].includes(chavePericia)
+    ? (arma === undefined ? melhorArma(ator) : arma) : null;
+  const armaCritico = armaDoAtaque?.system?.criticoMinimo ?? 0;
+  // Bônus fixo da arma no ataque (Gládio: +1 no teste). Regra de ouro: o card diz de onde veio.
+  const bonusAtaque = Number(armaDoAtaque?.system?.ataqueBonus) || 0;
+  if (bonusAtaque) {
+    notasDeHabilidade.push({ tipo: "texto", texto: game.i18n.format("OP2.Motivo.AtaqueArma", {
+      arma: armaDoAtaque.name, bonus: `${bonusAtaque > 0 ? "+" : ""}${bonusAtaque}`,
+    }) });
+  }
 
   const roll = OP2Roll.paraComponentes(componentes, {
     criticoMinimo: armaCritico || 0,
@@ -136,7 +144,7 @@ export async function rolarTeste(ator, {
     rotulo: contexto ?? base.rotuloPericia,
     atorId: ator.id,
     chavePericia,
-    modificador,
+    modificador: modificador + bonusAtaque,
   });
   if (notasDeHabilidade.length) roll.options.ajustes = [...(roll.options.ajustes ?? []), ...notasDeHabilidade];
 

@@ -19,6 +19,8 @@ export class EquipamentoData extends foundry.abstract.TypeDataModel {
       distancia: new BooleanField({ required: true, initial: false }),
       /** Modificador de dano da arma: dano = RA + modificador. */
       danoBonus: new NumberField({ required: true, initial: 0, integer: true, nullable: false }),
+      /** Bônus fixo no teste de ataque com a arma (Gládio: +1), somado ao total. */
+      ataqueBonus: new NumberField({ required: true, initial: 0, integer: true, nullable: false }),
       /** Reduz uma perícia em N passos enquanto equipado (elmo: Percepção; cota de malha: Furtividade). */
       penalidade: new SchemaField({
         pericia: new StringField({ required: true, initial: "", blank: true }),
