@@ -54,6 +54,27 @@ export function desafiosDoPonto(poi) {
     .filter((desafio) => desafio?.type === "desafio-acesso");
 }
 
+/**
+ * Os desafios que o jogador vê numa investigação: os que o mestre deixou à vista e
+ * os dos pontos bloqueados que estão à vista — o cadeado no ponto já diz que há um
+ * obstáculo, e sem o desafio o jogador ficava sem como tentar abrir (achado em uso
+ * real: o desafio criado com o ponto oculto nascia oculto e nunca aparecia).
+ */
+export function desafiosAVista(investigacao, ehGM = game.user.isGM) {
+  const todos = investigacao?.system.desafios ?? [];
+  if (ehGM) return [...todos];
+  const ocultos = investigacao.system.desafiosOcultos ?? [];
+  const poisOcultos = investigacao.system.poisOcultos ?? [];
+  const lista = todos.filter((uuid) => !ocultos.includes(uuid));
+  for (const poiUuid of investigacao.system.pois ?? []) {
+    if (poisOcultos.includes(poiUuid)) continue;
+    const poi = fromUuidSync(poiUuid);
+    if (!poi?.system?.acesso?.bloqueado) continue;
+    for (const d of poi.system.desafios ?? []) if (!lista.includes(d)) lista.push(d);
+  }
+  return lista;
+}
+
 /** O ponto está trancado agora? */
 export function pontoTrancado(poi) {
   return estaTrancado(poi?.system?.acesso, desafiosDoPonto(poi).map((d) => desafioResolvido(d.system)));

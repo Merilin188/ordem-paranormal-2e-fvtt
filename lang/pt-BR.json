@@ -1995,9 +1995,14 @@
       "EscolherAbordagensAjuda": "Marque as abordagens que fazem sentido neste obstáculo. Dá para mudar depois, na ficha do desafio.",
       "Criar": "Criar",
       "ExcluirDesafio": "Excluir desafio (de vez)",
-      "AcoesImpedidas": "Acesso bloqueado: vença o desafio de acesso para interagir ou examinar este ponto.",
+      "AcoesImpedidas": "Acesso bloqueado: resolva o desafio de acesso para interagir ou examinar este ponto.",
       "SoOLadoDeFora": "Acesso bloqueado: só dá para examinar o lado de fora. Vença o desafio para o resto.",
-      "ImpedidoDica": "Impedido: o acesso a este ponto está bloqueado por um desafio."
+      "ImpedidoDica": "Impedido: o acesso a este ponto está bloqueado por um desafio.",
+      "Resolver": "Resolver desafio de acesso",
+      "ResolverDica": "Tenta vencer o obstáculo deste ponto (arrombar, destrancar…).",
+      "ResolverTitulo": "Resolver acesso: {ponto}",
+      "ResolverAjuda": "Como você vai tentar vencer o obstáculo?",
+      "SemAbordagem": "Este ponto não tem desafio de acesso que dê para tentar agora. Fale com o mestre."
     },
     "Transicao": {
       "Titulo": "Transições de cena",

@@ -24,3 +24,23 @@ test("habilidade de criatura: condições do seletor sem o Defendendo-se", async
   assert.ok(ids.includes("sangrando"));
   assert.ok(!ids.includes("defendendo"));
 });
+
+test("desafios à vista: os do ponto trancado aparecem para o jogador mesmo ocultos", async () => {
+  const { desafiosAVista } = await import("../cena/acesso-poi.mjs");
+  const antes = globalThis.fromUuidSync;
+  const docs = {
+    "Item.bau": { system: { acesso: { bloqueado: true }, desafios: ["Item.tranca"] } },
+    "Item.oculto": { system: { acesso: { bloqueado: true }, desafios: ["Item.outra"] } },
+  };
+  globalThis.fromUuidSync = (u) => docs[u] ?? null;
+  try {
+    const inv = { system: {
+      desafios: ["Item.tranca", "Item.solto"], desafiosOcultos: ["Item.tranca"],
+      pois: ["Item.bau", "Item.oculto"], poisOcultos: ["Item.oculto"],
+    } };
+    assert.deepEqual(desafiosAVista(inv, false), ["Item.solto", "Item.tranca"]);
+    assert.deepEqual(desafiosAVista(inv, true), ["Item.tranca", "Item.solto"]);
+  } finally {
+    globalThis.fromUuidSync = antes;
+  }
+});

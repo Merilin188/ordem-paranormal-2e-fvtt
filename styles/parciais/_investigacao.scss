@@ -1797,6 +1797,11 @@ details[open] > summary.op2-painel-titulo::before { transform: rotate(45deg); }
 .op2-card__item-pista--removido img { opacity: 0.4; }
 
 // Ponto trancado na janela de ações: o porquê de Interagir/Examinar estarem impedidos.
+.op2-acoes__resolver {
+  width: 100%;
+  margin-top: var(--op2-e1);
+  border-color: var(--op2-vermelho);
+}
 .op2-acoes__bloqueio {
   margin: var(--op2-e1) 0;
   font-size: 0.85em;

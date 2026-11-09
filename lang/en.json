@@ -1995,9 +1995,14 @@
       "EscolherAbordagensAjuda": "Tick the approaches that make sense for this obstacle. You can change them later on the challenge sheet.",
       "Criar": "Create",
       "ExcluirDesafio": "Delete challenge (for good)",
-      "AcoesImpedidas": "Access locked: overcome the access challenge to interact with or examine this point.",
+      "AcoesImpedidas": "Access locked: resolve the access challenge to interact with or examine this point.",
       "SoOLadoDeFora": "Access locked: only the outside can be examined. Overcome the challenge for the rest.",
-      "ImpedidoDica": "Blocked: access to this point is locked by a challenge."
+      "ImpedidoDica": "Blocked: access to this point is locked by a challenge.",
+      "Resolver": "Resolve access challenge",
+      "ResolverDica": "Try to overcome this point's obstacle (break in, unlock…).",
+      "ResolverTitulo": "Resolve access: {ponto}",
+      "ResolverAjuda": "How will you try to overcome the obstacle?",
+      "SemAbordagem": "This point has no access challenge you can try now. Talk to the GM."
     },
     "Transicao": {
       "Titulo": "Scene transitions",

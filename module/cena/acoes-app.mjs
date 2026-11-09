@@ -30,7 +30,7 @@ import { abrirDestrancar } from "./destrancar-app.mjs";
 import { guardarRolagem, restaurarRolagem, esquecerRolagem } from "../ui/rolagem.mjs";
 import { semPrefixoDoPonto, desafioResolvido } from "./desafios.mjs";
 import { chaveInfo, periciasDaLinha, infosAlcancaveis, descobrivel } from "./investigacao.mjs";
-import { pontoTrancado } from "./acesso-poi.mjs";
+import { pontoTrancado, desafiosAVista } from "./acesso-poi.mjs";
 import { marcadoresDoPonto } from "./marcadores.mjs";
 import { filtrosVazios, filtrando } from "./filtros-painel.mjs";
 import {
@@ -93,6 +93,19 @@ function contextoDoDesafio(desafio, investigacao, indice, ator = null) {
 
 const CHAVE_ABA = "op2.acoes.aba";
 
+/** Abordagem do desafio → ação desta janela e ícone (o "Resolver desafio de acesso"). */
+const ABORDAGENS_DE_ACESSO = [
+  ["arrombar", "arrombar", "fa-hammer"], ["destrancar", "destrancar", "fa-key"],
+  ["hackTecnico", "hackTecnico", "fa-laptop-code"], ["hackSocial", "hackSocial", "fa-comments"],
+  ["equilibrar", "equilibrarDesafio", "fa-person-falling"], ["alcancar", "alcancarDesafio", "fa-person-walking"],
+  ["sustentar", "sustentarDesafio", "fa-weight-hanging"], ["generico", "desafioGenerico", "fa-circle-question"],
+];
+const ROTULO_ABORDAGEM = {
+  arrombar: "OP2.Desafio.Arrombar", destrancar: "OP2.Desafio.Destrancar", hackTecnico: "OP2.Desafio.HackTecnico",
+  hackSocial: "OP2.Desafio.HackSocial", equilibrar: "OP2.Desafio.Equilibrar", alcancar: "OP2.Desafio.Alcancar",
+  sustentar: "OP2.Desafio.Sustentar",
+};
+
 /** A última aba escolhida; sem registro, os pontos de interesse. */
 function abaInicial() {
   try {
@@ -132,6 +145,7 @@ export class AcoesInvestigacaoApp extends HandlebarsApplicationMixin(Application
       alcancar: fechaDepois(AcoesInvestigacaoApp.#alcancar),
       atravessar: fechaDepois(AcoesInvestigacaoApp.#atravessar),
       equilibrarDesafio: fechaDepois(AcoesInvestigacaoApp.#equilibrarDesafio),
+      resolverAcesso: AcoesInvestigacaoApp.#resolverAcesso,
       alcancarDesafio: fechaDepois(AcoesInvestigacaoApp.#alcancarDesafio),
       sustentar: fechaDepois(AcoesInvestigacaoApp.#sustentar),
       sustentarDesafio: fechaDepois(AcoesInvestigacaoApp.#sustentarDesafio),
@@ -311,10 +325,8 @@ export class AcoesInvestigacaoApp extends HandlebarsApplicationMixin(Application
     // POI e desafio que o mestre escondeu não existem para quem age: a lista de
     // alvos aqui é a mesma que o painel mostra para o jogador.
     const ocultosPoi = investigacao?.system.poisOcultos ?? [];
-    const ocultosDesafio = investigacao?.system.desafiosOcultos ?? [];
 
-    const desafios = (investigacao?.system.desafios ?? [])
-      .filter((uuid) => !ocultosDesafio.includes(uuid))
+    const desafios = (investigacao ? desafiosAVista(investigacao, false) : [])
       .map((uuid) => fromUuidSync(uuid))
       .filter((desafio) => desafio?.type === "desafio-acesso")
       .map((d, indice) => contextoDoDesafio(d, investigacao, indice, ator));
@@ -398,6 +410,44 @@ export class AcoesInvestigacaoApp extends HandlebarsApplicationMixin(Application
     const { iniciarEquilibrio } = await import("./equilibrio.mjs");
     await iniciarEquilibrio(this.ator);
   }
+  /**
+   * "Resolver desafio de acesso" no ponto trancado: as abordagens dos desafios dele
+   * ainda não vencidos. Uma só vai direto (abre a caixa do Destrancar, rola o
+   * Arrombar…); várias abrem a escolha.
+   */
+  static async #resolverAcesso(evento, alvo) {
+    const poi = fromUuidSync(alvo.dataset.poiUuid);
+    const opcoes = [];
+    for (const desafio of (poi?.system.desafios ?? []).map((u) => fromUuidSync(u))) {
+      if (desafio?.type !== "desafio-acesso" || desafioResolvido(desafio.system)) continue;
+      const { abordagens } = desafio.system;
+      for (const [chave, acao, icone] of ABORDAGENS_DE_ACESSO) {
+        if (!abordagens?.[chave]) continue;
+        if (["arrombar", "destrancar"].includes(chave) && (desafio.system.quebrado || desafio.system.destrancado)) continue;
+        const rotulo = chave === "generico"
+          ? (desafio.system.generico.rotulo?.trim() || game.i18n.localize("OP2.Desafio.Generico"))
+          : game.i18n.localize(ROTULO_ABORDAGEM[chave]);
+        opcoes.push({ acao, icone, uuid: desafio.uuid, rotulo: (poi.system.desafios.length > 1 ? `${desafio.name}: ` : "") + rotulo });
+      }
+    }
+    if (!opcoes.length) return void ui.notifications.warn(game.i18n.localize("OP2.Acesso.SemAbordagem"));
+    let escolhida = opcoes[0];
+    if (opcoes.length > 1) {
+      const indice = await foundry.applications.api.DialogV2.wait({
+        window: { title: game.i18n.format("OP2.Acesso.ResolverTitulo", { ponto: poi.name }), icon: "fa-solid fa-lock-open" },
+        classes: ["op2", "op2-dlg", "op2-defesa-janela"],
+        content: `<p class="op2-ajuda">${game.i18n.localize("OP2.Acesso.ResolverAjuda")}</p>`,
+        buttons: opcoes.map((o, i) => ({ action: String(i), label: o.rotulo, icon: `fa-solid ${o.icone}`, default: i === 0 })),
+        rejectClose: false,
+      });
+      if (indice === null || indice === undefined) return;
+      escolhida = opcoes[Number(indice)];
+    }
+    const executar = this.options.actions[escolhida.acao];
+    const handler = typeof executar === "function" ? executar : executar?.handler;
+    await handler?.call(this, evento, { dataset: { desafioUuid: escolhida.uuid } });
+  }
+
   /** Alcançar um obstáculo: o jogador escolhe seguro ou arriscado. */
   static async #alcancarDesafio(_evento, alvo) {
     const { alcancarDesafio } = await import("./acoes-desafio.mjs");

@@ -21,7 +21,7 @@ import { quemSustenta } from "./acoes-desafio.mjs";
 import { escolherCategoria, criarDesafioDaCategoria, rotuloCategoria } from "./categorias-desafio.mjs";
 import { SYSTEM_ID } from "../config.mjs";
 import { periciasDoQuadro, chaveInfo, danoSobrecarga, grupoDaLinha } from "./investigacao.mjs";
-import { pontoTrancado } from "./acesso-poi.mjs";
+import { pontoTrancado, desafiosAVista } from "./acesso-poi.mjs";
 import { semPrefixoDoPonto, desafioResolvido } from "./desafios.mjs";
 import { rodadaRelativa, proximaRodadaDaCena, linhaDaRodada } from "./eventos.mjs";
 import { marcarNoMapa, desmarcarDoMapa, marcadoresDoPonto } from "./marcadores.mjs";
@@ -400,9 +400,8 @@ export function PainelInvestigacaoMixin(Base) {
       const recolhidos = lerLista(CHAVE_RECOLHIDOS);
       const notas = lerLista(CHAVE_NOTAS);
       const editor = foundry.applications?.ux?.TextEditor?.implementation ?? TextEditor;
-      const desafios = investigacao.system.desafios.map((uuid) => fromUuidSync(uuid))
-        .filter((desafio) => desafio?.type === "desafio-acesso")
-        .filter((desafio) => ehGM || !ocultos.includes(desafio.uuid));
+      const desafios = desafiosAVista(investigacao, ehGM).map((uuid) => fromUuidSync(uuid))
+        .filter((desafio) => desafio?.type === "desafio-acesso");
       const saida = [];
       for (const desafio of desafios) {
         const { abordagens, generico, hackTecnico, hackSocial } = desafio.system;
