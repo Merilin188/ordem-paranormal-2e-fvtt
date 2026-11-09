@@ -320,6 +320,8 @@ export async function sustentar(ator, { rapido = false, desafioUuid = null } = {
     atorId: ator.id,
     botaoSoltar: true,
   });
+  // Quem sustenta abre caminho: os itens atrás do obstáculo ficam ao alcance de todos.
+  if (desafio?.system.itens?.length) await comoMestre("op2ItensSustentados", { uuid: desafio.uuid, atorId: ator.id });
   return { roll, sustentando: true };
 }
 

@@ -2074,7 +2074,10 @@
       "ParaTodos": "Send to everyone",
       "ParaMestre": "Send to the GM only",
       "ParaDescobridor": "Send only to {ator} (who overcame it)",
-      "ParaDescobridorNinguem": "Send to who overcame it (nobody tried yet)"
+      "ParaDescobridorNinguem": "Send to who overcame it (nobody tried yet)",
+      "SustentandoAbre": "{ator} is holding \"{desafio}\" and opens the way: these items are within everyone's reach:",
+      "EntregarUm": "Give this item to a character",
+      "EntregarTitulo": "Who receives {item}?"
     }
   }
 }

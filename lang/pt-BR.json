@@ -2074,7 +2074,10 @@
       "ParaTodos": "Enviar para todos",
       "ParaMestre": "Enviar somente para o mestre",
       "ParaDescobridor": "Enviar somente para {ator} (quem venceu)",
-      "ParaDescobridorNinguem": "Enviar para quem venceu (ninguém tentou ainda)"
+      "ParaDescobridorNinguem": "Enviar para quem venceu (ninguém tentou ainda)",
+      "SustentandoAbre": "{ator} está sustentando \"{desafio}\" e abre caminho: estes itens estão ao alcance de todos:",
+      "EntregarUm": "Entregar este item a um personagem",
+      "EntregarTitulo": "Quem recebe {item}?"
     }
   }
 }

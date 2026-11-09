@@ -1814,6 +1814,8 @@ details[open] > summary.op2-painel-titulo::before { transform: rotate(45deg); }
 .op2-card__itens-titulo { display: block; font-size: 0.8em; color: var(--op2-texto-fraco); margin-bottom: var(--op2-e1); }
 .op2-card__itens-lista { list-style: none; margin: 0 0 var(--op2-e2); padding: 0; display: flex; flex-direction: column; gap: var(--op2-e1); }
 .op2-card__item-pista--removido span { text-decoration: line-through; opacity: 0.5; }
+.op2-card__item-pista--entregue > span:not(.op2-card__item-para) { opacity: 0.6; }
+.op2-card__item-para { margin-left: auto; font-size: 0.85em; color: var(--op2-sucesso); white-space: nowrap; }
 .op2-card__item-pista--removido img { opacity: 0.4; }
 
 // Ponto trancado na janela de ações: o porquê de Interagir/Examinar estarem impedidos.
