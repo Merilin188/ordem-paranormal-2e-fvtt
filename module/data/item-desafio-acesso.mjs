@@ -37,6 +37,16 @@ export class DesafioAcessoData extends foundry.abstract.TypeDataModel {
         // teste de equilíbrio (2d10 por rodada); vence com N equilíbrios seguidos
         // ("3 sucessos necessários"), e cair dá dano e recomeça do zero.
         equilibrar: new BooleanField({ required: true, initial: false }),
+        // ALCANÇAR (spec §7.4) como abordagem do obstáculo: o jogador escolhe o modo
+        // na hora — seguro (duas ações, falha dá RB e recomeça) ou arriscado (uma
+        // ação, DT+3, falha dá RA).
+        alcancar: new BooleanField({ required: true, initial: false }),
+      }),
+
+      /** Alcançar: a DT do obstáculo e se alguém já alcançou. */
+      alcancar: new SchemaField({
+        dt: new NumberField({ required: true, initial: 7, min: 0, integer: true, nullable: false }),
+        resolvido: new BooleanField({ required: true, initial: false }),
       }),
 
       /** Equilibrar-se: sucessos para vencer, dano ao cair (fórmula) e se já venceu. */

@@ -746,7 +746,14 @@
       "EquilibrarVencido": "Já vencido (alguém chegou ao fim)",
       "EquilibrarDica": "Teste de equilíbrio: {n} sucesso(s) para vencer; caindo, sofre dano e recomeça.",
       "EquilibrarResumo": "{n} sucesso(s)",
-      "EquilibrarOcultar": "Ocultar dos jogadores quantos sucessos são necessários"
+      "EquilibrarOcultar": "Ocultar dos jogadores quantos sucessos são necessários",
+      "AlcancarAjuda": "O jogador escolhe na hora: seguro (duas ações em sequência na DT; falhou, sofre dano igual ao RB e recomeça) ou arriscado (uma ação só, DT +3; falhou, sofre dano igual ao RA). Alcançou: o desafio é vencido.",
+      "AlcancarDt": "DT para alcançar",
+      "AlcancarVencido": "Já vencido (alguém alcançou)",
+      "AlcancarEscolha": "Como você vai tentar alcançar?",
+      "AlcancarSeguroRegra": "Seguro: 2 ações, DT {dt}; falha = dano RB e recomeça",
+      "AlcancarArriscadoRegra": "Arriscado: 1 ação, DT {dt}; falha = dano RA",
+      "AlcancarDica": "Alcançar (DT {dt}): escolha entre seguro e arriscado."
     },
     "Ferramenta": {
       "Rotulo": "Ferramenta",

@@ -33,7 +33,8 @@ export function desafioResolvido(system) {
     || (abordagens.hackTecnico && system.hackTecnico?.resolvido)
     || (abordagens.hackSocial && system.hackSocial?.resolvido)
     || (abordagens.generico && system.generico?.resolvido)
-    || (abordagens.equilibrar && system.equilibrar?.resolvido));
+    || (abordagens.equilibrar && system.equilibrar?.resolvido)
+    || (abordagens.alcancar && system.alcancar?.resolvido));
 }
 
 /** @returns {boolean} 0 tentativas = sem teto; caso contrário, estourou o teto. */

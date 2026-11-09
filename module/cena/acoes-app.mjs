@@ -70,6 +70,8 @@ function contextoDoDesafio(desafio, investigacao, indice) {
     hackSocialResolvido: desafio.system.hackSocial.resolvido,
     genericoResolvido: desafio.system.generico.resolvido,
     equilibrarResolvido: desafio.system.equilibrar.resolvido,
+    alcancarResolvido: desafio.system.alcancar?.resolvido ?? false,
+    alcancarDt: desafio.system.alcancar?.dt ?? 7,
     equilibrarSucessos: desafio.system.equilibrar.ocultarSucessos && !game.user.isGM ? "?" : desafio.system.equilibrar.sucessos,
     sustentarDt: desafio.system.sustentar.dt,
     genericoRotulo: desafio.system.generico.rotulo?.trim() || game.i18n.localize("OP2.Desafio.Generico"),
@@ -122,6 +124,7 @@ export class AcoesInvestigacaoApp extends HandlebarsApplicationMixin(Application
       alcancar: fechaDepois(AcoesInvestigacaoApp.#alcancar),
       atravessar: fechaDepois(AcoesInvestigacaoApp.#atravessar),
       equilibrarDesafio: fechaDepois(AcoesInvestigacaoApp.#equilibrarDesafio),
+      alcancarDesafio: fechaDepois(AcoesInvestigacaoApp.#alcancarDesafio),
       sustentar: fechaDepois(AcoesInvestigacaoApp.#sustentar),
       sustentarDesafio: fechaDepois(AcoesInvestigacaoApp.#sustentarDesafio),
       excluirDesafio: AcoesInvestigacaoApp.#excluirDesafio,
@@ -384,6 +387,12 @@ export class AcoesInvestigacaoApp extends HandlebarsApplicationMixin(Application
     const { iniciarEquilibrio } = await import("./equilibrio.mjs");
     await iniciarEquilibrio(this.ator);
   }
+  /** Alcançar um obstáculo: o jogador escolhe seguro ou arriscado. */
+  static async #alcancarDesafio(_evento, alvo) {
+    const { alcancarDesafio } = await import("./acoes-desafio.mjs");
+    return alcancarDesafio(this.ator, alvo.dataset.desafioUuid);
+  }
+
   /** Equilibrar-se num desafio: a travessia conta os sucessos dele. */
   static async #equilibrarDesafio(_evento, alvo) {
     const { iniciarEquilibrio } = await import("./equilibrio.mjs");

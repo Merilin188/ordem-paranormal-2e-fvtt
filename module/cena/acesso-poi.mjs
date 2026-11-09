@@ -16,7 +16,7 @@ import { CATEGORIAS_DESAFIO } from "./categorias-desafio.mjs";
 /** As abordagens oferecidas ao criar o desafio pelo ponto, com as marcadas de início. */
 const ABORDAGENS = [
   ["arrombar", "OP2.Desafio.Arrombar", true], ["destrancar", "OP2.Desafio.Destrancar", true],
-  ["equilibrar", "OP2.Desafio.Equilibrar", false], ["hackTecnico", "OP2.Desafio.HackTecnico", false],
+  ["equilibrar", "OP2.Desafio.Equilibrar", false], ["alcancar", "OP2.Desafio.Alcancar", false], ["hackTecnico", "OP2.Desafio.HackTecnico", false],
   ["hackSocial", "OP2.Desafio.HackSocial", false], ["sustentar", "OP2.Desafio.Sustentar", false],
   ["generico", "OP2.Desafio.Generico", false],
 ];

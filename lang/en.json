@@ -746,7 +746,14 @@
       "EquilibrarVencido": "Already overcome (someone reached the end)",
       "EquilibrarDica": "Balance test: {n} success(es) to overcome; on a fall, take damage and start over.",
       "EquilibrarResumo": "{n} success(es)",
-      "EquilibrarOcultar": "Hide from players how many successes are needed"
+      "EquilibrarOcultar": "Hide from players how many successes are needed",
+      "AlcancarAjuda": "The player chooses on the spot: safe (two actions in a row at the DC; on a failure, takes damage equal to the LR and starts over) or risky (a single action, DC +3; on a failure, takes damage equal to the HR). Reached it: the challenge is overcome.",
+      "AlcancarDt": "DC to reach",
+      "AlcancarVencido": "Already overcome (someone reached it)",
+      "AlcancarEscolha": "How will you try to reach it?",
+      "AlcancarSeguroRegra": "Safe: 2 actions, DC {dt}; failure = LR damage and start over",
+      "AlcancarArriscadoRegra": "Risky: 1 action, DC {dt}; failure = HR damage",
+      "AlcancarDica": "Reach (DC {dt}): choose between safe and risky."
     },
     "Ferramenta": {
       "Rotulo": "Tool",

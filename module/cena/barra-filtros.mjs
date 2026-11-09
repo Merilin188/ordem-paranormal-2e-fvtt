@@ -18,6 +18,7 @@ export const ROTULOS_ABORDAGEM = {
   arrombar: "OP2.Desafio.Arrombar", destrancar: "OP2.Desafio.Destrancar",
   hackTecnico: "OP2.Desafio.HackTecnico", hackSocial: "OP2.Desafio.HackSocial",
   sustentar: "OP2.Desafio.Sustentar", equilibrar: "OP2.Desafio.Equilibrar",
+  alcancar: "OP2.Desafio.Alcancar",
 };
 
 /** As chaves das abordagens ligadas num desafio, para o `data-abordagens` do card. */

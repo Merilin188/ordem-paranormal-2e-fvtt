@@ -132,3 +132,10 @@ test("desafioResolvido: Equilibrar-se vencido resolve só com a abordagem ligada
   assert.equal(desafioResolvido({ ...base, abordagens: { equilibrar: true }, equilibrar: { resolvido: true } }), true);
   assert.equal(desafioResolvido({ ...base, abordagens: { arrombar: true }, equilibrar: { resolvido: true } }), false);
 });
+
+test("desafioResolvido: Alcançar vencido resolve só com a abordagem ligada", () => {
+  const base = { pontuacaoAtual: 0, pontuacaoAlvo: 10, destrancado: false };
+  assert.equal(desafioResolvido({ ...base, abordagens: { alcancar: true }, alcancar: { resolvido: false } }), false);
+  assert.equal(desafioResolvido({ ...base, abordagens: { alcancar: true }, alcancar: { resolvido: true } }), true);
+  assert.equal(desafioResolvido({ ...base, abordagens: { arrombar: true }, alcancar: { resolvido: true } }), false);
+});

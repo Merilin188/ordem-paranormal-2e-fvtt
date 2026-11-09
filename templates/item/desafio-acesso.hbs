@@ -46,6 +46,11 @@
         <span>{{localize "OP2.Desafio.Sustentar"}}</span>
       </label>
       <label class="op2-campo op2-campo--inline">
+        <input type="checkbox" name="system.abordagens.alcancar" {{#if sistema.abordagens.alcancar}}checked{{/if}}
+          {{#unless editavel}}disabled{{/unless}}>
+        <span>{{localize "OP2.Desafio.Alcancar"}}</span>
+      </label>
+      <label class="op2-campo op2-campo--inline">
         <input type="checkbox" name="system.abordagens.equilibrar" {{#if sistema.abordagens.equilibrar}}checked{{/if}}
           {{#unless editavel}}disabled{{/unless}}>
         <span>{{localize "OP2.Desafio.Equilibrar"}}</span>
@@ -341,6 +346,23 @@
         <span>{{localize "OP2.Desafio.SustentarAoFalhar"}}</span>
         <input type="text" name="system.sustentar.aoFalhar" value="{{sistema.sustentar.aoFalhar}}"
           {{#unless editavel}}disabled{{/unless}}>
+      </label>
+    </fieldset>
+  {{/if}}
+
+  {{#if sistema.abordagens.alcancar}}
+    <fieldset class="op2-desafio-hack">
+      <legend>{{localize "OP2.Desafio.Alcancar"}}</legend>
+      <p class="op2-ajuda">{{localize "OP2.Desafio.AlcancarAjuda"}}</p>
+      <label class="op2-campo">
+        <span>{{localize "OP2.Desafio.AlcancarDt"}}</span>
+        <input type="number" name="system.alcancar.dt" value="{{sistema.alcancar.dt}}" min="0" step="1"
+          {{#unless editavel}}disabled{{/unless}}>
+      </label>
+      <label class="op2-campo op2-campo--inline">
+        <input type="checkbox" name="system.alcancar.resolvido" {{#if sistema.alcancar.resolvido}}checked{{/if}}
+          {{#unless editavel}}disabled{{/unless}}>
+        <span>{{localize "OP2.Desafio.AlcancarVencido"}}</span>
       </label>
     </fieldset>
   {{/if}}

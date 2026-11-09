@@ -540,6 +540,9 @@
             <p class="op2-ajuda">{{localize "OP2.Desafio.Sustentar"}} · DT {{sustentarDt}} ·
               {{#if sustentadoPor}}{{localize "OP2.Desafio.SustentadoPor" nome=sustentadoPor}}{{else}}{{localize "OP2.Desafio.NinguemSustenta"}}{{/if}}</p>
           {{/if}}
+          {{#if temAlcancar}}
+            <p class="op2-ajuda">{{localize "OP2.Desafio.Alcancar"}} · DT {{alcancarDt}} ({{localize "OP2.Desafio.Modo.arriscado"}}: DT +3) — {{#if alcancarResolvido}}{{localize "OP2.Desafio.Resolvido"}}{{else}}{{localize "OP2.Desafio.Pendente"}}{{/if}}</p>
+          {{/if}}
           {{#if temEquilibrar}}
             <p class="op2-ajuda">{{localize "OP2.Desafio.Equilibrar"}}: {{localize "OP2.Desafio.EquilibrarResumo" n=equilibrarSucessos}} — {{#if equilibrarResolvido}}{{localize "OP2.Desafio.Resolvido"}}{{else}}{{localize "OP2.Desafio.Pendente"}}{{/if}}</p>
           {{/if}}

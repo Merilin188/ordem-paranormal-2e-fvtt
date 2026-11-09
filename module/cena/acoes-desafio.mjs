@@ -158,7 +158,7 @@ export async function arrombar(ator, desafioUuid, { rapido = false } = {}) {
  * @param {"seguro"|"arriscado"} modo
  * @returns {Promise<{modo: string, sucesso: boolean, dano: number|null}|null>}
  */
-export async function alcancar(ator, { modo, dt, rapido = false } = {}) {
+export async function alcancar(ator, { modo, dt, rapido = false, desafio = null } = {}) {
   if (dt === undefined || dt === null) {
     dt = await pedirDtAmbiente();
     if (dt === null) return null;
@@ -169,17 +169,45 @@ export async function alcancar(ator, { modo, dt, rapido = false } = {}) {
   if (modo === "arriscado") {
     const roll = await rolarTeste(ator, { chavePericia: "acrobacia", dt: dt + BONUS_DT_ALCANCAR_ARRISCADO, rapido, contexto });
     if (!roll) return null;
-    return publicarAlcancar(ator, modo, roll.sucesso ? [roll] : [roll], roll.sucesso);
+    return publicarAlcancar(ator, modo, [roll], roll.sucesso, desafio);
   }
 
   // Seguro: duas ações em sequência imediata; a segunda só roda se a primeira passar.
   const primeira = await rolarTeste(ator, { chavePericia: "acrobacia", dt, rapido, contexto: `${contexto} (1/2)` });
   if (!primeira) return null;
-  if (!primeira.sucesso) return publicarAlcancar(ator, modo, [primeira], false);
+  if (!primeira.sucesso) return publicarAlcancar(ator, modo, [primeira], false, desafio);
 
   const segunda = await rolarTeste(ator, { chavePericia: "acrobacia", dt, rapido, contexto: `${contexto} (2/2)` });
   if (!segunda) return null;
-  return publicarAlcancar(ator, modo, [primeira, segunda], segunda.sucesso);
+  return publicarAlcancar(ator, modo, [primeira, segunda], segunda.sucesso, desafio);
+}
+
+/**
+ * Alcançar um obstáculo (abordagem do desafio): o jogador escolhe o modo, com a
+ * regra de cada um à vista, e a DT é a do desafio. Alcançou: o desafio é vencido.
+ */
+export async function alcancarDesafio(ator, desafioUuid, { rapido = false } = {}) {
+  const desafio = await carregarDesafio(desafioUuid);
+  if (!desafio) return null;
+  const dt = desafio.system.alcancar?.dt ?? 7;
+  const modo = await foundry.applications.api.DialogV2.wait({
+    window: { title: `${game.i18n.localize("OP2.Desafio.Alcancar")} — ${desafio.name}`, icon: "fa-solid fa-person-walking" },
+    classes: ["op2", "op2-dlg", "op2-defesa-janela"],
+    content: `<p class="op2-ajuda">${game.i18n.localize("OP2.Desafio.AlcancarEscolha")}</p>`,
+    buttons: [
+      {
+        action: "seguro", icon: "fa-solid fa-person-walking", default: true,
+        label: game.i18n.format("OP2.Desafio.AlcancarSeguroRegra", { dt }),
+      },
+      {
+        action: "arriscado", icon: "fa-solid fa-person-running",
+        label: game.i18n.format("OP2.Desafio.AlcancarArriscadoRegra", { dt: dt + BONUS_DT_ALCANCAR_ARRISCADO }),
+      },
+    ],
+    rejectClose: false,
+  });
+  if (!["seguro", "arriscado"].includes(modo)) return null;
+  return alcancar(ator, { modo, dt, rapido, desafio });
 }
 
 async function pedirDtAmbiente() {
@@ -199,12 +227,18 @@ async function pedirDtAmbiente() {
 // Nunca aplica dano sozinho — o botão do card reaproveita a ação genérica
 // "aplicar-dano" (já registrada em ui/chat.mjs), do mesmo jeito que o card de
 // teste comum oferece "Dano RA"/"Dano RB" (spec: nada se aplica sem clique).
-async function publicarAlcancar(ator, modo, rolls, sucesso) {
+async function publicarAlcancar(ator, modo, rolls, sucesso, desafio = null) {
   const ultima = rolls.at(-1);
   const dano = sucesso ? null : danoDeAlcancar(modo, ultima.resultado);
+  // Alcançou o obstáculo de um desafio: vencido (e o ponto trancado, se houver, abre).
+  if (sucesso && desafio && !desafio.system.alcancar?.resolvido) {
+    await gravarNoDesafio(desafio, { "system.alcancar.resolvido": true });
+  }
 
   await enviarCard(ator, "alcancar", {
-    titulo: game.i18n.localize("OP2.Desafio.Alcancar"),
+    titulo: desafio
+      ? `${game.i18n.localize("OP2.Desafio.Alcancar")} — ${desafio.name}`
+      : game.i18n.localize("OP2.Desafio.Alcancar"),
     modo: game.i18n.localize(`OP2.Desafio.Modo.${modo}`),
     sucesso,
     dano,
