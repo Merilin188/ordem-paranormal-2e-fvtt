@@ -2040,7 +2040,16 @@
       "Recebeu": "{ator} recebeu: {itens}.",
       "TirarDaPista": "Tirar este item da pista",
       "ArrasteAqui": "Arraste itens para esta linha: eles ficam guardados na pista, e você transfere pelo card quando alguém achar.",
-      "SoItens": "Só itens de inventário entram numa pista."
+      "SoItens": "Só itens de inventário entram numa pista.",
+      "Guardados": "Itens guardados (ao vencer o desafio)",
+      "GuardadosAjuda": "Arraste itens para cá: eles ficam atrás deste obstáculo. Quando o desafio for vencido, você recebe um card (só seu) para tirar algum e transferir o resto a quem escolher.",
+      "DesafioVencido": "\"{desafio}\" foi vencido. Estes itens estavam guardados nele:",
+      "TransferirEscolher": "Transferir itens…",
+      "TransferirCurto": "Transferir",
+      "QuemRecebe": "Quem recebe os itens?",
+      "SemPersonagem": "Nenhum personagem para receber os itens.",
+      "Reanunciar": "Mandar o card dos itens agora",
+      "ReanunciarDica": "Manda (de novo) o card com estes itens para você transferir, mesmo sem o desafio vencido."
     }
   }
 }

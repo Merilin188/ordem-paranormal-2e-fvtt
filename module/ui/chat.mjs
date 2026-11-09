@@ -154,9 +154,13 @@ function atoresSelecionados(padrao) {
 
 /** @param {HTMLElement} elemento */
 /** Outros módulos do sistema registram ações de botão de card (ferramentas do mestre). */
-export function registrarAcaoDeChat(nome, executar) {
+export function registrarAcaoDeChat(nome, executar, { semAtor = false } = {}) {
   ACOES[nome] = executar;
+  if (semAtor) SEM_ATOR.add(nome);
 }
+
+/** Ações de card que não dependem de um ator (o card dos itens de um desafio vencido). */
+const SEM_ATOR = new Set();
 
 function ligar(elemento) {
   for (const botao of elemento.querySelectorAll("[data-op2-acao]")) {
@@ -170,8 +174,8 @@ function ligar(elemento) {
       if (!acao) return;
 
       // Token sem vínculo (duas Crias do mesmo ator): o uuid aponta o token certo.
-      const ator = (atorUuid && fromUuidSync(atorUuid)) || game.actors.get(atorId);
-      if (!ator) return void ui.notifications.warn(game.i18n.localize("OP2.Aviso.AtorAusente"));
+      const ator = (atorUuid && fromUuidSync(atorUuid)) || game.actors.get(atorId) || null;
+      if (!ator && !SEM_ATOR.has(op2Acao)) return void ui.notifications.warn(game.i18n.localize("OP2.Aviso.AtorAusente"));
 
       clicado.disabled = true;
       try {

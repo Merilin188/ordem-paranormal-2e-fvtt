@@ -9,6 +9,7 @@ import { gerarSenhaDestrancar, posicoesDoPalpite } from "../cena/acoes-desafio.m
 import { facesDasPosicoes } from "../cena/desafios.mjs";
 import { CATEGORIAS_DESAFIO, rotuloCategoria } from "../cena/categorias-desafio.mjs";
 import { iniciarHackTecnico } from "../cena/timer-hack.mjs";
+import { podeSerItemDePista } from "../cena/itens-pista.mjs";
 
 export class DesafioAcessoSheet extends OP2ItemSheet {
   static DEFAULT_OPTIONS = {
@@ -29,8 +30,51 @@ export class DesafioAcessoSheet extends OP2ItemSheet {
       limparSenha: DesafioAcessoSheet.#limparSenha,
       salvarSenhaManual: DesafioAcessoSheet.#salvarSenhaManual,
       salvarDados: DesafioAcessoSheet.#salvarDados,
+      removerItemGuardado: DesafioAcessoSheet.#removerItemGuardado,
+      abrirItemGuardado: DesafioAcessoSheet.#abrirItemGuardado,
+      reanunciarItens: DesafioAcessoSheet.#reanunciarItens,
     },
   };
+
+  /** Soltar um item na área "Itens guardados" guarda o item atrás deste obstáculo. */
+  get _dragDrop() {
+    return this.#dragDrop ??= new foundry.applications.ux.DragDrop.implementation({
+      dropSelector: ".op2-desafio-itens",
+      permissions: { drop: () => game.user.isGM && this.isEditable },
+      callbacks: { drop: this.#soltarItem.bind(this) },
+    });
+  }
+
+  #dragDrop = null;
+
+  async #soltarItem(evento) {
+    let dados;
+    try { dados = JSON.parse(evento.dataTransfer.getData("text/plain")); } catch { return; }
+    if (dados?.type !== "Item") return;
+    const item = await fromUuid(dados.uuid);
+    if (!podeSerItemDePista(item)) return void ui.notifications.warn(game.i18n.localize("OP2.ItensPista.SoItens"));
+    await this.item.update({ "system.itens": [...new Set([...(this.item.system.itens ?? []), item.uuid])] });
+  }
+
+  _onRender(contexto, opcoes) {
+    super._onRender?.(contexto, opcoes);
+    if (game.user.isGM && this.isEditable) this._dragDrop.bind(this.element);
+  }
+
+  static async #removerItemGuardado(_evento, alvo) {
+    await this.item.update({ "system.itens": (this.item.system.itens ?? []).filter((u) => u !== alvo.dataset.uuid) });
+  }
+
+  static async #abrirItemGuardado(_evento, alvo) {
+    (await fromUuid(alvo.dataset.uuid))?.sheet?.render(true);
+  }
+
+  /** Mandar de novo o card dos itens (ex.: o mestre desfez e refez o desafio). */
+  static async #reanunciarItens() {
+    const { anunciarItensDoDesafio } = await import("../cena/itens-pista.mjs");
+    await this.item.unsetFlag("ordem-paranormal-2e", "itensAnunciados");
+    await anunciarItensDoDesafio(this.item);
+  }
 
   /** Sorteia a senha com o tamanho e as faces do cadastro; zera o histórico. */
   static async #gerarSenha() {
@@ -86,6 +130,9 @@ export class DesafioAcessoSheet extends OP2ItemSheet {
 
     return {
       ...contexto,
+      ehGM: game.user.isGM,
+      itensGuardados: (this.item.system.itens ?? []).map((uuid) => fromUuidSync(uuid)).filter(podeSerItemDePista)
+        .map((i) => ({ uuid: i.uuid, nome: i.name, img: i.img })),
       percentualProgresso: Math.min(100, Math.round((pontuacaoAtual / pontuacaoAlvo) * 100)),
       // A senha do Destrancar e o histórico de palpites são do mestre: moram aqui, no
       // cadastro do desafio, não na tela de ações do jogador (achado em uso real).

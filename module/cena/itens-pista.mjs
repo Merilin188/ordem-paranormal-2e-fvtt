@@ -60,6 +60,36 @@ async function transferir(ator, dataset) {
   if (!game.user.isGM) return;
   const mensagem = mensagemDo(dataset);
   if (!mensagem) return;
+  await entregar(ator, mensagem, dataset);
+}
+
+/**
+ * Itens de um desafio vencido: não há "quem achou" — o mestre escolhe quem recebe
+ * (o grupo da investigação primeiro).
+ */
+async function transferirDoDesafio(_ator, dataset) {
+  if (!game.user.isGM) return;
+  const mensagem = mensagemDo(dataset);
+  if (!mensagem) return;
+  if ((mensagem.getFlag(SYSTEM_ID, "itensTransferidos") ?? []).includes(dataset.infoId)) return;
+  const candidatos = game.actors.filter((a) => a.type === "personagem")
+    .sort((a, b) => Number(b.hasPlayerOwner) - Number(a.hasPlayerOwner) || a.name.localeCompare(b.name));
+  if (!candidatos.length) return void ui.notifications.warn(game.i18n.localize("OP2.ItensPista.SemPersonagem"));
+  const opcoes = candidatos.map((a) => `<option value="${a.id}">${esc(a.name)}</option>`).join("");
+  const id = await foundry.applications.api.DialogV2.prompt({
+    window: { title: game.i18n.localize("OP2.ItensPista.QuemRecebe"), icon: "fa-solid fa-box-open" },
+    classes: ["op2", "op2-dlg"],
+    content: `<div class="form-group"><label>${game.i18n.localize("OP2.ItensPista.QuemRecebe")}</label>
+      <select name="ator">${opcoes}</select></div>`,
+    ok: { label: game.i18n.localize("OP2.ItensPista.TransferirCurto"), callback: (_e, botao) => botao.form.elements.ator.value },
+    rejectClose: false,
+  });
+  const ator = id ? game.actors.get(id) : null;
+  if (ator) await entregar(ator, mensagem, dataset);
+}
+
+/** Copia os itens que sobraram na mensagem para a ficha do ator e marca como feito. */
+async function entregar(ator, mensagem, dataset) {
   const transferidos = mensagem.getFlag(SYSTEM_ID, "itensTransferidos") ?? [];
   if (transferidos.includes(dataset.infoId)) return;
 
@@ -90,7 +120,8 @@ async function transferir(ator, dataset) {
     content: `<div class="op2 op2-card op2-card--investigacao">
       <header class="op2-card__topo"><span class="op2-tag op2-tag--pequena"><i class="fa-solid fa-box-open"></i> ${game.i18n.localize("OP2.ItensPista.Titulo")}</span></header>
       <p class="op2-card__texto">${game.i18n.format("OP2.ItensPista.Recebeu", { ator: esc(ator.name), itens: nomes })}</p></div>`,
-    whisper: mensagem.whisper?.length ? mensagem.whisper : [],
+    // Itens de desafio vencido: a mesa toda fica sabendo; de pista, os mesmos do card dela.
+    whisper: mensagem.getFlag(SYSTEM_ID, "tipo") === "itens-desafio" || !mensagem.whisper?.length ? [] : mensagem.whisper,
     flags: { [SYSTEM_ID]: { tipo: "itens-pista", atorId: ator.id } },
   });
 }
@@ -117,7 +148,7 @@ function pintar(mensagem, html) {
       botao.setAttribute("aria-label", botao.dataset.tooltip);
       botao.querySelector("i")?.classList.replace(fora ? "fa-xmark" : "fa-rotate-left", fora ? "fa-rotate-left" : "fa-xmark");
     }
-    const transferir = bloco.querySelector("[data-op2-acao='transferir-itens-pista']");
+    const transferir = bloco.querySelector("[data-op2-acao^='transferir-itens']");
     if (transferir) {
       transferir.disabled = feito || restam === 0;
       if (feito) transferir.innerHTML = `<i class="fa-solid fa-check"></i> ${game.i18n.localize("OP2.ItensPista.Transferidos")}`;
@@ -126,9 +157,43 @@ function pintar(mensagem, html) {
 }
 
 /** Chamado no init. */
+/**
+ * Desafio vencido com itens guardados: um card só para o mestre, com os itens, o ×
+ * de cada um e "Transferir itens…" (escolhe quem recebe). Uma vez por desafio.
+ */
+export async function anunciarItensDoDesafio(desafio) {
+  if (!game.user.isGM || desafio.getFlag(SYSTEM_ID, "itensAnunciados")) return;
+  const itens = (desafio.system.itens ?? []).map((uuid) => fromUuidSync(uuid)).filter(podeSerItemDePista);
+  if (!itens.length) return;
+  await desafio.setFlag(SYSTEM_ID, "itensAnunciados", true);
+  const infoId = "desafio";
+  const linhas = itens.map((i) => `<li class="op2-card__item-pista" data-item-uuid="${esc(i.uuid)}">
+      <img src="${esc(i.img)}" alt=""> <span>${esc(i.name)}</span>
+      <button type="button" class="op2-botao-icone" data-op2-acao="remover-item-pista" data-info-id="${infoId}"
+        data-item-uuid="${esc(i.uuid)}" aria-label="${game.i18n.localize("OP2.ItensPista.Remover")}"
+        data-tooltip="${game.i18n.localize("OP2.ItensPista.Remover")}"><i class="fa-solid fa-xmark"></i></button></li>`).join("");
+  await ChatMessage.create({
+    speaker: { alias: desafio.name },
+    whisper: game.users.filter((u) => u.isGM).map((u) => u.id),
+    content: `<div class="op2 op2-card op2-card--investigacao">
+      <header class="op2-card__topo"><span class="op2-tag op2-tag--pequena"><i class="fa-solid fa-box-open"></i> ${game.i18n.localize("OP2.ItensPista.Titulo")}</span>
+        <span class="op2-card__dt">${esc(desafio.name)}</span></header>
+      <p class="op2-card__texto">${game.i18n.format("OP2.ItensPista.DesafioVencido", { desafio: esc(desafio.name) })}</p>
+      <div class="op2-card__itens-pista" data-info-id="${infoId}">
+        <span class="op2-card__itens-titulo"><i class="fa-solid fa-box-open"></i> ${game.i18n.localize("OP2.ItensPista.NoCard")}</span>
+        <ul class="op2-card__itens-lista">${linhas}</ul>
+        <button type="button" class="op2-botao op2-botao--pequeno" data-op2-acao="transferir-itens-desafio"
+          data-info-id="${infoId}" data-itens="${esc(itens.map((i) => i.uuid).join(","))}">
+          <i class="fa-solid fa-right-to-bracket"></i> ${game.i18n.localize("OP2.ItensPista.TransferirEscolher")}</button>
+      </div></div>`,
+    flags: { [SYSTEM_ID]: { tipo: "itens-desafio", desafioUuid: desafio.uuid } },
+  });
+}
+
 export function registrarItensDaPista() {
-  registrarAcaoDeChat("remover-item-pista", alternarRemovido);
+  registrarAcaoDeChat("remover-item-pista", alternarRemovido, { semAtor: true });
   registrarAcaoDeChat("transferir-itens-pista", transferir);
+  registrarAcaoDeChat("transferir-itens-desafio", transferirDoDesafio, { semAtor: true });
   Hooks.on("renderChatMessageHTML", (mensagem, html) => {
     if (game.user.isGM) pintar(mensagem, html);
   });

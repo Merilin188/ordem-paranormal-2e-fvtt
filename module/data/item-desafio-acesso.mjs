@@ -43,6 +43,10 @@ export class DesafioAcessoData extends foundry.abstract.TypeDataModel {
         alcancar: new BooleanField({ required: true, initial: false }),
       }),
 
+      // Itens guardados atrás do obstáculo (o gládio e o elmo dentro do baú): vencer o
+      // desafio manda ao mestre um card com eles, e é ele quem transfere.
+      itens: new ArrayField(new StringField({ required: true, blank: false }), { initial: [] }),
+
       /** Alcançar: a DT do obstáculo e se alguém já alcançou. */
       alcancar: new SchemaField({
         dt: new NumberField({ required: true, initial: 7, min: 0, integer: true, nullable: false }),

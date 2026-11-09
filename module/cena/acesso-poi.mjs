@@ -12,6 +12,7 @@ import { desafioResolvido } from "./desafios.mjs";
 import { renderizar } from "../dice/teste.mjs";
 import { todasInvestigacoes, vincularDesafio, vincularDesafioAoPonto } from "./investigacao-ativa.mjs";
 import { CATEGORIAS_DESAFIO } from "./categorias-desafio.mjs";
+import { anunciarItensDoDesafio } from "./itens-pista.mjs";
 
 /** As abordagens oferecidas ao criar o desafio pelo ponto, com as marcadas de início. */
 const ABORDAGENS = [
@@ -145,6 +146,8 @@ export function registrarAcessoPoi() {
   Hooks.on("updateItem", (item) => {
     if (item.type !== "desafio-acesso" || game.users.activeGM?.id !== game.user.id) return;
     if (!desafioResolvido(item.system)) return;
+    // Itens guardados atrás do obstáculo: o card do mestre, uma vez.
+    void anunciarItensDoDesafio(item);
     const pontos = game.items.filter((poi) => poi.type === "ponto-interesse"
       && poi.system.acesso?.bloqueado && !poi.system.acesso.liberado
       && poi.system.desafios.includes(item.uuid));

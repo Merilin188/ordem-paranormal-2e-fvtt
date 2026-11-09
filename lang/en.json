@@ -2040,7 +2040,16 @@
       "Recebeu": "{ator} received: {itens}.",
       "TirarDaPista": "Remove this item from the clue",
       "ArrasteAqui": "Drag items onto this line: they stay stored in the clue, and you transfer them from the card when someone finds it.",
-      "SoItens": "Only inventory items can go in a clue."
+      "SoItens": "Only inventory items can go in a clue.",
+      "Guardados": "Stored items (when the challenge is overcome)",
+      "GuardadosAjuda": "Drag items here: they stay behind this obstacle. When the challenge is overcome, you get a card (yours only) to remove some and transfer the rest to whoever you choose.",
+      "DesafioVencido": "\"{desafio}\" was overcome. These items were stored in it:",
+      "TransferirEscolher": "Transfer items…",
+      "TransferirCurto": "Transfer",
+      "QuemRecebe": "Who receives the items?",
+      "SemPersonagem": "No character to receive the items.",
+      "Reanunciar": "Send the items card now",
+      "ReanunciarDica": "Sends (again) the card with these items for you to transfer, even if the challenge isn't overcome."
     }
   }
 }
