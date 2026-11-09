@@ -14,7 +14,7 @@ import { iconeDado } from "../ui/dice-icons.mjs";
 import { stepDie } from "../dice/escada.mjs";
 import { MAX_BONUS, folegoInicial, formulaDoEsforco, pontosDoAvanco, quemEAlcancado, proximoCorte } from "./perseguicao-regras.mjs";
 import { animarSorteio, ligarVinheta } from "./furtividade.mjs";
-import { listarCenas, obterCena, novaCena, ConfigCenaApp, PERSEGUICAO_PADRAO } from "./cenas-config.mjs";
+import { listarCenas, obterCena, novaCena, ConfigCenaApp, PERSEGUICAO_PADRAO, salvarCena } from "./cenas-config.mjs";
 import { enviarCaixasDeSussurro, jogadoresDe } from "../ui/sussurro.mjs";
 import { iniciarAmbientePerseguicao, pararAmbientePerseguicao, mostrarAlcancado, precarregarEfeitos } from "../ui/terror.mjs";
 
@@ -116,6 +116,7 @@ function executar({ op, ...dados }) {
     if (op === "resolverOposto") return resolverPeloOposto(dados);
     if (op === "reavaliar") return reavaliarAvanco(dados.mensagemId);
     if (op === "cabecas") return eventoDeInicio();
+    if (op === "perseguidor") return renomearPerseguidor(dados);
     const e = estadoPerseguicao();
     OPS[op]?.(e, dados);
     await game.settings.set(SYSTEM_ID, CHAVE, e);
@@ -130,6 +131,23 @@ function executar({ op, ...dados }) {
 }
 
 const pedir = (op, dados = {}) => comoMestre("op2Perseguicao", { op, ...dados });
+
+/**
+ * O nome do perseguidor, editado direto no painel: vale para a cena em andamento e
+ * fica gravado na configuração dela (a próxima vez já vem com ele).
+ */
+async function renomearPerseguidor({ nome, configId }) {
+  const limpo = String(nome ?? "").trim();
+  const e = estadoPerseguicao();
+  const id = e.ativa ? e.config?.id : (configId ?? e.config?.id);
+  const config = obterCena("perseguicao", id);
+  if (config && config.id === id) await salvarCena("perseguicao", { ...config, perseguidor: limpo });
+  if (e.config && (e.ativa || e.config.id === id)) {
+    e.config.perseguidor = limpo;
+    await game.settings.set(SYSTEM_ID, CHAVE, e);
+  }
+  return true;
+}
 
 async function rolar(formula) {
   const roll = await new Roll(formula).evaluate();
@@ -573,7 +591,8 @@ export class PerseguicaoApp extends HandlebarsApplicationMixin(ApplicationV2) {
     this.configId ??= cenas[0]?.id;
     return {
       gm, ativa: e.ativa, rodada: e.rodada, total: config.rodadas, dtAvanco: config.dtAvanco, fim: e.fim, cabecas: e.cabecas,
-      nomeCena: config.nome, perseguidor: config.perseguidor,
+      nomeCena: config.nome,
+      perseguidor: e.ativa ? config.perseguidor : (obterCena("perseguicao", this.configId)?.perseguidor ?? config.perseguidor),
       inicioNome: config.inicioRodada?.ataques?.length ? config.inicioRodada.nome : null,
       cenas: cenas.map((c) => ({ id: c.id, nome: c.nome, sel: c.id === this.configId })),
       corte,
@@ -613,6 +632,11 @@ export class PerseguicaoApp extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     this.element.querySelector("[data-seletor-cena]")?.addEventListener("change", (ev) => {
       this.configId = ev.target.value;
+      this.render();
+    });
+    // Nome do perseguidor, editável pelo mestre direto no painel.
+    this.element.querySelector("[data-perseguidor]")?.addEventListener("change", (ev) => {
+      void pedir("perseguidor", { nome: ev.target.value, configId: this.configId });
     });
   }
 

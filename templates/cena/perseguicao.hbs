@@ -32,7 +32,14 @@
   </header>
 
   <div class="op2-furt__criaturas" data-zona="criatura">
-    <span class="op2-tag op2-tag--secao">{{#if perseguidor}}{{perseguidor}}{{else}}{{localize "OP2.Perseguicao.Perseguidor"}}{{/if}}</span>
+    {{#if gm}}
+      {{!-- O mestre escreve o nome da criatura aqui mesmo (vale para a cena e fica salvo). --}}
+      <input type="text" class="op2-tag op2-tag--secao op2-pers__perseguidor" data-perseguidor value="{{perseguidor}}"
+        placeholder="{{localize 'OP2.Perseguicao.Perseguidor'}}" aria-label="{{localize 'OP2.Perseguicao.NomePerseguidor'}}"
+        data-tooltip="{{localize 'OP2.Perseguicao.NomePerseguidor'}}">
+    {{else}}
+      <span class="op2-tag op2-tag--secao">{{#if perseguidor}}{{perseguidor}}{{else}}{{localize "OP2.Perseguicao.Perseguidor"}}{{/if}}</span>
+    {{/if}}
     {{#each criaturas}}
       <div class="op2-furt__criatura">
         <img src="{{img}}" alt=""><span>{{nome}}</span>

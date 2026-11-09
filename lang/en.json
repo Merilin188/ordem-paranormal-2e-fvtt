@@ -1776,7 +1776,8 @@
       "EmpatePendente": "A tie from this round is waiting for a decision in chat. Discard it and calculate the end of the round again?",
       "DescartarEmpate": "Discard and continue",
       "Voltar": "Back",
-      "AvancoRefeito": "Readiness changes {nome}'s advance: {antes} → {depois} AP (now {total} AP)."
+      "AvancoRefeito": "Readiness changes {nome}'s advance: {antes} → {depois} AP (now {total} AP).",
+      "NomePerseguidor": "Name of the pursuing creature (click to edit)"
     },
     "CenaConfig": {
       "Nome": "Name",
