@@ -29,7 +29,7 @@ import { usarHabilidadeOuItem } from "./acoes-recurso.mjs";
 import { abrirDestrancar } from "./destrancar-app.mjs";
 import { guardarRolagem, restaurarRolagem, esquecerRolagem } from "../ui/rolagem.mjs";
 import { semPrefixoDoPonto, desafioResolvido } from "./desafios.mjs";
-import { chaveInfo, periciasDaLinha } from "./investigacao.mjs";
+import { chaveInfo, periciasDaLinha, infosAlcancaveis, descobrivel } from "./investigacao.mjs";
 import { pontoTrancado } from "./acesso-poi.mjs";
 import { marcadoresDoPonto } from "./marcadores.mjs";
 import { filtrosVazios, filtrando } from "./filtros-painel.mjs";
@@ -48,7 +48,7 @@ const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
  * hackeia, painel eletrônico não se arromba no braço (achado em uso real — os
  * quatro botões apareciam em todo desafio).
  */
-function contextoDoDesafio(desafio, investigacao, indice) {
+function contextoDoDesafio(desafio, investigacao, indice, ator = null) {
   const { abordagens } = desafio.system;
   const ponto = pontoDoDesafio(investigacao, desafio.uuid);
   return {
@@ -71,6 +71,14 @@ function contextoDoDesafio(desafio, investigacao, indice) {
     genericoResolvido: desafio.system.generico.resolvido,
     equilibrarResolvido: desafio.system.equilibrar.resolvido,
     alcancarResolvido: desafio.system.alcancar?.resolvido ?? false,
+    // Quem segura este obstáculo agora, e quanto o próximo teste vai descer.
+    sustentadores: game.actors.filter((a) => a.type === "personagem" && a.system.estado?.sustentando?.ativo
+      && a.system.estado.sustentando.desafioUuid === desafio.uuid)
+      .map((a) => ({
+        nome: a.name,
+        passos: (a.system.estado.sustentando.fadiga ?? 0) + 1,
+        ehEste: a.id === ator?.id,
+      })),
     alcancarDt: desafio.system.alcancar?.dt ?? 7,
     equilibrarSucessos: desafio.system.equilibrar.ocultarSucessos && !game.user.isGM ? "?" : desafio.system.equilibrar.sucessos,
     sustentarDt: desafio.system.sustentar.dt,
@@ -309,7 +317,7 @@ export class AcoesInvestigacaoApp extends HandlebarsApplicationMixin(Application
       .filter((uuid) => !ocultosDesafio.includes(uuid))
       .map((uuid) => fromUuidSync(uuid))
       .filter((desafio) => desafio?.type === "desafio-acesso")
-      .map((d, indice) => contextoDoDesafio(d, investigacao, indice));
+      .map((d, indice) => contextoDoDesafio(d, investigacao, indice, ator));
     const desafioPorUuid = new Map(desafios.map((d) => [d.uuid, d]));
 
     const pois = (investigacao?.system.pois ?? [])
@@ -327,7 +335,9 @@ export class AcoesInvestigacaoApp extends HandlebarsApplicationMixin(Application
         ...resumoDoQuadro(poi, ator),
         marcado: marcadoresDoPonto(canvas?.scene, poi.uuid).length > 0,
         // Bloqueado por desafio de acesso: o jogador vê o cadeado antes de gastar ação.
-        trancado: pontoTrancado(poi),
+        // Interagir fica impedido; Examinar só se ainda há algo achável do lado de
+        // fora da tranca (a construção do baú) que este personagem não tenha.
+        ...acessoDoPonto(poi, ator),
         // Quantos desafios deste ponto estão à vista: um atalho leva à aba Desafios já
         // filtrada por ele. Com os botões do desafio dentro do ponto, as duas coisas se
         // embaralhavam (achado em uso real).
@@ -342,6 +352,7 @@ export class AcoesInvestigacaoApp extends HandlebarsApplicationMixin(Application
 
     return {
       atorNome: ator.name,
+      ehGM: game.user.isGM,
       temInvestigacao: Boolean(investigacao),
       nomeInvestigacao: investigacao?.name ?? "",
       // O grupo pode estar em mais de uma investigação ao mesmo tempo — dá pra
@@ -496,6 +507,15 @@ function personagemDoUsuario() {
  * O que o personagem já vê do quadro de um ponto: a mesma leitura do painel do
  * jogador (linha aberta, contada ao grupo ou descoberta por ele).
  */
+function acessoDoPonto(poi, ator) {
+  const trancado = pontoTrancado(poi);
+  if (!trancado) return { trancado: false, examinarBloqueado: false };
+  const jaTem = ator.system.estado.infosReveladas;
+  const fora = infosAlcancaveis(poi.system.informacoes, true)
+    .some((info) => descobrivel(info) && !jaTem.has(chaveInfo(poi.uuid, info.id)));
+  return { trancado: true, examinarBloqueado: !fora };
+}
+
 function resumoDoQuadro(poi, ator) {
   const visiveis = poi.system.informacoes.filter((info) => info.aberta
     || (info.contadaPor?.length ?? 0) > 0

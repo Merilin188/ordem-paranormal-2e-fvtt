@@ -8,10 +8,13 @@
   </div>
   {{#if quebrado}}<span class="op2-painel-trava">· {{localize "OP2.Desafio.Quebrado"}}</span>{{/if}}
   {{#if destrancado}}<span class="op2-painel-trava">· {{localize "OP2.Desafio.Destrancou"}}</span>{{/if}}
-  <button type="button" class="op2-botao-icone op2-acoes__excluir" data-action="excluirDesafio" data-desafio-uuid="{{uuid}}"
-    aria-label="{{localize 'OP2.Ferramentas.ExcluirDesafio'}}" data-tooltip="{{localize 'OP2.Ferramentas.ExcluirDesafio'}}">
-    <i class="fa-solid fa-trash" aria-hidden="true"></i>
-  </button>
+  {{!-- Excluir o desafio é decisão do mestre: o jogador não vê a lixeira. --}}
+  {{#if @root.ehGM}}
+    <button type="button" class="op2-botao-icone op2-acoes__excluir" data-action="excluirDesafio" data-desafio-uuid="{{uuid}}"
+      aria-label="{{localize 'OP2.Ferramentas.ExcluirDesafio'}}" data-tooltip="{{localize 'OP2.Ferramentas.ExcluirDesafio'}}">
+      <i class="fa-solid fa-trash" aria-hidden="true"></i>
+    </button>
+  {{/if}}
 </div>
 {{!-- Só as abordagens que o mestre marcou neste obstáculo. --}}
 <div class="op2-acoes__grupo">
@@ -54,6 +57,18 @@
       <span class="op2-acoes__rotulo">{{localize "OP2.Desafio.Sustentar"}} (DT {{sustentarDt}})</span>
     </button>
   {{/if}}
+  {{#each sustentadores}}
+    <div class="op2-acoes__sustentando">
+      <i class="fa-solid fa-weight-hanging" aria-hidden="true"></i>
+      <span>{{localize "OP2.Desafio.SustentandoAgora" nome=nome passos=passos}}</span>
+      {{#if ehEste}}
+        <button type="button" class="op2-botao op2-botao--pequeno op2-botao--perigo" data-action="pararDeSustentar"
+          data-tooltip="{{localize 'OP2.Desafio.PararDeSustentar'}}">
+          <i class="fa-solid fa-hand" aria-hidden="true"></i> {{localize "OP2.Desafio.Soltar"}}
+        </button>
+      {{/if}}
+    </div>
+  {{/each}}
   {{#if abordagens.alcancar}}
     <button type="button" class="op2-botao op2-botao--pequeno" data-action="alcancarDesafio"
       data-desafio-uuid="{{uuid}}" {{#if alcancarResolvido}}disabled{{/if}}

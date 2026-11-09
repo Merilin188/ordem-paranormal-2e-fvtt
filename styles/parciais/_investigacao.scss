@@ -1795,3 +1795,33 @@ details[open] > summary.op2-painel-titulo::before { transform: rotate(45deg); }
 .op2-card__itens-lista { list-style: none; margin: 0 0 var(--op2-e2); padding: 0; display: flex; flex-direction: column; gap: var(--op2-e1); }
 .op2-card__item-pista--removido span { text-decoration: line-through; opacity: 0.5; }
 .op2-card__item-pista--removido img { opacity: 0.4; }
+
+// Ponto trancado na janela de ações: o porquê de Interagir/Examinar estarem impedidos.
+.op2-acoes__bloqueio {
+  margin: var(--op2-e1) 0;
+  font-size: 0.85em;
+  color: var(--op2-vermelho-claro);
+}
+
+// Quem está sustentando o obstáculo, com a fadiga do próximo teste e o Soltar.
+.op2-acoes__sustentando {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--op2-e2);
+  margin-top: var(--op2-e1);
+  padding: var(--op2-e1) var(--op2-e2);
+  border-left: 3px solid var(--op2-vermelho);
+  font-size: 0.9em;
+  span { flex: 1 1 12rem; }
+}
+
+// Caixa do teste de fadiga: DT e dados, com o Atletismo antes da redução riscado.
+.op2-fadiga__dados {
+  list-style: none;
+  margin: var(--op2-e2) 0;
+  padding: 0;
+  display: flex;
+  gap: var(--op2-e3);
+  s { opacity: 0.6; }
+}

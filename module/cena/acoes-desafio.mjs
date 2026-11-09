@@ -23,7 +23,7 @@ import { stepDie } from "../dice/escada.mjs";
 import { OP2Roll } from "../dice/op2-roll.mjs";
 import { lerConfig } from "../settings/register.mjs";
 import { rodadaAtual } from "./rodada.mjs";
-import { comoMestre, registrarAcaoDeMestre } from "../ui/socket.mjs";
+import { comoMestre, registrarAcaoDeMestre, paraTodos, registrarAcaoDeTodos, responsavelPor } from "../ui/socket.mjs";
 import { registrarAcaoDeChat } from "../ui/chat.mjs";
 
 const CHAT = "systems/ordem-paranormal-2e/templates/chat";
@@ -337,20 +337,41 @@ export async function pararDeSustentar(ator) {
  * as duas não deviam se somar por engano). Falhar solta o que era sustentado — o card
  * avisa, a mesa decide o que isso significa. Chamado por `avancarRodada()`.
  */
+/**
+ * O teste de fadiga que vem a seguir, explicado: DT, o dado de Atletismo antes e
+ * depois da redução e o do atributo. A caixa do jogador e o card leem daqui.
+ */
+export function previaDaFadiga(ator) {
+  const estado = ator.system.estado.sustentando;
+  const fadiga = (estado?.fadiga ?? 0) + 1;
+  const pericia = ator.system.pericias.atletismo;
+  const atributo = ator.system.atributos[pericia.atributo];
+  const de = pericia.dadoEfetivo;
+  const para = stepDie(de, -fadiga);
+  return {
+    fadiga, de, para, piso: para === de,
+    chaveAtributo: pericia.atributo,
+    rotuloPericia: rotuloDePericia("atletismo"),
+    rotuloAtributo: game.i18n.localize(`OP2.Atributo.${pericia.atributo}`),
+    dadoAtributo: atributo.dadoEfetivo,
+    dt: lerConfig("dtPadrao"),
+    nome: estado?.nome || game.i18n.localize("OP2.Desafio.Algo"),
+  };
+}
+
 export async function testarFadigaDeSustentar(ator) {
   const estado = ator.system.estado.sustentando;
   if (!estado?.ativo) return null;
 
-  const fadiga = estado.fadiga + 1;
+  const previa = previaDaFadiga(ator);
+  const { fadiga, de, para } = previa;
   const pericia = ator.system.pericias.atletismo;
   const atributo = ator.system.atributos[pericia.atributo];
   const rotulo = `${game.i18n.localize("OP2.Desafio.Sustentar")} — ${game.i18n.localize("OP2.Desafio.Fadiga")} ${fadiga}`;
 
   // Regra de ouro: o card diz que o dado desceu, quanto e por quê.
-  const de = pericia.dadoEfetivo;
-  const para = stepDie(de, -fadiga);
-  const nota = game.i18n.format(para === de ? "OP2.Motivo.FadigaPiso" : "OP2.Motivo.Fadiga", {
-    passos: fadiga, pericia: rotuloDePericia("atletismo"), de, para,
+  const nota = game.i18n.format(previa.piso ? "OP2.Motivo.FadigaPiso" : "OP2.Motivo.Fadiga", {
+    passos: fadiga, pericia: previa.rotuloPericia, de, para,
   });
   const roll = OP2Roll.paraComponentes([
     { chave: "pericia.atletismo", rotulo: rotuloDePericia("atletismo"), tipo: "pericia", dado: para },
@@ -699,8 +720,65 @@ export async function desafioGenerico(ator, desafioUuid, { rapido = false } = {}
 }
 
 /** "Soltar" no card de sustentar: só quem controla o personagem. Chamado no init. */
+const fadigasAbertas = new Set();
+
+/**
+ * A caixa do fim da rodada para quem está sustentando: a DT, os dados que vai rolar
+ * (Atletismo já reduzido pela fadiga, com o porquê) e as duas saídas — continuar
+ * (rola o teste) ou soltar. Abre no cliente do dono do personagem.
+ */
+export async function perguntarFadiga(ator) {
+  if (!ator?.system.estado.sustentando?.ativo || fadigasAbertas.has(ator.id)) return null;
+  fadigasAbertas.add(ator.id);
+  try {
+    const p = previaDaFadiga(ator);
+    const esc = foundry.utils.escapeHTML;
+    const reducao = game.i18n.format(p.piso ? "OP2.Motivo.FadigaPiso" : "OP2.Motivo.Fadiga", {
+      passos: p.fadiga, pericia: p.rotuloPericia, de: p.de, para: p.para,
+    });
+    const escolha = await foundry.applications.api.DialogV2.wait({
+      window: { title: game.i18n.format("OP2.Desafio.FadigaTitulo", { ator: ator.name }), icon: "fa-solid fa-weight-hanging" },
+      classes: ["op2", "op2-dlg", "op2-defesa-janela", "op2-fadiga-janela"],
+      position: { width: 420 },
+      content: `
+        <p>${game.i18n.format("OP2.Desafio.FadigaPergunta", { nome: esc(p.nome) })}</p>
+        <ul class="op2-fadiga__dados">
+          <li><strong>${game.i18n.localize("OP2.DT")}</strong> ${p.dt}</li>
+          <li><strong>${esc(p.rotuloPericia)}</strong> ${p.para}${p.piso ? "" : ` <s>${p.de}</s>`}</li>
+          <li><strong>${esc(p.rotuloAtributo)}</strong> ${p.dadoAtributo}</li>
+        </ul>
+        <p class="op2-ajuda">${esc(reducao)}</p>
+        <p class="op2-ajuda">${game.i18n.localize("OP2.Desafio.FadigaFalha")}</p>`,
+      buttons: [
+        { action: "continuar", icon: "fa-solid fa-dice", default: true, label: game.i18n.format("OP2.Desafio.FadigaContinuar", { de: p.para, atributo: p.dadoAtributo }) },
+        { action: "soltar", icon: "fa-solid fa-hand", label: game.i18n.localize("OP2.Desafio.Soltar") },
+      ],
+      rejectClose: false,
+    });
+    if (escolha === "continuar") return testarFadigaDeSustentar(ator);
+    if (escolha === "soltar") return pararDeSustentar(ator);
+    return null;
+  } finally {
+    fadigasAbertas.delete(ator.id);
+  }
+}
+
+/**
+ * Fim da rodada (mestre): manda a caixa da fadiga para quem responde pelo
+ * personagem — o jogador dono, ou o próprio mestre se ninguém estiver on-line.
+ */
+export function pedirTesteDeFadiga(ator) {
+  const quem = responsavelPor(ator);
+  if (!quem || quem.id === game.user.id) return void perguntarFadiga(ator);
+  paraTodos("op2PerguntarFadiga", { atorId: ator.id, para: quem.id });
+}
+
 export function registrarSoltarSustentar() {
   registrarAcaoDeChat("soltar-sustentar", soltarPeloCard);
+  registrarAcaoDeTodos("op2PerguntarFadiga", ({ atorId, para }) => {
+    if (para !== game.user.id) return;
+    void perguntarFadiga(game.actors.get(atorId));
+  });
 }
 
 async function soltarPeloCard(_autor, dataset) {

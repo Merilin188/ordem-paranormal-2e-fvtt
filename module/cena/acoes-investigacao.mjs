@@ -392,6 +392,11 @@ async function recuperarPdAoDescobrir(ator) {
 export async function interagir(ator, poiUuid) {
   const poi = await carregarPoi(poiUuid);
   if (!poi) return null;
+  // Ponto trancado: não há o que interagir antes de vencer o acesso.
+  if (pontoTrancado(poi)) {
+    ui.notifications.warn(game.i18n.format("OP2.Acesso.Trancado", { ponto: poi.name }));
+    return null;
+  }
 
   const quemInterage = game.i18n.format("OP2.Investigacao.InteragirQuem", { ator: ator.name, poi: poi.name });
   await enviarCard(ator, "interagir", { poiNome: poi.name, quemInterage, soMestre: false });

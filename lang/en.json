@@ -753,7 +753,12 @@
       "AlcancarEscolha": "How will you try to reach it?",
       "AlcancarSeguroRegra": "Safe: 2 actions, DC {dt}; failure = LR damage and start over",
       "AlcancarArriscadoRegra": "Risky: 1 action, DC {dt}; failure = HR damage",
-      "AlcancarDica": "Reach (DC {dt}): choose between safe and risky."
+      "AlcancarDica": "Reach (DC {dt}): choose between safe and risky.",
+      "SustentandoAgora": "{nome} is holding it! Next test: −{passos} step(s) in Athletics.",
+      "FadigaTitulo": "Holding — {ator}",
+      "FadigaPergunta": "End of the round. To keep holding ({nome}), test Athletics:",
+      "FadigaFalha": "On a failure: lets go of what was held. Letting go now needs no test.",
+      "FadigaContinuar": "Keep holding (roll {de} + {atributo})"
     },
     "Ferramenta": {
       "Rotulo": "Tool",
@@ -1966,7 +1971,10 @@
       "EscolherAbordagens": "How is this challenge overcome?",
       "EscolherAbordagensAjuda": "Tick the approaches that make sense for this obstacle. You can change them later on the challenge sheet.",
       "Criar": "Create",
-      "ExcluirDesafio": "Delete challenge (for good)"
+      "ExcluirDesafio": "Delete challenge (for good)",
+      "AcoesImpedidas": "Access locked: overcome the access challenge to interact with or examine this point.",
+      "SoOLadoDeFora": "Access locked: only the outside can be examined. Overcome the challenge for the rest.",
+      "ImpedidoDica": "Blocked: access to this point is locked by a challenge."
     },
     "Transicao": {
       "Titulo": "Scene transitions",

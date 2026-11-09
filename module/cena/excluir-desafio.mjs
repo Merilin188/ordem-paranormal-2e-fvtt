@@ -12,6 +12,8 @@ const esc = (t) => foundry.utils.escapeHTML(String(t ?? ""));
 
 /** Pergunta e exclui. Devolve true se excluiu. */
 export async function excluirDesafio(uuid) {
+  // Só o mestre exclui desafio (o jogador nem vê o botão).
+  if (!game.user.isGM) return false;
   const item = await fromUuid(uuid);
   if (!item) return false;
   const ok = await foundry.applications.api.DialogV2.confirm({

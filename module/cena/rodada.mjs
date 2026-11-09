@@ -15,7 +15,7 @@ import { investigacaoAtiva, eventosDaInvestigacao } from "./investigacao-ativa.m
 import { linhaDaRodada } from "./eventos.mjs";
 import { renderizar } from "../dice/teste.mjs";
 import { aplicarDano } from "../dice/falha-critica.mjs";
-import { testarFadigaDeSustentar } from "./acoes-desafio.mjs";
+import { pedirTesteDeFadiga } from "./acoes-desafio.mjs";
 
 export function rodadaAtual(investigacao = investigacaoAtiva()) {
   return investigacao?.system.rodada ?? 0;
@@ -54,7 +54,9 @@ export async function avancarRodada(investigacao = investigacaoAtiva()) {
   // com a fadiga acumulada. Roda para todo mundo na cena, não só o dono do painel.
   if (encerrada >= 1) {
     for (const personagem of personagensDaCenaAtiva(investigacao)) {
-      if (personagem.system.estado.sustentando?.ativo) await testarFadigaDeSustentar(personagem);
+      // O dono decide: a caixa mostra a DT e os dados já reduzidos e oferece
+      // continuar (rola) ou soltar.
+      if (personagem.system.estado.sustentando?.ativo) pedirTesteDeFadiga(personagem);
     }
   }
 

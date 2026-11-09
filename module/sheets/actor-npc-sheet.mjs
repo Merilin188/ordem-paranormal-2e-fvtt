@@ -45,6 +45,10 @@ export class NpcSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       // `enriched`, o texto salvava e a ficha aparecia vazia (achado em uso real).
       notasEnriquecidas: await enriquecerHtml(sistema.notas, this.actor),
       editavel: this.isEditable,
+      // As opções do menu de dado (`partials/controle-dado.hbs` lê `@root.escada`). Sem
+      // isto o menu abria vazio e não dava para mudar atributo nem perícia (achado em
+      // uso real, na ficha da criatura).
+      escada: ESCADA.map((dado) => ({ dado, icone: iconeDado(dado) })),
       recursos: {
         pv: this.#recurso(sistema.recursos.pv),
         pd: this.#recurso(sistema.recursos.pd),
