@@ -154,6 +154,17 @@ export class ConfigCenaApp extends HandlebarsApplicationMixin(ApplicationV2) {
     opcoes.parts = [this.tipo];
   }
 
+  /** A contagem "N marcada(s)" das perícias de cada evento acompanha os cliques. */
+  _onRender(contexto, opcoes) {
+    super._onRender?.(contexto, opcoes);
+    for (const bloco of this.element.querySelectorAll("[data-pericias-escolha]")) {
+      bloco.addEventListener("change", () => {
+        const contagem = bloco.querySelector("[data-contagem]");
+        if (contagem) contagem.textContent = L("PericiasMarcadas", { n: bloco.querySelectorAll("input:checked").length });
+      });
+    }
+  }
+
   async _prepareContext() {
     const c = this.cena;
     const pericias = Object.keys(PERICIAS).filter((k) => k !== "aptidao")
@@ -164,6 +175,7 @@ export class ConfigCenaApp extends HandlebarsApplicationMixin(ApplicationV2) {
         c, somLigado: c.som !== false, pericias: pericias.map((p) => ({ ...p, sel: p.k === c.periciaPadrao })),
         eventos: c.eventos.map((ev, i) => ({
           ...ev, i, periciasEv: pericias.map((p) => ({ ...p, sel: ev.pericias.includes(p.k) })),
+          periciasMarcadas: ev.pericias.length,
         })),
         marcos: c.marcos.map((m, i) => ({ ...m, i })),
         ataques: c.inicioRodada.ataques.map((a, i) => ({ ...a, i, pv: a.recurso !== "pd" })),
@@ -204,7 +216,7 @@ export class ConfigCenaApp extends HandlebarsApplicationMixin(ApplicationV2) {
     c.eventos = [...f.querySelectorAll("[data-evento]")].map((el, i) => ({
       id: c.eventos[i]?.id ?? foundry.utils.randomID(),
       nome: v("nome", el).trim(), gatilhoPA: n("gatilhoPA", el), descricao: v("descricao", el).trim(), chamada: v("chamada", el).trim(),
-      pericias: [...el.querySelectorAll("[name=pericias] option:checked")].map((o) => o.value),
+      pericias: [...el.querySelectorAll("[name=pericias]:checked")].map((o) => o.value),
       dt: n("dt", el), passosFalha: n("passosFalha", el),
       avisavel: !!el.querySelector("[name=avisavel]")?.checked, passosAviso: n("passosAviso", el),
       textoPassou: v("textoPassou", el).trim(), textoFalhou: v("textoFalhou", el).trim(),

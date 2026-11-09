@@ -42,7 +42,21 @@
         </div>
         <label>{{localize "OP2.CenaConfig.Descricao"}}<textarea name="descricao" rows="3">{{descricao}}</textarea></label>
         <label>{{localize "OP2.CenaConfig.Chamada"}}<input type="text" name="chamada" value="{{chamada}}" placeholder="{{localize 'OP2.Perseguicao.ChamadaPadrao'}}"></label>
-        <label>{{localize "OP2.CenaConfig.PericiasEvento"}}<select name="pericias" multiple size="5">{{#each periciasEv}}<option value="{{k}}" {{#if sel}}selected{{/if}}>{{r}}</option>{{/each}}</select></label>
+        {{!-- Caixas marcáveis em grade: um clique marca ou desmarca, sem Ctrl. --}}
+        <div class="op2-pericias-escolha" data-pericias-escolha>
+          <div class="op2-pericias-escolha__topo">
+            <span>{{localize "OP2.CenaConfig.PericiasEvento"}}</span>
+            <span class="op2-pericias-escolha__contagem" data-contagem>{{localize "OP2.CenaConfig.PericiasMarcadas" n=periciasMarcadas}}</span>
+          </div>
+          <div class="op2-pericias-escolha__grade">
+            {{#each periciasEv}}
+              <label class="op2-pericias-escolha__item">
+                <input type="checkbox" name="pericias" value="{{k}}" {{#if sel}}checked{{/if}}>
+                <span>{{r}}</span>
+              </label>
+            {{/each}}
+          </div>
+        </div>
         <label>{{localize "OP2.CenaConfig.TextoPassou"}}<input type="text" name="textoPassou" value="{{textoPassou}}"></label>
         <label>{{localize "OP2.CenaConfig.TextoFalhou"}}<input type="text" name="textoFalhou" value="{{textoFalhou}}"></label>
         <div class="op2-cena-config__linha">

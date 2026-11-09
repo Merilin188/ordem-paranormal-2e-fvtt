@@ -1809,7 +1809,7 @@
       "PassosFalha": "Advance steps on failure",
       "PassosFalhaDica": "Negative lowers (−2 = two step reductions).",
       "Descricao": "Description (shown to everyone)",
-      "PericiasEvento": "Skills that can test (Ctrl+click for several)",
+      "PericiasEvento": "Skills that can test",
       "TextoPassou": "Text on success",
       "TextoFalhou": "Text on failure",
       "Avisavel": "Whoever passed can warn the others",
@@ -1844,7 +1844,8 @@
       },
       "Som": "Background sound (heart and breathing)",
       "SomDica": "Plays for everyone while this chase is active. Each player can still turn it off in their settings.",
-      "Chamada": "Prompt before the options"
+      "Chamada": "Prompt before the options",
+      "PericiasMarcadas": "{n} selected"
     },
     "Sussurro": {
       "Titulo": "Send whisper box",
