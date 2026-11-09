@@ -44,3 +44,11 @@ test("desafios à vista: os do ponto trancado aparecem para o jogador mesmo ocul
     globalThis.fromUuidSync = antes;
   }
 });
+
+test("barras: o jogador copia a altura e o estilo da barra do mestre", async () => {
+  const { diferencasDoVisual } = await import("../ui/barras-token.mjs");
+  assert.deepEqual(diferencasDoVisual({ heightMultiplier: 1.6, barStyle: "large" }, { heightMultiplier: 1, barStyle: "large" }),
+    { heightMultiplier: 1.6 });
+  assert.deepEqual(diferencasDoVisual({}, { heightMultiplier: 1 }), {});
+  assert.deepEqual(diferencasDoVisual({ barStyle: "default" }, { barStyle: "default" }), {});
+});

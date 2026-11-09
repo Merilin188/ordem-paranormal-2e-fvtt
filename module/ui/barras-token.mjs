@@ -69,6 +69,43 @@ async function migrar() {
   await game.settings.set(SYSTEM_ID, "barrasTokenV1", true);
 }
 
+/**
+ * Altura e estilo da barra são opções de CADA computador no Bar Brawl: o mestre tinha
+ * aumentado as dele e os jogadores ficavam com a barra fina, o número espremido
+ * (achado em uso real). O mestre vira a referência: ao entrar, grava as dele num
+ * ajuste do mundo, e cada cliente copia para si.
+ */
+const VISUAL = ["heightMultiplier", "barStyle"];
+
+/** Pura: o que precisa mudar no cliente para ficar igual à referência da mesa. */
+export function diferencasDoVisual(referencia = {}, local = {}) {
+  return Object.fromEntries(VISUAL
+    .filter((chave) => referencia[chave] !== undefined && referencia[chave] !== local[chave])
+    .map((chave) => [chave, referencia[chave]]));
+}
+
+function visualLocal() {
+  const lido = {};
+  for (const chave of VISUAL) {
+    try { lido[chave] = game.settings.get("barbrawl", chave); } catch { /* sem o módulo */ }
+  }
+  return lido;
+}
+
+async function aplicarVisualDaMesa() {
+  if (!temBarBrawl() || game.user.isGM) return;
+  const mudar = diferencasDoVisual(game.settings.get(SYSTEM_ID, "barrasVisualMesa") ?? {}, visualLocal());
+  for (const [chave, valor] of Object.entries(mudar)) await game.settings.set("barbrawl", chave, valor);
+}
+
+async function gravarVisualDoMestre() {
+  if (!temBarBrawl() || game.users.activeGM?.id !== game.user.id) return;
+  const atual = visualLocal();
+  if (Object.keys(diferencasDoVisual(atual, game.settings.get(SYSTEM_ID, "barrasVisualMesa") ?? {})).length) {
+    await game.settings.set(SYSTEM_ID, "barrasVisualMesa", atual);
+  }
+}
+
 /** No cliente do jogador, a barra da criatura não aparece, haja o que houver. */
 function esconderDaCriatura(token) {
   if (game.user.isGM || token?.actor?.type !== "criatura" || !token.bars) return;
@@ -77,6 +114,11 @@ function esconderDaCriatura(token) {
 
 export function registrarBarrasDeToken() {
   game.settings.register(SYSTEM_ID, "barrasTokenV1", { scope: "world", config: false, type: Boolean, default: false });
+  game.settings.register(SYSTEM_ID, "barrasVisualMesa", {
+    scope: "world", config: false, type: Object, default: {},
+    // O mestre mudou a dele e reentrou: os jogadores on-line acompanham na hora.
+    onChange: () => void aplicarVisualDaMesa(),
+  });
 
   Hooks.on("preCreateToken", (token) => {
     if (!temBarBrawl()) return;
@@ -88,5 +130,9 @@ export function registrarBarrasDeToken() {
   for (const gancho of ["drawToken", "refreshToken", "hoverToken", "controlToken"]) {
     Hooks.on(gancho, (token) => esconderDaCriatura(token));
   }
-  Hooks.once("ready", () => void migrar());
+  Hooks.once("ready", () => {
+    void migrar();
+    void gravarVisualDoMestre();
+    void aplicarVisualDaMesa();
+  });
 }
