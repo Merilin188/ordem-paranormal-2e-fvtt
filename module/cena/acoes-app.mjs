@@ -29,7 +29,7 @@ import { usarHabilidadeOuItem } from "./acoes-recurso.mjs";
 import { abrirDestrancar } from "./destrancar-app.mjs";
 import { guardarRolagem, restaurarRolagem, esquecerRolagem } from "../ui/rolagem.mjs";
 import { semPrefixoDoPonto, desafioResolvido } from "./desafios.mjs";
-import { chaveInfo, periciasDaLinha, infosAlcancaveis, descobrivel } from "./investigacao.mjs";
+import { chaveInfo, periciasDaLinha } from "./investigacao.mjs";
 import { pontoTrancado, desafiosAVista } from "./acesso-poi.mjs";
 import { marcadoresDoPonto } from "./marcadores.mjs";
 import { filtrosVazios, filtrando } from "./filtros-painel.mjs";
@@ -349,7 +349,7 @@ export class AcoesInvestigacaoApp extends HandlebarsApplicationMixin(Application
         // Bloqueado por desafio de acesso: o jogador vê o cadeado antes de gastar ação.
         // Interagir fica impedido; Examinar só se ainda há algo achável do lado de
         // fora da tranca (a construção do baú) que este personagem não tenha.
-        ...acessoDoPonto(poi, ator),
+        ...acessoDoPonto(poi),
         // Quantos desafios deste ponto estão à vista: um atalho leva à aba Desafios já
         // filtrada por ele. Com os botões do desafio dentro do ponto, as duas coisas se
         // embaralhavam (achado em uso real).
@@ -557,13 +557,12 @@ function personagemDoUsuario() {
  * O que o personagem já vê do quadro de um ponto: a mesma leitura do painel do
  * jogador (linha aberta, contada ao grupo ou descoberta por ele).
  */
-function acessoDoPonto(poi, ator) {
-  const trancado = pontoTrancado(poi);
-  if (!trancado) return { trancado: false, examinarBloqueado: false };
-  const jaTem = ator.system.estado.infosReveladas;
-  const fora = infosAlcancaveis(poi.system.informacoes, true)
-    .some((info) => descobrivel(info) && !jaTem.has(chaveInfo(poi.uuid, info.id)));
-  return { trancado: true, examinarBloqueado: !fora };
+/**
+ * Ponto trancado: Interagir fica impedido; Examinar continua (alcança só o lado de
+ * fora). O botão nunca diz se ainda há algo lá fora — isso o jogador arrisca.
+ */
+function acessoDoPonto(poi) {
+  return { trancado: pontoTrancado(poi), examinarBloqueado: false };
 }
 
 function resumoDoQuadro(poi, ator) {

@@ -318,9 +318,9 @@
       "SemDesafiosAjuda": "No challenges. Drag a Challenge item here.",
       "ExaminarEscolhaAjuda": "Examining hands over everything with DT up to your die size for free, then rolls for the rest. If nothing comes up, it costs {custo} PD.",
       "SemRevelacao": {
-        "sem-pericia": "There's nothing here that {pericia} can reach.",
-        "dado-pequeno": "There's something here for {pericia}, but your {dado} doesn't reach it. A bigger die — or help — would change that.",
-        "ja-revelado": "You've already found everything {pericia} reaches here."
+        "sem-pericia": "GM: nothing at this point can be reached with {pericia}.",
+        "dado-pequeno": "GM: there is something for {pericia}, but the {dado} can't reach it.",
+        "ja-revelado": "GM: the character already found everything {pericia} reaches here."
       },
       "DtQueFaltava": "GM: the lowest remaining DT for this skill is {dt}.",
       "SemRolar": "no roll",
@@ -334,8 +334,8 @@
       "InteragirSoMestre": "Only you can see this — the contextual description is the GM's. Narrate the outcome to the table.",
       "InteragirSemContextual": "This point has no contextual description. Narrate by common sense.",
       "ExaminarGratisTambem": "{quantidade} more lines came without rolling (DC within the size of your die).",
-      "ExaminarRestante": "The roll ({total}) did not reach what is still left for this skill.",
-      "ExaminarNadaMais": "Nothing left for this skill at this point.",
+      "ExaminarRestante": "GM: the roll ({total}) didn't reach what is still left for this skill.",
+      "ExaminarNadaMais": "GM: nothing is left for this skill at this point.",
       "ExaminarAchouUma": "the roll revealed one new piece of information.",
       "ExaminarSoGratisUma": "one line came without rolling: its DC is within the size of your die.",
       "ExaminarGratisTambemUma": "One more line came without rolling (DC within the size of your die).",
@@ -2017,7 +2017,7 @@
       "Criar": "Create",
       "ExcluirDesafio": "Delete challenge (for good)",
       "AcoesImpedidas": "Access locked: resolve the access challenge to interact with or examine this point.",
-      "SoOLadoDeFora": "Access locked: only the outside can be examined. Overcome the challenge for the rest.",
+      "SoOLadoDeFora": "Access locked: resolve the access challenge to interact. Examine only reaches the outside.",
       "ImpedidoDica": "Blocked: access to this point is locked by a challenge.",
       "Resolver": "Resolve access challenge",
       "ResolverDica": "Try to overcome this point's obstacle (break in, unlock…).",

@@ -26,7 +26,9 @@
   {{/if}}
 
   <p>{{localize "OP2.Investigacao.ExaminarSemInfo"}}</p>
-  {{#if motivo}}<p class="op2-ajuda">{{motivo}}</p>{{/if}}
+  {{!-- O porquê é do mestre: se ainda há algo (e para qual perícia) o jogador descobre
+        ou arrisca. --}}
+  {{#if motivo}}<p class="op2-ajuda" data-op2-gm>{{motivo}}</p>{{/if}}
   {{#if dtMinima}}
     <p class="op2-ajuda" data-op2-gm>{{localize "OP2.Investigacao.DtQueFaltava" dt=dtMinima}}</p>
   {{/if}}

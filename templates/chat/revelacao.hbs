@@ -64,8 +64,10 @@
           {{/if}}
         </p>
       {{/if}}{{/if}}
+      {{!-- Se ainda sobra algo desta perícia é segredo do mestre: descobrir (ou arriscar)
+            se há mais é parte da investigação (pedido do mestre). --}}
       {{#unless quantidadeTeste}}
-        <p class="op2-ajuda">
+        <p class="op2-ajuda" data-op2-gm>
           {{#if restantes}}{{localize "OP2.Investigacao.ExaminarRestante" total=total}}{{else}}{{localize "OP2.Investigacao.ExaminarNadaMais"}}{{/if}}
         </p>
       {{/unless}}
@@ -113,9 +115,10 @@
       {{/each}}
     </ol>
   {{else}}
-    {{!-- Dizer o porquê: sem isso o jogador não sabe se insiste com outro dado,
-          troca de perícia ou desiste do ponto (achado em uso real). --}}
-    <p class="op2-ajuda">{{#if motivo}}{{motivo}}{{else}}{{localize "OP2.Investigacao.NadaNovo"}}{{/if}}</p>
+    {{!-- O porquê (perícia que não serve, dado pequeno, já achou tudo) é do mestre: o
+          jogador só sabe que não veio nada novo e decide se insiste. --}}
+    <p class="op2-ajuda">{{localize "OP2.Investigacao.NadaNovo"}}</p>
+    {{#if motivo}}<p class="op2-ajuda" data-op2-gm>{{motivo}}</p>{{/if}}
     {{#if dtMinima}}
       <p class="op2-ajuda" data-op2-gm>{{localize "OP2.Investigacao.DtQueFaltava" dt=dtMinima}}</p>
     {{/if}}

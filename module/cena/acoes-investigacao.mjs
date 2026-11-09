@@ -30,17 +30,11 @@ const CHAT = "systems/ordem-paranormal-2e/templates/chat";
  * que está trancado, sem custar PD por uma tranca que ele não tinha como saber.
  * @returns {{trancado: boolean, infos: object[]}|null} null = barrado (já avisou)
  */
-function quadroAlcancavel(ator, poi) {
+function quadroAlcancavel(_ator, poi) {
+  // Trancado, Examinar só alcança o lado de fora — e rola mesmo que não sobre nada
+  // lá: barrar o teste entregava ao jogador que não havia mais o que achar.
   const trancado = pontoTrancado(poi);
-  const infos = infosAlcancaveis(poi.system.informacoes, trancado);
-  if (trancado) {
-    const jaTem = idsRevelados(ator, poi.uuid);
-    if (!infos.some((info) => descobrivel(info) && !jaTem.has(info.id))) {
-      ui.notifications.warn(game.i18n.format("OP2.Acesso.Trancado", { ponto: poi.name }));
-      return null;
-    }
-  }
-  return { trancado, infos };
+  return { trancado, infos: infosAlcancaveis(poi.system.informacoes, trancado) };
 }
 
 /** @returns {Promise<Item|null>} */

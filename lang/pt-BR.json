@@ -318,9 +318,9 @@
       "SemDesafiosAjuda": "Nenhum desafio. Arraste um Item de Desafio para cá.",
       "ExaminarEscolhaAjuda": "Examinar entrega de graça tudo com DT até o tamanho do seu dado e rola pelo resto. Se nada vier, custa {custo} PD.",
       "SemRevelacao": {
-        "sem-pericia": "Não há nada aqui que {pericia} alcance.",
-        "dado-pequeno": "Tem algo aqui para {pericia}, mas seu {dado} não alcança. Um dado maior — ou ajuda — mudaria isso.",
-        "ja-revelado": "Você já descobriu tudo que {pericia} alcança aqui."
+        "sem-pericia": "Mestre: não há nada neste ponto que {pericia} alcance.",
+        "dado-pequeno": "Mestre: há algo para {pericia}, mas o {dado} não alcança.",
+        "ja-revelado": "Mestre: o personagem já descobriu tudo que {pericia} alcança aqui."
       },
       "DtQueFaltava": "Mestre: a menor DT que falta nesta perícia é {dt}.",
       "SemRolar": "sem rolar",
@@ -334,8 +334,8 @@
       "InteragirSoMestre": "Só você vê isto — a descrição contextual é do mestre. Narre o resultado para a mesa.",
       "InteragirSemContextual": "Este ponto não tem descrição contextual. Narre pelo bom senso.",
       "ExaminarGratisTambem": "Outras {quantidade} linhas vieram sem rolar (DT dentro do tamanho do seu dado).",
-      "ExaminarRestante": "A rolagem ({total}) não alcançou o que ainda falta desta perícia.",
-      "ExaminarNadaMais": "Não sobrou nada desta perícia neste ponto.",
+      "ExaminarRestante": "Mestre: a rolagem ({total}) não alcançou o que ainda falta desta perícia.",
+      "ExaminarNadaMais": "Mestre: não sobrou nada desta perícia neste ponto.",
       "ExaminarAchouUma": "o teste revelou uma informação nova.",
       "ExaminarSoGratisUma": "uma linha veio sem rolar: a DT dela não passa do tamanho do seu dado.",
       "ExaminarGratisTambemUma": "Outra linha veio sem rolar (DT dentro do tamanho do seu dado).",
@@ -2017,7 +2017,7 @@
       "Criar": "Criar",
       "ExcluirDesafio": "Excluir desafio (de vez)",
       "AcoesImpedidas": "Acesso bloqueado: resolva o desafio de acesso para interagir ou examinar este ponto.",
-      "SoOLadoDeFora": "Acesso bloqueado: só dá para examinar o lado de fora. Vença o desafio para o resto.",
+      "SoOLadoDeFora": "Acesso bloqueado: resolva o desafio de acesso para interagir. Examinar só alcança o lado de fora.",
       "ImpedidoDica": "Impedido: o acesso a este ponto está bloqueado por um desafio.",
       "Resolver": "Resolver desafio de acesso",
       "ResolverDica": "Tenta vencer o obstáculo deste ponto (arrombar, destrancar…).",
