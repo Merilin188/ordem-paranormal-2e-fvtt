@@ -27,6 +27,9 @@ export async function usarHabilidadeOuItem(ator) {
   const itemId = await escolherItem(usaveis);
   if (!itemId) return null;
   const item = ator.items.get(itemId);
+  // Item com efeitos de uso (cura, dano, esconderijo): usa de verdade.
+  const { temUso, usarItem } = await import("./usar-item.mjs");
+  if (temUso(item)) return usarItem(ator, item);
 
   const editor = foundry.applications?.ux?.TextEditor?.implementation ?? TextEditor;
   const conteudo = await renderizar(`systems/${SYSTEM_ID}/templates/chat/recurso.hbs`, {

@@ -1764,6 +1764,30 @@ details[open] > summary.op2-painel-titulo::before { transform: rotate(45deg); }
 .op2-poi__transicao-cena { margin: 0; }
 .op2-poi .op2-item-ficha__topo .op2-poi__levar { flex: 0 0 auto; border-radius: 0; }
 
+// Uso e passiva do equipamento (ficha do item).
+.op2-uso {
+  display: flex; flex-direction: column; gap: var(--op2-e1);
+}
+.op2-uso__efeito {
+  display: grid; grid-template-columns: 6rem minmax(9rem, 12rem) minmax(0, 1fr) auto; gap: var(--op2-e1); align-items: center;
+  input, select { width: 100%; min-width: 0; }
+}
+// Card de uso de item.
+.op2-uso-card .op2-tag img { width: 1.1em; height: 1.1em; border: 0; vertical-align: middle; margin: 0 0.2em 0 0; }
+.op2-uso__linha { display: flex; flex-wrap: wrap; align-items: center; gap: var(--op2-e2); margin: var(--op2-e1) 0; }
+.op2-uso__gasto { margin-top: var(--op2-e2); font-style: italic; color: var(--op2-vermelho-claro); }
+// Item com passiva no inventário: o símbolo da runa brilha; apagado quando gasto.
+.op2-item--passiva { position: relative; box-shadow: inset 3px 0 0 #6fcfc0; }
+.op2-item__runa {
+  display: inline-flex; flex: none; width: 1.6rem; height: 1.6rem;
+  img { width: 100%; height: 100%; border: 0; margin: 0; filter: drop-shadow(0 0 4px #6fcfc0); animation: op2-runa-pulso 3.2s ease-in-out infinite; }
+}
+.op2-item--apagada { box-shadow: inset 3px 0 0 var(--op2-linha); }
+.op2-item--apagada .op2-item__runa img { filter: grayscale(1) brightness(0.55); animation: none; opacity: 0.6; }
+.op2-item__usar { flex: none; border-radius: 0; }
+@keyframes op2-runa-pulso { 0%, 100% { filter: drop-shadow(0 0 2px #6fcfc0); } 50% { filter: drop-shadow(0 0 7px #a8f5ea); } }
+@media (prefers-reduced-motion: reduce) { .op2-item__runa img { animation: none; } }
+
 // Menu flutuante (ex.: para quem mandar o card dos itens do desafio).
 .op2-menu-flutuante {
   position: fixed;

@@ -78,6 +78,68 @@
     {{/if}}
   </fieldset>
 
+  {{!-- Uso do item: dano, cura, dado de esconderijo ou texto. A caixa ao lado da
+        fórmula diz o que ela faz. --}}
+  <fieldset class="op2-uso">
+    <legend><i class="fa-solid fa-hand-sparkles" aria-hidden="true"></i> {{localize "OP2.Uso.Titulo"}}</legend>
+    <p class="op2-ajuda">{{localize "OP2.Uso.Ajuda"}}</p>
+    {{#each usosItem}}
+      <div class="op2-uso__efeito">
+        <input type="text" name="system.usos.{{i}}.formula" value="{{formula}}" placeholder="1d10"
+          aria-label="{{localize 'OP2.Uso.Formula'}}" {{#unless @root.editavel}}disabled{{/unless}}>
+        <select name="system.usos.{{i}}.tipo" aria-label="{{localize 'OP2.Uso.Tipo.Rotulo'}}" {{#unless @root.editavel}}disabled{{/unless}}>
+          {{#each tipos}}<option value="{{t}}" {{#if sel}}selected{{/if}}>{{rotulo}}</option>{{/each}}
+        </select>
+        <input type="text" name="system.usos.{{i}}.texto" value="{{texto}}"
+          placeholder="{{#if ehTexto}}{{localize 'OP2.Uso.TextoEfeito'}}{{else}}{{localize 'OP2.Uso.Nota'}}{{/if}}"
+          {{#unless @root.editavel}}disabled{{/unless}}>
+        {{#if @root.editavel}}
+          <button type="button" class="op2-botao-icone" data-action="removerUso" data-i="{{i}}"
+            aria-label="{{localize 'OP2.Uso.Remover'}}" data-tooltip="{{localize 'OP2.Uso.Remover'}}"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+        {{/if}}
+      </div>
+    {{/each}}
+    {{#if editavel}}
+      <button type="button" class="op2-botao op2-botao--pequeno" data-action="adicionarUso">
+        <i class="fa-solid fa-plus" aria-hidden="true"></i> {{localize "OP2.Uso.Adicionar"}}
+      </button>
+    {{/if}}
+    {{#if usosItem.length}}
+      <label class="op2-campo op2-campo--inline">
+        <input type="checkbox" name="system.escolhaUnica" {{#if sistema.escolhaUnica}}checked{{/if}} {{#unless editavel}}disabled{{/unless}}>
+        <span>{{localize "OP2.Uso.EscolhaUnica"}}</span>
+      </label>
+      <label class="op2-campo op2-campo--inline">
+        <input type="checkbox" name="system.gastaAoUsar" {{#if sistema.gastaAoUsar}}checked{{/if}} {{#unless editavel}}disabled{{/unless}}>
+        <span>{{localize "OP2.Uso.GastaAoUsar"}}</span>
+      </label>
+      {{#if sistema.gastaAoUsar}}
+        <label class="op2-campo">
+          <span>{{localize "OP2.Uso.MensagemGasto"}}</span>
+          <input type="text" name="system.mensagemGasto" value="{{sistema.mensagemGasto}}"
+            placeholder="{{localize 'OP2.Uso.MensagemGastoExemplo'}}" {{#unless editavel}}disabled{{/unless}}>
+        </label>
+      {{/if}}
+    {{/if}}
+  </fieldset>
+
+  {{!-- Passiva: enquanto o item está na ficha (e não foi gasto). --}}
+  <fieldset class="op2-uso">
+    <legend><i class="fa-solid fa-shield-heart" aria-hidden="true"></i> {{localize "OP2.Uso.Passiva"}}</legend>
+    <p class="op2-ajuda">{{localize "OP2.Uso.PassivaAjuda"}}</p>
+    <label class="op2-campo">
+      <span>{{localize "OP2.Uso.PassivaStatus"}}</span>
+      <select name="system.passiva.status" {{#unless editavel}}disabled{{/unless}}>
+        <option value="">{{localize "OP2.Criatura.SemCondicao"}}</option>
+        {{#each passivas}}<option value="{{id}}" {{#if sel}}selected{{/if}}>{{rotulo}}</option>{{/each}}
+      </select>
+    </label>
+    <label class="op2-campo op2-campo--inline">
+      <input type="checkbox" name="system.passiva.simbolo" {{#if sistema.passiva.simbolo}}checked{{/if}} {{#unless editavel}}disabled{{/unless}}>
+      <span>{{localize "OP2.Uso.PassivaSimbolo"}}</span>
+    </label>
+  </fieldset>
+
   <label class="op2-campo">
     <span>{{localize "OP2.Equipamento.Descricao"}}</span>
     {{formInput fields.descricao value=sistema.descricao enriched=descricao toggled=true

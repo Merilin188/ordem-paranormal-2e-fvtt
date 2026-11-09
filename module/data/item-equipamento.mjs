@@ -6,7 +6,7 @@
  */
 export class EquipamentoData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
-    const { SchemaField, NumberField, BooleanField, HTMLField, StringField } = foundry.data.fields;
+    const { SchemaField, NumberField, BooleanField, HTMLField, StringField, ArrayField } = foundry.data.fields;
 
     return {
       quantidade: new NumberField({ required: true, initial: 1, min: 0, integer: true, nullable: false }),
@@ -36,6 +36,29 @@ export class EquipamentoData extends foundry.abstract.TypeDataModel {
         usa: new BooleanField({ required: true, initial: false }),
         value: new NumberField({ required: true, initial: 0, min: 0, integer: true, nullable: false }),
         max: new NumberField({ required: true, initial: 0, min: 0, integer: true, nullable: false }),
+      }),
+
+      /**
+       * Uso do item (poção, kit, runa): cada efeito é uma fórmula e o que ela faz —
+       * dano físico/mental nos alvos, cura de PV/PD em quem usa, um dado de esconderijo
+       * ou só um texto (`module/cena/usar-item.mjs`).
+       */
+      usos: new ArrayField(new SchemaField({
+        formula: new StringField({ required: true, initial: "", blank: true }),
+        tipo: new StringField({ required: true, initial: "curaPV", blank: false,
+          choices: ["danoFisico", "danoMental", "curaPV", "curaPD", "esconderijo", "texto"] }),
+        texto: new StringField({ required: true, initial: "", blank: true }),
+      }), { initial: [] }),
+      /** Com mais de um efeito: quem usa escolhe UM (um OU outro). */
+      escolhaUnica: new BooleanField({ required: true, initial: true }),
+      /** Usar gasta uma carga (ou uma unidade). */
+      gastaAoUsar: new BooleanField({ required: true, initial: false }),
+      /** O que aparece quando o item é gasto (e se tentarem usar de novo). */
+      mensagemGasto: new StringField({ required: true, initial: "", blank: true }),
+      /** Enquanto está na ficha (e não foi gasto): uma condição e o símbolo na ficha. */
+      passiva: new SchemaField({
+        status: new StringField({ required: true, initial: "", blank: true }),
+        simbolo: new BooleanField({ required: true, initial: false }),
       }),
     };
   }

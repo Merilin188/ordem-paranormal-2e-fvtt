@@ -201,7 +201,8 @@ export async function alcancarDesafio(ator, desafioUuid, { rapido = false } = {}
   const desafio = await carregarDesafio(desafioUuid);
   if (!desafio) return null;
   await marcarQuemTenta(desafio, ator);
-  const dt = desafio.system.alcancar?.dt ?? 7;
+  // Abordagem Alcançar ligada: a DT dela; categoria Alcançar sem a abordagem: a do objeto.
+  const dt = desafio.system.abordagens?.alcancar ? (desafio.system.alcancar?.dt ?? 7) : (desafio.system.dtObjeto ?? 7);
   const modo = await foundry.applications.api.DialogV2.wait({
     window: { title: `${game.i18n.localize("OP2.Desafio.Alcancar")} — ${desafio.name}`, icon: "fa-solid fa-person-walking" },
     classes: ["op2", "op2-dlg", "op2-defesa-janela"],

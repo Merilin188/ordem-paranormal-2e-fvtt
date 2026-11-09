@@ -21,6 +21,8 @@ export const CONDICOES = [
   C("cego", "icons/svg/blind.svg"),
   C("sangrando", "icons/svg/degen.svg"),
   C("defendendo", "icons/svg/shield.svg"),
+  // Passiva da Runa de Brenna (e de qualquer item de proteção que o mestre criar).
+  C("runa", "systems/ordem-paranormal-2e/assets/icons/runa-brenna.svg"),
 ];
 
 /* ---------------- Iniciativa por fases ---------------- */

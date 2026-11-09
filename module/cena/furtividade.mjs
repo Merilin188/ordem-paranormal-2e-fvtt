@@ -88,6 +88,10 @@ const OPS = {
     const c = e.criaturas.find((x) => x.uuid === uuid);
     if (c) c.oculta = !c.oculta;
   },
+  dadoExtra(e, { uuid, dado, valor }) {
+    const p = e.participantes.find((x) => x.uuid === uuid);
+    if (p) p.dados = [...(p.dados ?? []), { id: foundry.utils.randomID(), dado, valor }];
+  },
   esconderijo(e, { uuid, dados }) {
     const p = e.participantes.find((x) => x.uuid === uuid);
     if (!p) return;
@@ -421,7 +425,29 @@ async function testeDeEsconderijo(doc) {
     const extra = await rolar(`1d${faces}`, { ocultoDoMestre: true });
     dados.push({ dado: `d${faces}`, valor: extra.total });
   }
+  // Dados de esconderijo guardados (a runa invocada fora da cena) entram agora.
+  const guardados = doc.getFlag(SYSTEM_ID, "esconderijoGuardado") ?? [];
+  if (guardados.length) {
+    dados.push(...guardados);
+    await doc.unsetFlag(SYSTEM_ID, "esconderijoGuardado");
+  }
   await pedir("esconderijo", { uuid: doc.uuid, dados });
+}
+
+/**
+ * Um dado de esconderijo ganho fora do teste (a Runa de Brenna: 1d10). Com a cena de
+ * furtividade em andamento e o personagem nela, entra na hora; senão fica guardado
+ * e entra no próximo teste de esconderijo. Devolve "cena" ou "guardado".
+ */
+export async function ganharDadoDeEsconderijo(doc, { dado, valor }) {
+  const e = estadoFurtividade();
+  if (e.ativa && e.participantes?.some((p) => p.uuid === doc.uuid)) {
+    await pedir("dadoExtra", { uuid: doc.uuid, dado, valor });
+    return "cena";
+  }
+  const atuais = doc.getFlag(SYSTEM_ID, "esconderijoGuardado") ?? [];
+  await doc.setFlag(SYSTEM_ID, "esconderijoGuardado", [...atuais, { dado, valor }]);
+  return "guardado";
 }
 
 async function acaoComTeste(doc, { chave, dt, uso, titulo }) {

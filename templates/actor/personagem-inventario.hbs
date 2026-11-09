@@ -23,8 +23,14 @@
   {{#if equipamentos.length}}
     <ul class="op2-lista-itens op2-lista-itens--inventario">
       {{#each equipamentos}}
-        <li class="op2-item{{#if system.equipado}} op2-item--equipado{{/if}}" data-item-id="{{id}}">
+        <li class="op2-item{{#if system.equipado}} op2-item--equipado{{/if}}{{#if op2Simbolo}} op2-item--passiva{{#if op2Gasto}} op2-item--apagada{{/if}}{{/if}}" data-item-id="{{id}}">
           <img class="op2-item__icone" src="{{img}}" alt="">
+          {{!-- Item com passiva: o símbolo brilha enquanto vale; gasto, fica apagado. --}}
+          {{#if op2Simbolo}}
+            <span class="op2-item__runa" data-tooltip="{{#if op2Gasto}}{{#if op2MensagemGasto}}{{op2MensagemGasto}}{{else}}{{localize 'OP2.Uso.PassivaApagada'}}{{/if}}{{else}}{{localize 'OP2.Uso.PassivaAtiva'}}{{/if}}">
+              <img src="systems/ordem-paranormal-2e/assets/icons/runa-brenna.svg" alt="">
+            </span>
+          {{/if}}
 
           {{!-- Sempre visível: equipado é um estado que interessa ver de relance na
                 lista, não só ao abrir a ficha do item. --}}
@@ -44,6 +50,13 @@
             </span>
           </div>
 
+          {{#if op2TemUso}}
+            <button type="button" class="op2-botao op2-botao--pequeno op2-item__usar" data-action="usarItem"
+              {{#unless @root.editavel}}disabled{{/unless}}
+              data-tooltip="{{#if op2Gasto}}{{#if op2MensagemGasto}}{{op2MensagemGasto}}{{else}}{{localize 'OP2.Uso.JaGastoCurto'}}{{/if}}{{else}}{{localize 'OP2.Uso.UsarDica'}}{{/if}}">
+              <i class="fa-solid fa-hand-sparkles" aria-hidden="true"></i> {{localize "OP2.Uso.Usar"}}
+            </button>
+          {{/if}}
           {{#if system.cargas.usa}}
             <div class="op2-item__cargas" role="group" aria-label="{{localize 'OP2.Equipamento.Cargas'}}">
               <button type="button" class="op2-botao-icone" data-action="ajustarCarga" data-delta="-1"

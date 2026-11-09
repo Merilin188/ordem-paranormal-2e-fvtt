@@ -1250,7 +1250,8 @@
       "apavorado": "Apavorado (dado de pavor)",
       "cego": "Cego",
       "sangrando": "Sangrando",
-      "defendendo": "Defendendo-se"
+      "defendendo": "Defendendo-se",
+      "runa": "Runa de proteção"
     },
     "Guia": {
       "Titulo": "Guia rápido de combate",
@@ -2078,6 +2079,47 @@
       "SustentandoAbre": "{ator} está sustentando \"{desafio}\" e abre caminho: estes itens estão ao alcance de todos:",
       "EntregarUm": "Entregar este item a um personagem",
       "EntregarTitulo": "Quem recebe {item}?"
+    },
+    "Uso": {
+      "Titulo": "Uso do item",
+      "Ajuda": "Cada linha é um efeito: a fórmula de dados e o que ela faz. Dano vai nos alvos marcados (T); cura e dado de esconderijo, em quem usa.",
+      "Formula": "Fórmula",
+      "Tipo": {
+        "Rotulo": "O que faz",
+        "danoFisico": "Dano físico (PV)",
+        "danoMental": "Dano mental (PD)",
+        "curaPV": "Cura de PV",
+        "curaPD": "Cura de PD",
+        "esconderijo": "Dado de esconderijo",
+        "texto": "Só texto (efeito livre)"
+      },
+      "TextoEfeito": "Descreva o efeito",
+      "Nota": "Nota (opcional)",
+      "Remover": "Remover efeito",
+      "Adicionar": "Novo efeito",
+      "EscolhaUnica": "Escolher UM dos efeitos ao usar (um OU outro)",
+      "GastaAoUsar": "Usar gasta uma carga (ou uma unidade)",
+      "MensagemGasto": "Mensagem quando o item é gasto",
+      "MensagemGastoExemplo": "ex.: Sua runa já foi apagada.",
+      "Passiva": "Passiva (enquanto estiver na ficha)",
+      "PassivaAjuda": "Enquanto o item estiver na ficha do personagem e não tiver sido gasto, ele fica com esta condição.",
+      "PassivaStatus": "Condição aplicada",
+      "PassivaSimbolo": "Mostrar o símbolo de runa no inventário",
+      "PassivaAtiva": "Passiva ativa: a runa protege quem a carrega.",
+      "PassivaApagada": "Apagada: a passiva não vale mais.",
+      "Usar": "Usar",
+      "UsarDica": "Usa o item (rola o efeito e aplica).",
+      "JaGastoCurto": "Já foi gasto.",
+      "JaGasto": "{item} já foi gasto.",
+      "Gastou": "{item} foi gasto.",
+      "Escolher": "Usar: {item}",
+      "EscolherAjuda": "Escolha um dos efeitos.",
+      "Usou": "{ator} usa {item}.",
+      "Curou": "{ator} recupera {n} {recurso} ({de} → {para}).",
+      "EsconderijoCena": "{ator} ganha um dado de esconderijo {dado} (o valor fica oculto do mestre).",
+      "EsconderijoGuardado": "{ator} ganha um dado de esconderijo {dado}: fica guardado e entra no próximo teste de esconderijo.",
+      "DanoAplicadoEm": "{n} de dano ({recurso}) em {alvos}.",
+      "DanoRolado": "{n} de dano ({recurso}). O mestre aplica nos alvos."
     }
   }
 }

@@ -19,6 +19,7 @@ import { registrarAcessoPoi } from "./cena/acesso-poi.mjs";
 import { registrarItensDaPista } from "./cena/itens-pista.mjs";
 import { registrarBarrasDeToken } from "./ui/barras-token.mjs";
 import { registrarHabilidadeDeCriatura } from "./cena/habilidade-criatura.mjs";
+import { registrarUsoDeItens } from "./cena/usar-item.mjs";
 import { SYSTEM_ID, OP2, ICONES_PADRAO } from "./config.mjs";
 import { PersonagemData } from "./data/actor-personagem.mjs";
 import { NpcData } from "./data/actor-npc.mjs";
@@ -142,6 +143,7 @@ Hooks.once("init", () => {
   registrarItensDaPista();
   registrarBarrasDeToken();
   registrarHabilidadeDeCriatura();
+  registrarUsoDeItens();
   registrarSocket();
   registrarPainelInvestigacao();
   registrarMarcadores();

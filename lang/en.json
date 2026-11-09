@@ -1250,7 +1250,8 @@
       "apavorado": "Apavorado (dado de pavor)",
       "cego": "Cego",
       "sangrando": "Sangrando",
-      "defendendo": "Defending"
+      "defendendo": "Defending",
+      "runa": "Protection rune"
     },
     "Guia": {
       "Titulo": "Guia rápido de combate",
@@ -2078,6 +2079,47 @@
       "SustentandoAbre": "{ator} is holding \"{desafio}\" and opens the way: these items are within everyone's reach:",
       "EntregarUm": "Give this item to a character",
       "EntregarTitulo": "Who receives {item}?"
+    },
+    "Uso": {
+      "Titulo": "Item use",
+      "Ajuda": "Each line is an effect: the dice formula and what it does. Damage goes to the targets (T); healing and hiding dice, to the user.",
+      "Formula": "Formula",
+      "Tipo": {
+        "Rotulo": "What it does",
+        "danoFisico": "Physical damage (HP)",
+        "danoMental": "Mental damage (MP)",
+        "curaPV": "Heal HP",
+        "curaPD": "Heal MP",
+        "esconderijo": "Hiding die",
+        "texto": "Text only (free effect)"
+      },
+      "TextoEfeito": "Describe the effect",
+      "Nota": "Note (optional)",
+      "Remover": "Remove effect",
+      "Adicionar": "New effect",
+      "EscolhaUnica": "Choose ONE of the effects when used (one OR the other)",
+      "GastaAoUsar": "Using spends a charge (or a unit)",
+      "MensagemGasto": "Message when the item is spent",
+      "MensagemGastoExemplo": "e.g. Your rune has already been erased.",
+      "Passiva": "Passive (while on the sheet)",
+      "PassivaAjuda": "While the item is on the character's sheet and not spent, they have this condition.",
+      "PassivaStatus": "Condition applied",
+      "PassivaSimbolo": "Show the rune symbol in the inventory",
+      "PassivaAtiva": "Passive active: the rune protects its bearer.",
+      "PassivaApagada": "Erased: the passive no longer applies.",
+      "Usar": "Use",
+      "UsarDica": "Uses the item (rolls the effect and applies it).",
+      "JaGastoCurto": "Already spent.",
+      "JaGasto": "{item} has already been spent.",
+      "Gastou": "{item} was spent.",
+      "Escolher": "Use: {item}",
+      "EscolherAjuda": "Choose one of the effects.",
+      "Usou": "{ator} uses {item}.",
+      "Curou": "{ator} recovers {n} {recurso} ({de} → {para}).",
+      "EsconderijoCena": "{ator} gains a {dado} hiding die (its value is hidden from the GM).",
+      "EsconderijoGuardado": "{ator} gains a {dado} hiding die: it is stored and joins the next hiding test.",
+      "DanoAplicadoEm": "{n} damage ({recurso}) to {alvos}.",
+      "DanoRolado": "{n} damage ({recurso}). The GM applies it to the targets."
     }
   }
 }

@@ -6,6 +6,7 @@
  * seletor de texto. É a leitura que o livro usa e a que torna a ficha escaneável.
  */
 import { resetarUsos } from "../cena/efeitos-mundo.mjs";
+import { usarItem, temUso, itemGasto } from "../cena/usar-item.mjs";
 import { posicionarMenuDeDado } from "./menu-dado.mjs";
 import { ESCADA, ATRIBUTOS, PERICIAS, PERFIS, APTIDOES_PADRAO } from "../config.mjs";
 import { periciaVisivel, aptidaoVisivel } from "../settings/pericias.mjs";
@@ -44,6 +45,7 @@ export class PersonagemSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       abrirSeletor: PersonagemSheet.#abrirSeletor,
       criarItem: PersonagemSheet.#criarItem,
       alternarEquipado: PersonagemSheet.#alternarEquipado,
+      usarItem: PersonagemSheet.#usarItem,
       ajustarCarga: PersonagemSheet.#ajustarCarga,
       editarItem: PersonagemSheet.#editarItem,
       apagarItem: PersonagemSheet.#apagarItem,
@@ -134,7 +136,12 @@ export class PersonagemSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
           : item.system.automacao === "arsenal" ? ["tonico", "balsamo", "vespa"].filter((p) => !item.system.arsenal[p]).map((p) => game.i18n.localize(`OP2.Poder.Arsenal.${p}`)).join(" · ") || game.i18n.localize("OP2.Poder.ArsenalVazio")
             : "",
       }))),
-      equipamentos: this.actor.items.filter((i) => i.type === "equipamento"),
+      equipamentos: this.actor.items.filter((i) => i.type === "equipamento").map((i) => Object.assign(i, {
+        op2TemUso: temUso(i),
+        op2Gasto: itemGasto(i.system),
+        op2Simbolo: Boolean(i.system.passiva?.simbolo),
+        op2MensagemGasto: i.system.mensagemGasto?.trim() || "",
+      })),
       ferramentas: this.actor.items.filter((i) => i.type === "ferramenta"),
       temReducao: Object.values(sistema.estado.reducoesTemporarias).some((n) => n > 0),
       // O aumento precisa aparecer na ficha: sem isso o jogador gasta os três espaços
@@ -459,6 +466,12 @@ export class PersonagemSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       render: renderDoPerfil(this.actor),
     });
     if (confirmado) await item.delete();
+  }
+
+  /** Usa o item (cura, dano, dado de esconderijo…), escolhendo o efeito se for "um OU outro". */
+  static async #usarItem(_evento, alvo) {
+    const item = this.#itemDe(alvo);
+    if (item) await usarItem(this.actor, item);
   }
 
   static async #alternarEquipado(_evento, alvo) {
