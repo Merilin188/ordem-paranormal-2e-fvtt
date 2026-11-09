@@ -139,3 +139,17 @@ test("desafioResolvido: Alcançar vencido resolve só com a abordagem ligada", (
   assert.equal(desafioResolvido({ ...base, abordagens: { alcancar: true }, alcancar: { resolvido: true } }), true);
   assert.equal(desafioResolvido({ ...base, abordagens: { arrombar: true }, alcancar: { resolvido: true } }), false);
 });
+
+test("trancar de novo: zera o que venceu o desafio, sem trocar a senha", async () => {
+  const { instalarStubs } = await import("./stub-foundry.mjs");
+  instalarStubs();
+  const { dadosParaTrancar } = await import("../cena/acesso-poi.mjs");
+  const dados = dadosParaTrancar({ alcancar: { resolvido: true }, equilibrar: { resolvido: true }, generico: {} });
+  assert.equal(dados["system.pontuacaoAtual"], 0);
+  assert.equal(dados["system.destrancado"], false);
+  assert.equal(dados["system.alcancar.resolvido"], false);
+  assert.equal(dados["system.equilibrar.resolvido"], false);
+  assert.equal(dados["system.senha"], undefined);
+  const resolvido = { abordagens: { alcancar: true }, alcancar: { resolvido: dados["system.alcancar.resolvido"] }, pontuacaoAtual: 0, pontuacaoAlvo: 10 };
+  assert.equal(desafioResolvido(resolvido), false);
+});

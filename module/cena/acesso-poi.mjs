@@ -119,7 +119,30 @@ export async function liberarAcesso(poi, { desafio = null } = {}) {
 /** Tranca de novo (o mestre liberou cedo demais). Desafio já vencido continua abrindo. */
 export async function trancarDeNovo(poi) {
   if (!game.user.isGM) return;
+  // Trancar de novo é fechar a porta: os desafios do ponto voltam a valer do zero.
+  // Sem isso, o desafio vencido continuava abrindo o ponto (achado em uso real).
+  for (const desafio of desafiosDoPonto(poi)) await desafio.update(dadosParaTrancar(desafio.system));
   await poi.update({ "system.acesso.liberado": false });
+}
+
+/**
+ * O que zera num desafio ao trancar o ponto de novo: o progresso do arrombamento, o
+ * destrancado (com o histórico e as tentativas) e o "vencido" de cada abordagem.
+ * A senha continua a mesma. Pura.
+ */
+export function dadosParaTrancar(system = {}) {
+  const dados = {
+    "system.pontuacaoAtual": 0,
+    "system.tentativasUsadas": 0,
+    "system.quebrado": false,
+    "system.destrancado": false,
+    "system.destrancarTentativas": 0,
+    "system.historicoDestrancar": [],
+  };
+  for (const chave of ["generico", "hackTecnico", "hackSocial", "equilibrar", "alcancar"]) {
+    if (system[chave]) dados[`system.${chave}.resolvido`] = false;
+  }
+  return dados;
 }
 
 /**

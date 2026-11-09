@@ -1990,7 +1990,7 @@
       "Liberar": "Unlock now",
       "LiberarDica": "Opens the point without the challenge and narrates what is inside in the chat.",
       "Trancar": "Lock again",
-      "TrancarDica": "Locks it again. A challenge already overcome still opens the point.",
+      "TrancarDica": "Locks the point again and resets its challenges: they must be overcome again (the Unlock code stays the same).",
       "CriarDesafio": "Create access challenge",
       "NomeDesafio": "{ponto} (access)",
       "DesafioVencido": "Overcome",

@@ -1990,7 +1990,7 @@
       "Liberar": "Liberar agora",
       "LiberarDica": "Abre o ponto sem o desafio e narra no chat o que há dentro.",
       "Trancar": "Trancar de novo",
-      "TrancarDica": "Volta a trancar. Um desafio já vencido continua abrindo o ponto.",
+      "TrancarDica": "Volta a trancar o ponto e zera os desafios dele: precisam ser vencidos de novo (a senha do Destrancar continua a mesma).",
       "CriarDesafio": "Criar desafio de acesso",
       "NomeDesafio": "{ponto} (acesso)",
       "DesafioVencido": "Vencido",
