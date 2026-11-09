@@ -280,6 +280,25 @@
   }
   .op2-criatura-rd { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem; input { width: 4rem; } }
   .op2-criatura-card h3 { margin: 0 0 0.3rem; border: 0; color: #e6a3b8; font-family: var(--op2-fonte-display); }
+  .op2-criatura-habilidade__campo {
+    display: flex; flex-direction: column; gap: 0.15rem; margin-top: 0.4rem;
+    span { font-size: 0.75em; text-transform: uppercase; color: var(--op2-tinta-fraca); }
+    textarea { margin-top: 0; }
+  }
+  .op2-criatura-habilidade__campo--mestre textarea { border-color: #8b1d3a; }
+  .op2-criatura-habilidade__linha {
+    display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.4rem;
+    label { display: flex; flex-direction: column; gap: 0.15rem; flex: 1 1 8rem; min-width: 0;
+      span { font-size: 0.75em; text-transform: uppercase; color: var(--op2-tinta-fraca); } }
+    .op2-criatura-habilidade__efeito { flex: 2 1 12rem; }
+  }
+  .op2-criatura-card__dano { margin: 0.3rem 0; align-items: center; .op2-ajuda { margin-left: 0.4rem; } }
+  .op2-criatura-card__efeito { margin: 0.25rem 0; }
+  .op2-criatura-card__mestre {
+    margin-top: 0.5rem; padding: 0.4rem; border: 1px dashed #8b1d3a;
+    p { margin: 0.2rem 0; }
+  }
+  .op2-criatura-card__mestre-titulo { display: block; font-size: 0.75em; text-transform: uppercase; color: var(--op2-tinta-fraca); }
   .op2-criatura-importar { align-self: flex-start; width: auto; flex: none; margin: 0.15rem 0; }
 
   // Escolha da cena configurada (painéis inativos)

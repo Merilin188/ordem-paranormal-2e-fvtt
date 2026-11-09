@@ -21,7 +21,16 @@ export class CriaturaData extends NpcData {
     });
     const habilidade = new SchemaField({
       nome: new StringField({ required: true, initial: "", blank: true }),
+      // O que a mesa lê no chat.
       texto: new StringField({ required: true, initial: "", blank: true }),
+      // Bastidor: no mesmo card, mas só o mestre vê.
+      textoMestre: new StringField({ required: true, initial: "", blank: true }),
+      // Dano da habilidade ("2d6", "1d4+1"); vazio = sem dano. Rola ao mostrar no chat.
+      dano: new StringField({ required: true, initial: "", blank: true }),
+      danoRecurso: new StringField({ required: true, initial: "pv", choices: ["pv", "pd"] }),
+      // Condição do sistema que ela aplica (id de CONDICOES) e/ou um efeito escrito à mão.
+      condicao: new StringField({ required: true, initial: "", blank: true }),
+      efeito: new StringField({ required: true, initial: "", blank: true }),
       ordem: new NumberField({ required: true, initial: 0, integer: true }),
     });
     const colecao = (campo) => (TypedObjectField ? new TypedObjectField(campo) : new ObjectField());

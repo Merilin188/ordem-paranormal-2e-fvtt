@@ -16,3 +16,11 @@ test("barras: criatura some para os jogadores; personagem mostra o número", asy
   assert.equal(personagem.bar1.otherVisibility, 30);
   assert.equal(ajustarBarras("criatura", null), null);
 });
+
+test("habilidade de criatura: condições do seletor sem o Defendendo-se", async () => {
+  const { opcoesDeCondicao } = await import("../cena/habilidade-criatura.mjs");
+  const ids = opcoesDeCondicao().map((c) => c.id);
+  assert.ok(ids.includes("caido"));
+  assert.ok(ids.includes("sangrando"));
+  assert.ok(!ids.includes("defendendo"));
+});

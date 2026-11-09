@@ -1,12 +1,12 @@
 /** Ficha de Criatura: a do NPC + ataques, habilidades, redução de dano e estratégia. */
 import { NpcSheet } from "./actor-npc-sheet.mjs";
-import { SYSTEM_ID } from "../config.mjs";
 import { dadosDoAtaque, danoDoAtaque } from "../data/actor-criatura.mjs";
 import { OP2Roll } from "../dice/op2-roll.mjs";
 import { mostrarDados3D, enviarParaChat } from "../dice/teste.mjs";
 import { lerConfig } from "../settings/register.mjs";
 import { iconeDado } from "../ui/dice-icons.mjs";
 import { enriquecerHtml } from "../ui/enriquecer.mjs";
+import { mostrarHabilidadeNoChat, opcoesDeCondicao } from "../cena/habilidade-criatura.mjs";
 
 const L = (k, d) => (d ? game.i18n.format(`OP2.Criatura.${k}`, d) : game.i18n.localize(`OP2.Criatura.${k}`));
 const esc = (t) => foundry.utils.escapeHTML(String(t ?? ""));
@@ -45,6 +45,7 @@ export class CriaturaSheet extends NpcSheet {
         corpo: a.alcance === "corpo",
       })),
       habilidades: ordenar(sistema.habilidades).map(([id, h]) => ({ id, ...h })),
+      condicoesOpcoes: opcoesDeCondicao(),
     };
   }
 
@@ -157,13 +158,7 @@ export class CriaturaSheet extends NpcSheet {
   }
 
   static async #mostrarHabilidade(_evento, alvo) {
-    const h = this.actor.system.habilidades?.[alvo.dataset.id];
-    if (!h) return;
-    await ChatMessage.create({
-      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-      content: `<div class="op2 op2-card op2-criatura-card"><h3>${esc(h.nome)}</h3><p>${esc(h.texto).replace(/\n/g, "<br>")}</p></div>`,
-      flags: { [SYSTEM_ID]: { tipo: "criatura-habilidade" } },
-    });
+    await mostrarHabilidadeNoChat(this.actor, alvo.dataset.id);
   }
 }
 
