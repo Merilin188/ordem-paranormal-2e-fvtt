@@ -57,7 +57,7 @@
         <div class="op2-furt__info">
           <div class="op2-furt__nome">
             <strong>{{nome}}</strong>
-            {{#if morto}}<span class="op2-furt__estado op2-furt__estado--encontrado"><i class="fa-solid fa-skull"></i> {{localize "OP2.Perseguicao.Alcancado"}}</span>{{/if}}
+            {{#if morto}}<span class="op2-furt__estado op2-furt__estado--encontrado"><i class="fa-solid {{#if alcancado}}fa-person-falling-burst{{else}}fa-skull{{/if}}"></i> {{localize "OP2.Perseguicao.Alcancado"}}</span>{{/if}}
             {{#if ../ativa}}{{#unless morto}}
               <label class="op2-furt__agiu {{#if agiu}}op2-furt__agiu--sim{{/if}}">
                 <input type="checkbox" data-action="agiu" data-uuid="{{uuid}}" {{#if agiu}}checked{{/if}} {{#unless podeMarcar}}disabled{{/unless}}>

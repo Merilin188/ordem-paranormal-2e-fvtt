@@ -44,6 +44,16 @@ export function quemEAlcancado(participantes, rodada, marcos = null) {
   return ultimos.length === 1 ? { corte, alvo: ultimos[0], empate: [] } : { corte, alvo: null, empate: ultimos };
 }
 
+/**
+ * A enxurrada não escolhe o último: atinge TODOS abaixo do corte (Missão 1, p. 35).
+ * Devolve o corte e a lista de quem foi alcançado.
+ */
+export function todosAbaixoDoCorte(participantes, rodada, marcos = null) {
+  const corte = marcos ? marcos.find((m) => Number(m.rodada) === Number(rodada))?.pa ?? null : CORTES[rodada];
+  if (!corte) return { corte: null, alvos: [] };
+  return { corte, alvos: participantes.filter((p) => !p.morto && (p.pa ?? 0) < corte).map((p) => p.uuid) };
+}
+
 /** Próximo corte a partir da rodada atual (para o painel avisar). */
 export function proximoCorte(rodada, marcos = null) {
   const lista = marcos ?? Object.entries(CORTES).map(([r, pa]) => ({ rodada: Number(r), pa }));

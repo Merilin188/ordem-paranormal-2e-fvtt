@@ -86,6 +86,30 @@
     <button type="button" class="op2-botao op2-botao--fantasma" data-action="adicionar" data-lista="ataques"><i class="fa-solid fa-plus"></i> {{localize "OP2.CenaConfig.AdicionarAtaque"}}</button>
   </fieldset>
 
+  {{!-- Ser alcançado: morte (a tela do retrato rasgado, PV 0 e Morto) ou uma
+        consequência configurada (a tela de "Alcançado", dano, condição, efeito). --}}
+  <fieldset>
+    <legend>{{localize "OP2.CenaConfig.Alcancado"}}</legend>
+    <label class="op2-cena-config__check"><input type="checkbox" name="alcancadoMorte" {{#if alcancadoMorte}}checked{{/if}}> {{localize "OP2.CenaConfig.AlcancadoMorte"}}</label>
+    <p class="op2-dica">{{localize "OP2.CenaConfig.AlcancadoMorteAjuda"}}</p>
+    <label class="op2-cena-config__check"><input type="checkbox" name="alcancaTodos" {{#if c.alcancaTodos}}checked{{/if}}> {{localize "OP2.CenaConfig.AlcancaTodos"}}</label>
+    <div class="op2-cena-config__bloco">
+      <span class="op2-dica">{{localize "OP2.CenaConfig.ConsequenciaAjuda"}}</span>
+      <div class="op2-cena-config__linha">
+        <label>{{localize "OP2.CenaConfig.AlcancadoDano"}}<input type="text" name="alcancadoDano" value="{{alcancado.dano}}" placeholder="1d6"></label>
+        <label>{{localize "OP2.CenaConfig.AlcancadoRecurso"}}<select name="alcancadoRecurso" class="op2-cena-config__curto">
+          <option value="pv" {{#if (op2Eq alcancado.recurso "pv")}}selected{{/if}}>PV</option>
+          <option value="pd" {{#if (op2Eq alcancado.recurso "pd")}}selected{{/if}}>PD</option></select></label>
+        <label class="op2-cena-config__check"><input type="checkbox" name="alcancadoPorRodada" {{#if alcancado.porRodada}}checked{{/if}}> {{localize "OP2.CenaConfig.AlcancadoPorRodada"}}</label>
+      </div>
+      <label>{{localize "OP2.CenaConfig.AlcancadoCondicao"}}<select name="alcancadoCondicao">
+        <option value="">{{localize "OP2.Criatura.SemCondicao"}}</option>
+        {{#each condicoesAlcancado}}<option value="{{id}}" {{#if sel}}selected{{/if}}>{{rotulo}}</option>{{/each}}
+      </select></label>
+      <label>{{localize "OP2.CenaConfig.AlcancadoEfeito"}}<textarea name="alcancadoEfeito" rows="2">{{alcancado.efeito}}</textarea></label>
+    </div>
+  </fieldset>
+
   <footer class="op2-cena-config__rodape">
     {{#if podeExcluir}}<button type="button" class="op2-botao op2-botao--fantasma" data-action="excluirCena"><i class="fa-solid fa-trash"></i> {{localize "OP2.CenaConfig.Excluir"}}</button>{{/if}}
     <button type="submit" class="op2-botao"><i class="fa-solid fa-floppy-disk"></i> {{localize "OP2.CenaConfig.Salvar"}}</button>

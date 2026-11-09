@@ -7,6 +7,7 @@
  */
 import { SYSTEM_ID, PERICIAS } from "../config.mjs";
 import { TABELA_CRIATURAS } from "./furtividade-regras.mjs";
+import { CONDICOES } from "./condicoes.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } = foundry.applications.api;
 const L = (k, d) => (d ? game.i18n.format(`OP2.CenaConfig.${k}`, d) : game.i18n.localize(`OP2.CenaConfig.${k}`));
@@ -40,6 +41,11 @@ export const PERSEGUICAO_PADRAO = () => ({
     textoPassou: "{nome} percebe a vala e salta por cima dela.",
     textoFalhou: "{nome} tropeça e se desequilibra: duas reduções de passo no teste de avanço.",
   }],
+  // Ser alcançado = morte (a Ellén devora quem fica para trás). Sem isso, vale a
+  // consequência abaixo (a enxurrada derruba e arrasta).
+  alcancadoMorte: true,
+  alcancaTodos: false,
+  alcancado: { dano: "", recurso: "pv", porRodada: false, condicao: "", efeito: "" },
   inicioRodada: {
     nome: "Ataque das cabeças",
     ataques: [
@@ -49,8 +55,37 @@ export const PERSEGUICAO_PADRAO = () => ({
   },
 });
 
+/**
+ * Missão 1, "Regras da perseguição" (p. 35): a enxurrada. 4 rodadas, 25 PA para
+ * chegar à elevação; no fim das rodadas 2, 3 e 4 a água atinge TODOS com menos de
+ * 5, 15 e 25 PA: derrubado e arrastado, não age mais (nem pode ser carregado) e
+ * sofre 1d6 de dano por rodada até o fim.
+ */
+export const PERSEGUICAO_ENXURRADA = () => ({
+  ...PERSEGUICAO_PADRAO(),
+  id: "enxurrada-missao-1",
+  nome: "Fuga da enxurrada (Missão 1)",
+  perseguidor: "A enxurrada",
+  rodadas: 4,
+  meta: 25,
+  dtAvanco: 10,
+  periciaPadrao: "atletismo",
+  outrasUmaVez: true,
+  folego: true,
+  som: true,
+  marcos: [{ rodada: 2, pa: 5 }, { rodada: 3, pa: 15 }, { rodada: 4, pa: 25 }],
+  eventos: [],
+  alcancadoMorte: false,
+  alcancaTodos: true,
+  alcancado: {
+    dano: "1d6", recurso: "pv", porRodada: true, condicao: "caido",
+    efeito: "Derrubado e empurrado pela água para longe: até o fim da perseguição, não pode mais agir (nem ser carregado) e sofre 1d6 de dano por rodada.",
+  },
+  inicioRodada: { nome: "", ataques: [] },
+});
+
 const PERSEGUICAO_NOVA = (nome) => ({
-  ...PERSEGUICAO_PADRAO(), id: foundry.utils.randomID(), nome, perseguidor: "",
+  ...PERSEGUICAO_PADRAO(), id: foundry.utils.randomID(), nome, perseguidor: "", alcancadoMorte: true, alcancaTodos: false,
   eventos: [], inicioRodada: { nome: L("InicioRodadaPadrao"), ataques: [] },
 });
 
@@ -68,6 +103,19 @@ export const FURTIVIDADE_PADRAO = () => ({
 const PADROES = { perseguicao: PERSEGUICAO_PADRAO, furtividade: FURTIVIDADE_PADRAO };
 
 /* -- leitura e gravação ------------------------------------------------------- */
+
+/**
+ * Uma vez por mundo, a perseguição da Missão 1 entra na lista já configurada (se o
+ * mestre a apagar depois, não volta).
+ */
+export async function garantirPerseguicoesPadrao() {
+  if (game.users.activeGM?.id !== game.user.id) return;
+  if (game.settings.get(SYSTEM_ID, "perseguicaoEnxurradaCriada")) return;
+  if (!listarCenas("perseguicao").some((c) => c.id === "enxurrada-missao-1")) {
+    await salvarCena("perseguicao", PERSEGUICAO_ENXURRADA());
+  }
+  await game.settings.set(SYSTEM_ID, "perseguicaoEnxurradaCriada", true);
+}
 
 export function listarCenas(tipo) {
   let salvo = null;
@@ -180,6 +228,10 @@ export class ConfigCenaApp extends HandlebarsApplicationMixin(ApplicationV2) {
         marcos: c.marcos.map((m, i) => ({ ...m, i })),
         ataques: c.inicioRodada.ataques.map((a, i) => ({ ...a, i, pv: a.recurso !== "pd" })),
         podeExcluir: listarCenas(this.tipo).length > 1,
+        alcancadoMorte: c.alcancadoMorte !== false,
+        alcancado: { dano: "", recurso: "pv", porRodada: false, condicao: "", efeito: "", ...(c.alcancado ?? {}) },
+        condicoesAlcancado: CONDICOES.filter((x) => !["defendendo", "morto"].includes(x.id))
+          .map((x) => ({ id: x.id, rotulo: game.i18n.localize(x.name), sel: x.id === c.alcancado?.condicao })),
       };
     }
     return {
@@ -211,6 +263,13 @@ export class ConfigCenaApp extends HandlebarsApplicationMixin(ApplicationV2) {
       dtAvanco: n("dtAvanco"), periciaPadrao: v("periciaPadrao"),
       outrasUmaVez: !!f.querySelector("[name=outrasUmaVez]")?.checked, folego: !!f.querySelector("[name=folego]")?.checked,
       som: !!f.querySelector("[name=som]")?.checked,
+      alcancadoMorte: !!f.querySelector("[name=alcancadoMorte]")?.checked,
+      alcancaTodos: !!f.querySelector("[name=alcancaTodos]")?.checked,
+      alcancado: {
+        dano: v("alcancadoDano").trim(), recurso: v("alcancadoRecurso") || "pv",
+        porRodada: !!f.querySelector("[name=alcancadoPorRodada]")?.checked,
+        condicao: v("alcancadoCondicao"), efeito: v("alcancadoEfeito").trim(),
+      },
     });
     c.marcos = [...f.querySelectorAll("[data-marco]")].map((el) => ({ rodada: n("rodada", el), pa: n("pa", el) }));
     c.eventos = [...f.querySelectorAll("[data-evento]")].map((el, i) => ({
@@ -266,6 +325,7 @@ export class ConfigCenaApp extends HandlebarsApplicationMixin(ApplicationV2) {
 }
 
 export function registrarCenasConfig() {
+  game.settings.register(SYSTEM_ID, "perseguicaoEnxurradaCriada", { scope: "world", config: false, type: Boolean, default: false });
   for (const chave of Object.values(CHAVES)) {
     game.settings.register(SYSTEM_ID, chave, {
       scope: "world", config: false, type: Object, default: { lista: [] },

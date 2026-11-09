@@ -1777,7 +1777,9 @@
       "DescartarEmpate": "Discard and continue",
       "Voltar": "Back",
       "AvancoRefeito": "Readiness changes {nome}'s advance: {antes} → {depois} AP (now {total} AP).",
-      "NomePerseguidor": "Name of the pursuing creature (click to edit)"
+      "NomePerseguidor": "Name of the pursuing creature (click to edit)",
+      "DanoAlcancado": "Caught by {perseguidor}",
+      "DanoArrastado": "Still dragged by {perseguidor}"
     },
     "CenaConfig": {
       "Nome": "Name",
@@ -1845,7 +1847,17 @@
       "Som": "Background sound (heart and breathing)",
       "SomDica": "Plays for everyone while this chase is active. Each player can still turn it off in their settings.",
       "Chamada": "Prompt before the options",
-      "PericiasMarcadas": "{n} selected"
+      "PericiasMarcadas": "{n} selected",
+      "Alcancado": "Being caught",
+      "AlcancadoMorte": "Being caught = the character dies",
+      "AlcancadoMorteAjuda": "Checked: the torn portrait screen, the blood, 0 HP and the Dead condition. Unchecked: the \"Caught\" screen and the consequence below.",
+      "AlcancaTodos": "Everyone below the threshold is caught (not only the last one)",
+      "ConsequenciaAjuda": "Consequence of being caught (when it isn't death), like an ability:",
+      "AlcancadoDano": "Damage (formula)",
+      "AlcancadoRecurso": "To",
+      "AlcancadoPorRodada": "Repeats the damage every round until the end",
+      "AlcancadoCondicao": "Condition applied",
+      "AlcancadoEfeito": "Effect (written by hand, goes to the chat)"
     },
     "Sussurro": {
       "Titulo": "Send whisper box",

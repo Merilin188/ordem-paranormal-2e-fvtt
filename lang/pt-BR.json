@@ -1777,7 +1777,9 @@
       "DescartarEmpate": "Descartar e seguir",
       "Voltar": "Voltar",
       "AvancoRefeito": "Prontidão muda o avanço de {nome}: {antes} → {depois} PA (agora {total} PA).",
-      "NomePerseguidor": "Nome da criatura que persegue (clique para editar)"
+      "NomePerseguidor": "Nome da criatura que persegue (clique para editar)",
+      "DanoAlcancado": "Alcançado por {perseguidor}",
+      "DanoArrastado": "Ainda arrastado por {perseguidor}"
     },
     "CenaConfig": {
       "Nome": "Nome",
@@ -1845,7 +1847,17 @@
       "Som": "Som de fundo (coração e respiração)",
       "SomDica": "Toca para todos enquanto esta perseguição estiver ativa. Cada jogador ainda pode desligar nas configurações dele.",
       "Chamada": "Chamada antes das opções",
-      "PericiasMarcadas": "{n} marcada(s)"
+      "PericiasMarcadas": "{n} marcada(s)",
+      "Alcancado": "Ser alcançado",
+      "AlcancadoMorte": "Ser alcançado = morte do personagem",
+      "AlcancadoMorteAjuda": "Marcado: a tela do retrato rasgado, o sangue, PV 0 e a condição Morto. Desmarcado: a tela de \"Alcançado\" e a consequência abaixo.",
+      "AlcancaTodos": "Todos abaixo do corte são alcançados (não só o último)",
+      "ConsequenciaAjuda": "Consequência de ser alcançado (quando não é morte), como numa habilidade:",
+      "AlcancadoDano": "Dano (fórmula)",
+      "AlcancadoRecurso": "Em",
+      "AlcancadoPorRodada": "Repete o dano a cada rodada até o fim",
+      "AlcancadoCondicao": "Condição aplicada",
+      "AlcancadoEfeito": "Efeito (escrito à mão, vai para o chat)"
     },
     "Sussurro": {
       "Titulo": "Enviar caixa de sussurro",

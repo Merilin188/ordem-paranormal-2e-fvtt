@@ -52,3 +52,25 @@ test("barras: o jogador copia a altura e o estilo da barra do mestre", async () 
   assert.deepEqual(diferencasDoVisual({}, { heightMultiplier: 1 }), {});
   assert.deepEqual(diferencasDoVisual({ barStyle: "default" }, { barStyle: "default" }), {});
 });
+
+test("perseguição: a enxurrada atinge todos abaixo do corte, sem desempate", async () => {
+  const { todosAbaixoDoCorte } = await import("../cena/perseguicao-regras.mjs");
+  const marcos = [{ rodada: 2, pa: 5 }, { rodada: 3, pa: 15 }, { rodada: 4, pa: 25 }];
+  const ps = [{ uuid: "a", pa: 3 }, { uuid: "b", pa: 3 }, { uuid: "c", pa: 9 }, { uuid: "d", pa: 1, morto: true }];
+  assert.deepEqual(todosAbaixoDoCorte(ps, 2, marcos), { corte: 5, alvos: ["a", "b"] });
+  assert.deepEqual(todosAbaixoDoCorte(ps, 3, marcos).alvos, ["a", "b", "c"]);
+  assert.deepEqual(todosAbaixoDoCorte(ps, 1, marcos), { corte: null, alvos: [] });
+});
+
+test("perseguição da Missão 1: 4 rodadas, 25 PA, cortes 5/15/25 e sem morte", async () => {
+  const { PERSEGUICAO_ENXURRADA } = await import("../cena/cenas-config.mjs");
+  const c = PERSEGUICAO_ENXURRADA();
+  assert.equal(c.rodadas, 4);
+  assert.equal(c.meta, 25);
+  assert.equal(c.dtAvanco, 10);
+  assert.deepEqual(c.marcos.map((m) => [m.rodada, m.pa]), [[2, 5], [3, 15], [4, 25]]);
+  assert.equal(c.alcancadoMorte, false);
+  assert.equal(c.alcancaTodos, true);
+  assert.equal(c.alcancado.dano, "1d6");
+  assert.equal(c.alcancado.porRodada, true);
+});

@@ -12,9 +12,9 @@ import { SYSTEM_ID } from "../config.mjs";
 import { comoMestre, registrarAcaoDeMestre, paraTodos, registrarAcaoDeTodos } from "../ui/socket.mjs";
 import { iconeDado } from "../ui/dice-icons.mjs";
 import { stepDie } from "../dice/escada.mjs";
-import { MAX_BONUS, folegoInicial, formulaDoEsforco, pontosDoAvanco, quemEAlcancado, proximoCorte } from "./perseguicao-regras.mjs";
-import { animarSorteio, ligarVinheta } from "./furtividade.mjs";
-import { listarCenas, obterCena, novaCena, ConfigCenaApp, PERSEGUICAO_PADRAO, salvarCena } from "./cenas-config.mjs";
+import { MAX_BONUS, folegoInicial, formulaDoEsforco, pontosDoAvanco, quemEAlcancado, proximoCorte, todosAbaixoDoCorte } from "./perseguicao-regras.mjs";
+import { animarSorteio, ligarVinheta, mostrarEncontrado } from "./furtividade.mjs";
+import { listarCenas, obterCena, novaCena, ConfigCenaApp, PERSEGUICAO_PADRAO, salvarCena, garantirPerseguicoesPadrao } from "./cenas-config.mjs";
 import { enviarCaixasDeSussurro, jogadoresDe } from "../ui/sussurro.mjs";
 import { iniciarAmbientePerseguicao, pararAmbientePerseguicao, mostrarAlcancado, precarregarEfeitos } from "../ui/terror.mjs";
 
@@ -339,6 +339,11 @@ async function proximaRodada() {
     await game.settings.set(SYSTEM_ID, CHAVE, e);
   }
   const config = e.config;
+  // A enxurrada atinge todos abaixo do corte, sem desempate.
+  if (config.alcancaTodos) {
+    const { corte, alvos } = todosAbaixoDoCorte(e.participantes, e.rodada, config.marcos);
+    return concluirRodada(e, alvos, corte);
+  }
   const { corte, alvo, empate } = quemEAlcancado(e.participantes, e.rodada, config.marcos);
   if (!alvo && empate.length) {
     const dados = { corte, uuids: empate, salvos: [] };
@@ -351,16 +356,27 @@ async function proximaRodada() {
 }
 
 /** O resto do fim da rodada: quem foi alcançado, depois a próxima rodada ou o fim. */
-async function concluirRodada(e, morto, corte) {
+async function concluirRodada(e, alcancados, corte) {
   const config = e.config;
-  if (morto) {
-    const p = acharP(e, morto);
-    if (p) p.morto = true;
-    e.evento = { id: foundry.utils.randomID(), mortos: [morto] };
-    await card(`<p class="op2-furt-card__encontrado"><i class="fa-solid fa-skull"></i> ${esc(L("FoiAlcancado", { nome: nomeDe(morto), corte, perseguidor: config.perseguidor || L("Perseguidor") }))}</p>`);
+  const lista = (Array.isArray(alcancados) ? alcancados : [alcancados]).filter(Boolean);
+  const morte = config.alcancadoMorte !== false;
+  // Quem já tinha sido alcançado sofre o dano da rodada (a água continua arrastando).
+  const jaAlcancados = morte || !config.alcancado?.porRodada ? []
+    : e.participantes.filter((p) => p.alcancado && !lista.includes(p.uuid)).map((p) => p.uuid);
+  if (lista.length) {
+    for (const uuid of lista) {
+      const p = acharP(e, uuid);
+      if (p) Object.assign(p, { morto: true, alcancado: !morte });
+    }
+    e.evento = { id: foundry.utils.randomID(), mortos: lista, morte };
+    const perseguidor = config.perseguidor || L("Perseguidor");
+    for (const uuid of lista) {
+      await card(`<p class="op2-furt-card__encontrado"><i class="fa-solid ${morte ? "fa-skull" : "fa-person-falling-burst"}"></i> ${esc(L("FoiAlcancado", { nome: nomeDe(uuid), corte, perseguidor }))}</p>`);
+    }
   } else if (corte) {
     await card(`<p>${esc(L("NinguemAlcancado", { corte }))}</p>`);
   }
+  for (const uuid of jaAlcancados) void consequencia(uuid, config, { soDano: true });
   if (e.rodada >= config.rodadas) {
     e.fim = true;
     const salvos = vivos(e).filter((p) => p.pa >= config.meta).map((p) => nomeDe(p.uuid));
@@ -371,8 +387,34 @@ async function concluirRodada(e, morto, corte) {
     e.participantes = e.participantes.map((p) => ({ ...p, agiu: false, sacrificou: false }));
   }
   await game.settings.set(SYSTEM_ID, CHAVE, e);
-  if (morto) setTimeout(() => void matar(morto), DURACAO_ALCANCADO);
+  // Depois da tela de cada um: a morte, ou a consequência configurada.
+  lista.forEach((uuid, i) => setTimeout(() => void (morte ? matar(uuid) : consequencia(uuid, config)), DURACAO_ALCANCADO + i * 6400));
   return true;
+}
+
+/**
+ * Ser alcançado sem morrer: o dano (rolado, com o card dos dados), a condição e o
+ * efeito escrito na configuração. `soDano`: as rodadas seguintes, só o dano.
+ */
+async function consequencia(uuid, config, { soDano = false } = {}) {
+  const doc = await fromUuid(uuid);
+  if (!doc) return;
+  const c = config.alcancado ?? {};
+  const recurso = c.recurso === "pd" ? "pd" : "pv";
+  const formula = String(c.dano ?? "").trim();
+  if (formula && Roll.validate(formula)) {
+    const roll = await rolar(formula);
+    const { aplicarDano } = await import("../dice/falha-critica.mjs");
+    const { cardDeDano } = await import("./rodada.mjs");
+    if (roll.total > 0) await aplicarDano(doc, roll.total, recurso);
+    await cardDeDano(doc, roll, { titulo: L(soDano ? "DanoArrastado" : "DanoAlcancado", { perseguidor: config.perseguidor || L("Perseguidor") }), recurso });
+  }
+  if (soDano) return;
+  if (c.condicao) {
+    const { definirCondicao } = await import("./ferimentos.mjs");
+    await definirCondicao(doc, c.condicao, true);
+  }
+  if (c.efeito?.trim()) await card(`<p><strong>${esc(doc.name)}</strong>: ${esc(c.efeito.trim())}</p>`);
 }
 
 /* -- avançar: uma janela só, com os dados à vista ---------------------------- */
@@ -711,7 +753,9 @@ function aoMudar(valor) {
   if (painel?.rendered) painel.render();
   if (e.evento?.id && e.evento.id !== ultimoEvento) {
     ultimoEvento = e.evento.id;
-    (e.evento.mortos ?? []).forEach((uuid, i) => setTimeout(() => mostrarAlcancado(uuid, L("Alcancado")), 400 + i * 6400));
+    // Morte: o retrato rasgado. Sem morte: a tela do "Encontrado", com o título Alcançado.
+    const tela = e.evento.morte === false ? mostrarEncontrado : mostrarAlcancado;
+    (e.evento.mortos ?? []).forEach((uuid, i) => setTimeout(() => tela(uuid, L("Alcancado")), 400 + i * 6400));
   }
 }
 
@@ -760,6 +804,7 @@ export function registrarPerseguicao() {
     if (!("rolls" in mudancas) || game.users.activeGM?.id !== game.user.id) return;
     if (estadoPerseguicao().participantes.some((p) => p.avancos?.[msg.id] !== undefined)) void executar({ op: "reavaliar", mensagemId: msg.id });
   });
+  Hooks.once("ready", () => void garantirPerseguicoesPadrao());
   Hooks.once("ready", () => {
     if (!perseguicaoHabilitada()) return;
     precarregarEfeitos();
