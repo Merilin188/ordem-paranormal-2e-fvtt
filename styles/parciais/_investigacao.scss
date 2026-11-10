@@ -1788,6 +1788,14 @@ details[open] > summary.op2-painel-titulo::before { transform: rotate(45deg); }
 @keyframes op2-runa-pulso { 0%, 100% { filter: drop-shadow(0 0 2px #6fcfc0); } 50% { filter: drop-shadow(0 0 7px #a8f5ea); } }
 @media (prefers-reduced-motion: reduce) { .op2-item__runa img { animation: none; } }
 
+// Calibrar os efeitos da perseguição.
+.op2-calibrar__corpo { display: flex; flex-direction: column; gap: var(--op2-e2); padding: var(--op2-e2); }
+.op2-calibrar__grupo { display: flex; flex-direction: column; gap: var(--op2-e1); legend { padding: 0 var(--op2-e1); } }
+.op2-calibrar__campos { display: grid; grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr)); gap: var(--op2-e2); }
+.op2-calibrar__campos .op2-campo { margin: 0; small { color: var(--op2-texto-fraco); font-size: 0.8em; } }
+.op2-calibrar__grupo > .op2-botao { align-self: flex-start; border-radius: 0; }
+.op2-calibrar__rodape { display: flex; justify-content: space-between; gap: var(--op2-e2); }
+
 // Menu flutuante (ex.: para quem mandar o card dos itens do desafio).
 .op2-menu-flutuante {
   position: fixed;

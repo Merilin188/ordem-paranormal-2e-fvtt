@@ -7,6 +7,9 @@
  *   os mesmos vagalumes, tremor e rastro mais leves (sem desfoque) e olhos que abrem,
  *   piscam e somem entre as árvores. Durante a furtividade, a mata fica mais atenta
  *   (mais olhos, olhos que procuram) e um batimento pulsa nas bordas.
+ * - Perseguição ("Caminho para Bellynyr"): sem olhos; tremor mais forte e rápido,
+ *   pisadas de tempos em tempos, névoa densa e as chamas da Ellén Trechend
+ *   (`efeitos-perseguicao.mjs`, calibrável pelo mestre).
  *
  * Roda direto no cliente de cada um (jogadores e mestre), pelos handlers do runtime do FX Bus
  * (`globalThis.fxbus.handlers`). O `emit()` do FX Bus não serve aqui: jogador comum
@@ -14,6 +17,10 @@
  * cena, o próprio FX Bus reseta tudo no `canvasTearDown`.
  */
 import { SYSTEM_ID } from "../config.mjs";
+import {
+  lerConfig as lerConfigPerseguicao, acoesDoFxBus, iniciarPerseguicaoVisual, pararPerseguicaoVisual,
+  registrarEfeitosDePerseguicao,
+} from "./efeitos-perseguicao.mjs";
 
 /** Os valores do painel do mestre (Screen Shake, Blur, Smear), "Run until stopped". */
 export const EFEITOS_DA_ENTRADA = Object.freeze([
@@ -37,7 +44,12 @@ export const EFEITOS_PROFUNDEZAS = Object.freeze([
 export const PRESETS = Object.freeze({
   home: { fx: EFEITOS_DA_ENTRADA, vagalumes: true, assombracao: false },
   profundezas: { fx: EFEITOS_PROFUNDEZAS, vagalumes: true, assombracao: true },
+  // O FX Bus da perseguição sai da calibração (lido na hora de ligar).
+  perseguicao: { fx: null, vagalumes: false, assombracao: false, perseguicao: true },
 });
+
+/** Cenas padrão da perseguição. */
+export const CENAS_DA_PERSEGUICAO = "Caminho para Bellynyr";
 const PARADAS = ["fx.screenShake.stop", "fx.screenBlur.stop", "fx.screenSmear.stop"];
 
 /** Cenas padrão da mata que observa. */
@@ -56,17 +68,20 @@ export function cenaTemEfeitos(cena, configurada) {
     .some((alvo) => alvo && (alvo === nome || alvo === id));
 }
 
-/** Qual preset vale na cena: "home", "profundezas" ou null. */
-export function presetDaCena(cena, { home = "", profundezas = "" } = {}) {
+/** Qual preset vale na cena: "home", "profundezas", "perseguicao" ou null. */
+export function presetDaCena(cena, { home = "", profundezas = "", perseguicao = "" } = {}) {
   if (cenaTemEfeitos(cena, home)) return "home";
   if (cenaTemEfeitos(cena, profundezas)) return "profundezas";
+  if (cenaTemEfeitos(cena, perseguicao)) return "perseguicao";
   return null;
 }
 
 const ler = (chave) => {
   try { return game.settings.get(SYSTEM_ID, chave); } catch { return ""; }
 };
-const configuradas = () => ({ home: ler("cenaEfeitosEntrada"), profundezas: ler("cenaEfeitosProfundezas") });
+const configuradas = () => ({
+  home: ler("cenaEfeitosEntrada"), profundezas: ler("cenaEfeitosProfundezas"), perseguicao: ler("cenaEfeitosPerseguicao"),
+});
 
 /** As mesmas travas do FX Bus: desligado no cliente, modo fotossensível, movimento reduzido. */
 function bloqueado() {
@@ -385,10 +400,13 @@ function atualizar() {
   else pararVagalumes();
   if (preset?.assombracao) iniciarAssombracao();
   else pararAssombracao();
+  if (preset?.perseguicao) iniciarPerseguicaoVisual(bloqueado);
+  else pararPerseguicaoVisual();
   if (!game.modules.get("fxbus")?.active) return;
-  const deve = Boolean(preset) && !bloqueado();
+  const fx = preset?.perseguicao ? acoesDoFxBus(lerConfigPerseguicao()) : preset?.fx;
+  const deve = Boolean(preset) && Boolean(fx?.length) && !bloqueado();
   if (ligados) despachar(PARADAS.map((action) => ({ action })));
-  if (deve) despachar(preset.fx);
+  if (deve) despachar(fx);
   ligados = deve;
 }
 
@@ -409,7 +427,14 @@ export function registrarEfeitosDeCena() {
     scope: "world", config: true, type: String, default: CENAS_DA_MATA,
     onChange: () => { ligados = true; quandoPronto(); },
   });
-  Hooks.on("canvasTearDown", () => { ligados = false; pararVagalumes(); pararAssombracao(); });
+  game.settings.register(SYSTEM_ID, "cenaEfeitosPerseguicao", {
+    name: "OP2.EfeitosCena.NomePerseguicao", hint: "OP2.EfeitosCena.DicaPerseguicao",
+    scope: "world", config: true, type: String, default: CENAS_DA_PERSEGUICAO,
+    onChange: () => { ligados = true; quandoPronto(); },
+  });
+  // Calibração salva: quem está na cena vê a mudança na hora.
+  registrarEfeitosDePerseguicao(() => { ligados = true; quandoPronto(); });
+  Hooks.on("canvasTearDown", () => { ligados = false; pararVagalumes(); pararAssombracao(); pararPerseguicaoVisual(); });
   Hooks.on("canvasReady", quandoPronto);
   // Mundo que gravou a cena única de antes: passa a valer a lista das três.
   Hooks.once("ready", () => {

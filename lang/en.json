@@ -1898,7 +1898,9 @@
       "Nome": "Scene with FX Bus effects (Home)",
       "Dica": "Name (or id) of the scene that turns on FX Bus shake, blur and smear on the screen of everyone on it (players and GM). Leave empty to turn it off. Requires the FX Bus module.",
       "NomeProfundezas": "Watching forest scenes",
-      "DicaProfundezas": "Names (or ids) of the scenes with fireflies, eyes in the woods, lighter shake and smear (no blur) and, during stealth, a more watchful forest and a heartbeat on the edges. Separate scenes with semicolons. Leave empty to turn off."
+      "DicaProfundezas": "Names (or ids) of the scenes with fireflies, eyes in the woods, lighter shake and smear (no blur) and, during stealth, a more watchful forest and a heartbeat on the edges. Separate scenes with semicolons. Leave empty to turn off.",
+      "NomePerseguicao": "Chase scenes",
+      "DicaPerseguicao": "Names (or ids) of the scenes with strong shake, creature stomps, thick fog and Ellén Trechend's flames (no eyes). Separate with semicolons; empty turns it off. The values are in \"Chase effects\"."
     },
     "Dados3D": {
       "Nome": "Standard 3D dice",
@@ -2128,6 +2130,59 @@
     },
     "Teste": {
       "ModificadorFixo": "Fixed modifier added to the total (injuries, traumas, weapon): the reason is in the notes below."
+    },
+    "EfeitosPerseguicao": {
+      "Titulo": "Calibrate chase effects",
+      "MenuNome": "Chase effects",
+      "MenuBotao": "Calibrate",
+      "MenuAjuda": "Shake, creature stomps, fog and flames of the chase scene (Caminho para Bellynyr).",
+      "Intro": "The values apply to everyone in the scene and change at once on saving. Each has a limit so nobody gets sick. Photosensitive mode or reduced motion turn off shaking, stomps and flicker.",
+      "Grupo": {
+        "tremor": "Constant shake",
+        "rastro": "Motion smear",
+        "pisadas": "Creature stomps",
+        "nevoa": "Fog",
+        "chamas": "Ellén's flames"
+      },
+      "Ajuda": {
+        "tremor": "Constant screen sway. More intensity = farther; more frequency = faster.",
+        "rastro": "The blur left behind camera movement (0 turns it off).",
+        "pisadas": "Every so often (drawn between the minimum and maximum, in seconds), a strong jolt that dies out. The GM draws it: everyone feels it together.",
+        "nevoa": "Two drifting fog layers. High opacity closes the view; the scene still shows at the maximum.",
+        "chamas": "Spectral flames in the colors of Ellén's token rising from the edges and the bottom, and their glow on the screen edges."
+      },
+      "Campo": {
+        "tremor": {
+          "intensidadePx": "Intensity (px)",
+          "freqHz": "Frequency (Hz)"
+        },
+        "rastro": {
+          "forca": "Strength"
+        },
+        "pisadas": {
+          "intervaloMin": "Minimum interval (s)",
+          "intervaloMax": "Maximum interval (s)",
+          "intensidadePx": "Jolt strength (px)",
+          "duracaoMs": "Duration (ms)",
+          "freqHz": "Vibration (Hz)"
+        },
+        "nevoa": {
+          "opacidade": "Opacity",
+          "velocidade": "Speed",
+          "cor": "Color"
+        },
+        "chamas": {
+          "quantidade": "Amount",
+          "tamanho": "Size",
+          "intensidade": "Brightness",
+          "velocidade": "Speed",
+          "bordas": "Edge glow"
+        }
+      },
+      "TestarPisada": "Test a stomp (your screen only)",
+      "Restaurar": "Restore defaults",
+      "Salvar": "Save",
+      "Salvo": "Chase effects saved."
     }
   }
 }

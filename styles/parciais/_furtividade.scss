@@ -104,6 +104,41 @@
     &.ativa { animation: op2-batimento 1.7s ease-out infinite; }
     &.ativa.rapido { animation-duration: 1s; }
   }
+  // Perseguição: névoa densa em duas camadas e o brilho das chamas nas bordas.
+  .op2-nevoa-perseguicao {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+    opacity: var(--op2-nevoa-opacidade, 0.5);
+    > div {
+      position: absolute; inset: -10%; background-image: var(--op2-nevoa-img); background-repeat: repeat;
+      background-color: transparent; mix-blend-mode: screen;
+    }
+    .op2-nevoa-perseguicao__a { background-size: 900px 900px; animation: op2-nevoa-correr var(--op2-nevoa-dur-a, 70s) linear infinite; }
+    .op2-nevoa-perseguicao__b { background-size: 600px 600px; opacity: 0.7; animation: op2-nevoa-correr-b var(--op2-nevoa-dur-b, 48s) linear infinite; }
+    &::after {
+      content: ""; position: absolute; inset: 0;
+      background: color-mix(in srgb, var(--op2-nevoa-cor, #a9bcc0) 22%, transparent);
+    }
+    &.op2-nevoa-perseguicao--tranco { animation: op2-nevoa-tranco 1.4s ease-out; }
+  }
+  @keyframes op2-nevoa-correr { from { background-position: 0 0; } to { background-position: -900px 180px; } }
+  @keyframes op2-nevoa-correr-b { from { background-position: 0 0; } to { background-position: 600px -120px; } }
+  @keyframes op2-nevoa-tranco { 0% { filter: brightness(1); } 15% { filter: brightness(1.35); } 100% { filter: brightness(1); } }
+  .op2-chamas-borda {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    opacity: var(--op2-chamas-forca, 0.4);
+    background:
+      radial-gradient(ellipse 60% 35% at 50% 108%, rgb(79 209 197 / 55%), transparent 70%),
+      radial-gradient(ellipse 22% 60% at -4% 70%, rgb(79 209 197 / 45%), transparent 70%),
+      radial-gradient(ellipse 22% 60% at 104% 70%, rgb(79 209 197 / 45%), transparent 70%),
+      radial-gradient(ellipse 40% 18% at 50% 104%, rgb(179 38 30 / 30%), transparent 70%);
+    &.op2-chamas-borda--viva { animation: op2-chamas-borda 2.3s steps(1, end) infinite, op2-chamas-ondula 3.7s ease-in-out infinite; }
+  }
+  // Cintilar irregular, mas sem piscar forte (nada de flash: só oscila).
+  @keyframes op2-chamas-borda {
+    0% { filter: brightness(1); } 13% { filter: brightness(1.18); } 27% { filter: brightness(0.92); }
+    41% { filter: brightness(1.1); } 58% { filter: brightness(0.96); } 72% { filter: brightness(1.15); } 86% { filter: brightness(1); }
+  }
+  @keyframes op2-chamas-ondula { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(1.04); } }
   @keyframes op2-batimento {
     0% { opacity: 0; }
     8% { opacity: 0.9; }
@@ -160,7 +195,8 @@
   @keyframes op2-enc-sair { to { opacity: 0; } }
 
   @media (prefers-reduced-motion: reduce) {
-    .op2-vinheta__nevoa, .op2-encontrado, .op2-batimento { animation: none !important; }
+    .op2-vinheta__nevoa, .op2-encontrado, .op2-batimento, .op2-chamas-borda, .op2-nevoa-perseguicao,
+    .op2-nevoa-perseguicao > div { animation: none !important; }
   }
 
   // Já agiu na rodada
