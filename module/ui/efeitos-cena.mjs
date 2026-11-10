@@ -21,6 +21,7 @@ import {
   lerConfig as lerConfigPerseguicao, acoesDoFxBus, iniciarPerseguicaoVisual, pararPerseguicaoVisual,
   registrarEfeitosDePerseguicao,
 } from "./efeitos-perseguicao.mjs";
+import { lerConfigMata, acoesDaMata, ritmoCalibrado, corHex, registrarCalibracaoDaMata } from "./efeitos-mata.mjs";
 
 /** Os valores do painel do mestre (Screen Shake, Blur, Smear), "Run until stopped". */
 export const EFEITOS_DA_ENTRADA = Object.freeze([
@@ -43,7 +44,8 @@ export const EFEITOS_PROFUNDEZAS = Object.freeze([
 
 export const PRESETS = Object.freeze({
   home: { fx: EFEITOS_DA_ENTRADA, vagalumes: true, assombracao: false },
-  profundezas: { fx: EFEITOS_PROFUNDEZAS, vagalumes: true, assombracao: true },
+  // A mata lê tremor, rastro, vagalumes e olhos da calibração (efeitos-mata.mjs).
+  profundezas: { fx: EFEITOS_PROFUNDEZAS, vagalumes: true, assombracao: true, mata: true },
   // O FX Bus da perseguição sai da calibração (lido na hora de ligar).
   perseguicao: { fx: null, vagalumes: false, assombracao: false, perseguicao: true },
 });
@@ -149,6 +151,12 @@ export const CORES_VAGALUMES = Object.freeze([
 ]);
 const QUANTOS = 55;
 
+/** Vagalumes desta cena: na mata, da calibração; na Home, o de sempre. */
+function vagalumesDaCena(ehMata) {
+  if (!ehMata) return { quantidade: QUANTOS, tamanho: 1, velocidade: 1 };
+  return lerConfigMata().vagalumes;
+}
+
 /** Escolhe uma cor pelo peso, com `r` em [0, 1). */
 export function corPorPeso(r, tabela) {
   const total = tabela.reduce((t, [, p]) => t + p, 0);
@@ -168,11 +176,11 @@ export function piscar(t, freq, fase) {
 
 let enxame = null;
 
-function nascer(v, area, emQualquerAltura) {
+function nascer(v, area, emQualquerAltura, cfg = { tamanho: 1, velocidade: 1 }) {
   v.x0 = area.x + Math.random() * area.w;
   v.y = emQualquerAltura ? area.y + Math.random() * area.h : area.y + area.h + 20 / area.escala;
-  v.subida = 9 + Math.random() * 20; // px de tela por segundo
-  v.raio = 2 + Math.random() * 3.5; // px de tela
+  v.subida = (9 + Math.random() * 20) * cfg.velocidade; // px de tela por segundo
+  v.raio = (2 + Math.random() * 3.5) * cfg.tamanho; // px de tela
   v.amplitude = 6 + Math.random() * 18;
   v.balanco = 0.08 + Math.random() * 0.25;
   v.freq = 0.15 + Math.random() * 0.45;
@@ -181,20 +189,20 @@ function nascer(v, area, emQualquerAltura) {
   v.sprite.tint = corDoVagalume(Math.random());
 }
 
-function iniciarVagalumes() {
-  if (enxame || !canvas?.stage || !canvas.app?.ticker) return;
+function iniciarVagalumes(cfg = { quantidade: QUANTOS, tamanho: 1, velocidade: 1 }) {
+  if (enxame || !canvas?.stage || !canvas.app?.ticker || cfg.quantidade <= 0) return;
   const container = new PIXI.Container();
   container.eventMode = "none";
   container.name = "op2-vagalumes";
   const textura = texturaDoBrilho();
   const area = areaVisivel();
-  const lista = Array.from({ length: QUANTOS }, () => {
+  const lista = Array.from({ length: Math.round(cfg.quantidade) }, () => {
     const sprite = new PIXI.Sprite(textura);
     sprite.anchor.set(0.5);
     sprite.blendMode = PIXI.BLEND_MODES.ADD;
     container.addChild(sprite);
     const v = { sprite };
-    nascer(v, area, true);
+    nascer(v, area, true, cfg);
     return v;
   });
   canvas.stage.addChild(container);
@@ -206,7 +214,7 @@ function iniciarVagalumes() {
     for (const v of lista) {
       v.idade += dt;
       v.y -= (v.subida * dt) / area.escala;
-      if (v.y < area.y - 30 / area.escala || v.x0 < area.x - 60 || v.x0 > area.x + area.w + 60) nascer(v, area, false);
+      if (v.y < area.y - 30 / area.escala || v.x0 < area.x - 60 || v.x0 > area.x + area.w + 60) nascer(v, area, false, cfg);
       const s = v.sprite;
       s.x = v.x0 + (Math.sin(t * v.balanco * Math.PI * 2 + v.fase) * v.amplitude) / area.escala;
       s.y = v.y;
@@ -247,9 +255,13 @@ export function envelope(idade, { entrada, fica, saida }) {
 
 /** Ritmo da mata: com que frequência nascem olhos (multiplicador) e quantos cabem. */
 export function ritmoDaMata(furtividade) {
-  if (!furtividade?.ativa) return { olhos: 1, maxOlhos: 6, procuram: false };
-  if (furtividade.fase === "criaturas") return { olhos: 3, maxOlhos: 12, procuram: true };
-  return { olhos: 2, maxOlhos: 9, procuram: false };
+  return ritmoCalibrado(furtividade, lerConfigMata());
+}
+
+/** As cores dos olhos da calibração, com os mesmos pesos de antes. [cor, peso] */
+function coresDosOlhos() {
+  const o = lerConfigMata().olhos;
+  return [[corHex(o.corVermelho), 3], [corHex(o.corClaro), 4], [corHex(o.corAmbar), 1]];
 }
 
 let mata = null;
@@ -287,7 +299,7 @@ function parDeOlhos(textura, cor, raio, distancia) {
 function criarOlhos(area, ritmo) {
   const ponto = pontoNaMata(area);
   if (!ponto) return null;
-  const cor = corPorPeso(Math.random(), CORES_OLHOS);
+  const cor = corPorPeso(Math.random(), mata?.cores ?? CORES_OLHOS);
   const par = parDeOlhos(mata.textura, cor, 1.5 + Math.random() * 1.2, 8 + Math.random() * 8);
   par.position.set(ponto.x, ponto.y);
   par.scale.set(1 / area.escala);
@@ -314,7 +326,7 @@ function iniciarAssombracao() {
   const container = new PIXI.Container();
   container.eventMode = "none";
   container.name = "op2-mata";
-  mata = { container, textura: texturaDoBrilho(), aparicoes: [], proximoOlho: 1.5, relogio: 0, furtividade: lerFurtividade() };
+  mata = { container, textura: texturaDoBrilho(), aparicoes: [], proximoOlho: 1.5, relogio: 0, furtividade: lerFurtividade(), cores: coresDosOlhos() };
   // Atrás dos vagalumes: eles brilham por cima da mata.
   const indice = enxame ? canvas.stage.getChildIndex(enxame.container) : canvas.stage.children.length;
   canvas.stage.addChildAt(container, indice);
@@ -375,7 +387,8 @@ function pararAssombracao() {
  */
 function atualizarBatimento(furtividade) {
   let el = document.getElementById("op2-batimento");
-  const ligar = Boolean(furtividade?.ativa) && !bloqueado();
+  const batimento = lerConfigMata().batimento;
+  const ligar = Boolean(furtividade?.ativa) && !bloqueado() && batimento.ligado && batimento.intensidade > 0;
   if (!ligar) return void el?.classList.remove("ativa", "rapido");
   if (!el) {
     el = document.createElement("div");
@@ -387,6 +400,7 @@ function atualizarBatimento(furtividade) {
   }
   el.classList.add("ativa");
   el.classList.toggle("rapido", furtividade.fase === "criaturas");
+  el.style.setProperty("--op2-batimento-forca", String(batimento.intensidade));
 }
 
 /* -- ligar e desligar ---------------------------------------------------------- */
@@ -396,14 +410,15 @@ let ligados = false;
 function atualizar() {
   const nome = presetDaCena(canvas?.scene, configuradas());
   const preset = nome ? PRESETS[nome] : null;
-  if (preset?.vagalumes) iniciarVagalumes();
+  const mata = preset?.mata ? lerConfigMata() : null;
+  if (preset?.vagalumes && (!mata || mata.vagalumes.ligado)) iniciarVagalumes(vagalumesDaCena(Boolean(mata)));
   else pararVagalumes();
-  if (preset?.assombracao) iniciarAssombracao();
+  if (preset?.assombracao && (!mata || mata.olhos.ligado)) iniciarAssombracao();
   else pararAssombracao();
   if (preset?.perseguicao) iniciarPerseguicaoVisual(bloqueado);
   else pararPerseguicaoVisual();
   if (!game.modules.get("fxbus")?.active) return;
-  const fx = preset?.perseguicao ? acoesDoFxBus(lerConfigPerseguicao()) : preset?.fx;
+  const fx = preset?.perseguicao ? acoesDoFxBus(lerConfigPerseguicao()) : (mata ? acoesDaMata(mata) : preset?.fx);
   const deve = Boolean(preset) && Boolean(fx?.length) && !bloqueado();
   if (ligados) despachar(PARADAS.map((action) => ({ action })));
   if (deve) despachar(fx);
@@ -432,8 +447,10 @@ export function registrarEfeitosDeCena() {
     scope: "world", config: true, type: String, default: CENAS_DA_PERSEGUICAO,
     onChange: () => { ligados = true; quandoPronto(); },
   });
-  // Calibração salva: quem está na cena vê a mudança na hora.
-  registrarEfeitosDePerseguicao(() => { ligados = true; quandoPronto(); });
+  // Calibração salva: quem está na cena vê a mudança na hora (recria vagalumes e olhos).
+  const recalibrar = () => { ligados = true; pararVagalumes(); pararAssombracao(); quandoPronto(); };
+  registrarEfeitosDePerseguicao(recalibrar);
+  registrarCalibracaoDaMata(recalibrar);
   Hooks.on("canvasTearDown", () => { ligados = false; pararVagalumes(); pararAssombracao(); pararPerseguicaoVisual(); });
   Hooks.on("canvasReady", quandoPronto);
   // Mundo que gravou a cena única de antes: passa a valer a lista das três.

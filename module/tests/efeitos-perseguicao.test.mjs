@@ -37,3 +37,21 @@ test("cenas: Caminho para Bellynyr cai no preset de perseguição", async () => 
   assert.equal(presetDaCena({ name: "Caminho para Bellynyr", id: "x" }, { home: "Home", profundezas: "Rio", perseguicao: CENAS_DA_PERSEGUICAO }), "perseguicao");
   assert.equal(presetDaCena({ name: "Rio", id: "x" }, { profundezas: "Rio", perseguicao: CENAS_DA_PERSEGUICAO }), "profundezas");
 });
+
+test("mata que observa: calibração com o padrão de antes e limites", async () => {
+  const { mesclarMata, configMataPadrao, ritmoCalibrado, acoesDaMata, corHex } = await import("../ui/efeitos-mata.mjs");
+  assert.deepEqual(mesclarMata({}), configMataPadrao());
+  const c = mesclarMata({ olhos: { maxCriaturas: 99, procuram: 0, corAmbar: "x" }, vagalumes: { quantidade: -3 } });
+  assert.equal(c.olhos.maxCriaturas, 30);
+  assert.equal(c.olhos.procuram, false);
+  assert.equal(c.olhos.corAmbar, "#ffffff");
+  assert.equal(c.vagalumes.quantidade, 0);
+  // Sem mexer, o ritmo é o de sempre: 6 / 9 / 12 olhos, procurando na fase das criaturas.
+  const p = configMataPadrao();
+  assert.deepEqual(ritmoCalibrado(null, p), { olhos: 1, maxOlhos: 6, procuram: false });
+  assert.deepEqual(ritmoCalibrado({ ativa: true, fase: "personagens" }, p), { olhos: 2, maxOlhos: 9, procuram: false });
+  assert.deepEqual(ritmoCalibrado({ ativa: true, fase: "criaturas" }, p), { olhos: 3, maxOlhos: 12, procuram: true });
+  assert.equal(acoesDaMata(p)[0].intensityPx, 7);
+  assert.equal(acoesDaMata({ ...p, tremor: { ...p.tremor, ligado: false }, rastro: { ...p.rastro, forca: 0 } }).length, 0);
+  assert.equal(corHex("#ff2a1f"), 0xff2a1f);
+});

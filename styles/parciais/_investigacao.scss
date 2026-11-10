@@ -1794,6 +1794,12 @@ details[open] > summary.op2-painel-titulo::before { transform: rotate(45deg); }
 .op2-calibrar__campos { display: grid; grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr)); gap: var(--op2-e2); }
 .op2-calibrar__campos .op2-campo { margin: 0; small { color: var(--op2-texto-fraco); font-size: 0.8em; } }
 .op2-calibrar__grupo > .op2-botao { align-self: flex-start; border-radius: 0; }
+.op2-calibrar__mundo { display: flex; flex-wrap: wrap; gap: var(--op2-e1); }
+.op2-calibrar__cena {
+  flex: none; width: auto; padding: 0.1rem 0.45rem; border-radius: 0; font-size: 0.8em;
+  border: 1px solid var(--op2-linha); background: transparent; color: var(--op2-texto-fraco); cursor: pointer;
+  &:hover { border-color: var(--op2-vermelho); color: var(--op2-texto); }
+}
 .op2-calibrar__rodape { display: flex; justify-content: space-between; gap: var(--op2-e2); }
 
 // Menu flutuante (ex.: para quem mandar o card dos itens do desafio).

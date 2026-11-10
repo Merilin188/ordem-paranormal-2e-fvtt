@@ -1,0 +1,71 @@
+{{!-- Calibrar os efeitos de um preset de cena: onde vale, e cada grupo com liga/desliga
+      e seus números. Salvar aplica na hora para todos que estão na cena. --}}
+<div class="op2-calibrar__corpo">
+  <p class="op2-ajuda">{{intro}}</p>
+
+  <fieldset class="op2-calibrar__grupo">
+    <legend>{{cenasRotulo}}</legend>
+    <p class="op2-ajuda">{{cenasAjuda}}</p>
+    <input type="text" name="cenas" value="{{cenas}}" list="{{idLista}}">
+    <datalist id="{{idLista}}">
+      {{#each cenasDoMundo}}<option value="{{this}}"></option>{{/each}}
+    </datalist>
+    {{#if cenasDoMundo.length}}
+      <div class="op2-calibrar__mundo">
+        {{#each cenasDoMundo}}
+          <button type="button" class="op2-calibrar__cena" data-cena="{{this}}" data-tooltip="{{@root.dicaCena}}">
+            <i class="fa-solid fa-plus" aria-hidden="true"></i> {{this}}
+          </button>
+        {{/each}}
+      </div>
+    {{/if}}
+  </fieldset>
+
+  {{#each grupos}}
+    <fieldset class="op2-calibrar__grupo">
+      <legend>
+        {{#if temLigado}}
+          <label class="op2-campo op2-campo--inline">
+            <input type="checkbox" name="{{id}}.ligado" {{#if ligado}}checked{{/if}}>
+            <span>{{titulo}}</span>
+          </label>
+        {{else}}{{titulo}}{{/if}}
+      </legend>
+      <p class="op2-ajuda">{{ajuda}}</p>
+      <div class="op2-calibrar__campos">
+        {{#each campos}}
+          {{#if ehBool}}
+            <label class="op2-campo op2-campo--inline">
+              <input type="checkbox" name="{{nome}}" {{#if valor}}checked{{/if}}>
+              <span>{{rotulo}}</span>
+            </label>
+          {{else if ehCor}}
+            <label class="op2-campo">
+              <span>{{rotulo}}</span>
+              <input type="color" name="{{nome}}" value="{{valor}}">
+            </label>
+          {{else}}
+            <label class="op2-campo">
+              <span>{{rotulo}} {{#if max}}<small>({{min}}–{{max}})</small>{{/if}}</span>
+              <input type="number" name="{{nome}}" value="{{valor}}" min="{{min}}" max="{{max}}" step="{{passo}}">
+            </label>
+          {{/if}}
+        {{/each}}
+      </div>
+      {{#if acao}}
+        <button type="button" class="op2-botao op2-botao--pequeno" data-action="acaoDoGrupo" data-acao="{{acao.id}}">
+          <i class="fa-solid {{acao.icone}}" aria-hidden="true"></i> {{acao.rotulo}}
+        </button>
+      {{/if}}
+    </fieldset>
+  {{/each}}
+
+  <footer class="op2-calibrar__rodape">
+    <button type="button" class="op2-botao op2-botao--fantasma" data-action="restaurar">
+      <i class="fa-solid fa-rotate-left" aria-hidden="true"></i> {{localize "OP2.Calibrar.Restaurar"}}
+    </button>
+    <button type="submit" class="op2-botao">
+      <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> {{localize "OP2.Calibrar.Salvar"}}
+    </button>
+  </footer>
+</div>

@@ -16,9 +16,9 @@
  */
 import { SYSTEM_ID } from "../config.mjs";
 import { paraTodos, registrarAcaoDeTodos } from "./socket.mjs";
+import { mesclarComLimites, criarJanelaDeCalibracao } from "./calibracao-efeitos.mjs";
 
 const CHAVE = "efeitosPerseguicaoConfig";
-const L = (k, d) => (d ? game.i18n.format(`OP2.EfeitosPerseguicao.${k}`, d) : game.i18n.localize(`OP2.EfeitosPerseguicao.${k}`));
 
 /* -- configuração ---------------------------------------------------------------- */
 
@@ -44,22 +44,9 @@ export const LIMITES = Object.freeze({
 
 /** O salvo por cima do padrão, com os números dentro dos limites. Pura. */
 export function mesclarConfig(salvo = {}) {
-  // Só as chaves que o padrão conhece (nada de lixo de versão antiga), sem foundry.utils.
-  const padrao = configPadrao();
-  const c = configPadrao();
-  for (const [grupo, campos] of Object.entries(c)) {
-    for (const chave of Object.keys(campos)) {
-      const v = salvo?.[grupo]?.[chave];
-      if (v !== undefined && v !== null) campos[chave] = typeof padrao[grupo][chave] === "boolean" ? Boolean(v) : v;
-    }
-  }
-  for (const [caminho, [min, max]] of Object.entries(LIMITES)) {
-    const [grupo, chave] = caminho.split(".");
-    const v = Number(c[grupo][chave]);
-    c[grupo][chave] = Number.isFinite(v) ? Math.min(max, Math.max(min, v)) : padrao[grupo][chave];
-  }
+  const c = mesclarComLimites(salvo, configPadrao(), LIMITES);
   if (c.pisadas.intervaloMax < c.pisadas.intervaloMin) c.pisadas.intervaloMax = c.pisadas.intervaloMin;
-  if (!/^#[0-9a-f]{6}$/i.test(c.nevoa.cor)) c.nevoa.cor = configPadrao().nevoa.cor;
+  if (c.nevoa.cor === "#ffffff" && salvo?.nevoa?.cor !== "#ffffff") c.nevoa.cor = configPadrao().nevoa.cor;
   return c;
 }
 
@@ -364,82 +351,6 @@ export function pararPerseguicaoVisual() {
 
 /* -- janela de calibração ----------------------------------------------------------- */
 
-/** A janela é criada só no init (o módulo carrega fora do Foundry nos testes). */
-function classeCalibrar() {
-const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
-
-return class CalibrarPerseguicaoApp extends HandlebarsApplicationMixin(ApplicationV2) {
-  static DEFAULT_OPTIONS = {
-    id: "op2-calibrar-perseguicao",
-    classes: ["op2", "op2-calibrar"],
-    tag: "form",
-    window: { title: "OP2.EfeitosPerseguicao.Titulo", icon: "fa-solid fa-sliders", resizable: true },
-    position: { width: 520, height: "auto" },
-    form: { handler: CalibrarPerseguicaoApp.#salvar, submitOnChange: false, closeOnSubmit: false },
-    actions: {
-      restaurar: CalibrarPerseguicaoApp.#restaurar,
-      testarPisada: CalibrarPerseguicaoApp.#testarPisada,
-    },
-  };
-
-  static PARTS = { corpo: { template: `systems/${SYSTEM_ID}/templates/ui/calibrar-perseguicao.hbs` } };
-
-  async _prepareContext() {
-    const c = lerConfig();
-    const campo = (grupo, chave, passo = 1) => {
-      const [min, max] = LIMITES[`${grupo}.${chave}`];
-      return { nome: `${grupo}.${chave}`, valor: c[grupo][chave], min, max, passo, rotulo: L(`Campo.${grupo}.${chave}`) };
-    };
-    return {
-      grupos: [
-        { id: "tremor", titulo: L("Grupo.tremor"), ajuda: L("Ajuda.tremor"), ligado: c.tremor.ligado,
-          campos: [campo("tremor", "intensidadePx"), campo("tremor", "freqHz", 0.05)] },
-        { id: "rastro", titulo: L("Grupo.rastro"), ajuda: L("Ajuda.rastro"), ligado: c.rastro.ligado,
-          campos: [campo("rastro", "forca", 0.01)] },
-        { id: "pisadas", titulo: L("Grupo.pisadas"), ajuda: L("Ajuda.pisadas"), ligado: c.pisadas.ligado, testar: true,
-          campos: [campo("pisadas", "intervaloMin"), campo("pisadas", "intervaloMax"), campo("pisadas", "intensidadePx"),
-            campo("pisadas", "duracaoMs", 50), campo("pisadas", "freqHz", 0.5)] },
-        { id: "nevoa", titulo: L("Grupo.nevoa"), ajuda: L("Ajuda.nevoa"), ligado: c.nevoa.ligado, cor: c.nevoa.cor,
-          campos: [campo("nevoa", "opacidade", 0.05), campo("nevoa", "velocidade", 0.1)] },
-        { id: "chamas", titulo: L("Grupo.chamas"), ajuda: L("Ajuda.chamas"), ligado: c.chamas.ligado,
-          campos: [campo("chamas", "quantidade"), campo("chamas", "tamanho", 0.1), campo("chamas", "intensidade", 0.05),
-            campo("chamas", "velocidade", 0.1), campo("chamas", "bordas", 0.05)] },
-      ],
-    };
-  }
-
-  /** Lê o formulário para a configuração (sem salvar). */
-  #ler() {
-    const dados = new foundry.applications.ux.FormDataExtended(this.element).object;
-    const c = configPadrao();
-    for (const grupo of Object.keys(c)) {
-      c[grupo].ligado = Boolean(dados[`${grupo}.ligado`]);
-      for (const chave of Object.keys(c[grupo])) {
-        if (chave === "ligado") continue;
-        const v = dados[`${grupo}.${chave}`];
-        if (v !== undefined && v !== null && v !== "") c[grupo][chave] = chave === "cor" ? String(v) : Number(v);
-      }
-    }
-    return mesclarConfig(c);
-  }
-
-  static async #salvar() {
-    await game.settings.set(SYSTEM_ID, CHAVE, this.#ler());
-    ui.notifications.info(L("Salvo"));
-  }
-
-  static async #restaurar() {
-    await game.settings.set(SYSTEM_ID, CHAVE, configPadrao());
-    this.render();
-  }
-
-  /** Sente a pisada com os valores do formulário, antes de salvar (só neste cliente). */
-  static #testarPisada() {
-    pisada(this.#ler().pisadas, { ignorarTravas: true });
-  }
-};
-}
-
 /** Chamado no init. `aoMudar` reaplica os efeitos se a cena atual for de perseguição. */
 export function registrarEfeitosDePerseguicao(aoMudar) {
   game.settings.register(SYSTEM_ID, CHAVE, {
@@ -450,7 +361,27 @@ export function registrarEfeitosDePerseguicao(aoMudar) {
     label: "OP2.EfeitosPerseguicao.MenuBotao",
     hint: "OP2.EfeitosPerseguicao.MenuAjuda",
     icon: "fa-solid fa-sliders",
-    type: classeCalibrar(),
+    type: criarJanelaDeCalibracao({
+      id: "op2-calibrar-perseguicao",
+      i18n: "OP2.EfeitosPerseguicao",
+      chave: CHAVE,
+      chaveCenas: "cenaEfeitosPerseguicao",
+      padrao: configPadrao,
+      mesclar: mesclarConfig,
+      limites: LIMITES,
+      grupos: [
+        { id: "tremor", campos: [{ chave: "intensidadePx" }, { chave: "freqHz", passo: 0.05 }] },
+        { id: "rastro", campos: [{ chave: "forca", passo: 0.01 }] },
+        { id: "pisadas", acao: { id: "testarPisada", icone: "fa-shoe-prints" }, campos: [
+          { chave: "intervaloMin" }, { chave: "intervaloMax" }, { chave: "intensidadePx" },
+          { chave: "duracaoMs", passo: 50 }, { chave: "freqHz", passo: 0.5 }] },
+        { id: "nevoa", campos: [{ chave: "opacidade", passo: 0.05 }, { chave: "velocidade", passo: 0.1 }, { chave: "cor", tipo: "cor" }] },
+        { id: "chamas", campos: [{ chave: "quantidade" }, { chave: "tamanho", passo: 0.1 }, { chave: "intensidade", passo: 0.05 },
+          { chave: "velocidade", passo: 0.1 }, { chave: "bordas", passo: 0.05 }] },
+      ],
+      // Sente a pisada com os valores do formulário, antes de salvar (só nesta tela).
+      acoes: { testarPisada: (c) => pisada(c.pisadas, { ignorarTravas: true }) },
+    }),
     restricted: true,
   });
   registrarAcaoDeTodos("op2PisadaPerseguicao", () => {

@@ -2182,7 +2182,66 @@
       "TestarPisada": "Testar uma pisada (só na sua tela)",
       "Restaurar": "Restaurar o padrão",
       "Salvar": "Salvar",
-      "Salvo": "Efeitos da perseguição salvos."
+      "Salvo": "Efeitos da perseguição salvos.",
+      "Acao": {
+        "testarPisada": "Testar uma pisada (só na sua tela)"
+      }
+    },
+    "Calibrar": {
+      "Cenas": "Cenas onde vale",
+      "CenasAjuda": "Nomes (ou ids) das cenas, separados por ponto e vírgula; vazio desliga. Para aplicar numa cena nova, clique nela abaixo ou escreva o nome.",
+      "Salvo": "Efeitos salvos — já valem para quem está na cena.",
+      "Salvar": "Salvar",
+      "Restaurar": "Restaurar o padrão",
+      "AcrescentarCena": "Acrescentar esta cena à lista"
+    },
+    "EfeitosMata": {
+      "Titulo": "Calibrar efeitos da mata (furtividade)",
+      "MenuNome": "Efeitos da mata que observa (furtividade)",
+      "MenuBotao": "Calibrar",
+      "MenuAjuda": "Tremor, rastro, vagalumes, olhos entre as árvores e o batimento da furtividade nas cenas da mata (Profundezas da Mata, Rio das Brumas, Encosta Escura…).",
+      "Intro": "Os números valem para todos na cena e mudam na hora ao salvar. Cada um tem limite. Modo fotossensível ou movimento reduzido desligam tremor e batimento.",
+      "Grupo": {
+        "tremor": "Tremor",
+        "rastro": "Rastro de movimento",
+        "vagalumes": "Vagalumes e partículas",
+        "olhos": "Olhos na mata",
+        "batimento": "Batimento na furtividade"
+      },
+      "Ajuda": {
+        "tremor": "Balanço leve e lento da tela.",
+        "rastro": "O borrão que fica atrás do movimento da câmera (0 desliga).",
+        "vagalumes": "Os pontos de luz subindo, nas cores das Crias e da Ellén.",
+        "olhos": "Pares de olhos que abrem, piscam e somem. A frequência multiplica o ritmo; cada máximo é quantos cabem: fora da furtividade, na fase dos personagens e na fase das criaturas (quando procuram, deslizam de lado).",
+        "batimento": "O pulso escuro nas bordas durante a furtividade (mais rápido na fase das criaturas)."
+      },
+      "Campo": {
+        "tremor": {
+          "intensidadePx": "Intensidade (px)",
+          "freqHz": "Frequência (Hz)"
+        },
+        "rastro": {
+          "forca": "Força"
+        },
+        "vagalumes": {
+          "quantidade": "Quantidade",
+          "tamanho": "Tamanho",
+          "velocidade": "Velocidade de subida"
+        },
+        "olhos": {
+          "frequencia": "Frequência",
+          "maxCalmo": "Máximo fora da furtividade",
+          "maxFurtividade": "Máximo na fase dos personagens",
+          "maxCriaturas": "Máximo na fase das criaturas",
+          "procuram": "Na fase das criaturas, os olhos procuram (deslizam)",
+          "corVermelho": "Cor 1 (vermelho)",
+          "corClaro": "Cor 2 (pálido)",
+          "corAmbar": "Cor 3 (rara)"
+        },
+        "batimento": {
+          "intensidade": "Intensidade"
+        }
+      }
     }
   }
 }

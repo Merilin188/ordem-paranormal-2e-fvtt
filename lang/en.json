@@ -2182,7 +2182,66 @@
       "TestarPisada": "Test a stomp (your screen only)",
       "Restaurar": "Restore defaults",
       "Salvar": "Save",
-      "Salvo": "Chase effects saved."
+      "Salvo": "Chase effects saved.",
+      "Acao": {
+        "testarPisada": "Test a stomp (your screen only)"
+      }
+    },
+    "Calibrar": {
+      "Cenas": "Scenes where it applies",
+      "CenasAjuda": "Scene names (or ids), separated by semicolons; empty turns it off. To use it in a new scene, click it below or type its name.",
+      "Salvo": "Effects saved — they already apply to whoever is in the scene.",
+      "Salvar": "Save",
+      "Restaurar": "Restore defaults",
+      "AcrescentarCena": "Add this scene to the list"
+    },
+    "EfeitosMata": {
+      "Titulo": "Calibrate forest effects (stealth)",
+      "MenuNome": "Watching forest effects (stealth)",
+      "MenuBotao": "Calibrate",
+      "MenuAjuda": "Shake, smear, fireflies, eyes among the trees and the stealth heartbeat in the forest scenes (Profundezas da Mata, Rio das Brumas, Encosta Escura…).",
+      "Intro": "The values apply to everyone in the scene and change at once on saving. Each has a limit. Photosensitive mode or reduced motion turn off shaking and the heartbeat.",
+      "Grupo": {
+        "tremor": "Shake",
+        "rastro": "Motion smear",
+        "vagalumes": "Fireflies and particles",
+        "olhos": "Eyes in the forest",
+        "batimento": "Stealth heartbeat"
+      },
+      "Ajuda": {
+        "tremor": "Light, slow screen sway.",
+        "rastro": "The blur left behind camera movement (0 turns it off).",
+        "vagalumes": "The rising points of light, in the colors of the Spawn and Ellén.",
+        "olhos": "Pairs of eyes that open, blink and fade. Frequency multiplies the pace; each maximum is how many fit: outside stealth, in the characters' phase and in the creatures' phase (when searching, they slide sideways).",
+        "batimento": "The dark pulse on the edges during stealth (faster in the creatures' phase)."
+      },
+      "Campo": {
+        "tremor": {
+          "intensidadePx": "Intensity (px)",
+          "freqHz": "Frequency (Hz)"
+        },
+        "rastro": {
+          "forca": "Strength"
+        },
+        "vagalumes": {
+          "quantidade": "Amount",
+          "tamanho": "Size",
+          "velocidade": "Rising speed"
+        },
+        "olhos": {
+          "frequencia": "Frequency",
+          "maxCalmo": "Maximum outside stealth",
+          "maxFurtividade": "Maximum in the characters' phase",
+          "maxCriaturas": "Maximum in the creatures' phase",
+          "procuram": "In the creatures' phase, the eyes search (slide)",
+          "corVermelho": "Color 1 (red)",
+          "corClaro": "Color 2 (pale)",
+          "corAmbar": "Color 3 (rare)"
+        },
+        "batimento": {
+          "intensidade": "Intensity"
+        }
+      }
     }
   }
 }

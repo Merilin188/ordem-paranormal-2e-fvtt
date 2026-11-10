@@ -100,6 +100,7 @@
   // (duas batidas e uma pausa); mais rápido na fase das criaturas.
   .op2-batimento {
     position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0;
+    filter: opacity(var(--op2-batimento-forca, 1));
     background: radial-gradient(ellipse at center, transparent 52%, rgb(70 0 12 / 38%) 80%, rgb(40 0 6 / 70%) 100%);
     &.ativa { animation: op2-batimento 1.7s ease-out infinite; }
     &.ativa.rapido { animation-duration: 1s; }
