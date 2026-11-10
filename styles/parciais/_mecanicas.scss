@@ -347,6 +347,47 @@
   .op2-analise__rotulo { flex: 1; }
   .op2-analise__restantes { margin: 0.3rem 0 0; color: #6ba6ec; }
   .op2-fase--antecipacao { color: #a5d36b; }
+  .op2-fase--aguardar { color: #86b943; font-style: italic; }
+
+  // Prontidão: "Aguardar pra agir" fica acima das fases, na largura delas.
+  .op2-declaracao__opcoes { flex: none; display: flex; flex-direction: column; gap: 0.25rem; }
+  .op2-fase-botao--aguardar {
+    width: 100%; border-style: dashed; border-color: var(--op2-perfil-vigilante-claro); color: #a5d36b;
+    i { margin-right: 0.2rem; }
+    &.ativa { border-style: solid; background: var(--op2-perfil-vigilante); border-color: #a5d36b; }
+  }
+
+  // Prontidão: a janela flutuante de quem aguarda pra agir (verde do Vigilante).
+  .application.op2-aguardar {
+    > .window-header { background: color-mix(in srgb, var(--op2-perfil-vigilante) 55%, var(--op2-superficie-alta)); }
+    &.op2-aguardar--perguntando { animation: op2-aguardar-chamar 1.1s ease-in-out infinite; }
+  }
+  .op2-aguardar__corpo { display: flex; flex-direction: column; gap: var(--op2-e3); }
+  .op2-aguardar__item { display: flex; flex-direction: column; gap: var(--op2-e2); }
+  .op2-aguardar__topo { display: flex; align-items: center; gap: var(--op2-e2); }
+  .op2-aguardar__icone { width: 40px; height: 40px; flex: none; border: 1px solid var(--op2-perfil-vigilante-claro); background: rgb(0 0 0 / 30%); padding: 3px; }
+  .op2-aguardar__nome { display: block; margin-top: 0.15rem; font-family: var(--op2-fonte-display); font-size: 1.05rem; letter-spacing: 0.03em; }
+  .op2-aguardar__descricao {
+    padding: var(--op2-e2) var(--op2-e3); border-left: 3px solid var(--op2-perfil-vigilante-claro);
+    background: color-mix(in srgb, var(--op2-perfil-vigilante) 12%, transparent); font-size: 0.85rem; line-height: 1.4;
+    p { margin: 0 0 0.35rem; } p:last-child { margin-bottom: 0; }
+    strong { color: #c4e39a; }
+  }
+  .op2-aguardar__agir {
+    width: 100%; padding: 0.55em 0.8em; font-size: 1rem; color: #fff;
+    background: var(--op2-perfil-vigilante); border-color: #a5d36b;
+    &:hover:not([disabled]) { background: #5c9628; color: #fff; border-color: #c4e39a; }
+  }
+  .op2-aguardar__botoes { display: flex; gap: var(--op2-e2); > * { flex: 1; } }
+  .op2-aguardar__pergunta {
+    margin: 0; text-align: center; font-family: var(--op2-fonte-display); font-size: 1.3rem; text-transform: uppercase; color: #c4e39a;
+    span { animation: op2-aguardar-piscar 0.9s ease-in-out infinite; }
+    small { display: block; font-family: var(--op2-fonte-corpo, inherit); font-size: 0.8rem; text-transform: none; color: var(--op2-texto); }
+  }
+  @keyframes op2-aguardar-piscar { 50% { opacity: 0.35; } }
+  @keyframes op2-aguardar-chamar {
+    50% { box-shadow: 0 0 0 2px #a5d36b, 0 0 28px 6px rgb(134 185 67 / 70%); }
+  }
 
   // Ofício: a especialidade fica numa segunda linha, largura toda, tamanho fixo
   .op2-pericia__campo { grid-column: 1 / -1; grid-row: 2; justify-self: stretch; box-sizing: border-box;

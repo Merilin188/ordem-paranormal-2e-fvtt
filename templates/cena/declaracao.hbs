@@ -19,10 +19,16 @@
               {{#if antecipacao.img}}<img src="{{antecipacao.img}}" alt="">{{else}}<i class="fa-solid fa-forward-fast"></i>{{/if}}</span>
           {{/if}}
         </span>
-        <span class="op2-declaracao__fases">
-          {{#each fases}}
-            <button type="button" class="op2-fase-botao op2-fase-botao--{{chave}} {{#if ativa}}ativa{{/if}}" data-action="fase" data-id="{{../id}}" data-fase="{{chave}}">{{rotulo}}</button>
-          {{/each}}
+        <span class="op2-declaracao__opcoes">
+          {{#if aguardar}}
+            <button type="button" class="op2-fase-botao op2-fase-botao--aguardar {{#if aguardar.ativa}}ativa{{/if}}" data-action="aguardar" data-id="{{id}}"
+              data-tooltip="{{localize 'OP2.Aguardar.OpcaoDica'}}"><i class="fa-solid fa-hourglass-half" aria-hidden="true"></i> {{localize "OP2.Aguardar.Opcao"}}</button>
+          {{/if}}
+          <span class="op2-declaracao__fases">
+            {{#each fases}}
+              <button type="button" class="op2-fase-botao op2-fase-botao--{{chave}} {{#if ativa}}ativa{{/if}}" data-action="fase" data-id="{{../id}}" data-fase="{{chave}}">{{rotulo}}</button>
+            {{/each}}
+          </span>
         </span>
       </li>
     {{/each}}

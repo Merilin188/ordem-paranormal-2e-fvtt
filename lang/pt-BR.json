@@ -867,7 +867,8 @@
         "geral": "Geral",
         "distancia": "Distância",
         "corpo": "Corpo a corpo",
-        "antecipacao": "Antecipação"
+        "antecipacao": "Antecipação",
+        "aguardar": "Aguardando"
       },
       "EscolherFase": "Declarar fase da rodada",
       "FaseAjuda": "Em que fase cada um age nesta rodada? Geral (qualquer ação, exceto ataques) → Ataques à distância → Ataques corpo a corpo. Quem age numa fase não age nas seguintes.",
@@ -2257,6 +2258,20 @@
           "intensidade": "Intensidade"
         }
       }
+    },
+    "Aguardar": {
+      "Titulo": "Prontidão",
+      "Opcao": "Aguardar pra agir",
+      "OpcaoDica": "Prontidão: em vez de escolher a fase agora, aguarde. A cada combatente que for agir, você decide se age antes dele.",
+      "Aguarda": "{nome} aguarda pra agir",
+      "AgirAgora": "Agir agora",
+      "Pergunta": "Agir agora?",
+      "Sim": "Sim",
+      "Nao": "Não",
+      "AntesDe": "Você entra antes de {nome}.",
+      "Esperando": "A fila começa quando a declaração de fase terminar.",
+      "AindaDeclarando": "Espere a declaração de fase terminar.",
+      "AgiuAntes": "{nome} sai da espera e age agora, antes de {alvo}."
     }
   }
 }

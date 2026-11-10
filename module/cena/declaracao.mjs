@@ -12,6 +12,7 @@
  */
 import { SYSTEM_ID } from "../config.mjs";
 import { FASES_COMBATE, faseDoValor } from "./tabelas-dados.mjs";
+import { INICIATIVA_AGUARDANDO } from "./poderes-regras.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const FLAG = "declaracao";
@@ -75,6 +76,7 @@ class DeclaracaoApp extends HandlebarsApplicationMixin(ApplicationV2) {
     position: { width: 440, height: "auto", top: 90 },
     actions: {
       fase: DeclaracaoApp.#fase,
+      aguardar: DeclaracaoApp.#aguardar,
       antecipar: DeclaracaoApp.#antecipar,
       pausar: DeclaracaoApp.#pausar,
       mais: DeclaracaoApp.#mais,
@@ -100,10 +102,13 @@ class DeclaracaoApp extends HandlebarsApplicationMixin(ApplicationV2) {
       pausado: e?.pausadoRestante !== null && e?.pausadoRestante !== undefined,
       combatentes: meus.map((c) => {
         const fase = faseDoValor(c.initiative);
+        const aguardando = c.initiative === INICIATIVA_AGUARDANDO && c.getFlag(SYSTEM_ID, "aguardar") === combate.round;
         return {
           id: c.id, nome: c.name, img: c.img ?? c.token?.texture?.src ?? c.actor?.img, npc: c.isNPC,
           fases: Object.keys(FASES_COMBATE).map((f) => ({ chave: f, rotulo: game.i18n.localize(`OP2.Combate.Fase.${f}`), ativa: f === fase })),
-          declarado: Boolean(fase),
+          declarado: Boolean(fase) || aguardando,
+          // Prontidão: "Aguardar pra agir" aparece acima das fases, só para quem tem a habilidade.
+          aguardar: poderDe(c.actor, "prontidao") ? { ativa: aguardando } : null,
           antecipacao: {
             img: poderDe(c.actor, "antecipacao")?.img ?? "",
             usada: antecipados.includes(c.actorId),
@@ -150,7 +155,20 @@ class DeclaracaoApp extends HandlebarsApplicationMixin(ApplicationV2) {
   static async #fase(_evento, alvo) {
     const c = this.combate?.combatants.get(alvo.dataset.id);
     if (!c?.isOwner) return;
-    await c.update({ initiative: FASES_COMBATE[alvo.dataset.fase] });
+    await c.update({ initiative: FASES_COMBATE[alvo.dataset.fase], [`flags.${SYSTEM_ID}.aguardar`]: null });
+  }
+
+  /** Prontidão: vai para o fim da fila e espera a hora de agir (janela "Agir agora"). */
+  static async #aguardar(_evento, alvo) {
+    const c = this.combate?.combatants.get(alvo.dataset.id);
+    if (!c?.isOwner) return;
+    const { poderDe } = await import("./poderes.mjs");
+    if (!poderDe(c.actor, "prontidao")) return;
+    await c.update({
+      initiative: INICIATIVA_AGUARDANDO,
+      [`flags.${SYSTEM_ID}.aguardar`]: this.combate.round,
+      [`flags.${SYSTEM_ID}.ordem`]: 0,
+    });
   }
 
   /** Antecipação Tática na janela: 2 PD, rodada extra antes de todos. */

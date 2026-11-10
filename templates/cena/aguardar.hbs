@@ -1,0 +1,32 @@
+{{!-- Prontidão: quem aguarda pra agir. A cada combatente novo a pergunta pisca. --}}
+<div class="op2-aguardar__corpo">
+  {{#each lista}}
+    <section class="op2-aguardar__item">
+      <header class="op2-aguardar__topo">
+        {{#if poderImg}}<img class="op2-aguardar__icone" src="{{poderImg}}" alt="">{{/if}}
+        <div>
+          <span class="op2-tag op2-tag--pequena">{{poder}}</span>
+          <strong class="op2-aguardar__nome">{{localize "OP2.Aguardar.Aguarda" nome=nome}}</strong>
+        </div>
+      </header>
+      {{#if descricao}}<div class="op2-aguardar__descricao">{{{descricao}}}</div>{{/if}}
+
+      {{#if @root.perguntando}}
+        <p class="op2-aguardar__pergunta"><span>{{localize "OP2.Aguardar.Pergunta"}}</span> <small>{{@root.atual}}</small></p>
+        <div class="op2-aguardar__botoes">
+          <button type="button" class="op2-botao op2-aguardar__agir" data-action="agir" data-id="{{id}}">
+            <i class="fa-solid fa-check" aria-hidden="true"></i> {{localize "OP2.Aguardar.Sim"}}
+          </button>
+          <button type="button" class="op2-botao op2-botao--fantasma" data-action="nao">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i> {{localize "OP2.Aguardar.Nao"}}
+          </button>
+        </div>
+      {{else}}
+        <button type="button" class="op2-botao op2-aguardar__agir" data-action="agir" data-id="{{id}}" {{#unless @root.andando}}disabled{{/unless}}>
+          <i class="fa-solid fa-forward-step" aria-hidden="true"></i> {{localize "OP2.Aguardar.AgirAgora"}}
+        </button>
+        <p class="op2-ajuda">{{@root.atual}}</p>
+      {{/if}}
+    </section>
+  {{/each}}
+</div>

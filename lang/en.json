@@ -867,7 +867,8 @@
         "geral": "Geral",
         "distancia": "Distância",
         "corpo": "Corpo a corpo",
-        "antecipacao": "Antecipação"
+        "antecipacao": "Antecipação",
+        "aguardar": "Waiting"
       },
       "EscolherFase": "Declarar fase da rodada",
       "FaseAjuda": "Em que fase cada um age nesta rodada? Geral (qualquer ação, exceto ataques) → Ataques à distância → Ataques corpo a corpo. Quem age numa fase não age nas seguintes.",
@@ -2257,6 +2258,20 @@
           "intensidade": "Intensity"
         }
       }
+    },
+    "Aguardar": {
+      "Titulo": "Readiness",
+      "Opcao": "Wait to act",
+      "OpcaoDica": "Readiness: instead of choosing a phase now, wait. Each time a combatant is about to act, you decide whether to act before them.",
+      "Aguarda": "{nome} is waiting to act",
+      "AgirAgora": "Act now",
+      "Pergunta": "Act now?",
+      "Sim": "Yes",
+      "Nao": "No",
+      "AntesDe": "You go before {nome}.",
+      "Esperando": "The turn order starts when the phase declaration ends.",
+      "AindaDeclarando": "Wait for the phase declaration to end.",
+      "AgiuAntes": "{nome} stops waiting and acts now, before {alvo}."
     }
   }
 }

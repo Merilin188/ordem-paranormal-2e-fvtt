@@ -6,6 +6,7 @@ import { SYSTEM_ID } from "../config.mjs";
 import { FASES_COMBATE, faseDoValor } from "./tabelas-dados.mjs";
 import { pedirTesteDeQueda } from "./ferimentos.mjs";
 import { iniciarDeclaracao } from "./declaracao.mjs";
+import { INICIATIVA_AGUARDANDO, ordenarCombatentes } from "./poderes-regras.mjs";
 
 const C = (id, img) => ({ id, img, name: `OP2.Condicao.${id}`, _id: `op2${id}`.padEnd(16, "0").slice(0, 16) });
 
@@ -59,6 +60,11 @@ async function escolherFases(combate, ids) {
 
 export function criarClasseDeCombate(Base) {
   return class OP2Combat extends Base {
+    /** Fase decrescente; no empate, a ordem do encaixe da Prontidão (Aguardar pra agir). */
+    _sortCombatants(a, b) {
+      return ordenarCombatentes(a, b);
+    }
+
     async rollInitiative(ids, _opcoes = {}) {
       const lista = typeof ids === "string" ? [ids] : ids;
       await escolherFases(this, lista);
@@ -85,7 +91,9 @@ export function criarClasseDeCombate(Base) {
       const extras = this.combatants.filter((c) => c.getFlag(SYSTEM_ID, "antecipacao"));
       if (this.round > 1 && extras.length) await this.deleteEmbeddedDocuments("Combatant", extras.map((c) => c.id));
       const restantes = this.combatants.filter((c) => !c.getFlag(SYSTEM_ID, "antecipacao"));
-      await this.updateEmbeddedDocuments("Combatant", restantes.map((c) => ({ _id: c.id, initiative: null })));
+      await this.updateEmbeddedDocuments("Combatant", restantes.map((c) => ({
+        _id: c.id, initiative: null, [`flags.${SYSTEM_ID}.aguardar`]: null, [`flags.${SYSTEM_ID}.ordem`]: 0,
+      })));
       await tirarDefendendo(this);
       await iniciarDeclaracao(this);
     }
@@ -106,7 +114,7 @@ function rotularFases(app, html) {
   for (const li of raiz.querySelectorAll("[data-combatant-id]")) {
     const combate = app.viewed ?? game.combat;
     const c = combate?.combatants.get(li.dataset.combatantId);
-    const fase = c?.initiative === 4 ? "antecipacao" : faseDoValor(c?.initiative);
+    const fase = c?.initiative === 4 ? "antecipacao" : c?.initiative === INICIATIVA_AGUARDANDO ? "aguardar" : faseDoValor(c?.initiative);
     const alvo = li.querySelector(".initiative, .token-initiative span");
     if (fase && alvo) {
       alvo.textContent = ROTULO_FASE(fase);

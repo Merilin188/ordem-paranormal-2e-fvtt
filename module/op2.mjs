@@ -78,6 +78,7 @@ import { registrarTabelas, abrirTabelaParaTodos } from "./cena/tabelas.mjs";
 import { registrarEquilibrio, iniciarEquilibrio } from "./cena/equilibrio.mjs";
 import { registrarCondicoes } from "./cena/condicoes.mjs";
 import { registrarDeclaracao } from "./cena/declaracao.mjs";
+import { registrarAguardar } from "./cena/aguardar.mjs";
 import { registrarPoderes } from "./cena/poderes.mjs";
 import { registrarAparenciaDoPavor } from "./cena/pavor.mjs";
 import { registrarGuiaCombate, alternarGuiaCombate } from "./ui/guia-combate.mjs";
@@ -173,6 +174,7 @@ Hooks.once("init", () => {
   registrarCondicoes();
   registrarEfeitosDoMundo();
   registrarDeclaracao();
+  registrarAguardar();
   registrarPoderes();
   registrarAparenciaDoPavor();
 
