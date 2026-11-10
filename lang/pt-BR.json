@@ -2138,18 +2138,22 @@
       "MenuAjuda": "Tremor, pisadas da criatura, névoa e chamas da cena de perseguição (Caminho para Bellynyr).",
       "Intro": "Os números valem para todos na cena e mudam na hora ao salvar. Cada um tem limite para não enjoar ninguém. Modo fotossensível ou movimento reduzido desligam tremor, pisadas e cintilar.",
       "Grupo": {
-        "tremor": "Tremor contínuo",
+        "tremor": "Tremor extra (FX Bus)",
         "rastro": "Rastro de movimento",
         "pisadas": "Pisadas da criatura",
         "nevoa": "Névoa",
-        "chamas": "Chamas da Ellén"
+        "chamas": "Chamas soltas subindo",
+        "corrida": "Câmera de quem corre",
+        "reflexo": "Reflexo da luz da Ellén"
       },
       "Ajuda": {
-        "tremor": "Balanço constante da tela. Mais intensidade = mais longe; mais frequência = mais rápido.",
-        "rastro": "O borrão que fica atrás do movimento da câmera (0 desliga).",
+        "tremor": "O balanço contínuo do FX Bus, além da câmera de corrida. Desligado no padrão.",
+        "rastro": "O borrão que fica atrás do movimento da câmera. Quase no mínimo no padrão (0 desliga).",
         "pisadas": "De tempos em tempos (sorteado entre o mínimo e o máximo, em segundos), um tranco forte que vai morrendo. O mestre sorteia: todos sentem juntos.",
         "nevoa": "Duas camadas de névoa que correm. Opacidade alta fecha a vista; a cena continua aparecendo até o máximo.",
-        "chamas": "Chamas espectrais nas cores do token da Ellén subindo pelas bordas e de baixo, e o brilho delas nas bordas da tela."
+        "chamas": "Chamas soltas subindo pela tela. Desligadas no padrão (o reflexo já faz o papel da luz).",
+        "corrida": "O balanço do passo, a passada de um lado para o outro e uma leve inclinação, irregulares — como quem filma correndo. Passos por segundo dá o ritmo; irregularidade evita que vire um ciclo repetido.",
+        "reflexo": "A luz das chamas da criatura batendo na cena, vinda de trás de quem foge: muda de lado devagar (movimento) e tremeluz (cintilar)."
       },
       "Campo": {
         "tremor": {
@@ -2175,8 +2179,19 @@
           "quantidade": "Quantidade",
           "tamanho": "Tamanho",
           "intensidade": "Brilho",
-          "velocidade": "Velocidade",
-          "bordas": "Brilho nas bordas"
+          "velocidade": "Velocidade"
+        },
+        "corrida": {
+          "intensidadePx": "Balanço (px)",
+          "passosHz": "Passos por segundo",
+          "rotacao": "Inclinação (graus)",
+          "irregularidade": "Irregularidade"
+        },
+        "reflexo": {
+          "forca": "Força",
+          "movimento": "Movimento da fonte",
+          "cintilar": "Cintilar",
+          "cor": "Cor"
         }
       },
       "TestarPisada": "Testar uma pisada (só na sua tela)",

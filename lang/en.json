@@ -2138,18 +2138,22 @@
       "MenuAjuda": "Shake, creature stomps, fog and flames of the chase scene (Caminho para Bellynyr).",
       "Intro": "The values apply to everyone in the scene and change at once on saving. Each has a limit so nobody gets sick. Photosensitive mode or reduced motion turn off shaking, stomps and flicker.",
       "Grupo": {
-        "tremor": "Constant shake",
+        "tremor": "Extra shake (FX Bus)",
         "rastro": "Motion smear",
         "pisadas": "Creature stomps",
         "nevoa": "Fog",
-        "chamas": "Ellén's flames"
+        "chamas": "Loose rising flames",
+        "corrida": "Running camera",
+        "reflexo": "Reflection of Ellén's light"
       },
       "Ajuda": {
-        "tremor": "Constant screen sway. More intensity = farther; more frequency = faster.",
-        "rastro": "The blur left behind camera movement (0 turns it off).",
+        "tremor": "FX Bus constant sway, on top of the running camera. Off by default.",
+        "rastro": "The blur behind camera movement. Almost at the minimum by default (0 turns it off).",
         "pisadas": "Every so often (drawn between the minimum and maximum, in seconds), a strong jolt that dies out. The GM draws it: everyone feels it together.",
         "nevoa": "Two drifting fog layers. High opacity closes the view; the scene still shows at the maximum.",
-        "chamas": "Spectral flames in the colors of Ellén's token rising from the edges and the bottom, and their glow on the screen edges."
+        "chamas": "Loose flames rising across the screen. Off by default (the reflection already plays the light).",
+        "corrida": "The bob of each step, the side-to-side stride and a slight tilt, irregular — like someone filming while running. Steps per second set the pace; irregularity keeps it from becoming a repeated cycle.",
+        "reflexo": "The light of the creature's flames hitting the scene from behind whoever flees: it slowly changes sides (movement) and flickers."
       },
       "Campo": {
         "tremor": {
@@ -2175,8 +2179,19 @@
           "quantidade": "Amount",
           "tamanho": "Size",
           "intensidade": "Brightness",
-          "velocidade": "Speed",
-          "bordas": "Edge glow"
+          "velocidade": "Speed"
+        },
+        "corrida": {
+          "intensidadePx": "Bob (px)",
+          "passosHz": "Steps per second",
+          "rotacao": "Tilt (degrees)",
+          "irregularidade": "Irregularity"
+        },
+        "reflexo": {
+          "forca": "Strength",
+          "movimento": "Source movement",
+          "cintilar": "Flicker",
+          "cor": "Color"
         }
       },
       "TestarPisada": "Test a stomp (your screen only)",

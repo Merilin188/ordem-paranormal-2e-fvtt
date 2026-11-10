@@ -3,12 +3,14 @@
  * Efeitos da cena de perseguição ("Caminho para Bellynyr"): a Ellén Trechend vem
  * atrás do grupo.
  *
- * - Tremor contínuo mais forte e mais rápido que o das matas (FX Bus).
+ * - Câmera de quem corre: o balanço do passo, a oscilação de um lado para o outro e
+ *   uma leve inclinação, irregulares (nunca o mesmo ciclo) — não um loop rodando.
  * - Pisadas: de 40 a 70 s, um tranco forte na tela inteira, como a criatura pisando
  *   perto. O mestre sorteia o momento e todos sentem juntos.
- * - Névoa densa em duas camadas que correm, sem fechar a vista da cena.
- * - Chamas espectrais nas cores do token da Ellén (verde-água, um branco-esverdeado e
- *   um toque de vermelho do aro) subindo e tremeluzindo, e um brilho nas bordas.
+ * - Névoa em duas camadas que correm, sem fechar a vista da cena.
+ * - Reflexo: a luz verde-água das chamas da Ellén batendo na cena por trás de quem
+ *   foge, tremeluzindo e mudando de lado como se ela viesse no encalço.
+ * - Opcionais (desligados no padrão): o tremor do FX Bus e chamas soltas subindo.
  *
  * Tudo calibrável pelo mestre em Configurações → "Calibrar efeitos da perseguição".
  * Sem som (respiração e batimento já vêm da perseguição). Respeita as travas de
@@ -24,27 +26,35 @@ const CHAVE = "efeitosPerseguicaoConfig";
 
 /** Os valores de partida. Cada número tem limite (ver LIMITES) para não enjoar ninguém. */
 export const configPadrao = () => ({
-  tremor: { ligado: true, intensidadePx: 9, freqHz: 0.8 },
-  rastro: { ligado: true, forca: 0.1 },
+  corrida: { ligado: true, intensidadePx: 5, passosHz: 1.4, rotacao: 0.35, irregularidade: 0.6 },
+  reflexo: { ligado: true, forca: 0.55, movimento: 0.5, cintilar: 0.5, cor: "#4fd1c5" },
   pisadas: { ligado: true, intervaloMin: 40, intervaloMax: 70, intensidadePx: 24, duracaoMs: 1100, freqHz: 9 },
-  nevoa: { ligado: true, opacidade: 0.5, velocidade: 1, cor: "#a9bcc0" },
-  chamas: { ligado: true, quantidade: 28, tamanho: 1, intensidade: 0.85, velocidade: 1, bordas: 0.55 },
+  nevoa: { ligado: true, opacidade: 0.3, velocidade: 1, cor: "#a9bcc0" },
+  rastro: { ligado: true, forca: 0.02 },
+  tremor: { ligado: false, intensidadePx: 6, freqHz: 0.3 },
+  chamas: { ligado: false, quantidade: 20, tamanho: 1, intensidade: 0.7, velocidade: 1 },
 });
 
 /** [mín, máx] de cada número: o teto do tremor e da pisada é o que evita enjoo. */
 export const LIMITES = Object.freeze({
+  "corrida.intensidadePx": [0, 14], "corrida.passosHz": [0.5, 2.5], "corrida.rotacao": [0, 1.5], "corrida.irregularidade": [0, 1],
+  "reflexo.forca": [0, 1], "reflexo.movimento": [0, 1], "reflexo.cintilar": [0, 1],
   "tremor.intensidadePx": [0, 18], "tremor.freqHz": [0.05, 1.6],
   "rastro.forca": [0, 0.3],
   "pisadas.intervaloMin": [10, 600], "pisadas.intervaloMax": [10, 900],
   "pisadas.intensidadePx": [0, 40], "pisadas.duracaoMs": [200, 2500], "pisadas.freqHz": [2, 14],
   "nevoa.opacidade": [0, 0.85], "nevoa.velocidade": [0.1, 4],
   "chamas.quantidade": [0, 80], "chamas.tamanho": [0.3, 3], "chamas.intensidade": [0, 1.5],
-  "chamas.velocidade": [0.2, 3], "chamas.bordas": [0, 1],
+  "chamas.velocidade": [0.2, 3],
 });
 
 /** O salvo por cima do padrão, com os números dentro dos limites. Pura. */
 export function mesclarConfig(salvo = {}) {
+  // Calibração da primeira versão (sem a câmera de corrida): só as pisadas ficam — o
+  // resto (loop do tremor, chamas soltas, névoa e rastro fortes) foi refeito.
+  if (salvo && Object.keys(salvo).length && !salvo.corrida) salvo = { pisadas: salvo.pisadas };
   const c = mesclarComLimites(salvo, configPadrao(), LIMITES);
+  if (c.reflexo.cor === "#ffffff" && salvo?.reflexo?.cor !== "#ffffff") c.reflexo.cor = configPadrao().reflexo.cor;
   if (c.pisadas.intervaloMax < c.pisadas.intervaloMin) c.pisadas.intervaloMax = c.pisadas.intervaloMin;
   if (c.nevoa.cor === "#ffffff" && salvo?.nevoa?.cor !== "#ffffff") c.nevoa.cor = configPadrao().nevoa.cor;
   return c;
@@ -69,6 +79,33 @@ export function deslocamentoDaPisada(t, { intensidadePx, duracaoMs, freqHz }, fa
   const ang = (2 * Math.PI * freqHz * t) / 1000;
   // Mais vertical que horizontal: é o chão que treme.
   return { x: intensidadePx * 0.45 * queda * Math.sin(ang * 1.3 + fase), y: intensidadePx * queda * Math.sin(ang) };
+}
+
+/**
+ * Câmera de quem corre, `t` em segundos: o passo (sobe e desce), a passada de um lado
+ * para o outro (metade do ritmo) e uma leve inclinação — com ondas de ritmos que não
+ * se repetem juntos e uma amplitude que respira, para nunca virar um loop. Pura.
+ * @returns {{x: number, y: number, rot: number}} px, px, graus
+ */
+export function cameraDaCorrida(t, { intensidadePx, passosHz, rotacao, irregularidade }, fase = 0) {
+  const tau = 2 * Math.PI;
+  const irr = irregularidade;
+  // O ritmo do passo varia um pouco (ninguém corre num metrônomo).
+  const ritmo = passosHz * (1 + 0.08 * irr * Math.sin(t * 0.23 + fase));
+  const passo = tau * ritmo * t;
+  // A amplitude respira devagar (cansaço, terreno), em vez de ficar constante.
+  const folego = 1 + 0.3 * irr * Math.sin(t * 0.17 + fase * 1.7) + 0.15 * irr * Math.sin(t * 0.41 + fase * 0.5);
+  const ruido = (a, b, c) => Math.sin(t * a + fase * b) * 0.6 + Math.sin(t * c + fase) * 0.4;
+  const y = intensidadePx * folego * (Math.abs(Math.sin(passo / 2)) - 0.64) * 1.6 + intensidadePx * 0.35 * irr * ruido(1.31, 2.3, 2.17);
+  const x = intensidadePx * 0.7 * folego * Math.sin(passo / 2 + 0.4) + intensidadePx * 0.4 * irr * ruido(0.73, 1.1, 1.91);
+  const rot = rotacao * folego * Math.sin(passo / 2 + 1.1) + rotacao * 0.5 * irr * ruido(0.57, 0.9, 1.43);
+  return { x, y, rot };
+}
+
+/** O quanto aumentar a cena para a câmera não mostrar a borda ao balançar/inclinar. Pura. */
+export function escalaDaCorrida({ intensidadePx, rotacao }, largura = 1920, altura = 1080) {
+  const folga = intensidadePx * 2.2 + Math.sin((rotacao * Math.PI) / 180) * Math.max(largura, altura) * 0.6;
+  return 1 + (2 * folga) / Math.min(largura, altura);
 }
 
 /** As ações do FX Bus para o tremor e o rastro desta configuração. */
@@ -262,16 +299,67 @@ function ligarNevoa(cfg) {
   if (!el.children.length) el.innerHTML = `<div class="op2-nevoa-perseguicao__a"></div><div class="op2-nevoa-perseguicao__b"></div>`;
 }
 
-function ligarBordas(cfg, semCintilar) {
-  const el = camada("op2-chamas-borda", "op2-nevoa-perseguicao");
-  if (!cfg.ligado || cfg.bordas <= 0) return void el.remove();
-  el.className = `op2-chamas-borda${semCintilar ? "" : " op2-chamas-borda--viva"}`;
-  el.style.setProperty("--op2-chamas-forca", String(cfg.bordas));
+/** O reflexo da luz da Ellén: a camada (o movimento e o cintilar vêm do laço da câmera). */
+function ligarReflexo(cfg) {
+  const el = camada("op2-reflexo-perseguicao", "op2-nevoa-perseguicao");
+  if (!cfg.ligado || cfg.forca <= 0) return void el.remove();
+  el.className = "op2-reflexo-perseguicao";
+  el.style.setProperty("--op2-reflexo-cor", `rgb(${rgbDe(cfg.cor)})`);
+  el.style.setProperty("--op2-reflexo-forca", String(cfg.forca));
+}
+
+/* -- o laço da câmera e do reflexo -------------------------------------------------- */
+
+let laco = null;
+
+/** Um só requestAnimationFrame: a câmera de quem corre e a luz que vem atrás. */
+function iniciarLaco(cfg, semMovimento) {
+  pararLaco();
+  const board = document.getElementById("board");
+  const reflexo = document.getElementById("op2-reflexo-perseguicao");
+  const correr = cfg.corrida.ligado && !semMovimento && cfg.corrida.intensidadePx + cfg.corrida.rotacao > 0;
+  if (!board || (!correr && !reflexo)) return;
+  const fase = Math.random() * 10;
+  const inicio = performance.now();
+  if (correr) {
+    const tela = board.getBoundingClientRect();
+    board.style.transformOrigin = "50% 50%";
+    board.dataset.op2Escala = String(escalaDaCorrida(cfg.corrida, tela.width, tela.height));
+  }
+  const quadro = (agora) => {
+    const t = (agora - inicio) / 1000;
+    if (correr) {
+      const { x, y, rot } = cameraDaCorrida(t, cfg.corrida, fase);
+      board.style.transform = `scale(${board.dataset.op2Escala}) translate(${x.toFixed(2)}px, ${y.toFixed(2)}px) rotate(${rot.toFixed(3)}deg)`;
+    }
+    if (reflexo) {
+      // A fonte da luz vem atrás e muda de lado devagar (a criatura no encalço).
+      const m = cfg.reflexo.movimento;
+      const lado = 50 + 32 * m * Math.sin(t * 0.21 + fase) + 10 * m * Math.sin(t * 0.53 + fase * 2);
+      const perto = 0.85 + 0.15 * Math.sin(t * 0.33 + fase);
+      const brilho = semMovimento ? 1 : 1 - cfg.reflexo.cintilar * 0.45 * (1 - tremeluzir(t * 0.55, fase));
+      reflexo.style.setProperty("--op2-reflexo-x", `${lado.toFixed(1)}%`);
+      reflexo.style.opacity = String((cfg.reflexo.forca * perto * brilho).toFixed(3));
+    }
+    laco = requestAnimationFrame(quadro);
+  };
+  laco = requestAnimationFrame(quadro);
+}
+
+function pararLaco() {
+  if (laco) cancelAnimationFrame(laco);
+  laco = null;
+  const board = document.getElementById("board");
+  if (board) {
+    board.style.transform = "";
+    board.style.transformOrigin = "";
+    delete board.dataset.op2Escala;
+  }
 }
 
 function pararDom() {
   document.getElementById("op2-nevoa-perseguicao")?.remove();
-  document.getElementById("op2-chamas-borda")?.remove();
+  document.getElementById("op2-reflexo-perseguicao")?.remove();
 }
 
 /* -- pisadas ----------------------------------------------------------------------- */
@@ -333,8 +421,9 @@ export function iniciarPerseguicaoVisual(bloqueado) {
   const cfg = lerConfig();
   const semMovimento = bloqueado();
   ligarNevoa(cfg.nevoa);
-  ligarBordas(cfg.chamas, semMovimento);
+  ligarReflexo(cfg.reflexo);
   iniciarChamas(cfg.chamas, semMovimento);
+  iniciarLaco(cfg, semMovimento);
   agendarPisadas(semMovimento ? { ...cfg.pisadas, ligado: false } : cfg.pisadas);
 }
 
@@ -345,6 +434,7 @@ export function pararPerseguicaoVisual() {
   pisando = null;
   const board = document.getElementById("board");
   if (board) board.style.translate = "";
+  pararLaco();
   pararChamas();
   pararDom();
 }
@@ -370,14 +460,18 @@ export function registrarEfeitosDePerseguicao(aoMudar) {
       mesclar: mesclarConfig,
       limites: LIMITES,
       grupos: [
-        { id: "tremor", campos: [{ chave: "intensidadePx" }, { chave: "freqHz", passo: 0.05 }] },
-        { id: "rastro", campos: [{ chave: "forca", passo: 0.01 }] },
+        { id: "corrida", campos: [{ chave: "intensidadePx", passo: 0.5 }, { chave: "passosHz", passo: 0.1 },
+          { chave: "rotacao", passo: 0.05 }, { chave: "irregularidade", passo: 0.05 }] },
+        { id: "reflexo", campos: [{ chave: "forca", passo: 0.05 }, { chave: "movimento", passo: 0.05 },
+          { chave: "cintilar", passo: 0.05 }, { chave: "cor", tipo: "cor" }] },
         { id: "pisadas", acao: { id: "testarPisada", icone: "fa-shoe-prints" }, campos: [
           { chave: "intervaloMin" }, { chave: "intervaloMax" }, { chave: "intensidadePx" },
           { chave: "duracaoMs", passo: 50 }, { chave: "freqHz", passo: 0.5 }] },
         { id: "nevoa", campos: [{ chave: "opacidade", passo: 0.05 }, { chave: "velocidade", passo: 0.1 }, { chave: "cor", tipo: "cor" }] },
+        { id: "rastro", campos: [{ chave: "forca", passo: 0.01 }] },
+        { id: "tremor", campos: [{ chave: "intensidadePx" }, { chave: "freqHz", passo: 0.05 }] },
         { id: "chamas", campos: [{ chave: "quantidade" }, { chave: "tamanho", passo: 0.1 }, { chave: "intensidade", passo: 0.05 },
-          { chave: "velocidade", passo: 0.1 }, { chave: "bordas", passo: 0.05 }] },
+          { chave: "velocidade", passo: 0.1 }] },
       ],
       // Sente a pisada com os valores do formulário, antes de salvar (só nesta tela).
       acoes: { testarPisada: (c) => pisada(c.pisadas, { ignorarTravas: true }) },
