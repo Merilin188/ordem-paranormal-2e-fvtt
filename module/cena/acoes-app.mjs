@@ -17,7 +17,7 @@ import {
 import { temFerramenta } from "./ferramentas.mjs";
 import { alvosDaCenaAtiva, alvosMarcados } from "./encerrar-investigacao.mjs";
 import {
-  dialogoExaminar, examinar, interagir, recapitular, compartilhar,
+  examinar, interagir, recapitular, compartilhar,
 } from "./acoes-investigacao.mjs";
 import {
   arrombar, alcancar, sustentar, pararDeSustentar, hackTecnico, hackSocial, desafioGenerico,
@@ -155,6 +155,7 @@ export class AcoesInvestigacaoApp extends HandlebarsApplicationMixin(Application
       examinar: fechaDepois(AcoesInvestigacaoApp.#examinar),
       interagir: fechaDepois(AcoesInvestigacaoApp.#interagir),
       irParaDesafios: AcoesInvestigacaoApp.#irParaDesafios,
+      regras: AcoesInvestigacaoApp.#regras,
       alternarChip: AcoesInvestigacaoApp.#alternarChip,
       limparFiltros: AcoesInvestigacaoApp.#limparFiltrosAcao,
       usarFerramenta: fechaDepois(AcoesInvestigacaoApp.#usarFerramenta),
@@ -220,8 +221,21 @@ export class AcoesInvestigacaoApp extends HandlebarsApplicationMixin(Application
     janelasDeInvestigacao.add(this);
   }
 
+  /** O resumo das regras abre ao lado, na primeira vez que a janela aparece. */
+  async _onFirstRender(contexto, opcoes) {
+    await super._onFirstRender?.(contexto, opcoes);
+    const { abrirComAsAcoes } = await import("./regras-investigacao.mjs");
+    abrirComAsAcoes(this);
+  }
+
+  static async #regras() {
+    const { abrirRegras } = await import("./regras-investigacao.mjs");
+    abrirRegras(this);
+  }
+
   _onClose(opcoes) {
     super._onClose(opcoes);
+    void import("./regras-investigacao.mjs").then((m) => m.fecharComAsAcoes());
     esquecerRolagem(this);
     if (this.#hookAtor) Hooks.off("updateActor", this.#hookAtor);
     this.#hookAtor = null;
@@ -474,10 +488,16 @@ export class AcoesInvestigacaoApp extends HandlebarsApplicationMixin(Application
   static async #pararDeSustentar() { await pararDeSustentar(this.ator); this.render(); }
   static async #usarLaser() { return usarLaser(this.ator); }
 
-  /** Sub-ação de Investigar: mesma lista do quadro, e aqui rola (spec §6.3.1). */
+  /**
+   * Investigar (playtest Beta): abre o card do passo 1 no chat, com as perícias do
+   * ponto. Daí em diante o card conduz: o mestre manda o passivo, o jogador escolhe
+   * Observar ou Examinar (`investigar.mjs`). Com `data-pericia` (atalho antigo de
+   * macro), segue o Examinar direto do Alpha.
+   */
   static async #examinar(_evento, alvo) {
     if (alvo.dataset.pericia) return examinar(this.ator, alvo.dataset.poiUuid, alvo.dataset.pericia);
-    return dialogoExaminar(this.ator, alvo.dataset.poiUuid);
+    const { iniciarInvestigacao } = await import("./investigar.mjs");
+    return iniciarInvestigacao(this.ator, alvo.dataset.poiUuid);
   }
   static async #interagir(_evento, alvo) { return interagir(this.ator, alvo.dataset.poiUuid); }
 

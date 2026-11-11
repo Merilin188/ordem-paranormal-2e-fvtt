@@ -79,6 +79,7 @@ import { registrarEquilibrio, iniciarEquilibrio } from "./cena/equilibrio.mjs";
 import { registrarCondicoes } from "./cena/condicoes.mjs";
 import { registrarDeclaracao } from "./cena/declaracao.mjs";
 import { registrarAguardar } from "./cena/aguardar.mjs";
+import { registrarInvestigar, iniciarInvestigacao } from "./cena/investigar.mjs";
 import { registrarPoderes } from "./cena/poderes.mjs";
 import { registrarAparenciaDoPavor } from "./cena/pavor.mjs";
 import { registrarGuiaCombate, alternarGuiaCombate } from "./ui/guia-combate.mjs";
@@ -175,6 +176,7 @@ Hooks.once("init", () => {
   registrarEfeitosDoMundo();
   registrarDeclaracao();
   registrarAguardar();
+  registrarInvestigar();
   registrarPoderes();
   registrarAparenciaDoPavor();
 
@@ -183,7 +185,7 @@ Hooks.once("init", () => {
     ferramentasMestre: alternarFerramentasMestre, abrirTabelaParaTodos, iniciarEquilibrio,
     aplicarPavor, removerPavor, abrirPavor, periciasDoMundo: abrirPericiasMundo, guiaCombate: alternarGuiaCombate, solicitarTeste, testeOposto, desafiosDeAcesso: abrirDesafios,
     rolarTeste, encerrarCena, stepDie, faces, OP2Roll,
-    examinar, interagir, recapitular, compartilhar, dialogoExaminar, cicloVisibilidadeInfo,
+    investigar: iniciarInvestigacao, examinar, interagir, recapitular, compartilhar, dialogoExaminar, cicloVisibilidadeInfo,
     limparRevelacao, contarAoGrupo,
     painelInvestigacao: abrirPainelInvestigacao, acoesInvestigacao: abrirAcoesInvestigacao, avancarRodada,
     arrombar, alcancar, sustentar, pararDeSustentar,

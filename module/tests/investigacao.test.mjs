@@ -148,3 +148,97 @@ test("transições: cena existente vale pela cena escolhida; cena nova no padrã
   assert.equal(v13.background.src, "h/altar.jpg");
   assert.equal(v13.levels, undefined);
 });
+
+/* ---- Investigar no Beta: passivo → Observar ou Examinar ---- */
+
+test("beta: o passo 1 lista as perícias do ponto sem as das linhas ocultas nem as de dentro da tranca", async () => {
+  const { periciasParaInvestigar } = await import("../cena/investigacao.mjs");
+  const quadro = [
+    { id: "a", pericia: "percepcao", dt: 6, foraDaTranca: true },
+    { id: "b", pericia: "ocultismo", dt: 8, oculta: true },
+    { id: "c", pericia: "medicina", dt: 7 },
+  ];
+  assert.deepEqual(periciasParaInvestigar(quadro), ["percepcao", "medicina"]);
+  assert.deepEqual(periciasParaInvestigar(quadro, true), ["percepcao"]);
+});
+
+test("beta: a janela do mestre mostra tudo da perícia e marca só o passivo (DT até o dado, visível, ao alcance)", async () => {
+  const { linhasParaOMestre } = await import("../cena/investigacao.mjs");
+  const quadro = [
+    { id: "a", pericia: "percepcao", dt: 6 },
+    { id: "b", pericia: "percepcao", dt: 10 },
+    { id: "c", pericia: "percepcao", dt: 4, oculta: true },
+    { id: "d", pericia: "ocultismo", dt: 4 },
+    { id: "e", pericia: "percepcao", dt: 8, aberta: true },
+  ];
+  const linhas = linhasParaOMestre(quadro, "percepcao", 8, new Set(["a"]));
+  assert.deepEqual(linhas.map((l) => l.id), ["c", "a", "e", "b"]);
+  assert.deepEqual(linhas.filter((l) => l.marcada).map((l) => l.id), ["a", "e"]);
+  assert.equal(linhas.find((l) => l.id === "c").oculta, true);
+  assert.equal(linhas.find((l) => l.id === "a").conhecida, true);
+  assert.equal(linhas.find((l) => l.id === "b").alcanca, false);
+  // Trancado: a linha de dentro aparece, mas não vem marcada.
+  const trancado = linhasParaOMestre([{ id: "x", pericia: "percepcao", dt: 4 }], "percepcao", 8, new Set(), true);
+  assert.equal(trancado[0].trancada, true);
+  assert.equal(trancado[0].marcada, false);
+});
+
+test("beta: passivo e Observar não custam PD — só gravam o que é novo", async () => {
+  const { novasParaOPersonagem } = await import("../cena/investigacao.mjs");
+  assert.deepEqual(novasParaOPersonagem(["a", "b", "c"], new Set(["b"])), ["a", "c"]);
+  assert.deepEqual(novasParaOPersonagem([], new Set(["b"])), []);
+});
+
+test("beta: Examinar cobra 1 PD só quando nada é novo — o passivo não conta", async () => {
+  const { resolverExaminarBeta } = await import("../cena/investigacao.mjs");
+  const quadro = [
+    { id: "a", pericia: "percepcao", dt: 6 },
+    { id: "b", pericia: "percepcao", dt: 11 },
+  ];
+  // O passivo (d8) já entregou "a": rolar 9 não alcança "b" → nada novo, perde PD.
+  assert.deepEqual(resolverExaminarBeta(quadro, "percepcao", 9, new Set(["a"])), { revelaveis: [], perdePD: true });
+  // Rolar 12 alcança "b": novo, sem custo.
+  assert.deepEqual(resolverExaminarBeta(quadro, "percepcao", 12, new Set(["a"])), { revelaveis: ["b"], perdePD: false });
+  // Rolar abaixo do próprio dado também é nada novo.
+  assert.equal(resolverExaminarBeta(quadro, "percepcao", 5, new Set(["a"])).perdePD, true);
+  // Linha oculta nunca é achada pelo teste.
+  assert.equal(resolverExaminarBeta([{ id: "o", pericia: "percepcao", dt: 2, oculta: true }], "percepcao", 20).perdePD, true);
+});
+
+test("beta: Observar e Examinar são exclusivos e só valem depois do passivo", async () => {
+  const { escolherAprofundamento, periciasParaObservar } = await import("../cena/investigacao.mjs");
+  const pericias = [{ chave: "percepcao" }, { chave: "intuicao" }];
+  const estado = { etapa: "aprofundar", pericias, passivo: { pericia: "percepcao" } };
+  assert.deepEqual(periciasParaObservar(estado).map((p) => p.chave), ["intuicao"]);
+  const observando = escolherAprofundamento(estado, "observar");
+  assert.equal(observando.etapa, "observar");
+  // Escolhido um, o outro não vale mais (os dois botões somem).
+  assert.equal(escolherAprofundamento(observando, "examinar"), null);
+  assert.equal(escolherAprofundamento(escolherAprofundamento(estado, "examinar"), "observar"), null);
+  // Antes de o mestre enviar o passivo, nenhum dos dois.
+  assert.equal(escolherAprofundamento({ ...estado, etapa: "mestre" }, "examinar"), null);
+  // Sem outra perícia na lista, Observar não existe.
+  assert.equal(escolherAprofundamento({ ...estado, pericias: [{ chave: "percepcao" }] }, "observar"), null);
+});
+
+test("lista de fichas: agrupa pelas pastas da barra (mãe antes das filhas) e deixa os soltos no fim", async () => {
+  const { agruparPorPasta, atorPassaNoFiltro } = await import("../ui/lista-atores.mjs");
+  const pastas = [
+    { id: "m2", name: "Missão 2", parentId: null, sort: 2 },
+    { id: "jog", name: "Jogadores", parentId: null, sort: 1 },
+    { id: "ini", name: "Inimigos", parentId: "m2", sort: 0 },
+    { id: "vazia", name: "Vazia", parentId: null, sort: 3 },
+  ];
+  const atores = [
+    { id: "1", name: "Ellén Trechend", folderId: "ini" },
+    { id: "2", name: "Crias da Floresta", folderId: "ini" },
+    { id: "3", name: "Rowan", folderId: "jog" },
+    { id: "4", name: "Cavalo", folderId: null },
+  ];
+  const grupos = agruparPorPasta(atores, pastas, { semPasta: "Sem pasta" });
+  assert.deepEqual(grupos.map((g) => g.rotulo), ["Jogadores", "Missão 2 › Inimigos", "Sem pasta"]);
+  assert.deepEqual(grupos[1].atores.map((a) => a.name), ["Crias da Floresta", "Ellén Trechend"]);
+  // Busca sem acento e "só na cena".
+  assert.equal(atorPassaNoFiltro({ id: "1", name: "Ellén Trechend" }, { termo: "ellen" }), true);
+  assert.equal(atorPassaNoFiltro({ id: "1", name: "Ellén" }, { soCena: true, idsNaCena: new Set(["3"]) }), false);
+});

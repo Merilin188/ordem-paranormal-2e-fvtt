@@ -6,7 +6,7 @@
  */
 import { SYSTEM_ID, CUSTO_PD_EXAMINAR } from "../config.mjs";
 import { rolarFalhaCritica, aplicarFalhaCritica, aplicarDano } from "../dice/falha-critica.mjs";
-import { testarCompartilhamento, registrarTravaDeCena, contarAoGrupo } from "../cena/acoes-investigacao.mjs";
+import { testarCompartilhamento, registrarTravaDeCena, contarAoGrupo, solicitarTesteDoInteragir } from "../cena/acoes-investigacao.mjs";
 import { rolarSobrecarga } from "../cena/rodada.mjs";
 import { marcarHackSocialResolvido, marcarHackTecnicoResolvido } from "../cena/acoes-desafio.mjs";
 import { iniciarHackTecnico, encerrarHackTecnico } from "../cena/timer-hack.mjs";
@@ -21,6 +21,10 @@ const ACOES = {
   },
   async "contar-ao-grupo"(ator, dataset) {
     await contarAoGrupo(ator, dataset.poiUuid, dataset.infoId);
+  },
+  // Interagir: o mestre pede um teste a partir do próprio card (só ele vê o botão).
+  async "interagir-solicitar-teste"(ator, dataset) {
+    await solicitarTesteDoInteragir(ator, dataset.poiUuid);
   },
   async "aplicar-falha-critica"(ator, dataset) {
     await aplicarFalhaCritica(ator, Number(dataset.face));

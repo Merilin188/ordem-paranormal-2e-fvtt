@@ -1,0 +1,106 @@
+// Investigar no playtest Beta: o card de três passos, a janela do mestre, o resumo
+// das regras ao lado das Ações e o filtro de fichas dos diálogos do mestre.
+@layer system {
+  // As cores dos passos (no card e no resumo das regras). Não são as do livro: âmbar,
+  // azul e violeta do próprio sistema, para separar as fases do turno.
+  .op2 {
+    --op2-passo-1: #e8b53a;
+    --op2-passo-2: #6ba6ec;
+    --op2-passo-3: #a98be0;
+  }
+
+  /* ---- card ---- */
+  .op2-investigar {
+    .op2-investigar__pericias { display: flex; flex-wrap: wrap; gap: 0.3rem; margin: 0.35rem 0; }
+    .op2-investigar__pericias .op2-botao { width: auto; flex: 0 1 auto; }
+    .op2-investigar__dado { font-family: var(--op2-fonte-mono); opacity: 0.75; text-transform: none; }
+    .op2-investigar__passo {
+      margin-top: 0.45rem; padding: 0.35rem 0.5rem; border-left: 3px solid var(--op2-cor-passo);
+      background: color-mix(in srgb, var(--op2-cor-passo) 9%, transparent);
+      h4 { margin: 0 0 0.25rem; border: 0; font-family: var(--op2-fonte-display); font-size: 0.9rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--op2-cor-passo); }
+      .op2-card__infos { margin: 0.2rem 0 0; }
+    }
+    .op2-investigar__passo--2 { --op2-cor-passo: var(--op2-passo-2); }
+    .op2-investigar__passo--3 { --op2-cor-passo: var(--op2-passo-3); }
+    .op2-investigar__escolha { display: flex; flex-wrap: wrap; gap: 0.35rem; .op2-botao { flex: 1 1 10rem; width: auto; } }
+    .op2-investigar__aviso { margin: 0.35rem 0 0; font-size: 0.8rem; color: var(--op2-critico); }
+    .op2-investigar__aguarde { margin: 0.2rem 0; font-style: italic; color: var(--op2-tinta-fraca); }
+    .op2-investigar__fim { margin: 0.45rem 0 0; font-size: 0.8rem; color: var(--op2-tinta-fraca); text-align: right; }
+  }
+
+  /* ---- janela do mestre ---- */
+  .op2-invm-janela .window-content { padding: var(--op2-e3); }
+  .op2-invm { display: flex; flex-direction: column; gap: var(--op2-e2); }
+  .op2-invm__topo {
+    display: flex; align-items: center; gap: var(--op2-e2);
+    img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 1px solid var(--op2-linha-forte); flex: none; }
+  }
+  .op2-invm__titulo { display: block; margin-top: 0.15rem; font-family: var(--op2-fonte-display); font-size: 1.05rem; letter-spacing: 0.02em; }
+  .op2-invm__contextual {
+    border: 1px solid var(--op2-linha); padding: 0.3rem 0.5rem; font-size: 0.85rem;
+    summary { cursor: pointer; color: var(--op2-tinta-fraca); }
+  }
+  .op2-invm__vazio { margin: 0; padding: 0.6rem; text-align: center; border: 1px dashed var(--op2-linha-forte); color: var(--op2-tinta-fraca); }
+  .op2-invm__grupo {
+    margin: 0.3rem 0 0; border: 0; font-family: var(--op2-fonte-display); font-size: 0.85rem; letter-spacing: 0.05em;
+    text-transform: uppercase; color: var(--op2-passo-2);
+  }
+  .op2-invm__linhas { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 0.3rem; }
+  .op2-invm__linha {
+    display: grid; grid-template-columns: auto 1fr auto; align-items: start; gap: 0.5rem; padding: 0.4rem 0.5rem;
+    border: 1px solid var(--op2-linha); border-left: 3px solid var(--op2-linha-forte); opacity: 0.7;
+    &.marcada { opacity: 1; border-left-color: var(--op2-passo-2); background: color-mix(in srgb, var(--op2-passo-2) 8%, transparent); }
+    &--oculta { border-style: dashed; }
+  }
+  .op2-invm__marcar { display: flex; flex-direction: column; align-items: center; gap: 0.15rem; cursor: pointer; }
+  .op2-invm__dt { font-family: var(--op2-fonte-mono); font-size: 0.75rem; white-space: nowrap; color: var(--op2-tinta-fraca); }
+  .op2-invm__texto { font-size: 0.9rem; line-height: 1.35; p { margin: 0; } }
+  .op2-invm__marcas { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-top: 0.2rem; }
+  .op2-invm__marca {
+    font-size: 0.7rem; padding: 0 0.3rem; border: 1px solid var(--op2-linha-forte); color: var(--op2-tinta-fraca);
+    &--oculta { border-color: var(--op2-critico); color: var(--op2-critico); }
+  }
+  .op2-invm__olho { flex: none; }
+  .op2-invm__rodape {
+    display: flex; align-items: center; justify-content: space-between; gap: var(--op2-e2);
+    padding-top: var(--op2-e2); border-top: 1px solid var(--op2-linha);
+    .op2-botao { width: auto; }
+  }
+  .op2-invm__contagem { font-size: 0.85rem; color: var(--op2-tinta-fraca); }
+
+  /* ---- resumo das regras ---- */
+  .op2-regras-inv .window-content { padding: var(--op2-e3); }
+  .op2-regras-inv__corpo { display: flex; flex-direction: column; gap: var(--op2-e2); font-size: 0.85rem; line-height: 1.4; }
+  .op2-regras-inv__corpo p { margin: 0; }
+  .op2-regras-inv__passo {
+    padding: 0.45rem 0.6rem; border-left: 4px solid var(--op2-cor-passo);
+    background: color-mix(in srgb, var(--op2-cor-passo) 12%, transparent);
+    h3 { margin: 0 0 0.3rem; border: 0; font-family: var(--op2-fonte-display); font-size: 0.95rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--op2-cor-passo); }
+    h4 { margin: 0 0 0.15rem; border: 0; font-size: 0.85rem; }
+  }
+  .op2-regras-inv__passo--1 { --op2-cor-passo: var(--op2-passo-1); }
+  .op2-regras-inv__passo--2 { --op2-cor-passo: var(--op2-passo-2); }
+  .op2-regras-inv__passo--3 { --op2-cor-passo: var(--op2-passo-3); }
+  .op2-regras-inv__colunas { display: grid; grid-template-columns: 1fr; gap: 0.4rem; }
+  .op2-regras-inv__fim { margin-top: 0.35rem !important; font-weight: bold; }
+  .op2-regras-inv__outras {
+    h3 { margin: 0.2rem 0 0.3rem; border: 0; font-family: var(--op2-fonte-display); font-size: 0.95rem; letter-spacing: 0.04em; text-transform: uppercase; }
+    dl { margin: 0 0 0.3rem; display: grid; grid-template-columns: 1fr; gap: 0.1rem; }
+    dt { margin-top: 0.3rem; font-weight: bold; }
+    dd { margin: 0 0 0 1.2rem; }
+  }
+  .op2-regras-inv__abrir { font-size: 0.8rem; color: var(--op2-tinta-fraca); }
+
+  /* ---- Ações: botão das regras no topo ---- */
+  .op2-acoes__topo { display: flex; align-items: center; gap: var(--op2-e2); }
+  .op2-acoes__regras { margin-left: auto; width: auto; flex: none; }
+
+  /* ---- diálogos do mestre: filtro de fichas ---- */
+  .op2-part__filtro {
+    align-self: stretch; display: flex; flex-direction: column; gap: 0.25rem;
+    input[type="search"] { width: 100%; }
+  }
+  .op2-part .op2-part__cena { flex-direction: row; align-items: center; gap: 0.3rem; input { width: auto; } }
+  .op2-part select optgroup { font-style: normal; font-weight: bold; color: var(--op2-tinta-fraca); background: var(--op2-superficie); }
+  .op2-part select option { font-weight: normal; color: var(--op2-texto); background: var(--op2-superficie); }
+}

@@ -127,6 +127,77 @@ export function resolverExaminar(informacoes, chavePericia, total, idsJaRevelado
   return { revelaveis, perdePD: revelaveis.length === 0 };
 }
 
+/* ------------------------------------------------------------------ */
+/* Investigar no playtest Beta: três passos, o mestre narra              */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Passo 1: as perícias que o mestre lista ao jogador. Linha oculta não entra — a
+ * perícia dela na lista já entregaria que há algo ali; com o ponto trancado, só as
+ * do lado de fora. Sem DT e sem contagem: só os nomes.
+ */
+export function periciasParaInvestigar(informacoes, trancado = false) {
+  return periciasDoQuadro(infosAlcancaveis(informacoes, trancado).filter((info) => !info.oculta));
+}
+
+/**
+ * Passo 2 (e Observar): o que a janela do mestre mostra para UMA perícia e o dado do
+ * personagem nela. Todas as linhas daquela perícia, inclusive as ocultas e as que o
+ * dado não alcança: o mestre decide o que envia. Vem marcado o que o livro manda
+ * narrar — DT até o tamanho do dado, visível e ao alcance (fora da tranca).
+ *
+ * @returns {Array<{id: string, dt: number, texto: string, oculta: boolean, aberta: boolean,
+ *   conhecida: boolean, alcanca: boolean, trancada: boolean, marcada: boolean}>}
+ */
+export function linhasParaOMestre(informacoes, chavePericia, dado, idsJaRevelados = new Set(), trancado = false) {
+  return informacoes
+    .filter((info) => aceitaPericia(info, chavePericia))
+    .sort((a, b) => a.dt - b.dt)
+    .map((info) => {
+      const trancada = Boolean(trancado && !info.foraDaTranca);
+      const alcanca = info.dt <= dado;
+      return {
+        id: info.id, dt: info.dt, texto: info.texto,
+        oculta: Boolean(info.oculta), aberta: Boolean(info.aberta),
+        conhecida: idsJaRevelados.has(info.id) || Boolean(info.aberta) || contadaAoGrupo(info),
+        alcanca, trancada,
+        marcada: !info.oculta && alcanca && !trancada,
+      };
+    });
+}
+
+/** Do que o mestre enviou, o que é novo para este personagem (vai para a ficha dele). */
+export function novasParaOPersonagem(idsEnviados, idsJaRevelados = new Set()) {
+  return idsEnviados.filter((id) => !idsJaRevelados.has(id));
+}
+
+/**
+ * Passo 3: Observar OU Examinar — um só, e só depois que o mestre enviou o passivo.
+ * Escolher tira os dois botões (a ação acaba depois de qualquer um). Devolve o
+ * estado novo, ou null quando a escolha não vale (já escolheu, ainda não é a hora,
+ * Observar sem outra perícia na lista).
+ */
+export function escolherAprofundamento(estado, escolha) {
+  if (estado?.etapa !== "aprofundar" || !["observar", "examinar"].includes(escolha)) return null;
+  if (escolha === "observar" && !periciasParaObservar(estado).length) return null;
+  return { ...estado, escolha, etapa: escolha === "observar" ? "observar" : "examinando" };
+}
+
+/** Observar usa OUTRA perícia listada — nunca a do passo 2. */
+export function periciasParaObservar(estado) {
+  return (estado?.pericias ?? []).filter((p) => p.chave !== estado?.passivo?.pericia);
+}
+
+/**
+ * Examinar no Beta: rola a perícia do passo 2 e alcança as linhas com DT até o
+ * resultado. O passivo já foi entregue antes e NÃO entra na conta: perde 1 PD quem
+ * não recebe nenhuma linha nova para ele — rolou abaixo do dado, já sabia tudo ou
+ * não havia mais nada. (No Alpha, só custava quando passivo e teste vinham vazios.)
+ */
+export function resolverExaminarBeta(informacoes, chavePericia, total, idsJaRevelados = new Set(), { ignorarDT = false } = {}) {
+  return resolverExaminar(informacoes, chavePericia, total, idsJaRevelados, { ignorarDT });
+}
+
 /**
  * Sobrecarga mental (spec §7.6): o dano emocional do fim da rodada. A tabela é
  * editável por cena; a última linha cobre "9 ou mais", então vale a maior rodada

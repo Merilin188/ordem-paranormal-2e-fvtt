@@ -243,9 +243,9 @@
         "termometro": "Termômetro Diferencial"
       },
       "Visibilidade": {
-        "rascunho": "Rascunho — o jogador não vê, e Examinar nunca encontra. Clique para tornar descobrível.",
-        "descobrivel": "Descobrível — só quem Examinar com a perícia e alcançar a DT. Clique para abrir para todos.",
-        "aberta": "Aberta — todo jogador vê sem gastar ação. Clique para voltar a rascunho."
+        "rascunho": "Oculta — os jogadores não veem, e nenhuma investigação, teste ou análise acha. Só aparece quando você muda o estado (ou envia pela janela do Investigar). Clique para tornar descobrível.",
+        "descobrivel": "Descobrível — só chega a quem investigar com a perícia e alcançar a DT. Clique para abrir para todos.",
+        "aberta": "Aberta — todo jogador vê sem gastar ação. Clique para ocultar."
       },
       "LaboratorioDados": "Dados do Laboratório Portátil",
       "LaboratorioDadosAjuda": "Quantos dados a escada do Laboratório rola neste ponto (4 a 6) — a \"sequência mínima\" do livro. O app usa como padrão.",
@@ -329,8 +329,8 @@
       "CriticoExaminar": "revela o que faltava desta perícia, ignorando a DT.",
       "EventoNarracao": "Narração (para os jogadores)",
       "EventoEfeito": "Efeito (só do mestre)",
-      "InteragirDica": "Agir sobre o ponto sem teste. O mestre narra o que acontece.",
-      "InteragirAguarde": "Sem teste. O mestre narra o que acontece.",
+      "InteragirDica": "Agir sobre o ponto. O mestre narra o que acontece ou pede um teste. Depois de interagir, o turno acaba.",
+      "InteragirAguarde": "O mestre narra o que acontece ou pede um teste.",
       "InteragirSoMestre": "Só você vê isto — a descrição contextual é do mestre. Narre o resultado para a mesa.",
       "InteragirSemContextual": "Este ponto não tem descrição contextual. Narre pelo bom senso.",
       "ExaminarGratisTambem": "Outras {quantidade} linhas vieram sem rolar (DT dentro do tamanho do seu dado).",
@@ -344,7 +344,8 @@
       "ContadaPor": "Contada ao grupo por {nomes}",
       "ContouAoGrupo": "{ator} contou ao grupo",
       "ContadaVisivel": "A pista agora aparece no painel de todos os participantes.",
-      "ContarSoQuemAchou": "Só quem achou a pista pode contá-la ao grupo."
+      "ContarSoQuemAchou": "Só quem achou a pista pode contá-la ao grupo.",
+      "InteragirSolicitarTeste": "Solicitar teste"
     },
     "Dialog": {
       "Teste": {
@@ -508,7 +509,7 @@
         "ComPistas": "Com pistas",
         "ComPistasDica": "Alguma linha já chegou a você",
         "Esgotados": "Esgotados",
-        "EsgotadosDica": "Todas as linhas (fora rascunho) já chegaram a alguém",
+        "EsgotadosDica": "Todas as linhas (fora as ocultas) já chegaram a alguém",
         "NoMapa": "No mapa",
         "NoMapaDica": "Com marcador na cena aberta",
         "SemMarcador": "Sem marcador",
@@ -1175,7 +1176,11 @@
       "OpostoProntidaoDica": "Gaste 2 PD (habilidade Prontidão) para rerrolar um dado deste lado.",
       "OpostoProntidaoNota": "{nome} rerrolou {antes} → {depois}",
       "OpostoResolver": "Resolver o empate",
-      "OpostoResolvido": "Empate resolvido."
+      "OpostoResolvido": "Empate resolvido.",
+      "BuscarFicha": "Buscar ficha…",
+      "SoNaCena": "Só quem está na cena",
+      "SemPasta": "Sem pasta",
+      "Criatura": "Criatura"
     },
     "Pavor": {
       "Dado": "Dado de pavor",
@@ -2020,7 +2025,7 @@
       "Criar": "Criar",
       "ExcluirDesafio": "Excluir desafio (de vez)",
       "AcoesImpedidas": "Acesso bloqueado: resolva o desafio de acesso para interagir ou examinar este ponto.",
-      "SoOLadoDeFora": "Acesso bloqueado: resolva o desafio de acesso para interagir. Examinar só alcança o lado de fora.",
+      "SoOLadoDeFora": "Acesso bloqueado: resolva o desafio de acesso para interagir. Investigar só alcança o lado de fora.",
       "ImpedidoDica": "Impedido: o acesso a este ponto está bloqueado por um desafio.",
       "Resolver": "Resolver desafio de acesso",
       "ResolverDica": "Tenta vencer o obstáculo deste ponto (arrombar, destrancar…).",
@@ -2272,6 +2277,74 @@
       "Esperando": "A fila começa quando a declaração de fase terminar.",
       "AindaDeclarando": "Espere a declaração de fase terminar.",
       "AgiuAntes": "{nome} sai da espera e age agora, antes de {alvo}."
+    },
+    "Investigar": {
+      "Titulo": "Investigar",
+      "BotaoDica": "Investigar o ponto: escolha uma perícia; o mestre narra o que o seu dado alcança, sem rolar. Depois, Observar ou Examinar.",
+      "PodeInvestigar": "{ator} está investigando {poi}. Pode investigar com:",
+      "EscolhaUma": "Escolha UMA perícia. Ninguém rola: o mestre narra o que o seu dado alcança.",
+      "SemPericias": "{ator} investiga {poi}, mas nada aqui se investiga com perícia. O mestre narra o que houver.",
+      "Passo2": "Investigar com {pericia} d{dado}",
+      "Observando": "Observar com {pericia} d{dado}",
+      "AguardandoMestre": "Aguardando o mestre…",
+      "AbrirJanela": "Abrir a janela do mestre",
+      "NadaPassivo": "Nenhuma informação com este dado.",
+      "Passo3": "Investigação aprofundada — escolha uma:",
+      "Observar": "Observar com outra perícia",
+      "ObservarDica": "Outra perícia da lista, também sem rolar e sem custo.",
+      "SemOutraPericia": "Não há outra perícia na lista para Observar.",
+      "Examinar": "Examinar com {pericia}",
+      "ExaminarDica": "Um teste da perícia que você usou: chega o que o resultado alcançar.",
+      "AvisoPD": "Se não descobrir nenhuma informação nova, perde 1 PD.",
+      "EscolhaObservar": "Observar — escolha outra perícia:",
+      "Examinando": "Examinando com {pericia}…",
+      "ExaminarNada": "Nenhuma informação nova.",
+      "PdPago": "{ator} perdeu 1 PD.",
+      "Fim": "Fim da ação: o turno de {ator} acaba.",
+      "Mestre": {
+        "Titulo": "Investigar — janela do mestre",
+        "Cabecalho": "{ator} investiga {poi} com {pericia} d{dado}",
+        "ModoPassivo": "Passo 2 · passivo",
+        "ModoObservar": "Observar",
+        "Ajuda": "Vem marcado o que o dado alcança. Desmarque o que não vai, marque o que quiser incluir (até linha oculta) e envie. O olho muda o estado da linha no ponto: oculta não aparece para ninguém até você revelar.",
+        "Contextual": "Descrição contextual",
+        "Nenhuma": "O ponto não tem nenhuma linha desta perícia.",
+        "Alcanca": "Ao alcance do d{dado}",
+        "Acima": "Acima do d{dado}",
+        "Oculta": "Oculta",
+        "Aberta": "Aberta a todos",
+        "JaSabe": "Já sabe",
+        "Trancada": "Dentro da tranca",
+        "Ocultar": "Ocultar dos jogadores",
+        "Revelar": "Tornar descobrível",
+        "Marcadas": "{n} para enviar",
+        "Enviar": "Enviar para {ator} no chat",
+        "EnviarNada": "Enviar \"nada encontrado\" para {ator}",
+        "JaEnviado": "Já enviado ao jogador."
+      }
+    },
+    "RegrasInvestigacao": {
+      "Titulo": "Como investigar",
+      "Botao": "Regras",
+      "BotaoDica": "Resumo das regras de investigação",
+      "Intro": "Na sua vez, escolha uma ação. A principal é investigar um ponto de interesse, em três passos:",
+      "Passo1Titulo": "1 · Escolha um ponto",
+      "Passo1": "Escolha um ponto de interesse da cena. O mestre descreve o que se vê nele.",
+      "Passo2Titulo": "2 · Investigar ou Interagir",
+      "Investigar": "O mestre lista as perícias do ponto. Escolha uma e diga o seu dado nela: sem rolar, você recebe toda informação daquela perícia que o dado alcança.",
+      "Interagir": "Uma ação simples com o ponto (abrir, mover, olhar atrás). O mestre narra o resultado ou pede um teste. O turno acaba aqui.",
+      "Passo3Titulo": "3 · Aprofundar (depois de Investigar)",
+      "ObservarTitulo": "Observar",
+      "Observar": "Escolha outra perícia da lista e diga o seu dado. Como no passo 2: sem rolar e sem custo.",
+      "Examinar": "Teste da perícia do passo 2. Chega o que o resultado alcançar. Nada novo: perde {custo} PD.",
+      "Passo3Fim": "Observar ou Examinar, nunca os dois — depois de qualquer um, o turno acaba.",
+      "OutrasTitulo": "Outras ações de investigação",
+      "Recapitular": "Recapitule em personagem o que o grupo já sabe. Se o mestre aceitar, teste de Intuição (DT {dt}) por uma pista nova. Depois de um sucesso, ninguém repete nesta cena.",
+      "Compartilhar": "Explique a um aliado uma pista que você achou nesta cena. Ele testa {pericia} (DT {dt}) como ação livre por uma pista nova. Depois de um sucesso, ninguém repete nesta cena.",
+      "RecursoTitulo": "Usar habilidades e itens",
+      "Recurso": "O mestre decide se a habilidade ou o item serve na investigação e qual o efeito — normalmente, um passo a mais no teste.",
+      "Rodape": "As outras ações desta janela (Ajudar, Atacar, desafios, ferramentas) seguem as regras delas.",
+      "AbrirJunto": "Abrir junto com as Ações de investigação"
     }
   }
 }

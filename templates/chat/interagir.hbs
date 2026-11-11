@@ -18,5 +18,12 @@
     {{/if}}
   {{else}}
     <p class="op2-ajuda">{{localize "OP2.Investigacao.InteragirAguarde"}}</p>
+    {{!-- O mestre narra ou pede um teste: o botão abre o Solicitar teste já preenchido. --}}
+    <div class="op2-card__acoes" data-op2-gm>
+      <button type="button" class="op2-botao op2-botao--pequeno" data-op2-acao="interagir-solicitar-teste"
+        data-ator-id="{{atorId}}" data-poi-uuid="{{poiUuid}}">
+        <i class="fa-solid fa-dice" aria-hidden="true"></i> {{localize "OP2.Investigacao.InteragirSolicitarTeste"}}
+      </button>
+    </div>
   {{/if}}
 </div>

@@ -1,0 +1,65 @@
+{{!-- Janela do mestre no Investigar (Beta): as linhas da perícia escolhida, marcado o
+      que o dado alcança. O mestre desmarca, inclui o que quiser (até oculta), muda o
+      estado da linha e envia ao jogador. --}}
+<div class="op2-invm">
+  <header class="op2-invm__topo">
+    {{#if atorImg}}<img src="{{atorImg}}" alt="">{{/if}}
+    <div>
+      <span class="op2-tag op2-tag--pequena">{{modoRotulo}}</span>
+      <strong class="op2-invm__titulo">{{cabecalho}}</strong>
+    </div>
+  </header>
+  <p class="op2-ajuda">{{localize "OP2.Investigar.Mestre.Ajuda"}}</p>
+
+  {{#if descricaoContextual}}
+    <details class="op2-invm__contextual">
+      <summary><i class="fa-solid fa-book-open" aria-hidden="true"></i> {{localize "OP2.Investigar.Mestre.Contextual"}}</summary>
+      <div>{{{descricaoContextual}}}</div>
+    </details>
+  {{/if}}
+
+  {{#unless temLinhas}}
+    <p class="op2-invm__vazio">{{localize "OP2.Investigar.Mestre.Nenhuma"}}</p>
+  {{/unless}}
+
+  {{#each grupos}}
+    {{#if linhas.length}}
+      <h3 class="op2-invm__grupo">{{titulo}}</h3>
+      <ul class="op2-invm__linhas">
+        {{#each linhas}}
+          <li class="op2-invm__linha {{#if oculta}}op2-invm__linha--oculta{{/if}} {{#if marcada}}marcada{{/if}}">
+            <label class="op2-invm__marcar">
+              <input type="checkbox" data-enviar="{{id}}" {{#if marcada}}checked{{/if}} {{#if @root.enviado}}disabled{{/if}}>
+              <span class="op2-invm__dt">DT {{dt}}</span>
+            </label>
+            <div class="op2-invm__texto">
+              {{{texto}}}
+              <span class="op2-invm__marcas">
+                {{#if oculta}}<span class="op2-invm__marca op2-invm__marca--oculta"><i class="fa-solid fa-eye-slash" aria-hidden="true"></i> {{localize "OP2.Investigar.Mestre.Oculta"}}</span>{{/if}}
+                {{#if aberta}}<span class="op2-invm__marca"><i class="fa-solid fa-eye" aria-hidden="true"></i> {{localize "OP2.Investigar.Mestre.Aberta"}}</span>{{/if}}
+                {{#if conhecida}}<span class="op2-invm__marca"><i class="fa-solid fa-check" aria-hidden="true"></i> {{localize "OP2.Investigar.Mestre.JaSabe"}}</span>{{/if}}
+                {{#if trancada}}<span class="op2-invm__marca"><i class="fa-solid fa-lock" aria-hidden="true"></i> {{localize "OP2.Investigar.Mestre.Trancada"}}</span>{{/if}}
+              </span>
+            </div>
+            <button type="button" class="op2-botao-icone op2-invm__olho" data-action="alternarOculta" data-id="{{id}}"
+              data-tooltip="{{#if oculta}}{{localize 'OP2.Investigar.Mestre.Revelar'}}{{else}}{{localize 'OP2.Investigar.Mestre.Ocultar'}}{{/if}}"
+              aria-label="{{#if oculta}}{{localize 'OP2.Investigar.Mestre.Revelar'}}{{else}}{{localize 'OP2.Investigar.Mestre.Ocultar'}}{{/if}}">
+              <i class="fa-solid {{#if oculta}}fa-eye-slash{{else}}fa-eye{{/if}}" aria-hidden="true"></i>
+            </button>
+          </li>
+        {{/each}}
+      </ul>
+    {{/if}}
+  {{/each}}
+
+  <footer class="op2-invm__rodape">
+    {{#if enviado}}
+      <p class="op2-ajuda">{{localize "OP2.Investigar.Mestre.JaEnviado"}}</p>
+    {{else}}
+      <span class="op2-invm__contagem" data-contagem>{{contagem}}</span>
+      <button type="button" class="op2-botao" data-action="enviar">
+        <i class="fa-solid fa-paper-plane" aria-hidden="true"></i> {{rotuloEnviar}}
+      </button>
+    {{/if}}
+  </footer>
+</div>

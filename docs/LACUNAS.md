@@ -16,6 +16,29 @@ de ações de investigação diz **Intuição**.
 **Default:** `pesquisar`. Setting `compartilharPericia`.
 Vale reportar no formulário de feedback do playtest.
 
+### Tabela-resumo do Beta: sem Observar, e Interagir no lugar errado (spec §6.3)
+
+O passo a passo do Investigar (Beta) tem **Observar** e **Examinar** no passo 3 e
+**Interagir** como alternativa a Investigar no passo 2. A tabela-resumo lista só
+Examinar e Interagir, os dois como subitens de Investigar e na mesma linha de nível.
+**Decisão:** vale o passo a passo (texto normativo). Observar existe, sem rolagem e
+sem custo; Interagir sai do passo 2. Vale reportar no feedback do playtest.
+
+### Examinar no Beta: o que é "informação nova" (spec §6.3.1)
+
+O passo 2 já entregou tudo com DT ≤ dado. **Decisão:** nova é a linha da perícia do
+passo 2 com DT ≤ resultado que **este personagem** ainda não tinha — de qualquer rodada.
+Rolar abaixo do próprio dado é nada novo, e perde 1 PD. No Alpha só custava quando
+passivo e teste vinham os dois vazios. Crítico segue revelando o que falta da perícia
+(spec §4.3).
+
+### Linha oculta enviada pelo mestre
+
+"Oculta" (antes "Rascunho") é a linha que nenhuma busca acha — a condição do livro que
+ainda não aconteceu (*se portar a runa*). A janela do mestre no Investigar mostra as
+ocultas desmarcadas; **marcar e enviar entrega a linha só àquele personagem, e ela
+continua oculta para os outros.** Revelar (o olho) é que a torna descobrível para todos.
+
 ### Sobrecarga mental na rodada 9+ (spec §7.6)
 
 A diagramação da linha "9 ou mais" comporta mais de uma leitura. A mais provável é

@@ -38,7 +38,7 @@ function quadroAlcancavel(_ator, poi) {
 }
 
 /** @returns {Promise<Item|null>} */
-async function carregarPoi(poiUuid) {
+export async function carregarPoi(poiUuid) {
   const poi = await fromUuid(poiUuid);
   if (poi?.type !== "ponto-interesse") {
     ui.notifications.warn(game.i18n.localize("OP2.Aviso.POIAusente"));
@@ -171,7 +171,7 @@ registrarAcaoDeMestre("contarLinha", async ({ uuid, infoId, atorId }) => {
   });
 });
 
-async function gravarRevelacoes(ator, poiUuid, idsNovos, { investigado = false } = {}) {
+export async function gravarRevelacoes(ator, poiUuid, idsNovos, { investigado = false } = {}) {
   const estado = ator.system.estado;
   const atualizacao = {
     "system.estado.infosReveladas": [...estado.infosReveladas, ...idsNovos.map((id) => chaveInfo(poiUuid, id))],
@@ -183,13 +183,13 @@ async function gravarRevelacoes(ator, poiUuid, idsNovos, { investigado = false }
 }
 
 /** A informação é de quem descobriu (spec §6.2): sussurro para o dono e o mestre. */
-function sussurroPara(ator) {
+export function sussurroPara(ator) {
   return game.users
     .filter((u) => u.isGM || ator.testUserPermission(u, "OWNER"))
     .map((u) => u.id);
 }
 
-function editorDeTexto() {
+export function editorDeTexto() {
   return foundry.applications?.ux?.TextEditor?.implementation ?? TextEditor;
 }
 
@@ -360,7 +360,7 @@ export async function examinar(ator, poiUuid, chavePericia, { rapido = false } =
  * Habilidades que devolvem PD ao descobrir (`efeito.pdAoDescobrir`): soma o que todas
  * concedem, respeitando o máximo. Devolve o que foi recuperado para o card, ou null.
  */
-async function recuperarPdAoDescobrir(ator) {
+export async function recuperarPdAoDescobrir(ator) {
   const habilidades = ator.items.filter((i) => i.type === "habilidade" && (i.system.efeito?.pdAoDescobrir ?? 0) > 0);
   if (!habilidades.length) return null;
   const { value, max } = ator.system.recursos.pd;
@@ -393,7 +393,7 @@ export async function interagir(ator, poiUuid) {
   }
 
   const quemInterage = game.i18n.format("OP2.Investigacao.InteragirQuem", { ator: ator.name, poi: poi.name });
-  await enviarCard(ator, "interagir", { poiNome: poi.name, quemInterage, soMestre: false });
+  await enviarCard(ator, "interagir", { poiNome: poi.name, quemInterage, soMestre: false, atorId: ator.id, poiUuid: poi.uuid });
 
   const contextual = poi.system.descricaoContextual?.trim() ?? "";
   return enviarCardAoMestre(ator, "interagir", {
@@ -401,6 +401,23 @@ export async function interagir(ator, poiUuid) {
     quemInterage,
     soMestre: true,
     descricaoContextual: contextual ? await editorDeTexto().enrichHTML(contextual, { relativeTo: poi }) : "",
+  });
+}
+
+/**
+ * "Solicitar teste" do card do Interagir (só o mestre vê): o livro deixa o mestre
+ * narrar OU pedir um teste. Abre a janela do menu do mestre com quem agiu, a primeira
+ * perícia do quadro do ponto (Percepção se não houver) e o motivo preenchidos.
+ */
+export async function solicitarTesteDoInteragir(ator, poiUuid) {
+  if (!game.user.isGM) return;
+  const poi = await fromUuid(poiUuid);
+  const { periciasParaInvestigar } = await import("./investigacao.mjs");
+  const chave = poi ? (periciasParaInvestigar(poi.system.informacoes)[0] ?? "percepcao") : "percepcao";
+  const { solicitarTeste } = await import("../ui/ferramentas-testes.mjs");
+  await solicitarTeste({
+    atorId: ator.id, chave,
+    motivo: `${game.i18n.localize("OP2.Investigacao.Interagir")} — ${poi?.name ?? ""}`,
   });
 }
 

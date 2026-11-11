@@ -243,9 +243,9 @@
         "termometro": "Differential Thermometer"
       },
       "Visibilidade": {
-        "rascunho": "Draft — players can't see it and Examine never finds it. Click to make it discoverable.",
-        "descobrivel": "Discoverable — only by Examining with the skill and meeting the DT. Click to open it to everyone.",
-        "aberta": "Open — every player sees it without spending an action. Click to return to draft."
+        "rascunho": "Hidden — players can't see it, and no investigation, test or analysis finds it. It only shows up when you change its state (or send it from the Investigate window). Click to make it discoverable.",
+        "descobrivel": "Discoverable — only reaches whoever investigates with the skill and meets the DT. Click to open it to everyone.",
+        "aberta": "Open — every player sees it without spending an action. Click to hide it."
       },
       "LaboratorioDados": "Portable Lab dice",
       "LaboratorioDadosAjuda": "How many dice the Lab ladder rolls at this point (4 to 6) — the book's \"minimum sequence\". The app uses it as the default.",
@@ -329,8 +329,8 @@
       "CriticoExaminar": "reveals what was left for this skill, ignoring the DT.",
       "EventoNarracao": "Narration (for the players)",
       "EventoEfeito": "Effect (GM only)",
-      "InteragirDica": "Act on the point with no test. The GM narrates what happens.",
-      "InteragirAguarde": "No test. The GM narrates what happens.",
+      "InteragirDica": "Act on the point. The GM narrates what happens or asks for a test. Interacting ends your turn.",
+      "InteragirAguarde": "The GM narrates what happens or asks for a test.",
       "InteragirSoMestre": "Only you can see this — the contextual description is the GM's. Narrate the outcome to the table.",
       "InteragirSemContextual": "This point has no contextual description. Narrate by common sense.",
       "ExaminarGratisTambem": "{quantidade} more lines came without rolling (DC within the size of your die).",
@@ -344,7 +344,8 @@
       "ContadaPor": "Told to the group by {nomes}",
       "ContouAoGrupo": "{ator} told the group",
       "ContadaVisivel": "The clue now shows on every participant's panel.",
-      "ContarSoQuemAchou": "Only whoever found the clue can tell it to the group."
+      "ContarSoQuemAchou": "Only whoever found the clue can tell it to the group.",
+      "InteragirSolicitarTeste": "Request a test"
     },
     "Dialog": {
       "Teste": {
@@ -508,7 +509,7 @@
         "ComPistas": "With clues",
         "ComPistasDica": "Some line has already reached you",
         "Esgotados": "Exhausted",
-        "EsgotadosDica": "Every line (drafts aside) has reached someone",
+        "EsgotadosDica": "Every line (hidden ones aside) has reached someone",
         "NoMapa": "On the map",
         "NoMapaDica": "With a marker on the open scene",
         "SemMarcador": "No marker",
@@ -1175,7 +1176,11 @@
       "OpostoProntidaoDica": "Spend 2 SP (Readiness ability) to reroll one die on this side.",
       "OpostoProntidaoNota": "{nome} rerolled {antes} → {depois}",
       "OpostoResolver": "Resolve the tie",
-      "OpostoResolvido": "Tie resolved."
+      "OpostoResolvido": "Tie resolved.",
+      "BuscarFicha": "Search sheets…",
+      "SoNaCena": "Only those in the scene",
+      "SemPasta": "No folder",
+      "Criatura": "Creature"
     },
     "Pavor": {
       "Dado": "Dado de pavor",
@@ -2020,7 +2025,7 @@
       "Criar": "Create",
       "ExcluirDesafio": "Delete challenge (for good)",
       "AcoesImpedidas": "Access locked: resolve the access challenge to interact with or examine this point.",
-      "SoOLadoDeFora": "Access locked: resolve the access challenge to interact. Examine only reaches the outside.",
+      "SoOLadoDeFora": "Access locked: resolve the access challenge to interact. Investigating only reaches the outside.",
       "ImpedidoDica": "Blocked: access to this point is locked by a challenge.",
       "Resolver": "Resolve access challenge",
       "ResolverDica": "Try to overcome this point's obstacle (break in, unlock…).",
@@ -2272,6 +2277,74 @@
       "Esperando": "The turn order starts when the phase declaration ends.",
       "AindaDeclarando": "Wait for the phase declaration to end.",
       "AgiuAntes": "{nome} stops waiting and acts now, before {alvo}."
+    },
+    "Investigar": {
+      "Titulo": "Investigate",
+      "BotaoDica": "Investigate the point: pick a skill; the GM narrates what your die reaches, no roll. Then Observe or Examine.",
+      "PodeInvestigar": "{ator} is investigating {poi}. They can investigate with:",
+      "EscolhaUma": "Pick ONE skill. Nobody rolls: the GM narrates what your die reaches.",
+      "SemPericias": "{ator} investigates {poi}, but nothing here is investigated with a skill. The GM narrates whatever there is.",
+      "Passo2": "Investigate with {pericia} d{dado}",
+      "Observando": "Observe with {pericia} d{dado}",
+      "AguardandoMestre": "Waiting for the GM…",
+      "AbrirJanela": "Open the GM window",
+      "NadaPassivo": "No information with this die.",
+      "Passo3": "Deeper investigation — pick one:",
+      "Observar": "Observe with another skill",
+      "ObservarDica": "Another skill from the list, also without rolling and at no cost.",
+      "SemOutraPericia": "There is no other skill on the list to Observe with.",
+      "Examinar": "Examine with {pericia}",
+      "ExaminarDica": "A test of the skill you used: you get what the result reaches.",
+      "AvisoPD": "If you find no new information, you lose 1 SP.",
+      "EscolhaObservar": "Observe — pick another skill:",
+      "Examinando": "Examining with {pericia}…",
+      "ExaminarNada": "No new information.",
+      "PdPago": "{ator} lost 1 SP.",
+      "Fim": "End of the action: {ator}'s turn ends.",
+      "Mestre": {
+        "Titulo": "Investigate — GM window",
+        "Cabecalho": "{ator} investigates {poi} with {pericia} d{dado}",
+        "ModoPassivo": "Step 2 · passive",
+        "ModoObservar": "Observe",
+        "Ajuda": "What the die reaches comes checked. Uncheck what won't go, check what you want to add (even a hidden line) and send. The eye changes the line's state on the point: a hidden line shows up for nobody until you reveal it.",
+        "Contextual": "Contextual description",
+        "Nenhuma": "The point has no line for this skill.",
+        "Alcanca": "Within reach of the d{dado}",
+        "Acima": "Above the d{dado}",
+        "Oculta": "Hidden",
+        "Aberta": "Open to everyone",
+        "JaSabe": "Already knows",
+        "Trancada": "Inside the lock",
+        "Ocultar": "Hide from players",
+        "Revelar": "Make discoverable",
+        "Marcadas": "{n} to send",
+        "Enviar": "Send to {ator} in chat",
+        "EnviarNada": "Send \"nothing found\" to {ator}",
+        "JaEnviado": "Already sent to the player."
+      }
+    },
+    "RegrasInvestigacao": {
+      "Titulo": "How to investigate",
+      "Botao": "Rules",
+      "BotaoDica": "Investigation rules summary",
+      "Intro": "On your turn, pick one action. The main one is investigating a point of interest, in three steps:",
+      "Passo1Titulo": "1 · Pick a point",
+      "Passo1": "Pick a point of interest in the scene. The GM describes what you see there.",
+      "Passo2Titulo": "2 · Investigate or Interact",
+      "Investigar": "The GM lists the point's skills. Pick one and say your die in it: without rolling, you get every piece of information for that skill your die reaches.",
+      "Interagir": "A simple action with the point (open, move, look behind). The GM narrates the result or asks for a test. Your turn ends here.",
+      "Passo3Titulo": "3 · Go deeper (after Investigating)",
+      "ObservarTitulo": "Observe",
+      "Observar": "Pick another skill from the list and say your die. Like step 2: no roll and no cost.",
+      "Examinar": "A test of the step 2 skill. You get what the result reaches. Nothing new: lose {custo} SP.",
+      "Passo3Fim": "Observe or Examine, never both — after either one, your turn ends.",
+      "OutrasTitulo": "Other investigation actions",
+      "Recapitular": "Recap in character what the group already knows. If the GM accepts it, an Intuition test (DT {dt}) for a new clue. After a success, nobody repeats it this scene.",
+      "Compartilhar": "Explain to an ally a clue you found this scene. They test {pericia} (DT {dt}) as a free action for a new clue. After a success, nobody repeats it this scene.",
+      "RecursoTitulo": "Use abilities and items",
+      "Recurso": "The GM decides whether the ability or item helps the investigation and what it does — usually one more step on the test.",
+      "Rodape": "The other actions in this window (Help, Attack, challenges, tools) follow their own rules.",
+      "AbrirJunto": "Open together with the Investigation actions"
     }
   }
 }

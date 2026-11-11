@@ -103,18 +103,21 @@ mesa, e a rodada de agora vira a rodada 0 dele; daí em diante "Nova rodada" põ
 o que o roteiro tiver para aquela rodada do evento. A ficha do evento tem o gatilho, a
 descrição e o roteiro rodada a rodada.
 
-**Não existe uma ação "Investigar".** Investigar um ponto é **Examinar** ou
-**Interagir** — as duas sub-ações em que a ação se resolve. Examinar faz os dois passos
-da regra com a mesma perícia:
+**Investigar segue o playtest Beta, em três passos, num card só do chat.**
 
-1. **sem rolar**, entrega tudo com DT ≤ ao tamanho do seu dado;
-2. **rolando**, tenta o que ficou acima disso.
+1. O jogador clica **Investigar** no ponto: o card lista as perícias do quadro, com o
+   dado dele em cada uma — sem DT e sem dizer quantas informações há.
+2. Ele escolhe **uma**. Ninguém rola: abre para o mestre uma janela com as linhas
+   daquela perícia, já marcado o que o dado alcança. O mestre desmarca, inclui (até
+   linha oculta), muda o estado das linhas e **envia** — e o card do jogador mostra.
+3. O jogador escolhe **Observar** (outra perícia, de novo pela janela do mestre, sem
+   rolar e sem custo) **ou Examinar** (rola a perícia do passo 2; chega o que o
+   resultado alcançar; **nada novo = perde 1 PD**). Escolher um tira o outro.
 
-Achou uma linha por qualquer dos dois passos, o card diz **sucesso** e de onde ela
-veio. Só custa 1 PD quando os dois vêm vazios — e aí o card diz por quê (a perícia não
-serve ali, o dado é pequeno, ou já se descobriu tudo). **Interagir** é agir sobre o
-ponto sem teste: a mesa vê que o personagem agiu, e só o mestre recebe a descrição
-contextual, num card que avisa que é só dele — ele narra o que acontece.
+**Interagir** é agir sobre o ponto: a mesa vê que o personagem agiu, só o mestre recebe
+a descrição contextual — e o card tem **Solicitar teste** (só do mestre), que abre a
+janela do menu do mestre já com quem agiu e uma perícia do ponto. Ao abrir as **Ações
+de investigação**, uma janela ao lado resume essas regras, com uma cor por passo.
 
 ![Card de Examinar](docs/img/card-examinar.png)
 
@@ -122,8 +125,8 @@ Cada linha do quadro de informações tem **três estados**, num clique só do m
 
 | Ícone | Estado | O que significa |
 |---|---|---|
-| 👁️‍🗨️ | Rascunho | O jogador não vê, e Examinar nunca encontra |
-| 🔍 | Descobrível | Só quem examinar com a perícia e alcançar a DT |
+| 👁️‍🗨️ | Oculta | O jogador não vê, e nenhuma investigação acha — só chega pela janela do mestre |
+| 🔍 | Descobrível | Só quem investigar com a perícia e alcançar a DT |
 | 👁️ | Aberta | Todo jogador vê, sem gastar ação |
 
 A pista é **de quem achou**: revelada para aquele personagem, sussurrada no chat para
@@ -242,7 +245,7 @@ playtest e no PDF gratuito — e quando a editora publicar outra, o
 [roteiro de revisão](.claude/skills/revisar-extrator/SKILL.md) diz como conferir.
 
 As condições do livro — *apenas Victor*, *se o ídolo for quebrado* — abrem o texto da
-linha e a deixam como **rascunho**: Examinar não alcança, o mestre libera quando a
+linha e a deixam **oculta**: Examinar não alcança, o mestre libera quando a
 condição acontece. *Medicina ou Sobrevivência* não é condição, é perícia alternativa, e
 a linha segue descobrível.
 

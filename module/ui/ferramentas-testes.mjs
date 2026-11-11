@@ -13,6 +13,7 @@ import { periciaVisivel, aptidaoVisivel } from "../settings/pericias.mjs";
 import { registrarAcaoDeMestre, comoMestre } from "./socket.mjs";
 import { registrarAcaoDeChat } from "./chat.mjs";
 import { iniciarEquilibrio } from "../cena/equilibrio.mjs";
+import { agruparPorPasta, atorPassaNoFiltro } from "./lista-atores.mjs";
 
 const { DialogV2 } = foundry.applications.api;
 const L = (chave) => game.i18n.localize(`OP2.Ferramentas.${chave}`);
@@ -94,10 +95,26 @@ function rotuloDesfecho(resultado) {
 /* Bloco do participante nos diálogos                                   */
 /* ------------------------------------------------------------------ */
 
+const CHAVE_SO_CENA = "op2.participantes.soCena";
+const lerSoCena = () => { try { return window.localStorage.getItem(CHAVE_SO_CENA) === "1"; } catch { return false; } };
+const gravarSoCena = (v) => { try { window.localStorage.setItem(CHAVE_SO_CENA, v ? "1" : "0"); } catch { /* sem storage */ } };
+/** Atores com token na cena aberta (o "Só quem está na cena"). */
+const idsNaCena = () => new Set((canvas?.scene?.tokens ?? []).map((t) => t.actorId).filter(Boolean));
+
+/** As opções de ficha agrupadas pelas pastas da barra de atores (`<optgroup>` por pasta). */
+function opcoesDeAtores(atores, atorId) {
+  const pastas = (game.folders?.filter((f) => f.type === "Actor") ?? [])
+    .map((f) => ({ id: f.id, name: f.name, parentId: f.folder?.id ?? null, sort: f.sort ?? 0 }));
+  const grupos = agruparPorPasta(atores.map((a) => ({ id: a.id, name: a.name, folderId: a.folder?.id ?? null, ator: a })), pastas,
+    { semPasta: L("SemPasta") });
+  const opcao = ({ ator: a }) => `<option value="${a.id}" data-nome="${esc(a.name)}" ${a.id === atorId ? "selected" : ""}>${esc(a.name)}${a.type === "npc" ? " (NPC)" : a.type === "criatura" ? ` (${L("Criatura")})` : ""}</option>`;
+  return grupos.map((g) => `<optgroup label="${esc(g.rotulo)}">${g.atores.map(opcao).join("")}</optgroup>`).join("");
+}
+
 function blocoParticipante({ id, titulo, atores, atorId, chave, comDT = false, dt = "" }) {
   const ator = game.actors.get(atorId);
-  const opcoesAtor = `<option value="">${L("SelecionePersonagem")}</option>${atores
-    .map((a) => `<option value="${a.id}" ${a.id === atorId ? "selected" : ""}>${esc(a.name)}${a.type === "npc" ? " (NPC)" : a.type === "criatura" ? " (Criatura)" : ""}</option>`).join("")}`;
+  const opcoesAtor = `<option value="">${L("SelecionePersonagem")}</option>${opcoesDeAtores(atores, atorId)}`;
+  const temCena = idsNaCena().size > 0;
   const opcoesTeste = ator
     ? opcoesDePericia(chavesDoAtor(ator), ator, chave)
     : `<option value="">${L("SelecioneTeste")}</option>`;
@@ -105,6 +122,11 @@ function blocoParticipante({ id, titulo, atores, atorId, chave, comDT = false, d
     <span class="op2-part__titulo">${esc(titulo)}</span>
     <img class="op2-part__img" src="${esc(ator?.img ?? IMG_PADRAO)}" alt="">
     <strong class="op2-part__nome">${esc(ator?.name ?? L("NenhumParticipante"))}</strong>
+    <div class="op2-part__filtro">
+      <input type="search" data-part-busca="${id}" placeholder="${L("BuscarFicha")}" aria-label="${L("BuscarFicha")}">
+      <label class="op2-part__cena"><input type="checkbox" data-part-cena="${id}" ${temCena && lerSoCena() ? "checked" : ""} ${temCena ? "" : "disabled"}>
+        <span>${L("SoNaCena")}</span></label>
+    </div>
     <label>${L("Personagem")}<select name="ator${id}" data-part-ator="${id}">${opcoesAtor}</select></label>
     <label>${L("Teste")}<select name="pericia${id}" data-part-teste="${id}" ${ator ? "" : "disabled"}>${opcoesTeste}</select></label>
     ${comDT ? `<label>${L("DtOpcional")}<input type="number" name="dt" min="1" value="${dt}" placeholder="—"></label>` : ""}
@@ -137,6 +159,25 @@ function ligarParticipante(raiz, id, aoMudar = () => {}) {
     atualizarResumo();
   });
   selTeste.addEventListener("change", atualizarResumo);
+
+  // Busca e "Só quem está na cena": escondem opções (a escolhida fica sempre à vista)
+  // e o grupo da pasta que ficar vazio.
+  const busca = raiz.querySelector(`[data-part-busca="${id}"]`);
+  const soCena = raiz.querySelector(`[data-part-cena="${id}"]`);
+  const filtrar = () => {
+    const filtro = { termo: busca?.value ?? "", soCena: Boolean(soCena?.checked), idsNaCena: idsNaCena() };
+    for (const opcao of selAtor.querySelectorAll("option[value]:not([value=''])")) {
+      opcao.hidden = opcao.value !== selAtor.value
+        && !atorPassaNoFiltro({ id: opcao.value, name: opcao.dataset.nome }, filtro);
+    }
+    for (const grupo of selAtor.querySelectorAll("optgroup")) {
+      grupo.hidden = ![...grupo.querySelectorAll("option")].some((o) => !o.hidden);
+    }
+  };
+  busca?.addEventListener("input", filtrar);
+  soCena?.addEventListener("change", () => { gravarSoCena(soCena.checked); filtrar(); });
+  selAtor.addEventListener("change", filtrar);
+  filtrar();
 }
 
 const cabecalhoDialogo = (titulo, subtitulo) =>
@@ -164,10 +205,17 @@ function htmlSolicitacao(dados) {
   </div>`;
 }
 
-export async function solicitarTeste() {
+/**
+ * Solicitar teste. Sem argumentos é o botão do menu do mestre; o card do Interagir
+ * abre a mesma janela já com quem agiu, uma perícia do ponto e o motivo — o mestre
+ * troca o que quiser antes de criar.
+ * @param {{atorId?: string, chave?: string, motivo?: string}} [padroes]
+ */
+export async function solicitarTeste({ atorId = null, chave = "atletismo", motivo = "" } = {}) {
   const atores = personagens();
   if (!atores.length) return void ui.notifications.warn(L("SemPersonagens"));
-  const padrao = selecionados().find((a) => a.type === "personagem")?.id
+  const padrao = (atorId && atores.some((a) => a.id === atorId) ? atorId : null)
+    ?? selecionados().find((a) => a.type === "personagem")?.id
     ?? atores.find((a) => a.hasPlayerOwner)?.id ?? atores[0].id;
 
   const resposta = await DialogV2.wait({
@@ -175,8 +223,8 @@ export async function solicitarTeste() {
     classes: ["op2", "op2-dlg", "op2-dlg--solicitar"],
     position: { width: 460 },
     content: `${cabecalhoDialogo(L("SolicitarTeste"), L("SolicitarSub"))}
-      ${blocoParticipante({ id: "A", titulo: L("Participante"), atores, atorId: padrao, chave: "atletismo", comDT: true, dt: lerConfig("dtPadrao") })}
-      <label class="op2-dlg__motivo">${L("Motivo")}<input type="text" name="motivo" placeholder="${L("MotivoDica")}"></label>`,
+      ${blocoParticipante({ id: "A", titulo: L("Participante"), atores, atorId: padrao, chave, comDT: true, dt: lerConfig("dtPadrao") })}
+      <label class="op2-dlg__motivo">${L("Motivo")}<input type="text" name="motivo" value="${esc(motivo)}" placeholder="${L("MotivoDica")}"></label>`,
     render: (_evento, dialogo) => ligarParticipante(dialogo.element ?? dialogo, "A"),
     buttons: [
       {

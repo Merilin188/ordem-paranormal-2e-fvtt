@@ -66,11 +66,15 @@ permanentes). **v13 e v14 exercitados pelo e2e** (13.351: 532 verificações; 14
   mexer no default do setting: o core só registra `core.language` *depois* do hook
   `init` e resolve o idioma logo em seguida, sem hook no meio. A interface do próprio
   Foundry só fica em português com o módulo `pt-BR`, que o manifesto recomenda.
-- **Não existe ação "Investigar".** Investigar um ponto é Examinar ou Interagir (spec
-  §6.3). `examinar()` faz os dois passos: entrega de graça o que o tamanho do dado
-  alcança e rola pelo resto; só custa 1 PD quando os dois vêm vazios.
-- **Três estados por linha do quadro:** rascunho (`oculta`), descobrível (padrão, o
-  único que Examinar acha) e aberta (`aberta`, o jogador vê sem gastar ação). A pista é
+- **Investigar é a do playtest Beta, em três passos** (spec §6.3, `cena/investigar.mjs`).
+  Um card só no chat: o jogador escolhe UMA perícia do ponto (sem DT); o mestre recebe a
+  janela com as linhas dela, marcado o que o dado alcança, e envia; depois o jogador
+  escolhe **Observar** (outra perícia, sem rolar) **ou Examinar** (rola a do passo 2) —
+  um tira o outro, e a ação acaba. Examinar perde 1 PD quando nada é novo; o passivo não
+  conta. `examinar()` (passivo + rolagem juntos, o Alpha) fica só para macro.
+- **Três estados por linha do quadro:** oculta (`oculta`; na tela "Oculta" — antes
+  "Rascunho"), descobrível (padrão, o único que Examinar acha) e aberta (`aberta`, o
+  jogador vê sem gastar ação). Oculta só chega a alguém pela janela do mestre. A pista é
   de quem achou (revelação por personagem); **contar ao grupo** (`contadaPor`) é o
   jogador tornando a dele visível para a mesa — vale como aberta, com o nome dele. Não
   é a ação Compartilhar (spec §6.5), que é o teste do aliado por uma pista nova.

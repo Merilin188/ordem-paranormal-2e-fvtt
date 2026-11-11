@@ -1,0 +1,49 @@
+{{!-- Resumo das regras de investigação (Beta). Cada passo do Investigar tem uma cor,
+      como na tabela do livro; o texto é resumo do sistema. --}}
+<div class="op2-regras-inv__corpo">
+  <p class="op2-ajuda">{{localize "OP2.RegrasInvestigacao.Intro"}}</p>
+
+  <section class="op2-regras-inv__passo op2-regras-inv__passo--1">
+    <h3>{{localize "OP2.RegrasInvestigacao.Passo1Titulo"}}</h3>
+    <p>{{localize "OP2.RegrasInvestigacao.Passo1"}}</p>
+  </section>
+
+  <section class="op2-regras-inv__passo op2-regras-inv__passo--2">
+    <h3>{{localize "OP2.RegrasInvestigacao.Passo2Titulo"}}</h3>
+    <div class="op2-regras-inv__colunas">
+      <div><h4><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> {{localize "OP2.Investigar.Titulo"}}</h4>
+        <p>{{localize "OP2.RegrasInvestigacao.Investigar"}}</p></div>
+      <div><h4><i class="fa-solid fa-hand-pointer" aria-hidden="true"></i> {{localize "OP2.Investigacao.Interagir"}}</h4>
+        <p>{{localize "OP2.RegrasInvestigacao.Interagir"}}</p></div>
+    </div>
+  </section>
+
+  <section class="op2-regras-inv__passo op2-regras-inv__passo--3">
+    <h3>{{localize "OP2.RegrasInvestigacao.Passo3Titulo"}}</h3>
+    <div class="op2-regras-inv__colunas">
+      <div><h4><i class="fa-solid fa-eye" aria-hidden="true"></i> {{localize "OP2.RegrasInvestigacao.ObservarTitulo"}}</h4>
+        <p>{{localize "OP2.RegrasInvestigacao.Observar"}}</p></div>
+      <div><h4><i class="fa-solid fa-dice" aria-hidden="true"></i> {{localize "OP2.Investigacao.Examinar"}}</h4>
+        <p>{{localize "OP2.RegrasInvestigacao.Examinar" custo=custo}}</p></div>
+    </div>
+    <p class="op2-regras-inv__fim">{{localize "OP2.RegrasInvestigacao.Passo3Fim"}}</p>
+  </section>
+
+  <section class="op2-regras-inv__outras">
+    <h3>{{localize "OP2.RegrasInvestigacao.OutrasTitulo"}}</h3>
+    <dl>
+      <dt><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i> {{localize "OP2.Investigacao.Recapitular"}}</dt>
+      <dd>{{localize "OP2.RegrasInvestigacao.Recapitular" dt=dtRecapitular}}</dd>
+      <dt><i class="fa-solid fa-share-nodes" aria-hidden="true"></i> {{localize "OP2.Investigacao.Compartilhar"}}</dt>
+      <dd>{{localize "OP2.RegrasInvestigacao.Compartilhar" pericia=periciaCompartilhar dt=dtCompartilhar}}</dd>
+      <dt><i class="fa-solid fa-wand-sparkles" aria-hidden="true"></i> {{localize "OP2.RegrasInvestigacao.RecursoTitulo"}}</dt>
+      <dd>{{localize "OP2.RegrasInvestigacao.Recurso"}}</dd>
+    </dl>
+    <p class="op2-ajuda">{{localize "OP2.RegrasInvestigacao.Rodape"}}</p>
+  </section>
+
+  <label class="op2-campo op2-campo--inline op2-regras-inv__abrir">
+    <input type="checkbox" data-abrir-junto {{#if abrirJunto}}checked{{/if}}>
+    <span>{{localize "OP2.RegrasInvestigacao.AbrirJunto"}}</span>
+  </label>
+</div>

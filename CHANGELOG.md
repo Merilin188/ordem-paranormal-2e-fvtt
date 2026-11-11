@@ -5,6 +5,19 @@ Versões seguem [SemVer](https://semver.org/lang/pt-BR/).
 
 ## [Não publicado]
 
+- **Investigar do playtest Beta**, em três passos num card só do chat: as perícias do
+  ponto sem DT; a perícia escolhida abre para o mestre uma janela com as linhas dela,
+  marcado o que o dado alcança — ele desmarca, inclui (até oculta), muda o estado e
+  envia; depois **Observar** (outra perícia, sem rolar) **ou Examinar** (rola; nada novo
+  = perde 1 PD, sem contar o passivo). "Contar ao grupo" segue igual.
+- O estado "Rascunho" das linhas passa a se chamar **Oculta** na tela.
+- **Interagir** ganha "Solicitar teste" no card (só do mestre), com quem agiu e uma
+  perícia do ponto preenchidos.
+- **Resumo das regras de investigação** ao lado das Ações de investigação (botão
+  "Regras"; dá para não abrir junto).
+- **Solicitar teste e Teste oposto:** a lista de fichas segue as pastas da barra de
+  atores, com busca e "Só quem está na cena".
+- **Prontidão: aguardar pra agir** no combate, com a janela verde "Agir agora".
 - Rolagem sem a opção `rollMode` no `toMessage`: o core aplica o modo do usuário nas duas
   versões, e no v14 a opção estava depreciada (aviso a cada rolagem).
 - A release no GitHub traz como corpo a seção da versão no CHANGELOG e a linha de

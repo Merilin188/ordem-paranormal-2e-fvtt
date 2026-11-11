@@ -332,14 +332,23 @@ Modelo sugerido — POI como Item de tipo `ponto-interesse` (ou JournalEntryPage
 
 ### 6.3 Ação: INVESTIGAR
 
-Ação importante. Passo a passo:
+Ação importante. **Playtest Beta** — três passos (o Alpha punha Examinar e Interagir
+como as duas saídas do mesmo passo):
 
-1. Escolhe um POI.
-2. Mestre narra a descrição básica (primeira vez; depois é opcional) e **lista as perícias disponíveis no quadro**.
-3. Jogador **escolhe uma perícia e declara seu valor** (tamanho do dado).
-4. Mestre entrega **todas as informações daquela perícia cuja DT ≤ valor da perícia**. **Sem rolagem.**
-5. Em seguida, o jogador pode **Examinar** ou **Interagir**. Isso encerra a ação.
-6. Em rodadas seguintes pode reinvestigar o mesmo POI com outra perícia — ou a mesma, para tentar examinar de novo.
+1. **Ponto de interesse.** Escolhe um POI; o mestre narra a descrição básica (primeira vez; depois é opcional).
+2. **Investigar ou Interagir.**
+   - *Investigar:* o mestre **lista as perícias do quadro**; o jogador escolhe **uma** e declara o seu valor (tamanho do dado). O mestre narra **todas as informações daquela perícia com DT ≤ valor**. **Sem rolagem.** Segue para o passo 3.
+   - *Interagir* (§6.3.2): ação simples com o ponto. O turno acaba.
+3. **Investigação aprofundada** (só depois de Investigar) — **Observar OU Examinar**, nunca os dois:
+   - *Observar:* **outra** perícia listada, mesma leitura do passo 2 (valor contra DT, sem rolar, sem custo).
+   - *Examinar* (§6.3.1): teste da perícia do passo 2.
+   - Depois de qualquer um, o turno acaba.
+4. Em rodadas seguintes pode reinvestigar o mesmo POI com outra perícia — ou a mesma.
+
+> **No sistema** (`module/cena/investigar.mjs`): um card só no chat conduz os três passos.
+> O passo 2 e o Observar passam pela **janela do mestre**, que mostra todas as linhas da
+> perícia (inclusive as ocultas e as acima do dado), com o que o dado alcança já marcado;
+> o mestre desmarca, inclui, muda o estado da linha e envia ao jogador.
 
 > **Ponto de atenção para a implementação.** Há duas comparações distintas contra a mesma coluna DT:
 > - **Passo 4 (automático):** compara `dieFaces(pericia)` — 4, 6, 8, 10, 12 — contra a DT. Determinístico.
@@ -349,19 +358,20 @@ Ação importante. Passo a passo:
 
 #### 6.3.1 Sub-ação: EXAMINAR
 
-- Faz o **teste da perícia escolhida**.
+- Faz o **teste da perícia escolhida no passo 2**.
 - Se o resultado ≥ DT de uma informação **ainda não recebida**, recebe essa informação.
-- **Se não receber nenhuma informação nova — por não atingir a DT ou por não haver mais nada — perde 1 PD.**
+- **Se não receber nenhuma informação nova — por não atingir a DT, por rolar abaixo do próprio dado ou por não haver mais nada — perde 1 PD.** O que o passo 2 entregou já foi recebido e não conta como novo (no Alpha só custava quando passivo e teste vinham os dois vazios).
 
 Essa penalidade é o coração econômico da investigação: examinar é uma aposta. O system deve deixar isso explícito na UI antes da confirmação.
 
 #### 6.3.2 Sub-ação: INTERAGIR
 
 - Jogador descreve uma ação simples com o POI (tirar o quadro da parede, abrir a gaveta).
-- Mestre resolve pela **descrição contextual**.
-- Sem teste, sem custo de PD.
+- Mestre resolve pela **descrição contextual** — narra o resultado **ou pede um teste** (Beta).
+- Sem custo de PD. O turno acaba.
 
-Não automatize. Forneça um botão que abra a descrição contextual só para o GM.
+Não automatize. Forneça um botão que abra a descrição contextual só para o GM, e um
+"Solicitar teste" no card (só do GM), já com quem agiu e uma perícia do ponto.
 
 ### 6.4 Ação: RECAPITULAR
 
@@ -390,8 +400,9 @@ Habilidades e itens podem ter efeitos em investigação, descritos neles. Jogado
 | Ação | Tipo | Teste | Custo/risco |
 |---|---|---|---|
 | Investigar | Importante | Nenhum (comparação por valor de perícia) | — |
-| └ Examinar | Sub-ação | Perícia escolhida vs DT | **−1 PD se não obtiver info nova** |
-| └ Interagir | Sub-ação | Nenhum | — |
+| └ Observar | Passo 3 | Nenhum (outra perícia, por valor) | — |
+| └ Examinar | Passo 3 | Perícia do passo 2 vs DT | **−1 PD se não obtiver info nova** |
+| └ Interagir | Passo 2 (no lugar de Investigar) | Nenhum, ou o que o mestre pedir | — |
 | Recapitular | Importante | Intuição DT 10 | 1× por cena (grupo) |
 | Compartilhar | Importante | Aliado: Pesquisar DT 10 (ação livre) | 1× por cena (grupo) |
 | Usar habilidade/item | Importante | Variável | Conforme o item |
