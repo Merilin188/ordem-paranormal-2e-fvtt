@@ -368,6 +368,13 @@
                                 <span class="op2-poi-card__revelado-por" data-tooltip="{{localize 'OP2.Investigacao.ContadaPor' nomes=contadaPor}}">
                                   <i class="fa-solid fa-bullhorn" aria-hidden="true"></i> {{contadaPor}}
                                 </span>
+                                {{#if @root.ehGM}}
+                                  <button type="button" class="op2-botao-icone op2-poi-card__descontar" data-action="descontarDoGrupo"
+                                    data-poi-uuid="{{../../uuid}}" data-info-id="{{id}}"
+                                    aria-label="{{localize 'OP2.Investigacao.Descontar'}}" data-tooltip="{{localize 'OP2.Investigacao.DescontarDica'}}">
+                                    <i class="fa-solid fa-comment-slash" aria-hidden="true"></i>
+                                  </button>
+                                {{/if}}
                               {{/if}}
                               {{#if @root.ehGM}}{{#if reveladoPor.length}}
                                 <span class="op2-poi-card__revelado-por" data-tooltip="{{reveladoPor}}">

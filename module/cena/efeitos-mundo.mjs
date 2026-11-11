@@ -223,6 +223,12 @@ export async function resetarUsos(ator) {
     yes: { label: L("ResetSim") }, rejectClose: false,
   });
   if (!segundo) return;
+  await zerarUsosDasHabilidades(ator);
+  await card(ator, L("ResetTitulo"), L("ResetFeito", { nome: esc(ator.name) }));
+}
+
+/** Zera os usos das habilidades limitadas, sem perguntar (o Resetar cena usa também). */
+export async function zerarUsosDasHabilidades(ator) {
   const updates = ator.items.filter((i) => i.type === "habilidade").map((i) => ({
     _id: i.id,
     "system.usadoNaRodada": "",
@@ -232,7 +238,6 @@ export async function resetarUsos(ator) {
   }));
   if (updates.length) await ator.updateEmbeddedDocuments("Item", updates);
   await ator.update({ "system.estado.acoesUsadasNaCena": [] });
-  await card(ator, L("ResetTitulo"), L("ResetFeito", { nome: esc(ator.name) }));
 }
 
 /* ================== janela do mestre ================== */

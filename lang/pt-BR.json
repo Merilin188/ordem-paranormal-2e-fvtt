@@ -347,7 +347,10 @@
       "ContouAoGrupo": "{ator} contou ao grupo",
       "ContadaVisivel": "A pista agora aparece no painel de todos os participantes.",
       "ContarSoQuemAchou": "Só quem achou a pista pode contá-la ao grupo.",
-      "InteragirSolicitarTeste": "Solicitar teste"
+      "InteragirSolicitarTeste": "Solicitar teste",
+      "Descontar": "Tirar do grupo",
+      "DescontarDica": "Tirar do painel de todos: a linha deixa de estar contada ao grupo. Quem achou continua sabendo.",
+      "Descontada": "A linha saiu do painel do grupo."
     },
     "Dialog": {
       "Teste": {
@@ -438,7 +441,14 @@
     "Cena": {
       "Encerrar": "Encerrar cena",
       "Encerrada": "Cena encerrada. {total} personagem(ns) tiveram as reduções temporárias zeradas.",
-      "SemPersonagens": "Nenhum personagem na cena ativa."
+      "SemPersonagens": "Nenhum personagem na cena ativa.",
+      "Resetar": "Resetar cena",
+      "ResetarDica": "Volta a cena ao começo: rodada 0, descobertas e o que foi contado ao grupo, trancas e desafios, usos das habilidades.",
+      "ResetarTitulo": "Resetar cena",
+      "ResetarPergunta": "Resetar \"{nome}\"? A rodada volta a 0; somem as descobertas de todos nos pontos desta cena e o que foi contado ao grupo; pontos bloqueados voltam trancados e os desafios recomeçam; os usos das habilidades limitadas dos participantes zeram; eventos disparados voltam a antes do gatilho.",
+      "ResetarFica": "Fica o seu preparo: pontos, linhas e o estado delas (oculta/aberta), participantes e vínculos.",
+      "ResetarSim": "Resetar",
+      "Resetada": "Cena \"{nome}\" resetada."
     },
     "Painel": {
       "Titulo": "Painel de investigação",

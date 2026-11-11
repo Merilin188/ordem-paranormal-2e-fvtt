@@ -280,3 +280,10 @@ test("beta: Prontidão no Examinar refaz o alcance a partir do que ele sabia ant
   // Crítico depois da Prontidão: tudo o que falta.
   assert.deepEqual(refazerExaminar(quadro, "percepcao", 7, ["a"], [], { ignorarDT: true }).revelaveis, ["b", "c"]);
 });
+
+test("resetar cena: a chave da revelação aponta o ponto dela", async () => {
+  const { poiDaChave } = await import("../cena/encerrar-investigacao.mjs");
+  const { chaveInfo } = await import("../cena/investigacao.mjs");
+  assert.equal(poiDaChave(chaveInfo("Item.abc123", "linha9")), "Item.abc123");
+  assert.equal(poiDaChave(chaveInfo("Compendium.mundo.pois.Item.x", "l1")), "Compendium.mundo.pois.Item.x");
+});

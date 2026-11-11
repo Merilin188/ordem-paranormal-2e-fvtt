@@ -63,6 +63,93 @@ export async function encerrarCena({ atores, avisar = true, investigacao = inves
   return alvos;
 }
 
+/** "<uuid do ponto>:<id da linha>" → o uuid do ponto (o uuid não tem ":"). Pura. */
+export function poiDaChave(chave) {
+  return String(chave).split(":").slice(0, -1).join(":");
+}
+
+/**
+ * RESETAR CENA: a cena volta ao começo, como se o grupo nunca tivesse passado por ela
+ * (outra mesa vai jogar o mesmo lugar). Tudo o que "Encerrar cena" zera, e mais:
+ * - o que qualquer personagem descobriu nos pontos dela e o que foi contado ao grupo;
+ * - as trancas: ponto bloqueado volta trancado, desafios voltam do zero;
+ * - os usos das habilidades limitadas dos participantes (Prontidão, Arsenal…);
+ * - quem já agiu na rodada e os eventos com roteiro (voltam a antes do gatilho).
+ * O que é preparo do mestre fica: pontos, linhas e o estado delas (oculta/aberta),
+ * participantes, vínculos e o que está oculto na investigação.
+ */
+export async function resetarCena(investigacao = investigacaoAtiva()) {
+  if (!game.user.isGM || !investigacao) return false;
+  const { DialogV2 } = foundry.applications.api;
+  const ok = await DialogV2.confirm({
+    window: { title: game.i18n.localize("OP2.Cena.ResetarTitulo"), icon: "fa-solid fa-rotate-left" },
+    content: `<p>${game.i18n.format("OP2.Cena.ResetarPergunta", { nome: foundry.utils.escapeHTML(investigacao.name) })}</p>
+      <p class="op2-ajuda">${game.i18n.localize("OP2.Cena.ResetarFica")}</p>`,
+    yes: { label: game.i18n.localize("OP2.Cena.ResetarSim") },
+    rejectClose: false,
+  });
+  if (!ok) return false;
+
+  const participantes = personagensDaCenaAtiva(investigacao);
+  await encerrarCena({ atores: participantes, avisar: false, investigacao });
+
+  // As descobertas nos pontos desta cena, de qualquer personagem (não só do roster).
+  const pois = (investigacao.system.pois ?? []).map((uuid) => fromUuidSync(uuid)).filter((p) => p?.type === "ponto-interesse");
+  const uuids = new Set(pois.map((p) => p.uuid));
+  const dosPontos = (chave) => uuids.has(poiDaChave(chave));
+  const limpar = game.actors.filter((a) => a.type === "personagem" && ([...a.system.estado.infosReveladas].some(dosPontos)
+    || [...a.system.estado.poisInvestigados].some((u) => uuids.has(u))));
+  if (limpar.length) {
+    await Actor.updateDocuments(limpar.map((a) => ({
+      _id: a.id,
+      "system.estado.infosReveladas": [...a.system.estado.infosReveladas].filter((c) => !dosPontos(c)),
+      "system.estado.poisInvestigados": [...a.system.estado.poisInvestigados].filter((u) => !uuids.has(u)),
+    })));
+  }
+
+  // Pontos: nada contado ao grupo; quem era bloqueado volta trancado, desafios do zero.
+  const { dadosParaTrancar, desafiosDoPonto } = await import("./acesso-poi.mjs");
+  const { SYSTEM_ID } = await import("../config.mjs");
+  for (const poi of pois) {
+    await poi.update({
+      "system.informacoes": poi.system.informacoes.map((info) => ({ ...info, contadaPor: [] })),
+      "system.acesso.liberado": false,
+    });
+  }
+  const desafios = new Map();
+  for (const poi of pois) for (const d of desafiosDoPonto(poi)) desafios.set(d.uuid, d);
+  for (const uuid of investigacao.system.desafios ?? []) {
+    const d = fromUuidSync(uuid);
+    if (d?.type === "desafio-acesso") desafios.set(d.uuid, d);
+  }
+  for (const desafio of desafios.values()) {
+    await desafio.update(dadosParaTrancar(desafio.system));
+    const sessao = desafio.getFlag(SYSTEM_ID, "sessao");
+    if (sessao?.ativa) await desafio.setFlag(SYSTEM_ID, "sessao", { ...sessao, ativa: false });
+  }
+
+  // Habilidades limitadas dos participantes, como o "Resetar usos" da ficha.
+  const { zerarUsosDasHabilidades } = await import("./efeitos-mundo.mjs");
+  for (const ator of participantes) await zerarUsosDasHabilidades(ator);
+
+  // Quem já agiu e os eventos com roteiro.
+  // Também aqui (e não só no Encerrar): sem participantes, o Encerrar sai antes de zerar.
+  await investigacao.update({
+    "system.rodada": 0,
+    "system.jaAgiram": [],
+    "system.ordemParticipantes": [],
+    "system.recapitularUsado": { usado: false, atorId: "", nome: "" },
+    "system.compartilharUsado": { usado: false, atorId: "", nome: "" },
+  });
+  const { eventosDaInvestigacao, reiniciarEvento } = await import("./investigacao-ativa.mjs");
+  for (const evento of eventosDaInvestigacao(investigacao)) {
+    if (evento.system.disparado) await reiniciarEvento(evento);
+  }
+
+  ui.notifications.info(game.i18n.format("OP2.Cena.Resetada", { nome: investigacao.name }));
+  return true;
+}
+
 /** Personagens no roster da investigação ativa. */
 export function personagensDaCenaAtiva(investigacao = investigacaoAtiva()) {
   return participantesDaInvestigacao("personagem", investigacao);

@@ -8,7 +8,7 @@
 import { PERICIAS, APTIDOES_PADRAO, FERRAMENTAS_POI } from "../config.mjs";
 import { OP2ItemSheet } from "./item-sheet.mjs";
 import { rotuloDePericia } from "../dice/teste.mjs";
-import { cicloVisibilidadeInfo, limparRevelacao } from "../cena/acoes-investigacao.mjs";
+import { cicloVisibilidadeInfo, limparRevelacao, descontarDoGrupo } from "../cena/acoes-investigacao.mjs";
 import { vincularDesafioAoPonto, removerDesafioDoPonto, todasInvestigacoes, alternarOculto } from "../cena/investigacao-ativa.mjs";
 import { chaveInfo } from "../cena/investigacao.mjs";
 import { textoPuroDaLinha } from "../cena/texto-linha.mjs";
@@ -35,6 +35,7 @@ export class PontoInteresseSheet extends OP2ItemSheet {
       removerDesafioVinculado: PontoInteresseSheet.#removerDesafioVinculado,
       alternarOcultoNaInvestigacao: PontoInteresseSheet.#alternarOcultoNaInvestigacao,
       limparRevelacao: PontoInteresseSheet.#limparRevelacao,
+      descontarDoGrupo: PontoInteresseSheet.#descontarDoGrupo,
       criarDesafioAcesso: PontoInteresseSheet.#criarDesafioAcesso,
       liberarAcesso: PontoInteresseSheet.#liberarAcesso,
       trancarDeNovo: PontoInteresseSheet.#trancarDeNovo,
@@ -105,6 +106,14 @@ export class PontoInteresseSheet extends OP2ItemSheet {
 
   static async #limparRevelacao(_evento, alvo) {
     await limparRevelacao(this.item.uuid, alvo.dataset.infoId);
+    await this.render();
+  }
+
+  /** Tira a linha contada do painel de todos; quem achou continua sabendo. */
+  static async #descontarDoGrupo(_evento, alvo) {
+    if (await descontarDoGrupo(this.item.uuid, alvo.dataset.infoId)) {
+      ui.notifications.info(game.i18n.localize("OP2.Investigacao.Descontada"));
+    }
     await this.render();
   }
 

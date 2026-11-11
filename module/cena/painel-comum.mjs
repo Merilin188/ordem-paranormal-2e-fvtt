@@ -25,7 +25,7 @@ import { pontoTrancado, desafiosAVista } from "./acesso-poi.mjs";
 import { semPrefixoDoPonto, desafioResolvido } from "./desafios.mjs";
 import { rodadaRelativa, proximaRodadaDaCena, linhaDaRodada } from "./eventos.mjs";
 import { marcarNoMapa, desmarcarDoMapa, marcadoresDoPonto } from "./marcadores.mjs";
-import { personagensDaCenaAtiva, npcsDaCenaAtiva, encerrarCena } from "./encerrar-investigacao.mjs";
+import { personagensDaCenaAtiva, npcsDaCenaAtiva, encerrarCena, resetarCena } from "./encerrar-investigacao.mjs";
 import {
   estaAtiva, alternarAtiva,
   adicionarParticipante, removerParticipante, definirOrdemParticipantes, alternarJaAgiu,
@@ -33,7 +33,7 @@ import {
   vincularEvento, removerEvento, eventosDaInvestigacao, dispararEvento, reiniciarEvento,
 } from "./investigacao-ativa.mjs";
 import { rodadaAtual, sobrecargaDaCena, definirSobrecarga, avancarRodada, publicarLinhaDoEvento } from "./rodada.mjs";
-import { cicloVisibilidadeInfo, limparRevelacao, contarAoGrupo } from "./acoes-investigacao.mjs";
+import { cicloVisibilidadeInfo, limparRevelacao, contarAoGrupo, descontarDoGrupo } from "./acoes-investigacao.mjs";
 import { rotuloDePericia } from "../dice/teste.mjs";
 import { filtrosVazios, filtrando, progressoDoPonto } from "./filtros-painel.mjs";
 import {
@@ -86,6 +86,8 @@ export function PainelInvestigacaoMixin(Base) {
         ajustarPontuacaoDesafio: PainelInvestigacaoComum.#ajustarPontuacaoDesafio,
         novaRodada: PainelInvestigacaoComum.#novaRodada,
         encerrarCena: PainelInvestigacaoComum.#encerrarCena,
+        resetarCena: PainelInvestigacaoComum.#resetarCena,
+        descontarDoGrupo: PainelInvestigacaoComum.#descontarDoGrupo,
         alternarSobrecarga: PainelInvestigacaoComum.#alternarSobrecarga,
         adicionarLinhaSobrecarga: PainelInvestigacaoComum.#adicionarLinhaSobrecarga,
         removerLinhaSobrecarga: PainelInvestigacaoComum.#removerLinhaSobrecarga,
@@ -828,6 +830,19 @@ export function PainelInvestigacaoMixin(Base) {
 
     static async #encerrarCena() {
       await encerrarCena({ investigacao: this.investigacao });
+    }
+
+    static async #resetarCena() {
+      if (await resetarCena(this.investigacao)) this.render();
+    }
+
+    /** Tira a linha contada do painel de todos (quem achou continua sabendo). */
+    static async #descontarDoGrupo(_evento, alvo) {
+      if (!game.user.isGM) return;
+      if (await descontarDoGrupo(alvo.dataset.poiUuid, alvo.dataset.infoId)) {
+        ui.notifications.info(game.i18n.localize("OP2.Investigacao.Descontada"));
+      }
+      this.render();
     }
 
     static async #alternarSobrecarga(_evento, alvo) {

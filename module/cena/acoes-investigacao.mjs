@@ -129,6 +129,21 @@ export async function limparRevelacao(poiUuid, infoId) {
 }
 
 /**
+ * Tira a linha "contada ao grupo" do painel de todos: some de quem não a achou, e
+ * quem achou continua sabendo (a revelação dele fica). Só o mestre.
+ * @returns {Promise<boolean>} se havia o que tirar
+ */
+export async function descontarDoGrupo(poiUuid, infoId) {
+  if (!game.user.isGM) return false;
+  const poi = await carregarPoi(poiUuid);
+  if (!poi?.system.informacoes.some((info) => info.id === infoId && info.contadaPor?.length)) return false;
+  await poi.update({
+    "system.informacoes": poi.system.informacoes.map((info) => (info.id === infoId ? { ...info, contadaPor: [] } : info)),
+  });
+  return true;
+}
+
+/**
  * CONTAR AO GRUPO: o jogador que achou uma pista decide torná-la visível para todos
  * os participantes — nos painéis deles, com o nome de quem contou — e um card
  * público leva o texto ao chat. Não é a ação Compartilhar (spec §6.5), que continua

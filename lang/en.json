@@ -347,7 +347,10 @@
       "ContouAoGrupo": "{ator} told the group",
       "ContadaVisivel": "The clue now shows on every participant's panel.",
       "ContarSoQuemAchou": "Only whoever found the clue can tell it to the group.",
-      "InteragirSolicitarTeste": "Request a test"
+      "InteragirSolicitarTeste": "Request a test",
+      "Descontar": "Remove from group",
+      "DescontarDica": "Remove from everyone's panel: the line is no longer told to the group. Whoever found it still knows it.",
+      "Descontada": "The line left the group's panel."
     },
     "Dialog": {
       "Teste": {
@@ -438,7 +441,14 @@
     "Cena": {
       "Encerrar": "End scene",
       "Encerrada": "Scene ended. Temporary reductions cleared for {total} character(s).",
-      "SemPersonagens": "No characters in the active scene."
+      "SemPersonagens": "No characters in the active scene.",
+      "Resetar": "Reset scene",
+      "ResetarDica": "Takes the scene back to the start: round 0, discoveries and what was told to the group, locks and challenges, ability uses.",
+      "ResetarTitulo": "Reset scene",
+      "ResetarPergunta": "Reset \"{nome}\"? The round goes back to 0; everyone's discoveries in this scene's points and what was told to the group are cleared; blocked points lock again and challenges start over; participants' limited ability uses are cleared; triggered events go back to before the trigger.",
+      "ResetarFica": "Your prep stays: points, lines and their state (hidden/open), participants and links.",
+      "ResetarSim": "Reset",
+      "Resetada": "Scene \"{nome}\" reset."
     },
     "Painel": {
       "Titulo": "Investigation panel",

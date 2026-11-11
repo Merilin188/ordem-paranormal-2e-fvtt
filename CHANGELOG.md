@@ -17,6 +17,11 @@ Versões seguem [SemVer](https://semver.org/lang/pt-BR/).
 - **Prontidão** rerrola um dado do Examinar (de quem quer que tenha a habilidade): o
   card refaz o que o novo total alcança.
 - Painel: quem contou ao grupo e quem achou a linha aparecem embaixo do texto.
+- **Tirar do grupo** (mestre, no painel e na ficha do ponto): a linha contada sai do
+  painel de todos; quem achou continua sabendo.
+- **Resetar cena** (painel): rodada 0, descobertas de todos nos pontos da cena e o que
+  foi contado ao grupo, trancas e desafios do zero, usos das habilidades limitadas dos
+  participantes e eventos disparados. O preparo do mestre fica.
 - Ações de investigação: o topo, as abas e a barra de filtros ficam presos ao rolar.
 - Destrancar: a tentativa da rodada nova libera na hora em que o mestre avança a
   rodada, sem fechar e reabrir a janela.
