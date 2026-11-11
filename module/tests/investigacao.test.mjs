@@ -205,6 +205,18 @@ test("beta: Examinar cobra 1 PD só quando nada é novo — o passivo não conta
   assert.equal(resolverExaminarBeta([{ id: "o", pericia: "percepcao", dt: 2, oculta: true }], "percepcao", 20).perdePD, true);
 });
 
+test("beta: o bloco da perícia escolhida leva a chave em `pericia` — é por ela que a janela acha as linhas", async () => {
+  const { blocoDaPericia, normalizarEstado, linhasParaOMestre, periciasParaObservar } = await import("../cena/investigacao.mjs");
+  const quadro = [{ id: "a", pericia: "percepcao", dt: 4 }, { id: "b", pericia: "percepcao", dt: 8 }];
+  const bloco = blocoDaPericia({ chave: "percepcao", rotulo: "Percepção", dado: 8 });
+  assert.equal(bloco.pericia, "percepcao");
+  assert.deepEqual(linhasParaOMestre(quadro, bloco.pericia, bloco.dado).filter((l) => l.marcada).map((l) => l.id), ["a", "b"]);
+  // Card criado antes da correção (só `chave`): o estado lido é consertado.
+  const antigo = normalizarEstado({ pericias: [{ chave: "percepcao" }, { chave: "intuicao" }], passivo: { chave: "percepcao", dado: 8 } });
+  assert.equal(antigo.passivo.pericia, "percepcao");
+  assert.deepEqual(periciasParaObservar(antigo).map((p) => p.chave), ["intuicao"]);
+});
+
 test("beta: Observar e Examinar são exclusivos e só valem depois do passivo", async () => {
   const { escolherAprofundamento, periciasParaObservar } = await import("../cena/investigacao.mjs");
   const pericias = [{ chave: "percepcao" }, { chave: "intuicao" }];

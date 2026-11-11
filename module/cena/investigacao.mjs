@@ -183,6 +183,23 @@ export function escolherAprofundamento(estado, escolha) {
   return { ...estado, escolha, etapa: escolha === "observar" ? "observar" : "examinando" };
 }
 
+/**
+ * O bloco do passo 2 (ou do Observar) para a perícia escolhida. A chave vai em
+ * `pericia` — é por ela que a janela do mestre filtra as linhas e o Examinar rola.
+ * (Gravar só a `chave` da lista deixou a janela vazia: "nenhuma linha desta perícia".)
+ * Aceita bloco antigo, só com `chave`.
+ */
+export function blocoDaPericia({ chave, pericia, rotulo, dado }, extra = {}) {
+  return { pericia: pericia ?? chave, rotulo, dado, infos: [], enviado: false, ...extra };
+}
+
+/** Estado lido da mensagem, com os blocos antigos (sem `pericia`) consertados. */
+export function normalizarEstado(estado) {
+  if (!estado) return estado;
+  const conserta = (b) => (b && !b.pericia && b.chave ? { ...b, pericia: b.chave } : b);
+  return { ...estado, passivo: conserta(estado.passivo), observar: conserta(estado.observar) };
+}
+
 /** Observar usa OUTRA perícia listada — nunca a do passo 2. */
 export function periciasParaObservar(estado) {
   return (estado?.pericias ?? []).filter((p) => p.chave !== estado?.passivo?.pericia);

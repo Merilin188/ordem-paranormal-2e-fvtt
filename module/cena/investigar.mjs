@@ -16,7 +16,7 @@
 import { SYSTEM_ID, CUSTO_PD_EXAMINAR } from "../config.mjs";
 import {
   periciasParaInvestigar, linhasParaOMestre, novasParaOPersonagem, escolherAprofundamento,
-  periciasParaObservar, resolverExaminarBeta, infosAlcancaveis,
+  periciasParaObservar, resolverExaminarBeta, infosAlcancaveis, blocoDaPericia, normalizarEstado,
 } from "./investigacao.mjs";
 import {
   carregarPoi, gravarRevelacoes, sussurroPara, editorDeTexto, recuperarPdAoDescobrir, idsRevelados,
@@ -33,7 +33,7 @@ const FLAG = "investigar";
 const RAIZ = "systems/ordem-paranormal-2e/templates";
 const L = (chave, dados) => (dados ? game.i18n.format(`OP2.Investigar.${chave}`, dados) : game.i18n.localize(`OP2.Investigar.${chave}`));
 
-const estadoDe = (mensagem) => mensagem?.getFlag(SYSTEM_ID, FLAG) ?? null;
+const estadoDe = (mensagem) => normalizarEstado(mensagem?.getFlag(SYSTEM_ID, FLAG) ?? null);
 
 /** "Percepção" e o tamanho do dado do personagem nela (o que ele "fala" ao mestre). */
 function periciaComDado(ator, chave) {
@@ -122,7 +122,7 @@ async function escolherPericia({ mensagemId, pericia }) {
   if (!escolhida) return;
   const novo = {
     ...estado,
-    [modo]: { ...periciaComDado(ator, escolhida.chave), infos: [], enviado: false },
+    [modo]: blocoDaPericia(periciaComDado(ator, escolhida.chave)),
     etapa: modo === "passivo" ? "mestre" : "mestreObservar",
   };
   await salvar(mensagem, novo);
