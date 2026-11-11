@@ -271,7 +271,7 @@
       "Botao": "Invest. actions",
       "Ajuda": "Opens this character's investigation actions — investigate, examine, tools, challenges.",
       "Livres": "Free actions",
-      "SemInvestigacao": "No investigation in play for this character. The GM needs to put one in play and add you as a participant.",
+      "SemInvestigacao": "No active investigation scene.",
       "SemPOIs": "No points of interest available yet.",
       "SemDesafios": "No challenge available yet.",
       "SemAliado": "Target someone on the map, or add another character to the investigation.",
@@ -282,7 +282,9 @@
         "desafios": "Challenges"
       },
       "Filtrar": "Filter by name…",
-      "VerDesafios": "See this point's challenges"
+      "VerDesafios": "See this point's challenges",
+      "SemInvestigacaoMestre": "Tick \"In play\" on an investigation in the panel for it to show up here.",
+      "SemInvestigacaoJogador": "Once the GM puts a scene in play with you as a participant, it shows up here."
     },
     "Investigacao": {
       "Examinar": "Examine",

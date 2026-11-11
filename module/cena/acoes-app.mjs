@@ -12,7 +12,7 @@
 import { excluirDesafio } from "./excluir-desafio.mjs";
 import { FERRAMENTAS_POI } from "../config.mjs";
 import {
-  investigacaoAtiva, investigacoesVisiveis, definirInvestigacaoAtiva, pontoDoDesafio,
+  investigacaoAtiva, investigacoesDasAcoes, definirInvestigacaoAtiva, pontoDoDesafio,
 } from "./investigacao-ativa.mjs";
 import { temFerramenta } from "./ferramentas.mjs";
 import { alvosDaCenaAtiva, alvosMarcados } from "./encerrar-investigacao.mjs";
@@ -333,7 +333,13 @@ export class AcoesInvestigacaoApp extends HandlebarsApplicationMixin(Application
   }
 
   async _prepareContext() {
-    const investigacao = investigacaoAtiva();
+    // Só as em jogo. Se o mestre estava vendo no painel uma fora de jogo, a vista dele
+    // passa para uma em jogo: as ações (Recapitular, desafios…) leem a investigação
+    // vista, e ela tem que ser a mesma que esta janela mostra.
+    const emJogo = investigacoesDasAcoes();
+    const vista = investigacaoAtiva();
+    const investigacao = emJogo.find((i) => i.uuid === vista?.uuid) ?? emJogo[0] ?? null;
+    if (investigacao && investigacao.uuid !== vista?.uuid) await definirInvestigacaoAtiva(investigacao.uuid);
     const ator = this.ator;
 
     // POI e desafio que o mestre escondeu não existem para quem age: a lista de
@@ -383,7 +389,7 @@ export class AcoesInvestigacaoApp extends HandlebarsApplicationMixin(Application
       nomeInvestigacao: investigacao?.name ?? "",
       // O grupo pode estar em mais de uma investigação ao mesmo tempo — dá pra
       // trocar aqui sem voltar pro painel.
-      investigacoes: investigacoesVisiveis().map((i) => ({ uuid: i.uuid, nome: i.name })),
+      investigacoes: emJogo.map((i) => ({ uuid: i.uuid, nome: i.name })),
       investigacaoAtualUuid: investigacao?.uuid ?? "",
       desafios,
       sustentando: ator.system.estado.sustentando?.ativo ?? false,

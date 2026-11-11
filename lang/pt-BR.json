@@ -271,7 +271,7 @@
       "Botao": "Ações de Invest.",
       "Ajuda": "Abre as ações de investigação deste personagem — investigar, examinar, ferramentas, desafios.",
       "Livres": "Ações livres",
-      "SemInvestigacao": "Nenhuma investigação em jogo para este personagem. O mestre precisa colocar uma em jogo e adicionar você como participante.",
+      "SemInvestigacao": "Nenhuma cena de investigação ativa.",
       "SemPOIs": "Nenhum ponto de interesse disponível ainda.",
       "SemDesafios": "Nenhum desafio disponível ainda.",
       "SemAliado": "Marque o alvo no mapa, ou adicione outro personagem à investigação.",
@@ -282,7 +282,9 @@
         "desafios": "Desafios"
       },
       "Filtrar": "Filtrar pelo nome…",
-      "VerDesafios": "Ver os desafios deste ponto"
+      "VerDesafios": "Ver os desafios deste ponto",
+      "SemInvestigacaoMestre": "Marque \"Em jogo\" numa investigação do painel para ela aparecer aqui.",
+      "SemInvestigacaoJogador": "Quando o mestre colocar uma cena em jogo com você como participante, ela aparece aqui."
     },
     "Investigacao": {
       "Examinar": "Examinar",

@@ -55,6 +55,16 @@ export function investigacoesVisiveis() {
     && !investigacao.system.participantesOcultos.includes(personagem.uuid));
 }
 
+/**
+ * As investigações das Ações de investigação: só as "em jogo" — também para o mestre,
+ * que no painel navega por todas (inclusive as que ainda prepara). Mostrar uma cena
+ * fora de jogo nas Ações deixava agir nela (achado em uso real). O jogador já só vê as
+ * em jogo em que participa.
+ */
+export function investigacoesDasAcoes() {
+  return game.user.isGM ? investigacoesAtivas() : investigacoesVisiveis();
+}
+
 /** @returns {Actor|null} a investigação que o usuário atual está vendo agora no painel. */
 export function investigacaoAtiva() {
   const visiveis = investigacoesVisiveis();

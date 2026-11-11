@@ -1,6 +1,7 @@
 <div class="op2-acoes-corpo">
   {{#unless temInvestigacao}}
-    <p class="op2-ajuda">{{localize "OP2.Acoes.SemInvestigacao"}}</p>
+    <p class="op2-acoes__vazio">{{localize "OP2.Acoes.SemInvestigacao"}}</p>
+    <p class="op2-ajuda">{{#if ehGM}}{{localize "OP2.Acoes.SemInvestigacaoMestre"}}{{else}}{{localize "OP2.Acoes.SemInvestigacaoJogador"}}{{/if}}</p>
   {{else}}
     <header class="op2-acoes__topo">
       {{#if (op2Maior investigacoes.length 1)}}

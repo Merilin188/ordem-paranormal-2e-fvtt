@@ -91,6 +91,10 @@
   }
   .op2-regras-inv__abrir { font-size: 0.8rem; color: var(--op2-tinta-fraca); }
 
+  /* ---- Ações: nenhuma cena em jogo ---- */
+  .op2-acoes__vazio + .op2-ajuda { text-align: center; }
+  .op2-acoes__vazio { margin: var(--op2-e4) 0 var(--op2-e1); text-align: center; font-family: var(--op2-fonte-display); font-size: 1.1rem; letter-spacing: 0.04em; text-transform: uppercase; }
+
   /* ---- Ações: botão das regras no topo ---- */
   .op2-acoes__topo { display: flex; align-items: center; gap: var(--op2-e2); }
   .op2-acoes__regras { margin-left: auto; width: auto; flex: none; }
