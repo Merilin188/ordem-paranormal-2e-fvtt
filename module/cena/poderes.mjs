@@ -407,6 +407,52 @@ async function prontidaoNoOposto(_autor, dataset) {
   await comoMestre("ferrRegistrarOposto", { mensagemId: mensagem.id, indice, resultado });
 }
 
+/**
+ * Prontidão num card que guarda os dados em vez de um Roll — o Examinar do Investigar.
+ * Quem tem a habilidade escolhe o dado (não 1), paga 2 PD, marca a rodada e rola de
+ * novo; o total é refeito com o mesmo modificador. Quem chamou decide o que muda no
+ * card (as linhas que o novo resultado alcança).
+ * @param {object[]} dados os `roll.dados` guardados
+ * @param {number} total o total guardado (com modificadores)
+ * @returns {Promise<{dados: object[], total: number, critico: boolean, falhaCritica: boolean, nota: string}|null>}
+ */
+export async function prontidaoNosDados(dados, total, nomeAlvo) {
+  const { usuario, motivo } = quemUsaProntidao();
+  if (!usuario) { ui.notifications.warn(P(motivo)); return null; }
+  const poder = poderDe(usuario, "prontidao");
+  const rodada = chaveDaRodada();
+  if (poder.system.usadoNaRodada === rodada) { ui.notifications.warn(P("ProntidaoJaUsou")); return null; }
+  const elegiveis = dados.map((d, i) => ({ ...d, i })).filter((d) => !d.pavor && !d.consumido && d.resultado !== 1 && d.dado);
+  if (!elegiveis.length) { ui.notifications.warn(P("ProntidaoSemDado")); return null; }
+  const escolhido = await DialogV2.prompt({
+    window: { title: poder.name, icon: "fa-solid fa-bolt" },
+    classes: ["op2", "op2-ferr-dialogo"],
+    content: `<p>${P("ProntidaoOposto", { nome: esc(usuario.name), alvo: esc(nomeAlvo) })}</p>
+      <div class="form-group"><select name="d">${elegiveis.map((d) => `<option value="${d.i}">${esc(d.componente?.rotulo ?? d.dado)}: ${d.resultado}</option>`).join("")}</select></div>`,
+    ok: { label: P("ProntidaoRerrolar"), callback: (_e, b) => Number(b.form.elements.d.value) },
+    rejectClose: false,
+  });
+  if (escolhido === null || escolhido === undefined) return null;
+  if (!(await pagarPD(usuario, 2))) return null;
+  await poder.update({ "system.usadoNaRodada": rodada });
+  const alvo = dados[escolhido];
+  const novo = await new Roll(`1${alvo.dado}`).evaluate();
+  const { mostrarDados3D } = await import("../dice/teste.mjs");
+  await mostrarDados3D(novo);
+  const { analisar, soma } = await import("../dice/analise.mjs");
+  const doTeste = (lista) => lista.filter((d) => !d.pavor && !d.consumido);
+  const dadosNovos = dados.map((d, j) => (j === escolhido ? { ...d, resultado: novo.total } : d));
+  const modificador = total - soma(doTeste(dados));
+  const analise = analisar(doTeste(dadosNovos));
+  return {
+    dados: dadosNovos,
+    total: analise.total + modificador,
+    critico: analise.critico,
+    falhaCritica: analise.falhaCritica,
+    nota: P("ProntidaoNota", { nome: usuario.name, antes: alvo.resultado, depois: novo.total }),
+  };
+}
+
 async function usarProntidao(_autor, dataset) {
   const mensagem = game.messages.get(dataset.mensagemId);
   const roll = mensagem?.rolls?.[0];

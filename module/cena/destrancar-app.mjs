@@ -302,6 +302,10 @@ Hooks.on("updateItem", (item) => {
 // mestre designado grava, para não contar duas vezes).
 Hooks.on("updateActor", (ator, mudancas) => {
   if (ator.type !== "investigacao" || !foundry.utils.hasProperty(mudancas, "system.rodada")) return;
+  // Sem sessão do mestre, a rodada do Destrancar É a da investigação: a janela aberta
+  // redesenha agora, e a tentativa da rodada nova libera sem fechar e reabrir (achado
+  // em uso real). Com sessão, o flag gravado abaixo redesenha de novo — inofensivo.
+  for (const app of instancias.values()) if (app.rendered) app.render();
   if (game.users.activeGM?.id !== game.user.id) return;
   for (const item of game.items) {
     if (item.type === "desafio-acesso" && item.getFlag(SYSTEM_ID, "sessao")?.ativa) {

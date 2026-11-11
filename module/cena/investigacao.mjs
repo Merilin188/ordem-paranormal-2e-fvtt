@@ -216,6 +216,20 @@ export function resolverExaminarBeta(informacoes, chavePericia, total, idsJaReve
 }
 
 /**
+ * A Prontidão rerrolou um dado do Examinar: o que o NOVO total alcança, contado a
+ * partir do que o personagem sabia ANTES do Examinar. Devolve a lista nova e o que
+ * gravar e desfazer na ficha (um total menor pode deixar de alcançar uma linha).
+ */
+export function refazerExaminar(informacoes, chavePericia, total, conhecidasAntes, infosAntes, { ignorarDT = false } = {}) {
+  const { revelaveis } = resolverExaminarBeta(informacoes, chavePericia, total, new Set(conhecidasAntes), { ignorarDT });
+  return {
+    revelaveis,
+    ganhar: revelaveis.filter((id) => !infosAntes.includes(id)),
+    perder: infosAntes.filter((id) => !revelaveis.includes(id)),
+  };
+}
+
+/**
  * Sobrecarga mental (spec §7.6): o dano emocional do fim da rodada. A tabela é
  * editável por cena; a última linha cobre "9 ou mais", então vale a maior rodada
  * da tabela que não passa da atual.

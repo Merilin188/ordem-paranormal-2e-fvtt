@@ -2315,7 +2315,7 @@
         "Acima": "Acima do d{dado}",
         "Oculta": "Oculta",
         "Aberta": "Aberta a todos",
-        "JaSabe": "Já sabe",
+        "JaSabe": "Já descoberto",
         "Trancada": "Dentro da tranca",
         "Ocultar": "Ocultar dos jogadores",
         "Revelar": "Tornar descobrível",
@@ -2323,7 +2323,10 @@
         "Enviar": "Enviar para {ator} no chat",
         "EnviarNada": "Enviar \"nada encontrado\" para {ator}",
         "JaEnviado": "Já enviado ao jogador."
-      }
+      },
+      "JaDescoberto": "Já descoberto",
+      "Provocacao": "Parece que {ator} descobriu alguma coisa…",
+      "ProvocacaoNadaNovo": "{ator} não descobriu nada novo."
     },
     "RegrasInvestigacao": {
       "Titulo": "Como investigar",

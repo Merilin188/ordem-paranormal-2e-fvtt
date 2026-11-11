@@ -2315,7 +2315,7 @@
         "Acima": "Above the d{dado}",
         "Oculta": "Hidden",
         "Aberta": "Open to everyone",
-        "JaSabe": "Already knows",
+        "JaSabe": "Already found",
         "Trancada": "Inside the lock",
         "Ocultar": "Hide from players",
         "Revelar": "Make discoverable",
@@ -2323,7 +2323,10 @@
         "Enviar": "Send to {ator} in chat",
         "EnviarNada": "Send \"nothing found\" to {ator}",
         "JaEnviado": "Already sent to the player."
-      }
+      },
+      "JaDescoberto": "Already found",
+      "Provocacao": "Looks like {ator} found something…",
+      "ProvocacaoNadaNovo": "{ator} found nothing new."
     },
     "RegrasInvestigacao": {
       "Titulo": "How to investigate",

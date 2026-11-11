@@ -4,6 +4,7 @@
 <li>
   <span class="op2-card__info-pericia">{{rotuloPericia}}:</span> {{{texto}}}
   {{#if semRolar}}<span class="op2-card__info-marca">{{localize "OP2.Investigacao.SemRolar"}}</span>{{/if}}
+  {{#if jaSabia}}<span class="op2-card__info-marca op2-card__info-marca--sabia"><i class="fa-solid fa-check-double" aria-hidden="true"></i> {{localize "OP2.Investigar.JaDescoberto"}}</span>{{/if}}
   {{!-- A pista é de quem achou; contar ao grupo é decisão dele, aqui mesmo. --}}
   <button type="button" class="op2-botao op2-botao--pequeno" data-op2-acao="contar-ao-grupo"
     data-ator-id="{{atorId}}" data-poi-uuid="{{poiUuid}}" data-info-id="{{id}}">

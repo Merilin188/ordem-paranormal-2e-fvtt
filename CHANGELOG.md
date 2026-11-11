@@ -10,6 +10,16 @@ Versões seguem [SemVer](https://semver.org/lang/pt-BR/).
   marcado o que o dado alcança — ele desmarca, inclui (até oculta), muda o estado e
   envia; depois **Observar** (outra perícia, sem rolar) **ou Examinar** (rola; nada novo
   = perde 1 PD, sem contar o passivo). "Contar ao grupo" segue igual.
+- O card do Investigar é **público**: a mesa vê a descrição, as perícias e os dados; só o
+  texto das linhas é de quem achou — os outros leem "Parece que … descobriu alguma
+  coisa…". O que ele já sabia vem marcado **Já descoberto** e não conta como novo
+  (Examinar sem nada novo perde 1 PD, inclusive o que alguém contou ao grupo).
+- **Prontidão** rerrola um dado do Examinar (de quem quer que tenha a habilidade): o
+  card refaz o que o novo total alcança.
+- Painel: quem contou ao grupo e quem achou a linha aparecem embaixo do texto.
+- Ações de investigação: o topo, as abas e a barra de filtros ficam presos ao rolar.
+- Destrancar: a tentativa da rodada nova libera na hora em que o mestre avança a
+  rodada, sem fechar e reabrir a janela.
 - O estado "Rascunho" das linhas passa a se chamar **Oculta** na tela.
 - **Interagir** ganha "Solicitar teste" no card (só do mestre), com quem agiu e uma
   perícia do ponto preenchidos.

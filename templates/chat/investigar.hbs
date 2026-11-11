@@ -17,7 +17,7 @@
       <p class="op2-card__texto">{{localize "OP2.Investigar.PodeInvestigar" ator=atorNome poi=poiNome}}</p>
       <div class="op2-investigar__pericias">
         {{#each pericias}}
-          <button type="button" class="op2-botao op2-botao--pequeno" data-op2-acao="investigar-pericia"
+          <button type="button" class="op2-botao op2-botao--pequeno" data-op2-acao="investigar-pericia" data-op2-so-dono="{{../atorId}}"
             data-ator-id="{{../atorId}}" data-pericia="{{chave}}">{{rotulo}} <span class="op2-investigar__dado">d{{dado}}</span></button>
         {{/each}}
       </div>
@@ -29,11 +29,13 @@
         <h4>{{localize "OP2.Investigar.Passo2" pericia=passivo.rotulo dado=passivo.dado}}</h4>
         {{#if passivo.enviado}}
           {{#if passivo.infos.length}}
-            <ol class="op2-card__infos">
-              {{#each passivo.infos}}
-                {{> (op2Caminho "chat/partials/info-revelada") atorId=@root.atorId poiUuid=@root.poiUuid atorNome=@root.atorNome}}
-              {{/each}}
-            </ol>
+            <div data-op2-segredo data-ator-id="{{@root.atorId}}" data-provocacao="{{passivo.provocacao}}">
+              <ol class="op2-card__infos">
+                {{#each passivo.infos}}
+                  {{> (op2Caminho "chat/partials/info-revelada") atorId=@root.atorId poiUuid=@root.poiUuid atorNome=@root.atorNome}}
+                {{/each}}
+              </ol>
+            </div>
           {{else}}
             <p class="op2-ajuda">{{localize "OP2.Investigar.NadaPassivo"}}</p>
           {{/if}}
@@ -49,11 +51,11 @@
       <section class="op2-investigar__passo op2-investigar__passo--3">
         <h4>{{localize "OP2.Investigar.Passo3"}}</h4>
         <div class="op2-investigar__escolha">
-          <button type="button" class="op2-botao op2-botao--pequeno" data-op2-acao="investigar-observar" data-ator-id="{{atorId}}"
+          <button type="button" class="op2-botao op2-botao--pequeno" data-op2-acao="investigar-observar" data-op2-so-dono="{{atorId}}" data-ator-id="{{atorId}}"
             {{#unless podeObservar}}disabled data-tooltip="{{localize 'OP2.Investigar.SemOutraPericia'}}"{{else}}data-tooltip="{{localize 'OP2.Investigar.ObservarDica'}}"{{/unless}}>
             <i class="fa-solid fa-eye" aria-hidden="true"></i> {{localize "OP2.Investigar.Observar"}}
           </button>
-          <button type="button" class="op2-botao op2-botao--pequeno" data-op2-acao="investigar-examinar" data-ator-id="{{atorId}}"
+          <button type="button" class="op2-botao op2-botao--pequeno" data-op2-acao="investigar-examinar" data-op2-so-dono="{{atorId}}" data-ator-id="{{atorId}}"
             data-tooltip="{{localize 'OP2.Investigar.ExaminarDica'}}">
             <i class="fa-solid fa-dice" aria-hidden="true"></i> {{localize "OP2.Investigar.Examinar" pericia=passivo.rotulo}}
           </button>
@@ -67,7 +69,7 @@
         <h4>{{localize "OP2.Investigar.EscolhaObservar"}}</h4>
         <div class="op2-investigar__pericias">
           {{#each periciasObservar}}
-            <button type="button" class="op2-botao op2-botao--pequeno" data-op2-acao="investigar-pericia"
+            <button type="button" class="op2-botao op2-botao--pequeno" data-op2-acao="investigar-pericia" data-op2-so-dono="{{../atorId}}"
               data-ator-id="{{../atorId}}" data-pericia="{{chave}}">{{rotulo}} <span class="op2-investigar__dado">d{{dado}}</span></button>
           {{/each}}
         </div>
@@ -79,11 +81,13 @@
         <h4>{{localize "OP2.Investigar.Observando" pericia=observar.rotulo dado=observar.dado}}</h4>
         {{#if observar.enviado}}
           {{#if observar.infos.length}}
-            <ol class="op2-card__infos">
-              {{#each observar.infos}}
-                {{> (op2Caminho "chat/partials/info-revelada") atorId=@root.atorId poiUuid=@root.poiUuid atorNome=@root.atorNome}}
-              {{/each}}
-            </ol>
+            <div data-op2-segredo data-ator-id="{{@root.atorId}}" data-provocacao="{{observar.provocacao}}">
+              <ol class="op2-card__infos">
+                {{#each observar.infos}}
+                  {{> (op2Caminho "chat/partials/info-revelada") atorId=@root.atorId poiUuid=@root.poiUuid atorNome=@root.atorNome}}
+                {{/each}}
+              </ol>
+            </div>
           {{else}}
             <p class="op2-ajuda">{{localize "OP2.Investigar.NadaPassivo"}}</p>
           {{/if}}
@@ -108,6 +112,11 @@
           <span class="op2-card__igual" aria-hidden="true">=</span>
           <span class="op2-card__total">{{examinar.total}}</span>
         </div>
+        {{#each examinar.notas}}<p class="op2-prontidao-nota"><i class="fa-solid fa-bolt" aria-hidden="true"></i> {{this}}</p>{{/each}}
+        {{#unless examinar.pdPago}}
+          <button type="button" class="op2-botao op2-botao--pequeno" data-op2-acao="investigar-prontidao" data-ator-id="{{atorId}}"
+            data-tooltip="{{localize 'OP2.Poder.ProntidaoDica'}}"><i class="fa-solid fa-bolt" aria-hidden="true"></i> {{localize "OP2.Poder.Prontidao"}}</button>
+        {{/unless}}
         {{#if examinar.falhaCritica}}
           {{> (op2Caminho "partials/falha-critica") atorId=atorId}}
         {{else if examinar.critico}}
@@ -116,17 +125,19 @@
         {{/if}}
         {{#if examinar.infos.length}}
           <p class="op2-card__desfecho op2-card__desfecho--sucesso"><i class="fa-solid fa-check" aria-hidden="true"></i> {{localize "OP2.Sucesso"}}</p>
-          <ol class="op2-card__infos">
-            {{#each examinar.infos}}
-              {{> (op2Caminho "chat/partials/info-revelada") atorId=@root.atorId poiUuid=@root.poiUuid atorNome=@root.atorNome}}
-            {{/each}}
-          </ol>
+          <div data-op2-segredo data-ator-id="{{atorId}}" data-provocacao="{{examinar.provocacao}}">
+            <ol class="op2-card__infos">
+              {{#each examinar.infos}}
+                {{> (op2Caminho "chat/partials/info-revelada") atorId=@root.atorId poiUuid=@root.poiUuid atorNome=@root.atorNome}}
+              {{/each}}
+            </ol>
+          </div>
           {{#if examinar.pdRecuperado}}<p class="op2-card__desfecho op2-card__desfecho--sucesso"><i class="fa-solid fa-heart-pulse" aria-hidden="true"></i> {{examinar.pdRecuperado}}</p>{{/if}}
         {{else}}
           <p class="op2-card__desfecho op2-card__desfecho--falha"><i class="fa-solid fa-xmark" aria-hidden="true"></i> {{localize "OP2.Investigar.ExaminarNada"}}</p>
           {{#unless examinar.pdPago}}
             <div class="op2-card__acoes">
-              <button type="button" class="op2-botao op2-botao--pequeno op2-botao--perigo" data-op2-acao="investigar-pagar-pd" data-ator-id="{{atorId}}">{{rotuloCusto}}</button>
+              <button type="button" class="op2-botao op2-botao--pequeno op2-botao--perigo" data-op2-acao="investigar-pagar-pd" data-op2-so-dono="{{atorId}}" data-ator-id="{{atorId}}">{{rotuloCusto}}</button>
             </div>
           {{else}}
             <p class="op2-ajuda">{{localize "OP2.Investigar.PdPago" ator=atorNome}}</p>

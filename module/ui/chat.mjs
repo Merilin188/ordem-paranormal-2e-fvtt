@@ -210,6 +210,18 @@ export function registrarChat() {
     // Botões de mestre são removidos do DOM, não escondidos por CSS.
     if (msg.getFlag(SYSTEM_ID, "tipo") && !game.user.isGM) {
       for (const botao of html.querySelectorAll("[data-op2-gm]")) botao.remove();
+      // O texto das pistas é de quem achou: para os outros, só o aviso (Investigar).
+      for (const segredo of html.querySelectorAll("[data-op2-segredo]")) {
+        if (game.actors.get(segredo.dataset.atorId)?.isOwner) continue;
+        const aviso = document.createElement("p");
+        aviso.className = "op2-investigar__provocacao";
+        aviso.textContent = segredo.dataset.provocacao ?? "";
+        segredo.replaceWith(aviso);
+      }
+      // Botões de quem age: os outros veem (é a mesa acompanhando), mas não clicam.
+      for (const botao of html.querySelectorAll("[data-op2-so-dono]")) {
+        if (!game.actors.get(botao.dataset.op2SoDono)?.isOwner) botao.disabled = true;
+      }
     }
     // Dados de esconderijo: o mestre não pode ver (ele "adivinha" números na tabela das criaturas).
     if (game.user.isGM && msg.getFlag(SYSTEM_ID, "ocultoDoMestre")) {

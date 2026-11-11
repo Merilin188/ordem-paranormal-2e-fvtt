@@ -254,3 +254,29 @@ test("lista de fichas: agrupa pelas pastas da barra (mãe antes das filhas) e de
   assert.equal(atorPassaNoFiltro({ id: "1", name: "Ellén Trechend" }, { termo: "ellen" }), true);
   assert.equal(atorPassaNoFiltro({ id: "1", name: "Ellén" }, { soCena: true, idsNaCena: new Set(["3"]) }), false);
 });
+
+test("beta: o que já se sabia (achado antes ou contado ao grupo) não é novo — Examinar perde 1 PD", async () => {
+  const { resolverExaminarBeta } = await import("../cena/investigacao.mjs");
+  const quadro = [
+    { id: "a", pericia: "percepcao", dt: 4 },
+    { id: "b", pericia: "percepcao", dt: 6, contadaPor: ["rowan"] },
+  ];
+  // Muirenn rola 5: "a" ela já tinha achado, "b" alguém contou ao grupo — nada novo.
+  assert.deepEqual(resolverExaminarBeta(quadro, "percepcao", 5, new Set(["a"])), { revelaveis: [], perdePD: true });
+  assert.deepEqual(resolverExaminarBeta(quadro, "percepcao", 9, new Set(["a"])), { revelaveis: [], perdePD: true });
+});
+
+test("beta: Prontidão no Examinar refaz o alcance a partir do que ele sabia antes", async () => {
+  const { refazerExaminar } = await import("../cena/investigacao.mjs");
+  const quadro = [
+    { id: "a", pericia: "percepcao", dt: 4 },
+    { id: "b", pericia: "percepcao", dt: 9 },
+    { id: "c", pericia: "percepcao", dt: 12 },
+  ];
+  // Sabia "a"; rolou 10 (achou "b"); a Prontidão leva a 13: ganha "c".
+  assert.deepEqual(refazerExaminar(quadro, "percepcao", 13, ["a"], ["b"]), { revelaveis: ["b", "c"], ganhar: ["c"], perder: [] });
+  // Leva a 7: perde "b", nada novo.
+  assert.deepEqual(refazerExaminar(quadro, "percepcao", 7, ["a"], ["b"]), { revelaveis: [], ganhar: [], perder: ["b"] });
+  // Crítico depois da Prontidão: tudo o que falta.
+  assert.deepEqual(refazerExaminar(quadro, "percepcao", 7, ["a"], [], { ignorarDT: true }).revelaveis, ["b", "c"]);
+});

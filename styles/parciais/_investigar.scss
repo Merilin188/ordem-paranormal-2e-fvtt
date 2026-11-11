@@ -25,6 +25,8 @@
     .op2-investigar__escolha { display: flex; flex-wrap: wrap; gap: 0.35rem; .op2-botao { flex: 1 1 10rem; width: auto; } }
     .op2-investigar__aviso { margin: 0.35rem 0 0; font-size: 0.8rem; color: var(--op2-critico); }
     .op2-investigar__aguarde { margin: 0.2rem 0; font-style: italic; color: var(--op2-tinta-fraca); }
+    .op2-investigar__provocacao { margin: 0.2rem 0; font-style: italic; color: var(--op2-passo-1); }
+    .op2-card__info-marca--sabia { display: inline-block; padding: 0 0.3rem; border: 1px solid var(--op2-linha-forte); color: var(--op2-tinta-fraca); font-size: 0.66rem; }
     .op2-investigar__fim { margin: 0.45rem 0 0; font-size: 0.8rem; color: var(--op2-tinta-fraca); text-align: right; }
   }
 

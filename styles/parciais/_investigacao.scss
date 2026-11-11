@@ -360,9 +360,7 @@ details[open] > summary.op2-painel-titulo::before { transform: rotate(45deg); }
     list-style: disc;
 
     .op2-poi-card__info { display: list-item; border-top: 0; padding: 0.1rem 0; }
-    .op2-poi-card__texto { display: inline; }
-    .op2-poi-card__texto p { display: inline; }
-    .op2-poi-card__revelado-por { margin-left: var(--op2-e2); }
+    .op2-poi-card__texto p + p { margin-top: var(--op2-e1); }
   }
 
   &__texto {
@@ -370,6 +368,13 @@ details[open] > summary.op2-painel-titulo::before { transform: rotate(45deg); }
     min-width: 0;
     p { margin: 0; }
     p + p { margin-top: var(--op2-e1); }
+  }
+
+  // Texto em cima, marcas (quem contou, quem achou) numa linha embaixo.
+  &__conteudo { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.15rem; }
+  &__marcas {
+    display: flex; flex-wrap: wrap; gap: 0.15rem var(--op2-e3);
+    .op2-poi-card__revelado-por { max-width: none; white-space: normal; }
   }
 
   &__dt {
@@ -1509,7 +1514,22 @@ details[open] > summary.op2-painel-titulo::before { transform: rotate(45deg); }
   &.active { display: flex; }
 }
 
-.op2-acoes .op2-abas { position: sticky; top: 0; z-index: 1; background: var(--op2-fundo); }
+// Topo + abas presos ao rolar, sem fresta: o sticky respeita o padding do
+// .window-content, e o conteúdo aparecia por cima das abas (achado em uso real).
+.op2-acoes .window-content { padding-top: 0; }
+.op2-acoes-corpo:has(> .op2-acoes__cabeca) { padding-top: 0; }
+.op2-acoes__cabeca {
+  position: sticky; top: 0; z-index: 2;
+  display: flex; flex-direction: column; gap: var(--op2-e3);
+  padding-top: var(--op2-e3);
+  background: var(--op2-fundo);
+}
+// A barra de filtros da aba prende logo abaixo do topo (altura medida no render).
+.op2-acoes__aba > .op2-painel-secao__topo {
+  position: sticky; top: var(--op2-acoes-cabeca, 6.5rem); z-index: 1;
+  padding-bottom: var(--op2-e2);
+  background: var(--op2-fundo);
+}
 
 // Cada aba do tamanho do próprio rótulo, numa linha só (o mesmo do painel).
 .op2-acoes .op2-aba {

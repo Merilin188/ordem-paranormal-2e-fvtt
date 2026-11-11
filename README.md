@@ -129,8 +129,11 @@ Cada linha do quadro de informações tem **três estados**, num clique só do m
 | 🔍 | Descobrível | Só quem investigar com a perícia e alcançar a DT |
 | 👁️ | Aberta | Todo jogador vê, sem gastar ação |
 
-A pista é **de quem achou**: revelada para aquele personagem, sussurrada no chat para
-o jogador dele e o mestre. Se o jogador quiser, um botão na linha — no card de Examinar
+A pista é **de quem achou**: revelada para aquele personagem. O card do Investigar é
+público — a mesa vê a descrição, as perícias e os dados (e a Prontidão de um aliado
+rerrola o Examinar dali) — mas o texto das linhas só aparece para o dono e o mestre; os
+outros leem "Parece que … descobriu alguma coisa…". O que ele já sabia vem marcado
+**Já descoberto** e não conta como informação nova. Se o jogador quiser, um botão na linha — no card de Examinar
 ou na janela de ações — **conta ao grupo**: a linha aparece no painel de todos os
 participantes, com o nome de quem contou, e um card público leva o texto ao chat. É o
 "fica a cargo dele compartilhar a informação com os outros ou não" do livro; a ação

@@ -358,12 +358,25 @@
                           </button>
                           <span class="op2-poi-card__dt">DT {{dt}}</span>
                         {{/if}}
-                        <div class="op2-poi-card__texto">{{{texto}}}</div>
-                        {{#if contadaPor}}
-                          <span class="op2-poi-card__revelado-por" data-tooltip="{{localize 'OP2.Investigacao.ContadaPor' nomes=contadaPor}}">
-                            <i class="fa-solid fa-bullhorn" aria-hidden="true"></i> {{contadaPor}}
-                          </span>
-                        {{/if}}
+                        {{!-- O texto ocupa a largura; quem contou e quem achou vão numa linha
+                              embaixo — ao lado, espremiam o texto numa coluna (achado em uso real). --}}
+                        <div class="op2-poi-card__conteudo">
+                          <div class="op2-poi-card__texto">{{{texto}}}</div>
+                          {{#if (op2Ou contadaPor reveladoPor.length)}}
+                            <div class="op2-poi-card__marcas">
+                              {{#if contadaPor}}
+                                <span class="op2-poi-card__revelado-por" data-tooltip="{{localize 'OP2.Investigacao.ContadaPor' nomes=contadaPor}}">
+                                  <i class="fa-solid fa-bullhorn" aria-hidden="true"></i> {{contadaPor}}
+                                </span>
+                              {{/if}}
+                              {{#if @root.ehGM}}{{#if reveladoPor.length}}
+                                <span class="op2-poi-card__revelado-por" data-tooltip="{{reveladoPor}}">
+                                  <i class="fa-solid fa-user-check" aria-hidden="true"></i> {{reveladoPor}}
+                                </span>
+                              {{/if}}{{/if}}
+                            </div>
+                          {{/if}}
+                        </div>
                         {{#if podeContar}}
                           <button type="button" class="op2-botao-icone" data-action="contarAoGrupo"
                             data-poi-uuid="{{../../uuid}}" data-info-id="{{id}}"
@@ -373,9 +386,6 @@
                           </button>
                         {{/if}}
                         {{#if @root.ehGM}}{{#if reveladoPor.length}}
-                          <span class="op2-poi-card__revelado-por" data-tooltip="{{reveladoPor}}">
-                            <i class="fa-solid fa-user-check" aria-hidden="true"></i> {{reveladoPor}}
-                          </span>
                           <button type="button" class="op2-botao-icone" data-action="limparRevelacao"
                             data-poi-uuid="{{../../uuid}}" data-info-id="{{id}}"
                             aria-label="{{localize 'OP2.Painel.LimparRevelacao'}}"

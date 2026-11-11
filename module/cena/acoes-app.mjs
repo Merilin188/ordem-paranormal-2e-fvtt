@@ -200,6 +200,9 @@ export class AcoesInvestigacaoApp extends HandlebarsApplicationMixin(Application
     }
   }
 
+  /** Mede o bloco fixo do topo (a barra de filtros prende embaixo dele). */
+  #observadorCabeca = null;
+
   /** Hook de `updateActor`, para soltar no fechamento. */
   #hookAtor = null;
 
@@ -236,6 +239,7 @@ export class AcoesInvestigacaoApp extends HandlebarsApplicationMixin(Application
   _onClose(opcoes) {
     super._onClose(opcoes);
     void import("./regras-investigacao.mjs").then((m) => m.fecharComAsAcoes());
+    this.#observadorCabeca?.disconnect();
     esquecerRolagem(this);
     if (this.#hookAtor) Hooks.off("updateActor", this.#hookAtor);
     this.#hookAtor = null;
@@ -261,6 +265,15 @@ export class AcoesInvestigacaoApp extends HandlebarsApplicationMixin(Application
     super._onRender(contexto, opcoes);
     // A janela é a tela daquele personagem: veste a cor do perfil dele, como a ficha.
     this.element.dataset.perfil = this.ator.system.perfil ?? "";
+    // Topo e abas presos ao rolar; a barra de filtros da aba prende logo abaixo deles.
+    const cabeca = this.element.querySelector("[data-acoes-cabeca]");
+    this.#observadorCabeca?.disconnect();
+    if (cabeca) {
+      const medir = () => this.element?.style.setProperty("--op2-acoes-cabeca", `${cabeca.offsetHeight}px`);
+      medir();
+      this.#observadorCabeca = new ResizeObserver(medir);
+      this.#observadorCabeca.observe(cabeca);
+    }
     restaurarRolagem(this);
 
     // A barra de filtros de cada aba (a mesma do painel): só mexe no DOM, sem

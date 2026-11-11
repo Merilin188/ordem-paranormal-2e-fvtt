@@ -72,6 +72,10 @@ permanentes). **v13 e v14 exercitados pelo e2e** (13.351: 532 verificações; 14
   escolhe **Observar** (outra perícia, sem rolar) **ou Examinar** (rola a do passo 2) —
   um tira o outro, e a ação acaba. Examinar perde 1 PD quando nada é novo; o passivo não
   conta. `examinar()` (passivo + rolagem juntos, o Alpha) fica só para macro.
+  O card é **público**; o texto das linhas vai em `data-op2-segredo` (o hook do chat
+  troca pelo aviso "descobriu alguma coisa" para quem não é dono) e os botões de quem
+  age em `data-op2-so-dono` (os outros veem desabilitados). Como `data-op2-gm`, isso
+  esconde do DOM — não é segredo de verdade, e o texto do ponto já está no cliente.
 - **Três estados por linha do quadro:** oculta (`oculta`; na tela "Oculta" — antes
   "Rascunho"), descobrível (padrão, o único que Examinar acha) e aberta (`aberta`, o
   jogador vê sem gastar ação). Oculta só chega a alguém pela janela do mestre. A pista é

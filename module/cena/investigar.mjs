@@ -17,9 +17,10 @@ import { SYSTEM_ID, CUSTO_PD_EXAMINAR } from "../config.mjs";
 import {
   periciasParaInvestigar, linhasParaOMestre, novasParaOPersonagem, escolherAprofundamento,
   periciasParaObservar, resolverExaminarBeta, infosAlcancaveis, blocoDaPericia, normalizarEstado,
+  refazerExaminar, chaveInfo,
 } from "./investigacao.mjs";
 import {
-  carregarPoi, gravarRevelacoes, sussurroPara, editorDeTexto, recuperarPdAoDescobrir, idsRevelados,
+  carregarPoi, gravarRevelacoes, editorDeTexto, recuperarPdAoDescobrir, idsRevelados,
 } from "./acoes-investigacao.mjs";
 import { pontoTrancado } from "./acesso-poi.mjs";
 import { itensDaLinha } from "./itens-pista.mjs";
@@ -48,11 +49,19 @@ async function conteudo(estado) {
   const poi = await fromUuid(estado.poiUuid);
   const ator = game.actors.get(estado.atorId);
   const porId = new Map((poi?.system.informacoes ?? []).map((info) => [info.id, info]));
-  const linhas = (ids, chave) => (ids ?? []).map((id) => porId.get(id)).filter(Boolean).map((info) => {
+  // `novas` (gravado no envio): o que era novo para ele. O resto vem marcado "Já
+  // descoberto" — não conta como informação nova. Card antigo, sem `novas`: tudo novo.
+  const linhas = (ids, chave, novas = null) => (ids ?? []).map((id) => porId.get(id)).filter(Boolean).map((info) => {
     const itens = itensDaLinha(info);
-    return { ...info, rotuloPericia: rotuloDePericia(chave), itens, itensUuids: itens.map((i) => i.uuid).join(",") };
+    return {
+      ...info, rotuloPericia: rotuloDePericia(chave), itens, itensUuids: itens.map((i) => i.uuid).join(","),
+      jaSabia: Array.isArray(novas) && !novas.includes(info.id),
+    };
   });
-  const bloco = (b) => (b ? { ...b, infos: linhas(b.infos, b.pericia) } : null);
+  // Os outros jogadores veem o card inteiro, menos o texto das linhas: no lugar, o aviso.
+  const nome = ator?.name ?? "?";
+  const provocacao = (novas, infos) => L((Array.isArray(novas) ? novas.length : (infos ?? []).length) ? "Provocacao" : "ProvocacaoNadaNovo", { ator: nome });
+  const bloco = (b) => (b ? { ...b, infos: linhas(b.infos, b.pericia, b.novas), provocacao: provocacao(b.novas, b.infos) } : null);
   const etapa = estado.etapa;
   return renderizar(`${RAIZ}/chat/investigar.hbs`, {
     ...estado,
@@ -63,7 +72,11 @@ async function conteudo(estado) {
     trancado: poi ? pontoTrancado(poi) : false,
     passivo: bloco(estado.passivo),
     observar: bloco(estado.observar),
-    examinar: estado.examinar ? { ...estado.examinar, infos: linhas(estado.examinar.infos, estado.passivo?.pericia) } : null,
+    examinar: estado.examinar ? {
+      ...estado.examinar,
+      infos: linhas(estado.examinar.infos, estado.passivo?.pericia),
+      provocacao: provocacao(null, estado.examinar.infos),
+    } : null,
     periciasObservar: periciasParaObservar(estado),
     podeObservar: periciasParaObservar(estado).length > 0,
     ehPericia: etapa === "pericia",
@@ -83,7 +96,9 @@ async function salvar(mensagem, estado) {
 
 /**
  * Passo 1: o card com as perícias do ponto. É o botão "Investigar" do ponto na
- * janela de ações. Sussurrado ao dono e ao mestre: o que chegar ali é de quem achou.
+ * janela de ações. Público: a mesa vê a descrição básica, as perícias e os dados (a
+ * Prontidão de um aliado rerrola o Examinar daqui); só o TEXTO das linhas é de quem
+ * achou — os outros veem "Parece que… descobriu alguma coisa" (`data-op2-segredo`).
  */
 export async function iniciarInvestigacao(ator, poiUuid) {
   const poi = await carregarPoi(poiUuid);
@@ -100,7 +115,6 @@ export async function iniciarInvestigacao(ator, poiUuid) {
   return ChatMessage.create({
     speaker: ChatMessage.getSpeaker({ actor: ator }),
     content: await conteudo(estado),
-    whisper: sussurroPara(ator),
     flags: { [SYSTEM_ID]: { tipo: "investigacao", atorId: ator.id, [FLAG]: estado } },
   });
 }
@@ -152,6 +166,31 @@ async function registrarExaminar({ mensagemId, examinar }) {
   await gravarRevelacoes(ator, estado.poiUuid, novas);
   const pd = novas.length ? await recuperarPdAoDescobrir(ator) : null;
   await salvar(mensagem, { ...estado, examinar: { ...examinar, pdRecuperado: pd?.pd ? pd.texto : "" }, etapa: "fim" });
+}
+
+/**
+ * A Prontidão rerrolou um dado do Examinar: refaz o que o novo total alcança (a partir
+ * do que ele sabia antes) e acerta a ficha — grava o que passou a alcançar, desfaz o
+ * que deixou de alcançar.
+ */
+async function prontidaoNoExaminar({ mensagemId, componentes, total, critico, falhaCritica, nota }) {
+  const mensagem = game.messages.get(mensagemId);
+  const estado = estadoDe(mensagem);
+  const ator = game.actors.get(estado?.atorId);
+  const ex = estado?.examinar;
+  if (!ex || !ator || ex.pdPago) return;
+  const poi = await fromUuid(estado.poiUuid);
+  const quadro = infosAlcancaveis(poi?.system.informacoes ?? [], poi ? pontoTrancado(poi) : false);
+  const { revelaveis, ganhar, perder } = refazerExaminar(quadro, estado.passivo.pericia, total,
+    ex.conhecidasAntes ?? [], ex.infos ?? [], { ignorarDT: critico });
+  const tirar = new Set(perder.map((id) => chaveInfo(estado.poiUuid, id)));
+  const lista = [...ator.system.estado.infosReveladas].filter((c) => !tirar.has(c));
+  for (const id of ganhar) if (!lista.includes(chaveInfo(estado.poiUuid, id))) lista.push(chaveInfo(estado.poiUuid, id));
+  await ator.update({ "system.estado.infosReveladas": lista });
+  await salvar(mensagem, {
+    ...estado,
+    examinar: { ...ex, componentes, total, critico, falhaCritica, infos: revelaveis, notas: [...(ex.notas ?? []), nota] },
+  });
 }
 
 async function marcarPdPago({ mensagemId }) {
@@ -284,7 +323,7 @@ class JanelaDoMestre extends HandlebarsApplicationMixin(ApplicationV2) {
     const pd = novas.length ? await recuperarPdAoDescobrir(ator) : null;
     await salvar(mensagem, {
       ...estado,
-      [this.modo]: { ...bloco, infos: enviadas, enviado: true, pdRecuperado: pd?.pd ? pd.texto : "" },
+      [this.modo]: { ...bloco, infos: enviadas, novas, enviado: true, pdRecuperado: pd?.pd ? pd.texto : "" },
       etapa: this.modo === "passivo" ? "aprofundar" : "fim",
     });
     await this.close();
@@ -315,12 +354,14 @@ async function examinarDoCard(ator, mensagemId) {
   if (!roll) return void comoMestre("op2InvestigarAprofundar", { mensagemId, escolha: "desfazer" });
   const poi = await fromUuid(estado.poiUuid);
   const quadro = infosAlcancaveis(poi?.system.informacoes ?? [], poi ? pontoTrancado(poi) : false);
-  const { revelaveis } = resolverExaminarBeta(quadro, chave, roll.total, idsRevelados(ator, estado.poiUuid), { ignorarDT: roll.critico });
+  const conhecidasAntes = [...idsRevelados(ator, estado.poiUuid)];
+  const { revelaveis } = resolverExaminarBeta(quadro, chave, roll.total, new Set(conhecidasAntes), { ignorarDT: roll.critico });
   await comoMestre("op2InvestigarExaminado", {
     mensagemId,
     examinar: {
       componentes: JSON.parse(JSON.stringify(roll.dados)), total: roll.total,
       critico: roll.critico, falhaCritica: roll.falhaCritica, infos: revelaveis, pdPago: false,
+      conhecidasAntes, notas: [],
     },
   });
 }
@@ -330,6 +371,7 @@ export function registrarInvestigar() {
   registrarAcaoDeMestre("op2InvestigarAprofundar", escolherAprofundar);
   registrarAcaoDeMestre("op2InvestigarExaminado", registrarExaminar);
   registrarAcaoDeMestre("op2InvestigarPdPago", marcarPdPago);
+  registrarAcaoDeMestre("op2InvestigarProntidao", prontidaoNoExaminar);
 
   registrarAcaoDeChat("investigar-pericia", async (ator, dataset) => {
     if (!podeAgir(ator)) return;
@@ -342,6 +384,19 @@ export function registrarInvestigar() {
   registrarAcaoDeChat("investigar-examinar", async (ator, dataset) => {
     if (!podeAgir(ator)) return;
     await examinarDoCard(ator, dataset.mensagemId);
+  });
+  // Prontidão de qualquer um com a habilidade (o próprio ou um aliado), nos dados do Examinar.
+  registrarAcaoDeChat("investigar-prontidao", async (ator, dataset) => {
+    const estado = estadoDe(game.messages.get(dataset.mensagemId));
+    const ex = estado?.examinar;
+    if (!ex || ex.pdPago) return;
+    const { prontidaoNosDados } = await import("./poderes.mjs");
+    const r = await prontidaoNosDados(ex.componentes, ex.total, ator.name);
+    if (!r) return;
+    await comoMestre("op2InvestigarProntidao", {
+      mensagemId: dataset.mensagemId, componentes: r.dados, total: r.total,
+      critico: r.critico, falhaCritica: r.falhaCritica, nota: r.nota,
+    });
   });
   registrarAcaoDeChat("investigar-abrir-mestre", async (_ator, dataset) => abrirJanelaDoMestre(dataset.mensagemId));
   // Nada novo no Examinar: perde 1 PD. Um clique só — o botão some depois de pago.

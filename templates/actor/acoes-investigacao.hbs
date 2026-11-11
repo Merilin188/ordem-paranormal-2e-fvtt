@@ -3,6 +3,9 @@
     <p class="op2-acoes__vazio">{{localize "OP2.Acoes.SemInvestigacao"}}</p>
     <p class="op2-ajuda">{{#if ehGM}}{{localize "OP2.Acoes.SemInvestigacaoMestre"}}{{else}}{{localize "OP2.Acoes.SemInvestigacaoJogador"}}{{/if}}</p>
   {{else}}
+    {{!-- O topo e as abas ficam presos ao rolar; a barra de filtros da aba, logo abaixo
+          (altura medida em `_onRender`). --}}
+    <div class="op2-acoes__cabeca" data-acoes-cabeca>
     <header class="op2-acoes__topo">
       {{#if (op2Maior investigacoes.length 1)}}
         <label class="op2-campo op2-campo--inline">
@@ -33,6 +36,7 @@
         </button>
       {{/each}}
     </nav>
+    </div>
 
     {{!-- Um ícone por ação e o rótulo num span próprio: o ícone nunca some, e é o
           texto que encolhe se faltar largura. --}}
