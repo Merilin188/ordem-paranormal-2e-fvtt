@@ -11,7 +11,6 @@
         data-tooltip="{{componente.rotulo}}{{#if consumido}} — {{localize 'OP2.Pavor.Consumido'}}{{/if}}">{{op2DadoResultado this}}</span>
       {{/unless}}
     {{/each}}
-    {{#if bonusCritico}}<span class="op2-card__mod op2-card__mod--critico" data-tooltip="{{localize 'OP2.CriticoExtra.Rotulo'}} ({{bonusCritico.dado}})">+{{bonusCritico.valor}}</span>{{/if}}
     {{#if modificador}}<span class="op2-card__mod" data-tooltip="{{localize 'OP2.Teste.ModificadorFixo'}}">{{#if (op2Eq (op2Sinal modificador) 1)}}+{{/if}}{{modificador}}</span>{{/if}}
     <span class="op2-card__igual" aria-hidden="true">=</span>
     <span class="op2-card__total">{{total}}</span>
@@ -54,12 +53,6 @@
   </dl>
 
   <div class="op2-card__acoes">
-    {{#if critico}}{{#unless bonusCritico}}
-      <button type="button" class="op2-botao op2-botao--pequeno op2-botao--critico" data-op2-acao="dado-critico"
-        data-ator-id="{{atorId}}" data-tooltip="{{localize 'OP2.CriticoExtra.Dica'}}">
-        <i class="fa-solid fa-star" aria-hidden="true"></i> {{localize "OP2.CriticoExtra.Botao"}}
-      </button>
-    {{/unless}}{{/if}}
     {{!-- Um teste qualquer não sabe em quem o dano cai: estes botões usam os tokens
           selecionados na cena, e por isso são do mestre. Combate, Arrombar e Alcançar
           têm cards próprios, que já sabem o alvo. --}}
@@ -80,7 +73,7 @@
     {{#if arma}}
       <button type="button" class="op2-botao op2-botao--pequeno" data-op2-gm
         data-op2-acao="aplicar-dano-selecionado" data-quantidade="{{arma.dano}}" data-recurso="pv"
-        data-ator-id="{{atorId}}" data-tooltip="{{arma.nome}}: {{#if bonusCritico}}{{localize 'OP2.CriticoExtra.DuasMaiores'}}{{else}}RA{{/if}} {{arma.base}} + {{arma.bonus}}">
+        data-ator-id="{{atorId}}" data-tooltip="{{arma.nome}}: {{#if critico}}{{localize 'OP2.CriticoExtra.DuasMaiores'}}{{else}}RA{{/if}} {{arma.base}} + {{arma.bonus}}">
         {{localize "OP2.Chat.DanoArma" nome=arma.nome}} ({{arma.dano}})
       </button>
     {{/if}}

@@ -120,8 +120,12 @@ export async function arrombar(ator, desafioUuid, { rapido = false } = {}) {
   await aplicarDano(ator, CUSTO_PV_ARROMBAR, "pv");
 
   const tentativasUsadas = desafio.system.tentativasUsadas + 1;
+  // Teste estendido: soma a RA; no crítico, as DUAS rolagens mais altas (livro, Críticos).
+  const { duasMaisAltas } = await import("../dice/analise.mjs");
+  const doCritico = roll.critico ? duasMaisAltas(roll.dados.filter((d) => !d.pavor && !d.consumido)) : null;
+  const ganho = doCritico ? doCritico.reduce((t, v) => t + v, 0) : roll.ra;
   const pontuacaoAtual = roll.sucesso
-    ? acumularArrombar(desafio.system, roll.ra)
+    ? acumularArrombar(desafio.system, ganho)
     : desafio.system.pontuacaoAtual;
   const estadoAtualizado = { ...desafio.system, pontuacaoAtual, tentativasUsadas };
 
@@ -143,6 +147,8 @@ export async function arrombar(ator, desafioUuid, { rapido = false } = {}) {
     componentes: roll.dados,
     total: roll.total,
     ra: roll.ra,
+    ganho,
+    dadosCritico: doCritico?.join(" + ") ?? "",
     critico: roll.critico,
     falhaCritica: roll.falhaCritica,
     dt: desafio.system.dtObjeto,

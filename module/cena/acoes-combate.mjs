@@ -206,21 +206,17 @@ async function publicarAtaque(ator, alvo, roll, { armado, dano = null, distancia
 }
 
 /**
- * Texto, total e dano do card a partir do teste. No crítico, o dano usa as duas
- * rolagens mais altas (com o dado extra) e o card diz isso; sem o dado extra rolado
- * ainda, avisa que o dano se atualiza quando ele rolar.
+ * Texto, total e dano do card a partir do teste. No crítico, o dano soma as duas
+ * rolagens mais altas do teste (sem dado extra), e o card diz quais.
  */
 async function calcularDanoDoAtaque(d, roll) {
   const { danoBaseDoRoll, duasMaiores } = await import("../dice/teste.mjs");
-  const extra = roll.options?.bonusCritico?.valor ?? 0;
-  const total = roll.total; // já soma o dado do crítico
+  const total = roll.total;
   const base = d.danoBase ? danoBaseDoRoll(roll, d.danoBase) : 0;
   const dano = d.acertou && d.danoBase ? Math.max(0, base + (d.danoBonus ?? 0)) : 0;
   let notaDano = "";
   if (d.critico && d.acertou) {
-    notaDano = extra
-      ? game.i18n.format("OP2.Combate.DanoCritico", { dados: duasMaiores(roll).join(" + "), bonus: d.danoBonus ?? 0, dano })
-      : game.i18n.localize("OP2.Combate.CriticoPendente");
+    notaDano = game.i18n.format("OP2.Combate.DanoCritico", { dados: duasMaiores(roll).join(" + "), bonus: d.danoBonus ?? 0, dano });
   }
   const texto = d.defesa
     ? game.i18n.format("OP2.Combate.AtaqueDefendido", { atacante: d.atacanteNome, alvo: d.alvoNome, total, defesa: d.defesa.rotulo })

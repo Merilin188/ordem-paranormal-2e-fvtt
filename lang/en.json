@@ -705,7 +705,7 @@
       "CustoPV": "Cost {custo} HP.",
       "ArrombarSucesso": "the RA ({ra}) is added to the score.",
       "ArrombarFalha": "did not reach DC {dt}; the score does not advance.",
-      "ArrombarCritico": "the RA ({ra}) is added to the score, ignoring the DC.",
+      "ArrombarCritico": "the two highest rolls ({dados} = {ganho}) go into the score, ignoring the DT.",
       "LimparSenha": "Clear code",
       "HistoricoDestrancar": "Unlock attempts",
       "SenhaNenhuma": "No code generated yet.",
@@ -896,8 +896,7 @@
       "Arma": "Weapon",
       "PericiaAtaque": "Attack skill",
       "ArmaAjuda": "With a weapon, damage is RA (+ its modifier); unarmed, RB. Melee uses Fighting, ranged uses Aim — you can change it.",
-      "DanoCritico": "Critical: damage with the two highest rolls ({dados}) + {bonus} = {dano}.",
-      "CriticoPendente": "Critical success: roll the critical die on the test card — this card's damage updates with the two highest rolls."
+      "DanoCritico": "Critical: damage with the two highest rolls ({dados}) + {bonus} = {dano}."
     },
     "Impeto": {
       "Titulo": "Momentum",
@@ -1488,10 +1487,6 @@
       "RemoverCampo": "Delete field"
     },
     "CriticoExtra": {
-      "Botao": "Critical die",
-      "Rotulo": "Extra critical die",
-      "JaRolado": "The critical die was already rolled for this test.",
-      "Dica": "Rolls one more die (the largest of the critical) and adds it to the total and damage.",
       "DuasMaiores": "two highest"
     },
     "EfeitosMundo": {

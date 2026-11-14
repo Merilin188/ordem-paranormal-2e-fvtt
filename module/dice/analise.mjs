@@ -30,6 +30,16 @@ export function ra(dados) {
   return v.length ? Math.max(...v) : 0;
 }
 
+/**
+ * Crítico em teste estendido e ataque: em vez de só a rolagem mais alta, somam-se
+ * as DUAS mais altas (livro, Críticos). Não há dado extra — esse só existe no teste
+ * de esconderijo. Devolve os dois valores, do maior para o menor.
+ * @param {DadoRolado[]} dados
+ */
+export function duasMaisAltas(dados) {
+  return contados(dados).map((d) => d.resultado).sort((a, b) => b - a).slice(0, 2);
+}
+
 /** Rolagem Baixa — o menor valor rolado. @param {DadoRolado[]} dados */
 export function rb(dados) {
   const v = contados(dados).map((d) => d.resultado);

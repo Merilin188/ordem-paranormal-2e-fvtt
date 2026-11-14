@@ -5,6 +5,10 @@ Versões seguem [SemVer](https://semver.org/lang/pt-BR/).
 
 ## [Não publicado]
 
+- **Crítico sem dado extra** (livro, Críticos): o teste passa direto e, em ataques e
+  testes estendidos, soma as **duas rolagens mais altas** do próprio teste no dano e na
+  pontuação do Arrombar (o card diz quais). Sai o botão "Dado do crítico" e a rolagem
+  automática em ataques e testes opostos. O dado adicional fica só no esconderijo.
 - **Investigar do playtest Beta**, em três passos num card só do chat: as perícias do
   ponto sem DT; a perícia escolhida abre para o mestre uma janela com as linhas dela,
   marcado o que o dado alcança — ele desmarca, inclui (até oculta), muda o estado e

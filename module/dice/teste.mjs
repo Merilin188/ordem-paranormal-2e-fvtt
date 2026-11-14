@@ -16,6 +16,7 @@ import { ajustarDepoisDaRolagem, conferirLobo, escolherBonusPlano } from "../cen
 import {
   escolherUsoDoPavor, controlarPavor, abracarPavor, vencerPavor, pedirDadoDePavor, vestirDadoDePavor,
 } from "../cena/pavor.mjs";
+import { duasMaisAltas } from "./analise.mjs";
 
 /**
  * @param {Actor} ator
@@ -176,12 +177,6 @@ export async function rolarTeste(ator, {
 
   // `semCard`: quem chamou publica o próprio card com os dados dentro (Examinar,
   // solicitação do mestre). A animação já aconteceu; o card não repete.
-  // Crítico em ataque ou teste oposto: o dado extra rola já, para o total comparado
-  // (e o dano) saírem certos nos cards seguintes.
-  if (roll.resultado.critico && (oposto || ["luta", "pontaria"].includes(chavePericia))) {
-    const { rolarExtraDoCritico } = await import("./critico-extra.mjs");
-    await rolarExtraDoCritico(roll);
-  }
 
   if (!semCard) await enviarParaChat(roll, ator, { pularDados3D: true, ocultoDoMestre });
 
@@ -352,22 +347,17 @@ function notasDeAjuste(ajustes = []) {
 }
 
 /**
- * Base do dano de um teste de ataque: RA (ou RB). No crítico com o dado extra já
- * rolado, as DUAS rolagens mais altas entre os dados do teste e o extra.
+ * Base do dano de um teste de ataque: RA (ou RB). No crítico, a soma das DUAS
+ * rolagens mais altas do próprio teste — não há dado extra (livro, Críticos).
  */
 export function danoBaseDoRoll(roll, base = "ra") {
-  const extra = roll.options?.bonusCritico?.valor;
-  if (extra) {
-    return duasMaiores(roll).reduce((t, v) => t + v, 0);
-  }
+  if (roll.resultado?.critico ?? roll.critico) return duasMaiores(roll).reduce((t, v) => t + v, 0);
   return base === "rb" ? roll.resultado?.rb ?? roll.rb : roll.resultado?.ra ?? roll.ra;
 }
 
-/** As duas rolagens mais altas do crítico (dados contados + o dado extra). */
+/** As duas rolagens mais altas do teste (o que o crítico soma no dano). */
 export function duasMaiores(roll) {
-  const extra = roll.options?.bonusCritico?.valor ?? 0;
-  return (roll.dados ?? []).filter((d) => d.contado !== false && !d.pavor && !d.consumido).map((d) => d.resultado)
-    .concat(extra).sort((x, y) => y - x).slice(0, 2);
+  return duasMaisAltas((roll.dados ?? []).filter((d) => !d.pavor && !d.consumido));
 }
 
 export function htmlDoTeste(roll, ator) {
@@ -380,19 +370,13 @@ export function htmlDoTeste(roll, ator) {
   const arma = danoCriatura
     ? { name: danoCriatura.nome, system: { danoBonus: danoCriatura.bonus } }
     : armaItem;
-  // Dado extra do crítico (botão no card): soma no total e no dano da arma.
-  const bonusCritico = roll.options.bonusCritico ?? null;
-  const extra = bonusCritico?.valor ?? 0;
-  // Dano no crítico: as DUAS rolagens mais altas entre os dados do teste e o dado
-  // extra (+ arma). O extra só entra se for maior que um dos dois — nunca troca uma
-  // rolagem alta por uma menor (achado em uso real: 6, 6 e extra 5 dava 6+5).
+  // Dano no crítico: as DUAS rolagens mais altas do teste (+ arma), sem dado extra.
   const baseDano = danoBaseDoRoll(roll, danoCriatura?.base === "rb" ? "rb" : "ra");
   return renderizar("systems/ordem-paranormal-2e/templates/chat/teste.hbs", {
     rotulo: roll.options.rotulo,
     componentes: roll.dados,
     ...resultado,
-    total: resultado.total + extra,
-    bonusCritico,
+    total: resultado.total,
     notasAjuste: notasDeAjuste(roll.options.ajustes),
     arma: arma ? { nome: arma.name, bonus: arma.system.danoBonus, base: baseDano, dano: baseDano + arma.system.danoBonus } : null,
     atorId: ator.id,

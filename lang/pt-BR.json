@@ -705,7 +705,7 @@
       "CustoPV": "Custou {custo} PV.",
       "ArrombarSucesso": "a RA ({ra}) entra na pontuação.",
       "ArrombarFalha": "não alcançou a DT {dt}; a pontuação não avança.",
-      "ArrombarCritico": "a RA ({ra}) entra na pontuação, ignorando a DT.",
+      "ArrombarCritico": "as duas rolagens mais altas ({dados} = {ganho}) entram na pontuação, ignorando a DT.",
       "LimparSenha": "Limpar senha",
       "HistoricoDestrancar": "Tentativas de Destrancar",
       "SenhaNenhuma": "Nenhuma senha sorteada ainda.",
@@ -896,8 +896,7 @@
       "Arma": "Arma",
       "PericiaAtaque": "Perícia do ataque",
       "ArmaAjuda": "Com arma, o dano é a RA (+ o modificador dela); desarmado, a RB. Corpo a corpo usa Luta, à distância usa Pontaria — dá para trocar.",
-      "DanoCritico": "Crítico: dano com as duas rolagens mais altas ({dados}) + {bonus} = {dano}.",
-      "CriticoPendente": "Sucesso crítico: role o dado do crítico no card do teste — o dano deste card se atualiza com as duas rolagens mais altas."
+      "DanoCritico": "Crítico: dano com as duas rolagens mais altas ({dados}) + {bonus} = {dano}."
     },
     "Impeto": {
       "Titulo": "Ímpeto",
@@ -1488,10 +1487,6 @@
       "RemoverCampo": "Apagar campo"
     },
     "CriticoExtra": {
-      "Botao": "Dado do crítico",
-      "Rotulo": "Dado extra do crítico",
-      "JaRolado": "O dado do crítico já foi rolado neste teste.",
-      "Dica": "Rola mais um dado (o maior do crítico) e soma ao total e ao dano.",
       "DuasMaiores": "duas maiores"
     },
     "EfeitosMundo": {
