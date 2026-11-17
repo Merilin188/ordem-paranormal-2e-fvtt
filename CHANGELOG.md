@@ -11,7 +11,16 @@ Versões seguem [SemVer](https://semver.org/lang/pt-BR/).
   personagem tem a barra de avanços e os botões das ações da área; o card diz o que
   veio e por quê. Quem cruza pode ficar **parado em segurança** (não age; a busca das
   criaturas não tira dados dele). O mestre tem ±1 avanço (ideias livres) e "Próxima
-  área". Equilíbrio no tronco, nadar, salto de fé e escuridão vêm na etapa 2.
+  área".
+- **Travessia, etapa 2** — tipos de ação: **Preparo** (Procurar Trilhas: +1 passo numa
+  perícia até o fim da área), **Equilíbrio** (o tronco: um teste de equilíbrio por
+  rodada, com os dados de equilíbrio que não voltam até o fim da área; caindo, dano e
+  fica **Na água**, mantendo os avanços, e só aparecem as ações de água, como Nadar),
+  **Salto de fé** (dano por avanço que falta, reduzido pela RB se passar; chega do outro
+  lado). No Teste, **falhar por 3 ou mais** com "dano por avanço" é cair e chegar, com
+  1 dado por avanço que faltava. Cada área pode ter uma **penalidade** (Escuridão: a
+  partir de N avanços, −1 passo em todos os testes). Passos de preparo e penalidade
+  entram no teste com o motivo no card. "Voltar à margem" fica no ±1 do mestre.
 - **Crítico sem dado extra** (livro, Críticos): o teste passa direto e, em ataques e
   testes estendidos, soma as **duas rolagens mais altas** do próprio teste no dano e na
   pontuação do Arrombar (o card diz quais). Sai o botão "Dado do crítico" e a rolagem

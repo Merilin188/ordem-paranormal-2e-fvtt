@@ -9,6 +9,7 @@
             <i class="fa-solid fa-route" aria-hidden="true"></i>
             {{localize "OP2.Furtividade.Travessia.AreaRotulo" n=travessia.n total=travessia.total area=travessia.nome avancos=travessia.avancos}}
           </span>
+          {{#if travessia.penalidade}}<span class="op2-furt__area op2-furt__area--penalidade"><i class="fa-solid fa-moon" aria-hidden="true"></i> {{travessia.penalidade}}</span>{{/if}}
         {{/if}}
       </div>
       <div class="op2-furt__botoes">
@@ -93,6 +94,8 @@
           {{#if ../travessia}}
             <div class="op2-furt__avancos {{#if cruzou}}op2-furt__avancos--cruzou{{/if}}">
               <span class="op2-furt__avancos-rotulo">{{localize "OP2.Furtividade.Travessia.Avancos"}} <strong>{{avancos}}/{{../travessia.avancos}}</strong></span>
+              {{#if agua}}<span class="op2-furt__agua" data-tooltip="{{localize 'OP2.Furtividade.Travessia.NaAguaDica'}}"><i class="fa-solid fa-water"></i> {{localize "OP2.Furtividade.Travessia.NaAgua"}}</span>{{/if}}
+              {{#if preparos}}<span class="op2-furt__preparo" data-tooltip="{{localize 'OP2.Furtividade.Travessia.PreparoDica'}}"><i class="fa-solid fa-compass"></i> {{preparos}}</span>{{/if}}
               <span class="op2-furt__avancos-trilho"><span style="width: {{pctAvanco}}%"></span></span>
               {{#if ../gm}}
                 <button type="button" class="op2-botao-icone" data-action="avancoMenos" data-uuid="{{uuid}}" data-tooltip="{{localize 'OP2.Furtividade.Travessia.Menos'}}"><i class="fa-solid fa-minus"></i></button>
@@ -123,12 +126,12 @@
               {{#unless testou}}
                 <button type="button" class="op2-botao op2-botao--pequeno" data-action="jogador" data-acao="teste" data-uuid="{{uuid}}"><i class="fa-solid fa-dice"></i> {{localize "OP2.Furtividade.TesteEsconderijo"}}</button>
               {{else}}{{#unless ../criaturasFase}}
-                {{#if ../travessia}}
+                {{#if acoesArea.length}}
                   <div class="op2-furt__area-acoes">
-                    {{#each ../travessia.acoes}}
+                    {{#each acoesArea}}
                       <button type="button" class="op2-botao op2-botao--pequeno op2-furt__area-acao" data-action="jogador" data-acao="area"
-                        data-acao-id="{{id}}" data-uuid="{{../uuid}}" data-tooltip="{{rotuloPericia}} DT {{dt}} · {{rotuloAvanco}}{{#if danoFalha}} · {{localize 'OP2.Furtividade.Travessia.DanoFalha' formula=danoFalha}}{{/if}}">
-                        <i class="fa-solid fa-person-walking-arrow-right" aria-hidden="true"></i> {{nome}} <small>{{rotuloPericia}} {{dt}}</small></button>
+                        data-acao-id="{{id}}" data-uuid="{{../uuid}}" data-tooltip="{{dica}}">
+                        <i class="fa-solid {{icone}}" aria-hidden="true"></i> {{nome}} <small>{{rotuloPericia}} {{dt}}</small></button>
                     {{/each}}
                   </div>
                 {{/if}}

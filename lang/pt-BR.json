@@ -1670,7 +1670,28 @@
         "FicarSeguro": "Ficar em segurança",
         "VoltarAgir": "Voltar a agir",
         "SegurancaDica": "Parado em segurança: não age, mas a busca das criaturas não tira dados de esconderijo dele. Seguindo, continua exposto.",
-        "EmSegurancaNaoAge": "Parado em segurança: não age até a próxima área (ou até voltar a agir)."
+        "EmSegurancaNaoAge": "Parado em segurança: não age até a próxima área (ou até voltar a agir).",
+        "NotaBonus": "Preparo: +{n} passo em {pericia} (até o fim da área).",
+        "NotaPenalidade": "{nome}: {n} passo em todos os testes da área.",
+        "PenalidadeRotulo": "{nome}: a partir de {n} avanços, {passos} passo",
+        "Preparou": "Preparou o caminho: +1 passo em {pericia} até o fim da área.",
+        "NaoPreparou": "Não achou nada que ajude.",
+        "CaiuFeio": "Falhou por 3 ou mais: cai e chega do outro lado — os {faltam} avanço(s) que faltavam.",
+        "DanoQueda": "{n} de dano da queda ({formula}: 1 dado por avanço que faltava).",
+        "Salto": "Salto de fé: {faltam} avanço(s) que faltavam → {formula} = {rolado}.",
+        "SaltoReduz": "Passou no teste: o dano diminui pela RB ({rb}).",
+        "SaltoDano": "{n} de dano. Chega do outro lado.",
+        "CaiuNaAgua": "{nome} caiu! Está Na água, com os avanços que já tinha ({atual}/{total}): agora só nadando.",
+        "NaAgua": "Na água",
+        "NaAguaDica": "Caiu do tronco: mantém os avanços, mas só as ações de água aparecem.",
+        "PreparoDica": "Passos preparados para os testes desta área.",
+        "DicaQueda": "falhar por 3 ou mais: cai, {porAvanco} por avanço que falta, e chega",
+        "Dica": {
+          "teste": "teste",
+          "preparo": "passando, +1 passo em {pericia} até o fim da área",
+          "equilibrio": "teste de equilíbrio (2d10): equilibrou, +{n} avanço(s); caindo, salva com dado de equilíbrio ou cai na água ({dano})",
+          "salto": "{porAvanco} por avanço que falta; passar reduz pela RB; chega do outro lado"
+        }
       }
     },
     "Loucura": {
@@ -1926,7 +1947,26 @@
       "AcaoDanoDica": "Dano se falhar no teste (1d4, 1…). Em branco: a falha não machuca.",
       "AdicionarAcao": "Ação",
       "AdicionarArea": "Área",
-      "AcaoDanoCurto": "Dano"
+      "AcaoDanoCurto": "Dano",
+      "AcaoTipo": "Tipo",
+      "AcaoTipoDica": "Teste: rola a perícia e soma avanços. Preparo: passando, +1 passo numa perícia até o fim da área (não soma avanço). Equilíbrio: o teste de equilíbrio do tronco; caindo, fica Na água. Salto de fé: dano por avanço que falta, reduzido pela RB se passar; chega do outro lado.",
+      "TipoAcaoArea": {
+        "teste": "Teste",
+        "preparo": "Preparo",
+        "equilibrio": "Equilíbrio",
+        "salto": "Salto de fé"
+      },
+      "AcaoAgua": "Só na água",
+      "AcaoAguaDica": "A ação só aparece para quem caiu na água (Nadar). As outras somem enquanto ele estiver lá.",
+      "AcaoPorAvanco": "Dano por avanço",
+      "AcaoPorAvancoDica": "Teste: falhar por 3 ou mais é cair — este dano por avanço que faltava, e chega do outro lado. Salto de fé: o dano por avanço que falta (1d6).",
+      "AcaoPericiaBonus": "Passo em",
+      "AcaoPericiaBonusDica": "Preparo: passando, +1 passo nesta perícia até o fim da área (Procurar Trilhas → Acrobacia).",
+      "PenalidadeNome": "Penalidade da área",
+      "PenalidadeExemplo": "Escuridão",
+      "PenalidadeAPartir": "A partir de (avanços)",
+      "PenalidadePassos": "Passos",
+      "PenalidadeDica": "Quem já tem esses avanços sofre os passos em todos os testes da área (Escuridão: a partir de 2, −1 passo). 0 desliga."
     },
     "Sussurro": {
       "Titulo": "Enviar caixa de sussurro",

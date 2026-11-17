@@ -87,6 +87,9 @@
   }
   .op2-furt__avancos--cruzou .op2-furt__avancos-trilho > span { background: var(--op2-critico); }
   .op2-furt__cruzou { display: flex; align-items: center; gap: 0.4rem; button { width: auto; flex: none; } }
+  .op2-furt__agua { white-space: nowrap; color: #6ba6ec; text-transform: uppercase; }
+  .op2-furt__preparo { white-space: nowrap; color: #a5d36b; }
+  .op2-furt__area--penalidade { color: #b9a6e8; }
   .op2-furt__area-acoes {
     flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 0.25rem; padding-bottom: 0.2rem; margin-bottom: 0.1rem;
     border-bottom: 1px dashed var(--op2-linha);
@@ -399,9 +402,16 @@
   .op2-cena-config__area-nome { flex: 3 !important; }
   .op2-cena-config__acoes-area { display: flex; flex-direction: column; gap: 0.25rem; }
   .op2-cena-config__acao-area {
-    display: grid; grid-template-columns: minmax(8rem, 2fr) minmax(7rem, 1.3fr) 3.5rem 4.5rem minmax(9.5rem, 1.6fr) 4.5rem 1.5rem; gap: 0.3rem; align-items: center;
+    display: grid; grid-template-columns: minmax(7rem, 1.7fr) minmax(6.5rem, 1.1fr) minmax(6.5rem, 1.1fr) 3.2rem 4.2rem minmax(8.5rem, 1.4fr) 4rem 1.5rem; gap: 0.3rem; align-items: center;
     input, select { width: 100%; min-width: 0; }
   }
+  .op2-cena-config__acao-extra {
+    grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem 0.8rem; padding: 0 0 0.35rem 0.6rem;
+    border-bottom: 1px dashed var(--op2-linha);
+    label { flex-direction: row !important; align-items: center; gap: 0.3rem; font-size: 0.75em; color: var(--op2-tinta-fraca); white-space: nowrap; flex: none; }
+    input[type=text] { width: 5rem; } select { width: 9rem; }
+  }
+  .op2-cena-config__penalidade { font-size: 0.9em; }
   .op2-cena-config__acao-cabeca span { font-size: 0.72em; text-transform: uppercase; color: var(--op2-tinta-fraca); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   // Perícias de um evento: grade de caixas marcáveis (no lugar do select múltiplo).
   .op2-pericias-escolha {

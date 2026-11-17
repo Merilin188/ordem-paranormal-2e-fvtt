@@ -1670,7 +1670,28 @@
         "FicarSeguro": "Stay in safety",
         "VoltarAgir": "Act again",
         "SegurancaDica": "Staying put in safety: doesn't act, but the creatures' search doesn't take their hiding dice. Acting on, they stay exposed.",
-        "EmSegurancaNaoAge": "Staying put in safety: no actions until the next area (or until acting again)."
+        "EmSegurancaNaoAge": "Staying put in safety: no actions until the next area (or until acting again).",
+        "NotaBonus": "Preparation: +{n} step in {pericia} (until the end of the area).",
+        "NotaPenalidade": "{nome}: {n} step on every test in the area.",
+        "PenalidadeRotulo": "{nome}: from {n} advances, {passos} step",
+        "Preparou": "Prepared the way: +1 step in {pericia} until the end of the area.",
+        "NaoPreparou": "Found nothing that helps.",
+        "CaiuFeio": "Failed by 3 or more: they fall and reach the other side — the {faltam} missing advance(s).",
+        "DanoQueda": "{n} fall damage ({formula}: 1 die per missing advance).",
+        "Salto": "Leap of faith: {faltam} missing advance(s) → {formula} = {rolado}.",
+        "SaltoReduz": "Passed the test: the damage drops by the LR ({rb}).",
+        "SaltoDano": "{n} damage. They reach the other side.",
+        "CaiuNaAgua": "{nome} fell! They're In the water, keeping their advances ({atual}/{total}): swimming only from now on.",
+        "NaAgua": "In the water",
+        "NaAguaDica": "Fell off the log: keeps the advances, but only the water actions show up.",
+        "PreparoDica": "Steps prepared for this area's tests.",
+        "DicaQueda": "failing by 3 or more: fall, {porAvanco} per missing advance, and arrive",
+        "Dica": {
+          "teste": "test",
+          "preparo": "on a pass, +1 step in {pericia} until the end of the area",
+          "equilibrio": "balance test (2d10): balanced, +{n} advance(s); falling, save with a balance die or fall in the water ({dano})",
+          "salto": "{porAvanco} per missing advance; a pass reduces it by the LR; reach the other side"
+        }
       }
     },
     "Loucura": {
@@ -1926,7 +1947,26 @@
       "AcaoDanoDica": "Damage when the test fails (1d4, 1…). Blank: failure doesn't hurt.",
       "AdicionarAcao": "Action",
       "AdicionarArea": "Area",
-      "AcaoDanoCurto": "Damage"
+      "AcaoDanoCurto": "Damage",
+      "AcaoTipo": "Type",
+      "AcaoTipoDica": "Test: roll the skill and add advances. Preparation: on a pass, +1 step in a skill until the end of the area (adds no advance). Balance: the log's balance test; falling, they end up In the water. Leap of faith: damage per missing advance, reduced by the LR on a pass; they reach the other side.",
+      "TipoAcaoArea": {
+        "teste": "Test",
+        "preparo": "Preparation",
+        "equilibrio": "Balance",
+        "salto": "Leap of faith"
+      },
+      "AcaoAgua": "Only in the water",
+      "AcaoAguaDica": "The action only shows up for whoever fell in the water (Swim). The others disappear while they're there.",
+      "AcaoPorAvanco": "Damage per advance",
+      "AcaoPorAvancoDica": "Test: failing by 3 or more is falling — this damage per missing advance, and they reach the other side. Leap of faith: the damage per missing advance (1d6).",
+      "AcaoPericiaBonus": "Step in",
+      "AcaoPericiaBonusDica": "Preparation: on a pass, +1 step in this skill until the end of the area (Look for Trails → Acrobatics).",
+      "PenalidadeNome": "Area penalty",
+      "PenalidadeExemplo": "Darkness",
+      "PenalidadeAPartir": "From (advances)",
+      "PenalidadePassos": "Steps",
+      "PenalidadeDica": "Whoever already has these advances takes the steps on every test in the area (Darkness: from 2, −1 step). 0 turns it off."
     },
     "Sussurro": {
       "Titulo": "Send whisper box",

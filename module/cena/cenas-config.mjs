@@ -102,8 +102,15 @@ export const FURTIVIDADE_PADRAO = () => ({
   areas: [],
 });
 
-const NOVA_ACAO = () => ({ id: foundry.utils.randomID(), nome: L("NovaAcaoArea"), pericia: "acrobacia", dt: 7, avancos: 1, quando: "sucesso", danoFalha: "" });
-const NOVA_AREA = () => ({ id: foundry.utils.randomID(), nome: L("NovaArea"), avancos: 4, acoes: [NOVA_ACAO()] });
+const NOVA_ACAO = () => ({
+  id: foundry.utils.randomID(), nome: L("NovaAcaoArea"), tipo: "teste", estado: "", pericia: "acrobacia", dt: 7,
+  avancos: 1, quando: "sucesso", danoFalha: "", porAvanco: "", periciaBonus: "",
+});
+const NOVA_AREA = () => ({
+  id: foundry.utils.randomID(), nome: L("NovaArea"), avancos: 4, acoes: [NOVA_ACAO()],
+  penalidade: { aPartir: 0, passos: -1, nome: "" },
+});
+const TIPOS_ACAO_AREA = ["teste", "preparo", "equilibrio", "salto"];
 
 const PADROES = { perseguicao: PERSEGUICAO_PADRAO, furtividade: FURTIVIDADE_PADRAO };
 
@@ -244,10 +251,14 @@ export class ConfigCenaApp extends HandlebarsApplicationMixin(ApplicationV2) {
       c,
       areas: c.areas.map((a, ai) => ({
         ...a, ai,
+        penalidade: { aPartir: 0, passos: -1, nome: "", ...(a.penalidade ?? {}) },
         acoes: (a.acoes ?? []).map((ac, i) => ({
           ...ac, i, ai,
+          naAgua: ac.estado === "agua",
           pericias: pericias.map((p) => ({ ...p, sel: p.k === ac.pericia })),
+          periciasBonus: pericias.map((p) => ({ ...p, sel: p.k === ac.periciaBonus })),
           quandoOpcoes: ["sucesso", "sempre"].map((q) => ({ q, r: L(`Quando.${q}`), sel: q === (ac.quando ?? "sucesso") })),
+          tipos: TIPOS_ACAO_AREA.map((t) => ({ t, r: L(`TipoAcaoArea.${t}`), sel: t === (ac.tipo ?? "teste") })),
         })),
       })),
       linhas: Object.entries(c.tabela).map(([n, l]) => ({
@@ -274,11 +285,13 @@ export class ConfigCenaApp extends HandlebarsApplicationMixin(ApplicationV2) {
       c.areas = [...f.querySelectorAll("[data-area]")].map((el, ai) => ({
         id: antigas[ai]?.id ?? foundry.utils.randomID(),
         nome: v("areaNome", el).trim(), avancos: Math.max(1, n("areaAvancos", el)),
+        penalidade: { aPartir: Math.max(0, n("penAPartir", el)), passos: n("penPassos", el) || -1, nome: v("penNome", el).trim() },
         acoes: [...el.querySelectorAll("[data-acao-area]")].map((ac, i) => ({
           id: antigas[ai]?.acoes?.[i]?.id ?? foundry.utils.randomID(),
-          nome: v("acaoNome", ac).trim(), pericia: v("acaoPericia", ac), dt: Math.max(1, n("acaoDt", ac)),
-          avancos: Math.max(0, n("acaoAvancos", ac)), quando: v("acaoQuando", ac) || "sucesso",
-          danoFalha: v("acaoDano", ac).trim(),
+          nome: v("acaoNome", ac).trim(), tipo: v("acaoTipo", ac) || "teste", pericia: v("acaoPericia", ac),
+          dt: Math.max(1, n("acaoDt", ac)), avancos: Math.max(0, n("acaoAvancos", ac)), quando: v("acaoQuando", ac) || "sucesso",
+          danoFalha: v("acaoDano", ac).trim(), porAvanco: v("acaoPorAvanco", ac).trim(), periciaBonus: v("acaoPericiaBonus", ac),
+          estado: ac.querySelector("[name=acaoAgua]")?.checked ? "agua" : "",
         })),
       }));
       return;

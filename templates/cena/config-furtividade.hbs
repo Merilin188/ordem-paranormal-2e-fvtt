@@ -36,10 +36,16 @@
           <label>{{localize "OP2.CenaConfig.AreaAvancos"}}<input type="number" name="areaAvancos" value="{{avancos}}" min="1"></label>
           <button type="button" class="op2-botao-icone" data-action="remover" data-lista="areas" data-i="{{ai}}" data-tooltip="{{localize 'OP2.CenaConfig.RemoverArea'}}"><i class="fa-solid fa-trash"></i></button>
         </div>
+        {{!-- Penalidade da área (Escuridão): a partir de N avanços, passos em todos os testes. --}}
+        <div class="op2-cena-config__linha op2-cena-config__penalidade" data-tooltip="{{localize 'OP2.CenaConfig.PenalidadeDica'}}">
+          <label>{{localize "OP2.CenaConfig.PenalidadeNome"}}<input type="text" name="penNome" value="{{penalidade.nome}}" placeholder="{{localize 'OP2.CenaConfig.PenalidadeExemplo'}}"></label>
+          <label class="op2-cena-config__curto">{{localize "OP2.CenaConfig.PenalidadeAPartir"}}<input type="number" name="penAPartir" value="{{penalidade.aPartir}}" min="0"></label>
+          <label class="op2-cena-config__curto">{{localize "OP2.CenaConfig.PenalidadePassos"}}<input type="number" name="penPassos" value="{{penalidade.passos}}" max="-1"></label>
+        </div>
         <div class="op2-cena-config__acoes-area">
           {{#if acoes.length}}
             <div class="op2-cena-config__acao-area op2-cena-config__acao-cabeca" aria-hidden="true">
-              <span>{{localize "OP2.CenaConfig.AcaoNome"}}</span><span>{{localize "OP2.CenaConfig.AcaoPericia"}}</span><span>DT</span>
+              <span>{{localize "OP2.CenaConfig.AcaoNome"}}</span><span>{{localize "OP2.CenaConfig.AcaoTipo"}}</span><span>{{localize "OP2.CenaConfig.AcaoPericia"}}</span><span>DT</span>
               <span>{{localize "OP2.CenaConfig.AcaoAvancos"}}</span><span>{{localize "OP2.CenaConfig.AcaoQuando"}}</span>
               <span data-tooltip="{{localize 'OP2.CenaConfig.AcaoDanoDica'}}">{{localize "OP2.CenaConfig.AcaoDanoCurto"}}</span><span></span>
             </div>
@@ -47,12 +53,19 @@
           {{#each acoes}}
             <div class="op2-cena-config__acao-area" data-acao-area="{{i}}">
               <input type="text" name="acaoNome" value="{{nome}}" placeholder="{{localize 'OP2.CenaConfig.AcaoNome'}}" aria-label="{{localize 'OP2.CenaConfig.AcaoNome'}}">
+              <select name="acaoTipo" aria-label="{{localize 'OP2.CenaConfig.AcaoTipo'}}" data-tooltip="{{localize 'OP2.CenaConfig.AcaoTipoDica'}}">{{#each tipos}}<option value="{{t}}" {{#if sel}}selected{{/if}}>{{r}}</option>{{/each}}</select>
               <select name="acaoPericia" aria-label="{{localize 'OP2.CenaConfig.AcaoPericia'}}">{{#each pericias}}<option value="{{k}}" {{#if sel}}selected{{/if}}>{{r}}</option>{{/each}}</select>
               <input type="number" name="acaoDt" value="{{dt}}" min="1" aria-label="DT">
               <input type="number" name="acaoAvancos" value="{{avancos}}" min="0" aria-label="{{localize 'OP2.CenaConfig.AcaoAvancos'}}">
               <select name="acaoQuando" aria-label="{{localize 'OP2.CenaConfig.AcaoQuando'}}">{{#each quandoOpcoes}}<option value="{{q}}" {{#if sel}}selected{{/if}}>{{r}}</option>{{/each}}</select>
               <input type="text" name="acaoDano" value="{{danoFalha}}" placeholder="1d4" data-tooltip="{{localize 'OP2.CenaConfig.AcaoDanoDica'}}" aria-label="{{localize 'OP2.CenaConfig.AcaoDano'}}">
               <button type="button" class="op2-botao-icone" data-action="remover" data-lista="acoesArea" data-area="{{ai}}" data-i="{{i}}" data-tooltip="{{localize 'OP2.CenaConfig.RemoverAcao'}}"><i class="fa-solid fa-xmark"></i></button>
+              {{!-- Segunda linha: o que só alguns tipos usam. --}}
+              <div class="op2-cena-config__acao-extra">
+                <label class="op2-cena-config__check" data-tooltip="{{localize 'OP2.CenaConfig.AcaoAguaDica'}}"><input type="checkbox" name="acaoAgua" {{#if naAgua}}checked{{/if}}> {{localize "OP2.CenaConfig.AcaoAgua"}}</label>
+                <label data-tooltip="{{localize 'OP2.CenaConfig.AcaoPorAvancoDica'}}">{{localize "OP2.CenaConfig.AcaoPorAvanco"}}<input type="text" name="acaoPorAvanco" value="{{porAvanco}}" placeholder="1d6"></label>
+                <label data-tooltip="{{localize 'OP2.CenaConfig.AcaoPericiaBonusDica'}}">{{localize "OP2.CenaConfig.AcaoPericiaBonus"}}<select name="acaoPericiaBonus"><option value="">—</option>{{#each periciasBonus}}<option value="{{k}}" {{#if sel}}selected{{/if}}>{{r}}</option>{{/each}}</select></label>
+              </div>
             </div>
           {{/each}}
           <button type="button" class="op2-botao op2-botao--pequeno op2-botao--fantasma" data-action="adicionar" data-lista="acoesArea" data-area="{{ai}}">

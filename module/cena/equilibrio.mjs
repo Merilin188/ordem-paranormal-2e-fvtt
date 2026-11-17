@@ -77,8 +77,9 @@ class EquilibrioApp extends HandlebarsApplicationMixin(ApplicationV2) {
           : Array.from({ length: desafio.necessarios }, (_x, i) => i < desafio.sucessos),
         dano: desafio.dano,
       } : null,
-      rolarBloqueado: Boolean(e?.d4Pendente) || Boolean(desafio && temDados && !ok),
-      podeCair: Boolean(desafio && temDados && !ok && !e?.d4Pendente),
+      // Travessia (furtividade): cada rodada rola pela ação da área, não por aqui.
+      rolarBloqueado: Boolean(e?.travessia) || Boolean(e?.d4Pendente) || Boolean(desafio && temDados && !ok),
+      podeCair: Boolean((desafio || e?.travessia) && temDados && !ok && !e?.d4Pendente),
       ator: ator ? { nome: ator.name, img: ator.img } : null,
       ativo: Boolean(e?.ativo),
       podeAgir: Boolean(ator?.isOwner),
@@ -98,7 +99,7 @@ class EquilibrioApp extends HandlebarsApplicationMixin(ApplicationV2) {
   static async #rolar() {
     const ator = this.ator;
     const e = estadoDe(ator);
-    if (!ator?.isOwner || !e?.ativo) return;
+    if (!ator?.isOwner || !e?.ativo || e.travessia) return;
     // Caindo num desafio, não se rola de novo: salva com um dado ou aceita a queda.
     if (e.desafio && e.dados?.length === 2 && !equilibrado(...e.dados)) return;
     const roll = await new Roll("2d10").evaluate();
@@ -132,6 +133,7 @@ class EquilibrioApp extends HandlebarsApplicationMixin(ApplicationV2) {
     const linha = `+${e.d4Pendente} → ${dados.join(" e ")} — ${game.i18n.localize(ok ? "OP2.Equilibrio.Equilibrou" : "OP2.Equilibrio.Caindo")}`;
     await ator.setFlag(SYSTEM_ID, FLAG, { ...e, dados, d4Pendente: null, historico: [...(e.historico ?? []), linha] });
     await card(ator, `<strong>${esc(ator.name)}</strong> ${game.i18n.localize("OP2.Equilibrio.UsouDado")} ${esc(linha)}`, ok ? "op2-equilibrio-card--ok" : "op2-equilibrio-card--caindo");
+    if (ok && e.travessia) return void await fimDaRodadaNoTronco(ator, true, this);
     if (ok) await sucessoNoDesafio(ator, this);
   }
 
@@ -139,6 +141,7 @@ class EquilibrioApp extends HandlebarsApplicationMixin(ApplicationV2) {
   static async #cair() {
     const ator = this.ator;
     const e = estadoDe(ator);
+    if (ator?.isOwner && e?.travessia) return void await fimDaRodadaNoTronco(ator, false, this);
     if (!ator?.isOwner || !e?.desafio) return;
     const formula = String(e.desafio.dano ?? "").trim();
     let dano = 0;
@@ -173,6 +176,60 @@ class EquilibrioApp extends HandlebarsApplicationMixin(ApplicationV2) {
 }
 
 const janelas = new Map();
+
+/* -- travessia na furtividade: um equilíbrio por rodada ---------------------- */
+
+/**
+ * O tronco da travessia (furtividade): cada ação da área rola UM equilíbrio. Os dados
+ * de equilíbrio (metade da Acrobacia, d4) começam na primeira vez e não voltam até o
+ * fim da travessia — o estado fica no ator entre as rodadas. Equilibrou: fim da
+ * rodada, soma avanço. Caindo: abre a janela para salvar com um dado ou aceitar a queda.
+ * @returns {Promise<"equilibrou"|"caindo"|null>}
+ */
+export async function equilibrioNaTravessia(ator, { acaoId, nome }) {
+  if (!ator?.isOwner) return null;
+  let e = estadoDe(ator);
+  // Ainda caindo da rodada anterior: decide na janela (dado de equilíbrio ou queda).
+  if (e?.travessia && e.dados?.length === 2 && !equilibrado(...e.dados)) {
+    abrirLocal({ atorId: ator.id });
+    return "caindo";
+  }
+  if (!e?.travessia) {
+    const acrobacia = ator.system?.pericias?.acrobacia?.dadoEfetivo ?? "d4";
+    e = { ativo: true, rodada: 0, restantes: dadosDeEquilibrio(acrobacia), dados: [], d4Pendente: null, historico: [], desafio: null, travessia: { acaoId, nome } };
+    await card(ator, game.i18n.format("OP2.Equilibrio.Inicio", { nome: esc(ator.name), n: e.restantes, dado: acrobacia }));
+  }
+  const roll = await new Roll("2d10").evaluate();
+  await mostrarDados3D(roll);
+  const dados = roll.dice[0].results.map((r) => r.result);
+  const rodada = (e.rodada ?? 0) + 1;
+  const ok = equilibrado(...dados);
+  const linha = `${nome} — ${dados.join(" e ")}: ${game.i18n.localize(ok ? "OP2.Equilibrio.Equilibrou" : "OP2.Equilibrio.Caindo")}`;
+  await ator.setFlag(SYSTEM_ID, FLAG, { ...e, ativo: true, rodada, dados: ok ? [] : dados, d4Pendente: null, historico: [...(e.historico ?? []), linha] });
+  await card(ator, `<strong>${esc(ator.name)}</strong> — ${esc(linha)}`, ok ? "op2-equilibrio-card--ok" : "op2-equilibrio-card--caindo");
+  if (ok) return "equilibrou";
+  abrirLocal({ atorId: ator.id });
+  return "caindo";
+}
+
+/** Fim da rodada no tronco decidido pela janela: salvou com o dado, ou caiu. */
+async function fimDaRodadaNoTronco(ator, equilibrou, app) {
+  const e = estadoDe(ator);
+  if (!e?.travessia) return;
+  if (equilibrou) await ator.setFlag(SYSTEM_ID, FLAG, { ...e, dados: [], d4Pendente: null });
+  else await ator.unsetFlag(SYSTEM_ID, FLAG);
+  void app?.close();
+  const { resultadoDoTronco } = await import("./furtividade.mjs");
+  await resultadoDoTronco(ator, e.travessia.acaoId, equilibrou);
+}
+
+/** A travessia terminou (próxima área): os dados de equilíbrio gastos voltam. */
+export async function encerrarEquilibrioDaTravessia(ator) {
+  if (estadoDe(ator)?.travessia) {
+    await ator.unsetFlag(SYSTEM_ID, FLAG);
+    paraTodos("op2EquilibrioFechar", { atorId: ator.id });
+  }
+}
 
 /**
  * Mais um equilíbrio na travessia de um desafio. Chegou aos sucessos necessários:

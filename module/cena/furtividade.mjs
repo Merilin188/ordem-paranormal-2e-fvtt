@@ -19,7 +19,10 @@ import {
   aplicarBusca, perderDado, limparPerdidos, facesDe,
 } from "./furtividade-regras.mjs";
 import { listarCenas, obterCena, novaCena, ConfigCenaApp, linhaDaTabela } from "./cenas-config.mjs";
-import { areaAtual, resultadoDaAcao, somarAvancos, concluiu, todosConcluiram } from "./travessia-regras.mjs";
+import {
+  areaAtual, resultadoDaAcao, somarAvancos, concluiu, todosConcluiram, acoesDisponiveis, passosNaArea,
+  danoDoSalto, formulaPorAvanco,
+} from "./travessia-regras.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } = foundry.applications.api;
 const CHAVE = "furtividade";
@@ -71,7 +74,7 @@ const OPS = {
   iniciar(e, { configId } = {}) {
     e.config = obterCena("furtividade", configId);
     Object.assign(e, { ativa: true, cenaId: foundry.utils.randomID(), rodada: 1, fase: "personagens", usosDistrair: 0, acaoRolada: false, evento: null, areaIndice: 0 });
-    e.participantes = e.participantes.map((p) => ({ ...p, dados: [], testou: false, usosEsconder: 0, agiu: false, avancos: 0, seguro: false }));
+    e.participantes = e.participantes.map((p) => ({ ...p, dados: [], testou: false, usosEsconder: 0, agiu: false, avancos: 0, seguro: false, agua: false, bonus: {} }));
   },
   encerrar(e) { e.ativa = false; e.evento = null; },
   adicionar(e, { uuid, papel }) {
@@ -152,10 +155,24 @@ const OPS = {
     const p = e.participantes.find((x) => x.uuid === uuid);
     if (p && concluiu(p, areaAtual(e.config, e.areaIndice ?? 0))) p.seguro = !p.seguro;
   },
-  /** Próxima área: avanços e "em segurança" zeram. Depois da última, a travessia termina. */
+  /** Preparo (Procurar Trilhas): passos numa perícia até o fim da área. */
+  bonus(e, { uuid, pericia, passos = 1, agiu = false }) {
+    const p = e.participantes.find((x) => x.uuid === uuid);
+    if (!p) return;
+    if (pericia) p.bonus = { ...(p.bonus ?? {}), [pericia]: (p.bonus?.[pericia] ?? 0) + passos };
+    if (agiu) p.agiu = true;
+  },
+  /** Caiu do tronco: Na água (mantém os avanços; agora só as ações de água). */
+  agua(e, { uuid, agua = true, agiu = false }) {
+    const p = e.participantes.find((x) => x.uuid === uuid);
+    if (!p) return;
+    p.agua = Boolean(agua);
+    if (agiu) p.agiu = true;
+  },
+  /** Próxima área: avanços, "em segurança", Na água e os bônus preparados zeram. */
   proximaArea(e) {
     e.areaIndice = (e.areaIndice ?? 0) + 1;
-    e.participantes = e.participantes.map((p) => ({ ...p, avancos: 0, seguro: false }));
+    e.participantes = e.participantes.map((p) => ({ ...p, avancos: 0, seguro: false, agua: false, bonus: {} }));
   },
   busca(e, { valores, alvos = null }, eventoId) {
     const r = aplicarBusca(e.participantes, valores, eventoId, alvos);
@@ -187,6 +204,11 @@ function executar({ op, ...dados }) {
     const novoEvento = OPS[op]?.(estado, dados, eventoId);
     await gravar(estado, novoEvento ? eventoId : null);
     if (op === "proximaArea" || (op === "iniciar" && estado.config?.areas?.length)) await cardDaArea(estado);
+    // Fim da área (ou cena nova): os dados de equilíbrio gastos no tronco voltam.
+    if (op === "proximaArea" || op === "iniciar") {
+      const { encerrarEquilibrioDaTravessia } = await import("./equilibrio.mjs");
+      for (const p of estado.participantes) { const doc = ator(p.uuid); if (doc) await encerrarEquilibrioDaTravessia(doc); }
+    }
     if (novoEvento && ["perder", "transferir"].includes(op) && estado.evento?.descobertos?.length) await cardDescobertos(estado.evento.descobertos);
   });
   fila = resultado.catch((erro) => console.error(`${SYSTEM_ID} | furtividade`, erro));
@@ -491,38 +513,117 @@ async function acaoComTeste(doc, { chave, dt, uso, titulo }) {
   return roll.resultado?.sucesso ? roll : null;
 }
 
+/** Rola e aplica um dano em PV; devolve { n, formula } ou null. */
+async function danoDaTravessia(doc, formula) {
+  if (!formula || !Roll.validate(formula)) return null;
+  const rolagem = await rolar(formula);
+  const { aplicarDano } = await import("../dice/falha-critica.mjs");
+  if (rolagem.total > 0) await aplicarDano(doc, rolagem.total, "pv");
+  return { n: rolagem.total, formula };
+}
+
+/** O card da ação da área: o que veio, os avanços e o dano, cada um com o motivo. */
+async function cardDaAcao(doc, { area, acao, cabecalho = "", linhas = [], antes, depois }) {
+  const corpo = [`<h3>${esc(doc.name)} — ${esc(acao.nome)}</h3>`, cabecalho, ...linhas];
+  if (depois >= area.avancos && antes < area.avancos) corpo.push(`<p><strong><i class="fa-solid fa-flag"></i> ${esc(L("Travessia.Cruzou", { nome: doc.name }))}</strong></p>`);
+  await card(corpo.filter(Boolean).join(""), { speaker: ChatMessage.getSpeaker({ actor: doc }) });
+}
+
+const linhaAvanco = (n, atual, total, chave = "Travessia.Avancou") => `<p><i class="fa-solid fa-person-walking-arrow-right"></i> ${esc(n
+  ? L(chave, { n, atual, total }) : L("Travessia.NaoAvancou", { atual, total }))}</p>`;
+const linhaDano = (dano, chave = "Travessia.Dano", extra = {}) => (dano
+  ? `<p class="op2-furt-card__encontrado"><i class="fa-solid fa-droplet"></i> ${esc(L(chave, { n: dano.n, formula: dano.formula, ...extra }))}</p>` : "");
+
 /**
- * Ação da área (travessia): o teste da ação; soma os avanços (sempre ou só passando) e,
- * falhando, rola o dano configurado. O card diz o que veio e por quê.
+ * Ação da área (travessia), pelo tipo: teste (com queda por 3 ou mais), preparo
+ * (passo até o fim da área), equilíbrio no tronco, Salto de Fé. Os passos do preparo e
+ * da penalidade da área entram no teste com o motivo no card (regra de ouro).
  */
 async function acaoDaArea(doc, estado, p, dataset) {
   const area = areaAtual(estado.config, estado.areaIndice ?? 0);
-  const acao = area?.acoes.find((a) => a.id === dataset.acaoId);
+  const acao = area && acoesDisponiveis(area, p).find((a) => a.id === dataset.acaoId);
   if (!acao) return;
+  const antes = p.avancos ?? 0;
+  const faltam = Math.max(0, area.avancos - antes);
+
+  if (acao.tipo === "equilibrio") {
+    const { equilibrioNaTravessia } = await import("./equilibrio.mjs");
+    const r = await equilibrioNaTravessia(doc, { acaoId: acao.id, nome: acao.nome });
+    if (r === "equilibrou") await resultadoDoTronco(doc, acao.id, true);
+    return;
+  }
+
   const { rolarTeste, rotuloDePericia } = await import("../dice/teste.mjs");
-  const roll = await rolarTeste(doc, { chavePericia: acao.pericia, dt: acao.dt, contexto: `${area.nome} — ${acao.nome}` });
+  const { bonus, penalidade } = passosNaArea(area, p, acao.pericia);
+  const notas = [];
+  if (bonus) notas.push(L("Travessia.NotaBonus", { n: bonus, pericia: rotuloDePericia(acao.pericia) }));
+  if (penalidade) notas.push(L("Travessia.NotaPenalidade", { nome: area.penalidade.nome || area.nome, n: penalidade }));
+  const passos = bonus + penalidade ? { pericia: bonus + penalidade } : null;
+
+  // Salto de Fé: o dano vem de qualquer jeito; o teste só o reduz (pela RB).
+  if (acao.tipo === "salto") {
+    const formula = formulaPorAvanco(acao.porAvanco || "1d6", faltam);
+    const roll = await rolarTeste(doc, { chavePericia: acao.pericia, dt: acao.dt, contexto: `${area.nome} — ${acao.nome}`, passos, notas });
+    if (!roll) return;
+    const sucesso = Boolean(roll.resultado?.sucesso);
+    const rolagem = formula && Roll.validate(formula) ? await rolar(formula) : null;
+    const total = danoDoSalto(rolagem?.total ?? 0, sucesso, roll.resultado?.rb ?? roll.rb);
+    if (total > 0) { const { aplicarDano } = await import("../dice/falha-critica.mjs"); await aplicarDano(doc, total, "pv"); }
+    await pedir("avanco", { uuid: doc.uuid, delta: faltam, agiu: true });
+    return cardDaAcao(doc, { area, acao, antes, depois: antes + faltam, linhas: [
+      `<p>${esc(L("Travessia.Salto", { faltam, formula: formula ?? "—", rolado: rolagem?.total ?? 0 }))}</p>`,
+      sucesso ? `<p>${esc(L("Travessia.SaltoReduz", { rb: roll.resultado?.rb ?? roll.rb }))}</p>` : "",
+      `<p class="op2-furt-card__encontrado"><i class="fa-solid fa-droplet"></i> ${esc(L("Travessia.SaltoDano", { n: total }))}</p>`,
+    ] });
+  }
+
+  const roll = await rolarTeste(doc, { chavePericia: acao.pericia, dt: acao.dt, contexto: `${area.nome} — ${acao.nome}`, passos, notas });
   if (!roll) return;
   const sucesso = Boolean(roll.resultado?.sucesso);
-  const r = resultadoDaAcao(acao, sucesso);
-  let dano = null;
-  if (r.dano && Roll.validate(r.dano)) {
-    const rolagem = await rolar(r.dano);
-    const { aplicarDano } = await import("../dice/falha-critica.mjs");
-    await aplicarDano(doc, rolagem.total, "pv");
-    dano = { n: rolagem.total, formula: r.dano };
+  const cabecalho = `<p class="op2-dica">${esc(rotuloDePericia(acao.pericia))} · DT ${acao.dt} · ${esc(L(sucesso ? "Travessia.Passou" : "Travessia.Falhou"))}</p>`;
+
+  // Preparo: passando, +1 passo na perícia até o fim da área. Não soma avanço.
+  if (acao.tipo === "preparo") {
+    if (sucesso && acao.periciaBonus) await pedir("bonus", { uuid: doc.uuid, pericia: acao.periciaBonus, passos: 1, agiu: true });
+    else await pedir("avanco", { uuid: doc.uuid, delta: 0, agiu: true });
+    return cardDaAcao(doc, { area, acao, cabecalho, antes, depois: antes, linhas: [
+      `<p><i class="fa-solid fa-compass"></i> ${esc(sucesso && acao.periciaBonus
+        ? L("Travessia.Preparou", { pericia: rotuloDePericia(acao.periciaBonus) }) : L("Travessia.NaoPreparou"))}</p>`,
+    ] });
   }
-  const novo = somarAvancos(p.avancos, r.avancos);
+
+  const r = resultadoDaAcao(acao, sucesso, { margem: (roll.total ?? 0) - acao.dt, faltam });
+  const dano = await danoDaTravessia(doc, r.dano);
   await pedir("avanco", { uuid: doc.uuid, delta: r.avancos, agiu: true });
-  const linhas = [
-    `<h3>${esc(doc.name)} — ${esc(acao.nome)}</h3>`,
-    `<p class="op2-dica">${esc(rotuloDePericia(acao.pericia))} · DT ${acao.dt} · ${esc(L(sucesso ? "Travessia.Passou" : "Travessia.Falhou"))}</p>`,
-    `<p><i class="fa-solid fa-person-walking-arrow-right"></i> ${esc(r.avancos
-      ? L(acao.quando === "sempre" && !sucesso ? "Travessia.AvancouMesmoAssim" : "Travessia.Avancou", { n: r.avancos, atual: novo, total: area.avancos })
-      : L("Travessia.NaoAvancou", { atual: novo, total: area.avancos }))}</p>`,
-  ];
-  if (dano) linhas.push(`<p class="op2-furt-card__encontrado"><i class="fa-solid fa-droplet"></i> ${esc(L("Travessia.Dano", { n: dano.n, formula: dano.formula }))}</p>`);
-  if (novo >= area.avancos && (p.avancos ?? 0) < area.avancos) linhas.push(`<p><strong><i class="fa-solid fa-flag"></i> ${esc(L("Travessia.Cruzou", { nome: doc.name }))}</strong></p>`);
-  await card(linhas.join(""), { speaker: ChatMessage.getSpeaker({ actor: doc }) });
+  const depois = somarAvancos(antes, r.avancos);
+  const linhas = r.caiu
+    ? [`<p><strong>${esc(L("Travessia.CaiuFeio", { faltam }))}</strong></p>`, linhaDano(dano, "Travessia.DanoQueda", { faltam })]
+    : [linhaAvanco(r.avancos, depois, area.avancos, acao.quando === "sempre" && !sucesso ? "Travessia.AvancouMesmoAssim" : "Travessia.Avancou"), linhaDano(dano)];
+  return cardDaAcao(doc, { area, acao, cabecalho, linhas, antes, depois });
+}
+
+/**
+ * Fim da rodada no tronco (chamado pelo equilíbrio): equilibrou, soma os avanços da
+ * ação; caiu, sofre o dano e fica Na água — mantém o que tinha avançado.
+ */
+export async function resultadoDoTronco(doc, acaoId, equilibrou) {
+  const estado = estadoFurtividade();
+  const p = estado.participantes.find((x) => x.uuid === doc.uuid);
+  const area = areaAtual(estado.config, estado.areaIndice ?? 0);
+  const acao = area?.acoes.find((a) => a.id === acaoId);
+  if (!p || !acao) return;
+  const antes = p.avancos ?? 0;
+  if (equilibrou) {
+    await pedir("avanco", { uuid: doc.uuid, delta: acao.avancos, agiu: true });
+    const depois = somarAvancos(antes, acao.avancos);
+    return cardDaAcao(doc, { area, acao, antes, depois, linhas: [linhaAvanco(acao.avancos, depois, area.avancos)] });
+  }
+  const dano = await danoDaTravessia(doc, acao.danoFalha);
+  await pedir("agua", { uuid: doc.uuid, agua: true, agiu: true });
+  return cardDaAcao(doc, { area, acao, antes, depois: antes, linhas: [
+    `<p><strong><i class="fa-solid fa-water"></i> ${esc(L("Travessia.CaiuNaAgua", { nome: doc.name, atual: antes, total: area.avancos }))}</strong></p>`,
+    linhaDano(dano),
+  ] });
 }
 
 const ACOES_JOGADOR = {
@@ -665,6 +766,21 @@ export class FurtividadeApp extends HandlebarsApplicationMixin(ApplicationV2) {
         avancos: p.avancos ?? 0,
         cruzou: concluiu(p, area),
         seguro: !!p.seguro,
+        agua: !!p.agua,
+        preparos: Object.entries(p.bonus ?? {}).filter(([, n]) => n)
+          .map(([k, n]) => `+${n} ${game.i18n.localize(`OP2.Pericia.${k}`)}`).join(", "),
+        acoesArea: area ? acoesDisponiveis(area, p).map((a) => ({
+          ...a, rotuloPericia: game.i18n.localize(`OP2.Pericia.${a.pericia}`),
+          dica: [
+            `${game.i18n.localize(`OP2.Pericia.${a.pericia}`)} DT ${a.dt}`,
+            L(`Travessia.Dica.${a.tipo}`, { n: a.avancos, dano: a.danoFalha || "—", porAvanco: a.porAvanco || "1d6", pericia: a.periciaBonus ? game.i18n.localize(`OP2.Pericia.${a.periciaBonus}`) : "—" }),
+            a.tipo === "teste" ? L(a.quando === "sempre" ? "Travessia.SomaSempre" : "Travessia.SomaPassando", { n: a.avancos }) : "",
+            a.tipo === "teste" && a.danoFalha ? L("Travessia.DanoFalha", { formula: a.danoFalha }) : "",
+            a.tipo === "teste" && a.porAvanco ? L("Travessia.DicaQueda", { porAvanco: a.porAvanco }) : "",
+          ].filter(Boolean).join(" · "),
+          icone: { equilibrio: "fa-person-falling", salto: "fa-person-falling-burst", preparo: "fa-compass" }[a.tipo]
+            ?? (a.estado === "agua" ? "fa-person-swimming" : "fa-person-walking-arrow-right"),
+        })) : [],
         pctAvanco: area ? Math.min(100, Math.round(((p.avancos ?? 0) / area.avancos) * 100)) : 0,
       };
     });
@@ -676,10 +792,8 @@ export class FurtividadeApp extends HandlebarsApplicationMixin(ApplicationV2) {
       travessia: area ? {
         nome: area.nome, n: (e.areaIndice ?? 0) + 1, total: e.config.areas.length, avancos: area.avancos,
         todos: todosConcluiram(e.participantes, area), ultima: (e.areaIndice ?? 0) + 1 >= e.config.areas.length,
-        acoes: area.acoes.map((a) => ({
-          ...a, rotuloPericia: game.i18n.localize(`OP2.Pericia.${a.pericia}`),
-          rotuloAvanco: L(a.quando === "sempre" ? "Travessia.SomaSempre" : "Travessia.SomaPassando", { n: a.avancos }),
-        })),
+        penalidade: area.penalidade.aPartir > 0
+          ? L("Travessia.PenalidadeRotulo", { nome: area.penalidade.nome || "", n: area.penalidade.aPartir, passos: area.penalidade.passos }) : "",
       } : null,
       cenas: listarCenas("furtividade").map((c) => ({ id: c.id, nome: c.nome, sel: c.id === (this.configId ??= listarCenas("furtividade")[0]?.id) })),
       vazio: !criaturas.length && !participantes.length,
