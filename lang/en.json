@@ -1956,8 +1956,8 @@
         "equilibrio": "Balance",
         "salto": "Leap of faith"
       },
-      "AcaoAgua": "Only in the water",
-      "AcaoAguaDica": "The action only shows up for whoever fell in the water (Swim). The others disappear while they're there.",
+      "AcaoAgua": "Shows",
+      "AcaoAguaDica": "Out of the water: the normal action. Only in the water: only for whoever fell. Always: both (Swim in the river).",
       "AcaoPorAvanco": "Damage per advance",
       "AcaoPorAvancoDica": "Test: failing by 3 or more is falling — this damage per missing advance, and they reach the other side. Leap of faith: the damage per missing advance (1d6).",
       "AcaoPericiaBonus": "Step in",
@@ -1966,7 +1966,17 @@
       "PenalidadeExemplo": "Darkness",
       "PenalidadeAPartir": "From (advances)",
       "PenalidadePassos": "Steps",
-      "PenalidadeDica": "Whoever already has these advances takes the steps on every test in the area (Darkness: from 2, −1 step). 0 turns it off."
+      "PenalidadeDica": "Whoever already has these advances takes the steps on every test in the area (Darkness: from 2, −1 step). 0 turns it off.",
+      "EstadoAcao": {
+        "seco": "Out of the water",
+        "agua": "Only in the water",
+        "ambos": "Always"
+      },
+      "AreaCena": "Scene",
+      "AreaCenaDica": "World scene the table moves to when entering this area (when the stealth scene starts and on Next area). Empty: stays where it is.",
+      "CarregarMissao1": "Load the Mission 1 areas",
+      "CarregarMissao1Dica": "Fills Bosque dos Espinheiros, Rio de Brumas and Encosta Escura with Mission 1's actions and numbers. Descriptions and scenes stay with you.",
+      "CarregarMissao1Troca": "This scene already has areas. Replace them all with Mission 1's?"
     },
     "Sussurro": {
       "Titulo": "Send whisper box",

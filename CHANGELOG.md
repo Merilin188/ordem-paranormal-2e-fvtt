@@ -21,6 +21,11 @@ Versões seguem [SemVer](https://semver.org/lang/pt-BR/).
   1 dado por avanço que faltava. Cada área pode ter uma **penalidade** (Escuridão: a
   partir de N avanços, −1 passo em todos os testes). Passos de preparo e penalidade
   entram no teste com o motivo no card. "Voltar à margem" fica no ±1 do mestre.
+- **Travessia, etapa 3**: botão **Carregar as áreas da Missão 1** na preparação da
+  furtividade (Bosque dos Espinheiros, Rio de Brumas, Encosta Escura — só nomes e
+  números; as descrições ficam com o mestre). Cada área pode ter uma **cena** do mundo,
+  ativada para todos ao iniciar a furtividade e no "Próxima área". Ação com "Aparece:
+  Sempre" (o Nadar do rio vale para quem está no tronco e para quem caiu).
 - **Crítico sem dado extra** (livro, Críticos): o teste passa direto e, em ataques e
   testes estendidos, soma as **duas rolagens mais altas** do próprio teste no dano e na
   pontuação do Arrombar (o card diz quais). Sai o botão "Dado do crítico" e a rolagem

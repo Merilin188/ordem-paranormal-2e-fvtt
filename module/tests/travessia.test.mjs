@@ -72,12 +72,24 @@ test("travessia: Salto de Fé — passar reduz o dano pela RB, nunca abaixo de z
   assert.equal(danoDoSalto(3, true, 6), 0);
 });
 
-test("travessia: Na água só as ações de água; fora, só as outras", () => {
+test("travessia: Na água só as ações de água; fora, só as outras; 'sempre' nos dois", () => {
   const area = normalizarArea({ avancos: 3, acoes: [
-    { id: "tronco", tipo: "equilibrio" }, { id: "nadar", estado: "agua" },
+    { id: "tronco", tipo: "equilibrio" }, { id: "boiar", estado: "agua" }, { id: "nadar", estado: "ambos" },
   ] });
-  assert.deepEqual(acoesDisponiveis(area, {}).map((a) => a.id), ["tronco"]);
-  assert.deepEqual(acoesDisponiveis(area, { agua: true }).map((a) => a.id), ["nadar"]);
+  assert.deepEqual(acoesDisponiveis(area, {}).map((a) => a.id), ["tronco", "nadar"]);
+  assert.deepEqual(acoesDisponiveis(area, { agua: true }).map((a) => a.id), ["boiar", "nadar"]);
+});
+
+test("travessia: as áreas da Missão 1 batem com o livro (avanços, tipos, DTs)", async () => {
+  const { AREAS_MISSAO_1 } = await import("../cena/travessia-regras.mjs");
+  const [bosque, rio, encosta] = AREAS_MISSAO_1().map(normalizarArea);
+  assert.deepEqual([bosque.avancos, rio.avancos, encosta.avancos], [4, 3, 4]);
+  assert.deepEqual(bosque.acoes.map((a) => [a.tipo, a.dt, a.avancos, a.quando]), [
+    ["teste", 10, 2, "sempre"], ["teste", 7, 1, "sempre"], ["preparo", 7, 0, "sucesso"]]);
+  assert.equal(bosque.acoes[2].periciaBonus, "acrobacia");
+  assert.deepEqual(rio.acoes.map((a) => [a.tipo, a.estado]), [["equilibrio", ""], ["teste", "ambos"]]);
+  assert.deepEqual(encosta.penalidade, { aPartir: 2, passos: -1, nome: "Escuridão" });
+  assert.deepEqual(encosta.acoes.map((a) => [a.tipo, a.porAvanco]), [["teste", "1d6"], ["teste", "1d6"], ["salto", "1d6"]]);
 });
 
 test("travessia: passos na área — o bônus preparado e a escuridão a partir de N avanços", () => {

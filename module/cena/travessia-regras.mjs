@@ -24,8 +24,8 @@ export const QUANDO_AVANCA = ["sempre", "sucesso"];
  *   teste; chega do outro lado de qualquer jeito (Salto de Fé).
  */
 export const TIPOS_ACAO = ["teste", "preparo", "equilibrio", "salto"];
-/** Em que estado a ação aparece: fora d'água (o normal) ou só Na água (Nadar). */
-export const ESTADOS_ACAO = ["", "agua"];
+/** Em que estado a ação aparece: fora d'água (o normal), só Na água, ou sempre (Nadar no rio). */
+export const ESTADOS_ACAO = ["", "agua", "ambos"];
 
 /** Uma ação da área com tudo preenchido (o que vem da configuração pode faltar campo). */
 export function normalizarAcao(acao = {}) {
@@ -51,6 +51,8 @@ export function normalizarArea(area = {}) {
     nome: String(area.nome ?? "").trim(),
     avancos: Math.max(1, Math.trunc(Number(area.avancos) || 1)),
     acoes: (area.acoes ?? []).map(normalizarAcao),
+    // Cena do mundo para onde a mesa vai ao entrar na área (vazio = fica onde está).
+    cena: String(area.cena ?? ""),
     // Penalidade da área (Escuridão): a partir de N avanços, passos em todos os testes.
     penalidade: {
       aPartir: Math.max(0, Math.trunc(Number(area.penalidade?.aPartir) || 0)),
@@ -98,10 +100,10 @@ export function danoDoSalto(danoRolado, sucesso, rb) {
   return Math.max(0, Number(danoRolado) - (sucesso ? Number(rb) || 0 : 0));
 }
 
-/** As ações que aparecem para este personagem: Na água só as de água; fora, só as outras. */
+/** As ações que aparecem para este personagem: Na água só as de água; fora, só as outras; "ambos" sempre. */
 export function acoesDisponiveis(area, participante) {
   const agua = Boolean(participante?.agua);
-  return (area?.acoes ?? []).filter((a) => (a.estado === "agua") === agua);
+  return (area?.acoes ?? []).filter((a) => a.estado === "ambos" || (a.estado === "agua") === agua);
 }
 
 /**
@@ -114,6 +116,41 @@ export function passosNaArea(area, participante, pericia) {
   const p = area?.penalidade;
   const penalidade = p?.aPartir > 0 && (participante?.avancos ?? 0) >= p.aPartir ? p.passos : 0;
   return { bonus, penalidade };
+}
+
+/**
+ * As três áreas da Missão 1 (Contos da Vigília): só a mecânica — nomes curtos e
+ * números — para o mestre não digitar tudo. As descrições ficam com ele (o texto do
+ * livro não entra no pacote). Ids novos a cada chamada: cada cena tem as suas.
+ */
+export function AREAS_MISSAO_1() {
+  const id = () => Math.random().toString(36).slice(2, 12);
+  const acao = (dados) => ({ id: id(), estado: "", quando: "sucesso", danoFalha: "", porAvanco: "", periciaBonus: "", tipo: "teste", ...dados });
+  return [
+    {
+      id: id(), nome: "Bosque dos Espinheiros", avancos: 4, cena: "", penalidade: { aPartir: 0, passos: -1, nome: "" },
+      acoes: [
+        acao({ nome: "Atravessar as Árvores", pericia: "acrobacia", dt: 10, avancos: 2, quando: "sempre", danoFalha: "1d4" }),
+        acao({ nome: "Circundar as Árvores", pericia: "acrobacia", dt: 7, avancos: 1, quando: "sempre", danoFalha: "1d4" }),
+        acao({ nome: "Procurar Trilhas", tipo: "preparo", pericia: "sobrevivencia", dt: 7, avancos: 0, periciaBonus: "acrobacia" }),
+      ],
+    },
+    {
+      id: id(), nome: "Rio de Brumas", avancos: 3, cena: "", penalidade: { aPartir: 0, passos: -1, nome: "" },
+      acoes: [
+        acao({ nome: "Caminhar pelo Tronco", tipo: "equilibrio", pericia: "acrobacia", dt: 7, avancos: 1, danoFalha: "1d4" }),
+        acao({ nome: "Nadar", estado: "ambos", pericia: "atletismo", dt: 10, avancos: 1, danoFalha: "1" }),
+      ],
+    },
+    {
+      id: id(), nome: "Encosta Escura", avancos: 4, cena: "", penalidade: { aPartir: 2, passos: -1, nome: "Escuridão" },
+      acoes: [
+        acao({ nome: "Descer Caminhando", pericia: "atletismo", dt: 10, avancos: 2, danoFalha: "1d4", porAvanco: "1d6" }),
+        acao({ nome: "Descer Escalando", pericia: "atletismo", dt: 7, avancos: 1, danoFalha: "1d4", porAvanco: "1d6" }),
+        acao({ nome: "Salto de Fé", tipo: "salto", pericia: "acrobacia", dt: 7, avancos: 0, porAvanco: "1d6" }),
+      ],
+    },
+  ];
 }
 
 /** Avanços depois de somar `delta` (nunca abaixo de zero; pode passar do total). */

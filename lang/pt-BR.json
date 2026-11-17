@@ -1956,8 +1956,8 @@
         "equilibrio": "Equilíbrio",
         "salto": "Salto de fé"
       },
-      "AcaoAgua": "Só na água",
-      "AcaoAguaDica": "A ação só aparece para quem caiu na água (Nadar). As outras somem enquanto ele estiver lá.",
+      "AcaoAgua": "Aparece",
+      "AcaoAguaDica": "Fora d'água: a ação normal. Só na água: só para quem caiu. Sempre: nos dois (Nadar no rio).",
       "AcaoPorAvanco": "Dano por avanço",
       "AcaoPorAvancoDica": "Teste: falhar por 3 ou mais é cair — este dano por avanço que faltava, e chega do outro lado. Salto de fé: o dano por avanço que falta (1d6).",
       "AcaoPericiaBonus": "Passo em",
@@ -1966,7 +1966,17 @@
       "PenalidadeExemplo": "Escuridão",
       "PenalidadeAPartir": "A partir de (avanços)",
       "PenalidadePassos": "Passos",
-      "PenalidadeDica": "Quem já tem esses avanços sofre os passos em todos os testes da área (Escuridão: a partir de 2, −1 passo). 0 desliga."
+      "PenalidadeDica": "Quem já tem esses avanços sofre os passos em todos os testes da área (Escuridão: a partir de 2, −1 passo). 0 desliga.",
+      "EstadoAcao": {
+        "seco": "Fora d'água",
+        "agua": "Só na água",
+        "ambos": "Sempre"
+      },
+      "AreaCena": "Cena",
+      "AreaCenaDica": "Cena do mundo para onde a mesa vai ao entrar nesta área (ao iniciar a furtividade e no Próxima área). Vazio: fica onde está.",
+      "CarregarMissao1": "Carregar as áreas da Missão 1",
+      "CarregarMissao1Dica": "Preenche Bosque dos Espinheiros, Rio de Brumas e Encosta Escura com as ações e os números da Missão 1. As descrições e as cenas ficam com você.",
+      "CarregarMissao1Troca": "Esta cena já tem áreas. Trocar todas pelas da Missão 1?"
     },
     "Sussurro": {
       "Titulo": "Enviar caixa de sussurro",

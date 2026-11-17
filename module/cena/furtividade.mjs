@@ -204,6 +204,12 @@ function executar({ op, ...dados }) {
     const novoEvento = OPS[op]?.(estado, dados, eventoId);
     await gravar(estado, novoEvento ? eventoId : null);
     if (op === "proximaArea" || (op === "iniciar" && estado.config?.areas?.length)) await cardDaArea(estado);
+    // Área com cena própria: a mesa vai para ela (como as transições dos pontos).
+    if (op === "proximaArea" || op === "iniciar") {
+      const area = areaAtual(estado.config, estado.areaIndice ?? 0);
+      const cena = area?.cena ? game.scenes.get(area.cena) : null;
+      if (cena && !cena.active) await cena.activate();
+    }
     // Fim da área (ou cena nova): os dados de equilíbrio gastos no tronco voltam.
     if (op === "proximaArea" || op === "iniciar") {
       const { encerrarEquilibrioDaTravessia } = await import("./equilibrio.mjs");

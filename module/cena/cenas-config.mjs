@@ -5,6 +5,7 @@
  * escolhe uma e, ao iniciar, guarda uma cópia dela no estado da cena (mudar a
  * configuração depois não mexe na cena em andamento).
  */
+import { AREAS_MISSAO_1 } from "./travessia-regras.mjs";
 import { SYSTEM_ID, PERICIAS } from "../config.mjs";
 import { TABELA_CRIATURAS } from "./furtividade-regras.mjs";
 import { CONDICOES } from "./condicoes.mjs";
@@ -195,6 +196,7 @@ export class ConfigCenaApp extends HandlebarsApplicationMixin(ApplicationV2) {
     form: { handler: ConfigCenaApp.#salvar, closeOnSubmit: true },
     actions: {
       adicionar: ConfigCenaApp.#adicionar,
+      carregarMissao1: ConfigCenaApp.#carregarMissao1,
       remover: ConfigCenaApp.#remover,
       excluirCena: ConfigCenaApp.#excluirCena,
     },
@@ -247,14 +249,16 @@ export class ConfigCenaApp extends HandlebarsApplicationMixin(ApplicationV2) {
       };
     }
     c.areas ??= [];
+    const cenasDoMundo = (game.scenes?.contents ?? []).map((s) => ({ id: s.id, nome: s.name })).sort((a, b) => a.nome.localeCompare(b.nome));
     return {
       c,
       areas: c.areas.map((a, ai) => ({
         ...a, ai,
         penalidade: { aPartir: 0, passos: -1, nome: "", ...(a.penalidade ?? {}) },
+        cenas: cenasDoMundo.map((s) => ({ ...s, sel: s.id === a.cena })),
         acoes: (a.acoes ?? []).map((ac, i) => ({
           ...ac, i, ai,
-          naAgua: ac.estado === "agua",
+          estados: ["", "agua", "ambos"].map((e) => ({ e, r: L(`EstadoAcao.${e || "seco"}`), sel: e === (ac.estado ?? "") })),
           pericias: pericias.map((p) => ({ ...p, sel: p.k === ac.pericia })),
           periciasBonus: pericias.map((p) => ({ ...p, sel: p.k === ac.periciaBonus })),
           quandoOpcoes: ["sucesso", "sempre"].map((q) => ({ q, r: L(`Quando.${q}`), sel: q === (ac.quando ?? "sucesso") })),
@@ -286,12 +290,13 @@ export class ConfigCenaApp extends HandlebarsApplicationMixin(ApplicationV2) {
         id: antigas[ai]?.id ?? foundry.utils.randomID(),
         nome: v("areaNome", el).trim(), avancos: Math.max(1, n("areaAvancos", el)),
         penalidade: { aPartir: Math.max(0, n("penAPartir", el)), passos: n("penPassos", el) || -1, nome: v("penNome", el).trim() },
+        cena: v("areaCena", el),
         acoes: [...el.querySelectorAll("[data-acao-area]")].map((ac, i) => ({
           id: antigas[ai]?.acoes?.[i]?.id ?? foundry.utils.randomID(),
           nome: v("acaoNome", ac).trim(), tipo: v("acaoTipo", ac) || "teste", pericia: v("acaoPericia", ac),
           dt: Math.max(1, n("acaoDt", ac)), avancos: Math.max(0, n("acaoAvancos", ac)), quando: v("acaoQuando", ac) || "sucesso",
           danoFalha: v("acaoDano", ac).trim(), porAvanco: v("acaoPorAvanco", ac).trim(), periciaBonus: v("acaoPericiaBonus", ac),
-          estado: ac.querySelector("[name=acaoAgua]")?.checked ? "agua" : "",
+          estado: v("acaoEstado", ac),
         })),
       }));
       return;
@@ -340,6 +345,17 @@ export class ConfigCenaApp extends HandlebarsApplicationMixin(ApplicationV2) {
       });
     }
     if (o === "ataques") c.inicioRodada.ataques.push({ nome: L("NovoAtaque"), dano: "1d6", recurso: "pv", texto: "{nome} sofre {n} de dano." });
+    this.render();
+  }
+
+  /** Preenche as áreas com o modelo da Missão 1 (bosque, rio, encosta); pergunta antes de trocar. */
+  static async #carregarMissao1() {
+    this.#ler();
+    if (this.cena.areas?.length) {
+      const ok = await DialogV2.confirm({ window: { title: L("CarregarMissao1") }, content: `<p>${L("CarregarMissao1Troca")}</p>`, rejectClose: false });
+      if (!ok) return;
+    }
+    this.cena.areas = AREAS_MISSAO_1();
     this.render();
   }
 
