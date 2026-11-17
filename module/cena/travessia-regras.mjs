@@ -62,9 +62,17 @@ export function normalizarArea(area = {}) {
   };
 }
 
+/**
+ * As áreas de verdade da cena: sem nome E sem ação não é área (sobra de uma leitura
+ * errada da preparação, que gravava cada botão "+ Ação" como uma área vazia).
+ */
+export function areasDaCena(config) {
+  return (config?.areas ?? []).filter((a) => String(a?.nome ?? "").trim() || (a?.acoes ?? []).length);
+}
+
 /** A área em que a cena está, ou null (cena sem travessia, ou já passou da última). */
 export function areaAtual(config, indice = 0) {
-  const area = (config?.areas ?? [])[indice];
+  const area = areasDaCena(config)[indice];
   return area ? normalizarArea(area) : null;
 }
 

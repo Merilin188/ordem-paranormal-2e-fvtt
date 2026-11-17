@@ -20,7 +20,7 @@ import {
 } from "./furtividade-regras.mjs";
 import { listarCenas, obterCena, novaCena, ConfigCenaApp, linhaDaTabela } from "./cenas-config.mjs";
 import {
-  areaAtual, resultadoDaAcao, somarAvancos, concluiu, todosConcluiram, acoesDisponiveis, passosNaArea,
+  areaAtual, areasDaCena, resultadoDaAcao, somarAvancos, concluiu, todosConcluiram, acoesDisponiveis, passosNaArea,
   danoDoSalto, formulaPorAvanco,
 } from "./travessia-regras.mjs";
 
@@ -185,7 +185,7 @@ const OPS = {
 /** Anuncia a área em que a cena entrou (ou o fim da travessia). */
 async function cardDaArea(estado) {
   const area = areaAtual(estado.config, estado.areaIndice ?? 0);
-  const total = estado.config?.areas?.length ?? 0;
+  const total = areasDaCena(estado.config).length;
   await card(area
     ? `<h3><i class="fa-solid fa-route"></i> ${esc(L("Travessia.AreaNova", { area: area.nome, n: (estado.areaIndice ?? 0) + 1, total }))}</h3>
        <p>${esc(L("Travessia.AreaPede", { n: area.avancos }))}</p>`
@@ -203,7 +203,7 @@ function executar({ op, ...dados }) {
     const eventoId = foundry.utils.randomID();
     const novoEvento = OPS[op]?.(estado, dados, eventoId);
     await gravar(estado, novoEvento ? eventoId : null);
-    if (op === "proximaArea" || (op === "iniciar" && estado.config?.areas?.length)) await cardDaArea(estado);
+    if (op === "proximaArea" || (op === "iniciar" && areasDaCena(estado.config).length)) await cardDaArea(estado);
     // Área com cena própria: a mesa vai para ela (como as transições dos pontos).
     if (op === "proximaArea" || op === "iniciar") {
       const area = areaAtual(estado.config, estado.areaIndice ?? 0);
@@ -796,8 +796,8 @@ export class FurtividadeApp extends HandlebarsApplicationMixin(ApplicationV2) {
       dtDistrair: dtDe(e, e.usosDistrair), criaturas, participantes,
       nomeCena: e.config?.nome,
       travessia: area ? {
-        nome: area.nome, n: (e.areaIndice ?? 0) + 1, total: e.config.areas.length, avancos: area.avancos,
-        todos: todosConcluiram(e.participantes, area), ultima: (e.areaIndice ?? 0) + 1 >= e.config.areas.length,
+        nome: area.nome, n: (e.areaIndice ?? 0) + 1, total: areasDaCena(e.config).length, avancos: area.avancos,
+        todos: todosConcluiram(e.participantes, area), ultima: (e.areaIndice ?? 0) + 1 >= areasDaCena(e.config).length,
         penalidade: area.penalidade.aPartir > 0
           ? L("Travessia.PenalidadeRotulo", { nome: area.penalidade.nome || "", n: area.penalidade.aPartir, passos: area.penalidade.passos }) : "",
       } : null,

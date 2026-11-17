@@ -80,6 +80,16 @@ test("travessia: Na água só as ações de água; fora, só as outras; 'sempre'
   assert.deepEqual(acoesDisponiveis(area, { agua: true }).map((a) => a.id), ["boiar", "nadar"]);
 });
 
+test("travessia: área sem nome e sem ação não é área (a sobra da leitura antiga some)", async () => {
+  const { areasDaCena } = await import("../cena/travessia-regras.mjs");
+  const config = { areas: [
+    { nome: "Bosque", acoes: [{}] }, { nome: "", acoes: [] }, { nome: "", acoes: [] }, { nome: "Rio", acoes: [] }, { nome: "", acoes: [{}] },
+  ] };
+  assert.deepEqual(areasDaCena(config).map((a) => a.nome), ["Bosque", "Rio", ""]);
+  // A área atual pula as vazias: a segunda de verdade é o Rio.
+  assert.equal(areaAtual(config, 1).nome, "Rio");
+});
+
 test("travessia: as áreas da Missão 1 batem com o livro (avanços, tipos, DTs)", async () => {
   const { AREAS_MISSAO_1 } = await import("../cena/travessia-regras.mjs");
   const [bosque, rio, encosta] = AREAS_MISSAO_1().map(normalizarArea);

@@ -32,7 +32,7 @@
     <button type="button" class="op2-botao op2-botao--pequeno op2-botao--fantasma" data-action="carregarMissao1"
       data-tooltip="{{localize 'OP2.CenaConfig.CarregarMissao1Dica'}}"><i class="fa-solid fa-route"></i> {{localize "OP2.CenaConfig.CarregarMissao1"}}</button>
     {{#each areas}}
-      <div class="op2-cena-config__bloco op2-cena-config__area" data-area="{{ai}}">
+      <div class="op2-cena-config__bloco op2-cena-config__area" data-area-bloco="{{ai}}">
         <div class="op2-cena-config__linha">
           <label class="op2-cena-config__area-nome">{{localize "OP2.CenaConfig.AreaNome"}}<input type="text" name="areaNome" value="{{nome}}"></label>
           <label>{{localize "OP2.CenaConfig.AreaAvancos"}}<input type="number" name="areaAvancos" value="{{avancos}}" min="1"></label>

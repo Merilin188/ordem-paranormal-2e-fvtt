@@ -5,7 +5,7 @@
  * escolhe uma e, ao iniciar, guarda uma cópia dela no estado da cena (mudar a
  * configuração depois não mexe na cena em andamento).
  */
-import { AREAS_MISSAO_1 } from "./travessia-regras.mjs";
+import { AREAS_MISSAO_1, areasDaCena } from "./travessia-regras.mjs";
 import { SYSTEM_ID, PERICIAS } from "../config.mjs";
 import { TABELA_CRIATURAS } from "./furtividade-regras.mjs";
 import { CONDICOES } from "./condicoes.mjs";
@@ -248,7 +248,8 @@ export class ConfigCenaApp extends HandlebarsApplicationMixin(ApplicationV2) {
           .map((x) => ({ id: x.id, rotulo: game.i18n.localize(x.name), sel: x.id === c.alcancado?.condicao })),
       };
     }
-    c.areas ??= [];
+    // Sem as áreas vazias que uma leitura antiga gravou: some ao salvar de novo.
+    c.areas = areasDaCena(c);
     const cenasDoMundo = (game.scenes?.contents ?? []).map((s) => ({ id: s.id, nome: s.name })).sort((a, b) => a.nome.localeCompare(b.nome));
     return {
       c,
@@ -286,7 +287,9 @@ export class ConfigCenaApp extends HandlebarsApplicationMixin(ApplicationV2) {
         c.tabela[el.dataset.linha] = { tipo: v("tipo", el), formula: v("formula", el).trim(), texto: v("texto", el).trim() };
       }
       const antigas = c.areas ?? [];
-      c.areas = [...f.querySelectorAll("[data-area]")].map((el, ai) => ({
+      // `data-area-bloco`, não `data-area`: os botões "+ Ação" e "×" das ações também
+      // levam `data-area`, e cada um virava uma área vazia (achado em uso real).
+      c.areas = [...f.querySelectorAll("[data-area-bloco]")].map((el, ai) => ({
         id: antigas[ai]?.id ?? foundry.utils.randomID(),
         nome: v("areaNome", el).trim(), avancos: Math.max(1, n("areaAvancos", el)),
         penalidade: { aPartir: Math.max(0, n("penAPartir", el)), passos: n("penPassos", el) || -1, nome: v("penNome", el).trim() },
