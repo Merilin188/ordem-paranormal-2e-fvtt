@@ -19,6 +19,7 @@ import {
   aplicarBusca, perderDado, limparPerdidos, facesDe,
 } from "./furtividade-regras.mjs";
 import { listarCenas, obterCena, novaCena, ConfigCenaApp, linhaDaTabela } from "./cenas-config.mjs";
+import { areaAtual, resultadoDaAcao, somarAvancos, concluiu, todosConcluiram } from "./travessia-regras.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } = foundry.applications.api;
 const CHAVE = "furtividade";
@@ -31,6 +32,8 @@ const ANONIMO = "icons/svg/mystery-man.svg";
 const VAZIO = () => ({
   ativa: false, rodada: 1, fase: "personagens", participantes: [], criaturas: [],
   usosDistrair: 0, acaoRolada: false, evento: null,
+  // Travessia (áreas da cena configurada): em qual área a cena está.
+  areaIndice: 0,
 });
 
 export function estadoFurtividade() {
@@ -67,14 +70,14 @@ async function gravar(estado, eventoId = null) {
 const OPS = {
   iniciar(e, { configId } = {}) {
     e.config = obterCena("furtividade", configId);
-    Object.assign(e, { ativa: true, cenaId: foundry.utils.randomID(), rodada: 1, fase: "personagens", usosDistrair: 0, acaoRolada: false, evento: null });
-    e.participantes = e.participantes.map((p) => ({ ...p, dados: [], testou: false, usosEsconder: 0, agiu: false }));
+    Object.assign(e, { ativa: true, cenaId: foundry.utils.randomID(), rodada: 1, fase: "personagens", usosDistrair: 0, acaoRolada: false, evento: null, areaIndice: 0 });
+    e.participantes = e.participantes.map((p) => ({ ...p, dados: [], testou: false, usosEsconder: 0, agiu: false, avancos: 0, seguro: false }));
   },
   encerrar(e) { e.ativa = false; e.evento = null; },
   adicionar(e, { uuid, papel }) {
     if (e.participantes.some((p) => p.uuid === uuid) || e.criaturas.some((c) => c.uuid === uuid)) return;
     if (papel === "criatura") e.criaturas.push({ uuid, oculta: false });
-    else e.participantes.push({ uuid, dados: [], testou: false, usosEsconder: 0 });
+    else e.participantes.push({ uuid, dados: [], testou: false, usosEsconder: 0, avancos: 0, seguro: false });
   },
   remover(e, { uuid }) {
     e.participantes = e.participantes.filter((p) => p.uuid !== uuid);
@@ -135,6 +138,25 @@ const OPS = {
     };
     return true;
   },
+  /** Travessia: soma (ou tira) avanços; a ação da área conta como a ação do personagem. */
+  avanco(e, { uuid, delta, agiu = false }) {
+    const p = e.participantes.find((x) => x.uuid === uuid);
+    if (!p) return;
+    p.avancos = somarAvancos(p.avancos, delta);
+    if (agiu) p.agiu = true;
+    // Voltou para baixo do total (o mestre tirou um avanço): não está mais "do outro lado".
+    if (!concluiu(p, areaAtual(e.config, e.areaIndice ?? 0))) p.seguro = false;
+  },
+  /** Quem cruzou escolhe ficar parado em segurança (não age, não perde dados) ou seguir agindo. */
+  seguro(e, { uuid }) {
+    const p = e.participantes.find((x) => x.uuid === uuid);
+    if (p && concluiu(p, areaAtual(e.config, e.areaIndice ?? 0))) p.seguro = !p.seguro;
+  },
+  /** Próxima área: avanços e "em segurança" zeram. Depois da última, a travessia termina. */
+  proximaArea(e) {
+    e.areaIndice = (e.areaIndice ?? 0) + 1;
+    e.participantes = e.participantes.map((p) => ({ ...p, avancos: 0, seguro: false }));
+  },
   busca(e, { valores, alvos = null }, eventoId) {
     const r = aplicarBusca(e.participantes, valores, eventoId, alvos);
     e.participantes = r.participantes;
@@ -142,6 +164,16 @@ const OPS = {
     return r;
   },
 };
+
+/** Anuncia a área em que a cena entrou (ou o fim da travessia). */
+async function cardDaArea(estado) {
+  const area = areaAtual(estado.config, estado.areaIndice ?? 0);
+  const total = estado.config?.areas?.length ?? 0;
+  await card(area
+    ? `<h3><i class="fa-solid fa-route"></i> ${esc(L("Travessia.AreaNova", { area: area.nome, n: (estado.areaIndice ?? 0) + 1, total }))}</h3>
+       <p>${esc(L("Travessia.AreaPede", { n: area.avancos }))}</p>`
+    : `<h3><i class="fa-solid fa-flag-checkered"></i> ${esc(L("Travessia.Concluida"))}</h3>`);
+}
 
 /** Executa uma operação no cliente do mestre, em fila (duas ao mesmo tempo perdiam escrita). */
 function executar({ op, ...dados }) {
@@ -154,6 +186,7 @@ function executar({ op, ...dados }) {
     const eventoId = foundry.utils.randomID();
     const novoEvento = OPS[op]?.(estado, dados, eventoId);
     await gravar(estado, novoEvento ? eventoId : null);
+    if (op === "proximaArea" || (op === "iniciar" && estado.config?.areas?.length)) await cardDaArea(estado);
     if (novoEvento && ["perder", "transferir"].includes(op) && estado.evento?.descobertos?.length) await cardDescobertos(estado.evento.descobertos);
   });
   fila = resultado.catch((erro) => console.error(`${SYSTEM_ID} | furtividade`, erro));
@@ -256,7 +289,7 @@ export async function animarSorteio({ itens, final, passos, titulo = null }) {
  * em Sortear; a animação roda na tela de todos. Só nomes, nada de dados.
  */
 async function sortearAlvo(estado) {
-  const candidatos = estado.participantes.filter((p) => dadosAtivos(p).length);
+  const candidatos = estado.participantes.filter((p) => dadosAtivos(p).length && !p.seguro);
   if (!candidatos.length) {
     ui.notifications.info(L("NinguemEscondido"));
     return null;
@@ -458,8 +491,43 @@ async function acaoComTeste(doc, { chave, dt, uso, titulo }) {
   return roll.resultado?.sucesso ? roll : null;
 }
 
+/**
+ * Ação da área (travessia): o teste da ação; soma os avanços (sempre ou só passando) e,
+ * falhando, rola o dano configurado. O card diz o que veio e por quê.
+ */
+async function acaoDaArea(doc, estado, p, dataset) {
+  const area = areaAtual(estado.config, estado.areaIndice ?? 0);
+  const acao = area?.acoes.find((a) => a.id === dataset.acaoId);
+  if (!acao) return;
+  const { rolarTeste, rotuloDePericia } = await import("../dice/teste.mjs");
+  const roll = await rolarTeste(doc, { chavePericia: acao.pericia, dt: acao.dt, contexto: `${area.nome} — ${acao.nome}` });
+  if (!roll) return;
+  const sucesso = Boolean(roll.resultado?.sucesso);
+  const r = resultadoDaAcao(acao, sucesso);
+  let dano = null;
+  if (r.dano && Roll.validate(r.dano)) {
+    const rolagem = await rolar(r.dano);
+    const { aplicarDano } = await import("../dice/falha-critica.mjs");
+    await aplicarDano(doc, rolagem.total, "pv");
+    dano = { n: rolagem.total, formula: r.dano };
+  }
+  const novo = somarAvancos(p.avancos, r.avancos);
+  await pedir("avanco", { uuid: doc.uuid, delta: r.avancos, agiu: true });
+  const linhas = [
+    `<h3>${esc(doc.name)} — ${esc(acao.nome)}</h3>`,
+    `<p class="op2-dica">${esc(rotuloDePericia(acao.pericia))} · DT ${acao.dt} · ${esc(L(sucesso ? "Travessia.Passou" : "Travessia.Falhou"))}</p>`,
+    `<p><i class="fa-solid fa-person-walking-arrow-right"></i> ${esc(r.avancos
+      ? L(acao.quando === "sempre" && !sucesso ? "Travessia.AvancouMesmoAssim" : "Travessia.Avancou", { n: r.avancos, atual: novo, total: area.avancos })
+      : L("Travessia.NaoAvancou", { atual: novo, total: area.avancos }))}</p>`,
+  ];
+  if (dano) linhas.push(`<p class="op2-furt-card__encontrado"><i class="fa-solid fa-droplet"></i> ${esc(L("Travessia.Dano", { n: dano.n, formula: dano.formula }))}</p>`);
+  if (novo >= area.avancos && (p.avancos ?? 0) < area.avancos) linhas.push(`<p><strong><i class="fa-solid fa-flag"></i> ${esc(L("Travessia.Cruzou", { nome: doc.name }))}</strong></p>`);
+  await card(linhas.join(""), { speaker: ChatMessage.getSpeaker({ actor: doc }) });
+}
+
 const ACOES_JOGADOR = {
   async teste(doc) { await testeDeEsconderijo(doc); },
+  area: acaoDaArea,
   async esconder(doc, estado, p) {
     const roll = await acaoComTeste(doc, { chave: "furtividade", dt: dtDe(estado, p.usosEsconder), uso: "esconder", titulo: L("Esconder") });
     if (!roll) return;
@@ -540,6 +608,10 @@ export class FurtividadeApp extends HandlebarsApplicationMixin(ApplicationV2) {
       ficha: (_e, alvo) => ator(alvo.dataset.uuid)?.sheet?.render(true),
       jogador: FurtividadeApp.#jogador,
       agiu: (_e, alvo) => pedir("agiu", { uuid: alvo.dataset.uuid }),
+      avancoMais: (_e, alvo) => pedir("avanco", { uuid: alvo.dataset.uuid, delta: 1 }),
+      avancoMenos: (_e, alvo) => pedir("avanco", { uuid: alvo.dataset.uuid, delta: -1 }),
+      seguro: (_e, alvo) => pedir("seguro", { uuid: alvo.dataset.uuid }),
+      proximaArea: FurtividadeApp.#proximaArea,
       tabela: () => mostrarTabelaMestre(),
     },
   };
@@ -577,6 +649,7 @@ export class FurtividadeApp extends HandlebarsApplicationMixin(ApplicationV2) {
         img: anonima ? ANONIMO : doc?.img ?? ANONIMO,
       };
     });
+    const area = e.ativa ? areaAtual(e.config, e.areaIndice ?? 0) : null;
     const participantes = e.participantes.map((p) => {
       const doc = ator(p.uuid);
       // O mestre não vê valor, forma nem quantidade dos dados de esconderijo.
@@ -588,6 +661,11 @@ export class FurtividadeApp extends HandlebarsApplicationMixin(ApplicationV2) {
         dono: !gm && !!doc?.isOwner, podeMarcar: gm || !!doc?.isOwner, agiu: !!p.agiu,
         dados, testou: p.testou,
         encontrado: encontrado(p), dtEsconder: dtDe(e, p.usosEsconder),
+        // Travessia: avanços nesta área, se cruzou e se ficou parado em segurança.
+        avancos: p.avancos ?? 0,
+        cruzou: concluiu(p, area),
+        seguro: !!p.seguro,
+        pctAvanco: area ? Math.min(100, Math.round(((p.avancos ?? 0) / area.avancos) * 100)) : 0,
       };
     });
     return {
@@ -595,6 +673,14 @@ export class FurtividadeApp extends HandlebarsApplicationMixin(ApplicationV2) {
       podeRolarAcao: e.ativa && e.fase === "criaturas" && (gm || !e.acaoRolada),
       dtDistrair: dtDe(e, e.usosDistrair), criaturas, participantes,
       nomeCena: e.config?.nome,
+      travessia: area ? {
+        nome: area.nome, n: (e.areaIndice ?? 0) + 1, total: e.config.areas.length, avancos: area.avancos,
+        todos: todosConcluiram(e.participantes, area), ultima: (e.areaIndice ?? 0) + 1 >= e.config.areas.length,
+        acoes: area.acoes.map((a) => ({
+          ...a, rotuloPericia: game.i18n.localize(`OP2.Pericia.${a.pericia}`),
+          rotuloAvanco: L(a.quando === "sempre" ? "Travessia.SomaSempre" : "Travessia.SomaPassando", { n: a.avancos }),
+        })),
+      } : null,
       cenas: listarCenas("furtividade").map((c) => ({ id: c.id, nome: c.nome, sel: c.id === (this.configId ??= listarCenas("furtividade")[0]?.id) })),
       vazio: !criaturas.length && !participantes.length,
     };
@@ -629,6 +715,17 @@ export class FurtividadeApp extends HandlebarsApplicationMixin(ApplicationV2) {
     const papel = evento.target.closest("[data-zona]")?.dataset.zona
       ?? (doc.type === "personagem" ? "personagem" : "criatura");
     await pedir("adicionar", { uuid: doc.uuid, papel });
+  }
+
+  static async #proximaArea() {
+    const e = estadoFurtividade();
+    const area = areaAtual(e.config, e.areaIndice ?? 0);
+    if (!area) return;
+    if (!todosConcluiram(e.participantes, area)) {
+      const ok = await DialogV2.confirm({ window: { title: L("Travessia.ProximaArea") }, content: `<p>${esc(L("Travessia.NemTodos"))}</p>`, rejectClose: false });
+      if (!ok) return;
+    }
+    await pedir("proximaArea");
   }
 
   static async #encerrar() {
@@ -679,7 +776,9 @@ export class FurtividadeApp extends HandlebarsApplicationMixin(ApplicationV2) {
     const estado = estadoFurtividade();
     const p = estado.participantes.find((x) => x.uuid === uuid);
     if (!doc?.isOwner || !p) return;
-    await ACOES_JOGADOR[acao]?.(doc, estado, p);
+    // Parado em segurança não age (travessia).
+    if (p.seguro) return void ui.notifications.warn(L("Travessia.EmSegurancaNaoAge"));
+    await ACOES_JOGADOR[acao]?.(doc, estado, p, alvo.dataset);
   }
 }
 

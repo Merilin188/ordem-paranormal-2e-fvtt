@@ -71,6 +71,28 @@
     small { opacity: 0.75; }
   }
 
+  // Travessia: a área no topo, os avanços de cada um e as ações da área.
+  .op2-furt__area {
+    display: block; margin-top: 0.15rem; font-size: 0.8em; color: #a5d36b;
+    &--todos { color: var(--op2-critico); }
+  }
+  .op2-furt__avancos {
+    display: flex; align-items: center; gap: 0.35rem; font-size: 0.8em;
+    button { flex: none; width: 20px; height: 20px; }
+  }
+  .op2-furt__avancos-rotulo { white-space: nowrap; color: var(--op2-tinta-fraca); text-transform: uppercase; strong { color: var(--op2-texto); } }
+  .op2-furt__avancos-trilho {
+    flex: 1; height: 6px; background: rgb(255 255 255 / 10%); overflow: hidden;
+    > span { display: block; height: 100%; background: #6f9a4e; transition: width 0.4s; }
+  }
+  .op2-furt__avancos--cruzou .op2-furt__avancos-trilho > span { background: var(--op2-critico); }
+  .op2-furt__cruzou { display: flex; align-items: center; gap: 0.4rem; button { width: auto; flex: none; } }
+  .op2-furt__area-acoes {
+    flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 0.25rem; padding-bottom: 0.2rem; margin-bottom: 0.1rem;
+    border-bottom: 1px dashed var(--op2-linha);
+  }
+  .op2-furt__area-acao { border-color: #6f9a4e; }
+
   // Cards de chat
   .op2-furt-card {
     padding: 0.5rem; border-left: 3px solid #8b1d3a; background: linear-gradient(90deg, rgb(40 4 14 / 70%), transparent);
@@ -372,6 +394,15 @@
     padding: 0.35rem 0.5rem; border-left: 3px solid #8b1d3a; background: rgb(0 0 0 / 20%); display: flex; flex-direction: column; gap: 0.3rem;
     summary { display: flex; align-items: center; gap: 0.4rem; cursor: pointer; strong { flex: 1; } }
   }
+  // Travessia na preparação: cada área com as ações numa linha cada.
+  .op2-cena-config__area { border-left-color: #6f9a4e; }
+  .op2-cena-config__area-nome { flex: 3 !important; }
+  .op2-cena-config__acoes-area { display: flex; flex-direction: column; gap: 0.25rem; }
+  .op2-cena-config__acao-area {
+    display: grid; grid-template-columns: minmax(8rem, 2fr) minmax(7rem, 1.3fr) 3.5rem 4.5rem minmax(9.5rem, 1.6fr) 4.5rem 1.5rem; gap: 0.3rem; align-items: center;
+    input, select { width: 100%; min-width: 0; }
+  }
+  .op2-cena-config__acao-cabeca span { font-size: 0.72em; text-transform: uppercase; color: var(--op2-tinta-fraca); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   // Perícias de um evento: grade de caixas marcáveis (no lugar do select múltiplo).
   .op2-pericias-escolha {
     display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.85em;

@@ -56,6 +56,8 @@ export function aplicarBusca(participantes, valores, eventoId, alvos = null) {
   const descobertos = [];
   const novos = participantes.map((p) => {
     if (alvos && !alvos.includes(p.uuid)) return p;
+    // Parado em segurança (travessia): não perde dados de esconderijo.
+    if (p.seguro) return p;
     const antes = dadosAtivos(p).length;
     const dados = p.dados.map((d) => {
       if (d.perdido || !procurados.has(d.valor)) return d;

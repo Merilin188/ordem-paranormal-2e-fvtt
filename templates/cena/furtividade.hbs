@@ -4,6 +4,12 @@
       <div class="op2-furt__fase">
         <small>{{nomeCena}} · {{localize "OP2.Furtividade.Rodada"}} {{rodada}}</small>
         <strong>{{#if criaturasFase}}{{localize "OP2.Furtividade.FaseCriaturas"}}{{else}}{{localize "OP2.Furtividade.FasePersonagens"}}{{/if}}</strong>
+        {{#if travessia}}
+          <span class="op2-furt__area {{#if travessia.todos}}op2-furt__area--todos{{/if}}">
+            <i class="fa-solid fa-route" aria-hidden="true"></i>
+            {{localize "OP2.Furtividade.Travessia.AreaRotulo" n=travessia.n total=travessia.total area=travessia.nome avancos=travessia.avancos}}
+          </span>
+        {{/if}}
       </div>
       <div class="op2-furt__botoes">
         {{#if podeRolarAcao}}
@@ -13,6 +19,11 @@
         {{#if gm}}
           <button type="button" class="op2-botao" data-action="avancar"><i class="fa-solid fa-forward-step"></i>
             {{#if criaturasFase}}{{localize "OP2.Furtividade.ProximaRodada"}}{{else}}{{localize "OP2.Furtividade.IrCriaturas"}}{{/if}}</button>
+          {{#if travessia}}
+            <button type="button" class="op2-botao {{#unless travessia.todos}}op2-botao--fantasma{{/unless}}" data-action="proximaArea"
+              data-tooltip="{{localize 'OP2.Furtividade.Travessia.ProximaAreaDica'}}">
+              <i class="fa-solid fa-route"></i> {{#if travessia.ultima}}{{localize "OP2.Furtividade.Travessia.Concluir"}}{{else}}{{localize "OP2.Furtividade.Travessia.ProximaArea"}}{{/if}}</button>
+          {{/if}}
           <button type="button" class="op2-botao op2-botao--fantasma" data-action="tabela"><i class="fa-solid fa-table-list"></i> {{localize "OP2.Furtividade.TabelaBotao"}}</button>
           <button type="button" class="op2-botao op2-botao--fantasma" data-action="encerrar"><i class="fa-solid fa-flag-checkered"></i> {{localize "OP2.Furtividade.Encerrar"}}</button>
         {{/if}}
@@ -79,13 +90,48 @@
               {{/each}}
             {{/if}}
           </div>
-          {{#if dono}}{{#if ../ativa}}{{#if agiu}}
+          {{#if ../travessia}}
+            <div class="op2-furt__avancos {{#if cruzou}}op2-furt__avancos--cruzou{{/if}}">
+              <span class="op2-furt__avancos-rotulo">{{localize "OP2.Furtividade.Travessia.Avancos"}} <strong>{{avancos}}/{{../travessia.avancos}}</strong></span>
+              <span class="op2-furt__avancos-trilho"><span style="width: {{pctAvanco}}%"></span></span>
+              {{#if ../gm}}
+                <button type="button" class="op2-botao-icone" data-action="avancoMenos" data-uuid="{{uuid}}" data-tooltip="{{localize 'OP2.Furtividade.Travessia.Menos'}}"><i class="fa-solid fa-minus"></i></button>
+                <button type="button" class="op2-botao-icone" data-action="avancoMais" data-uuid="{{uuid}}" data-tooltip="{{localize 'OP2.Furtividade.Travessia.Mais'}}"><i class="fa-solid fa-plus"></i></button>
+              {{/if}}
+            </div>
+            {{#if cruzou}}
+              <div class="op2-furt__cruzou">
+                {{#if seguro}}
+                  <span class="op2-furt__estado"><i class="fa-solid fa-shield-halved"></i> {{localize "OP2.Furtividade.Travessia.EmSeguranca"}}</span>
+                {{else}}
+                  <span class="op2-furt__estado"><i class="fa-solid fa-flag"></i> {{localize "OP2.Furtividade.Travessia.CruzouRotulo"}}</span>
+                {{/if}}
+                {{#if podeMarcar}}
+                  <button type="button" class="op2-botao op2-botao--pequeno op2-botao--fantasma" data-action="seguro" data-uuid="{{uuid}}"
+                    data-tooltip="{{localize 'OP2.Furtividade.Travessia.SegurancaDica'}}">
+                    {{#if seguro}}{{localize "OP2.Furtividade.Travessia.VoltarAgir"}}{{else}}{{localize "OP2.Furtividade.Travessia.FicarSeguro"}}{{/if}}</button>
+                {{/if}}
+              </div>
+            {{/if}}
+          {{/if}}
+          {{#if dono}}{{#if ../ativa}}{{#if seguro}}
+            <p class="op2-dica op2-furt__aguardando"><i class="fa-solid fa-shield-halved"></i> {{localize "OP2.Furtividade.Travessia.EmSegurancaNaoAge"}}</p>
+          {{else if agiu}}
             <p class="op2-dica op2-furt__aguardando"><i class="fa-solid fa-hourglass-half"></i> {{localize "OP2.Furtividade.Aguardando"}}</p>
           {{else}}
             <div class="op2-furt__acoes">
               {{#unless testou}}
                 <button type="button" class="op2-botao op2-botao--pequeno" data-action="jogador" data-acao="teste" data-uuid="{{uuid}}"><i class="fa-solid fa-dice"></i> {{localize "OP2.Furtividade.TesteEsconderijo"}}</button>
               {{else}}{{#unless ../criaturasFase}}
+                {{#if ../travessia}}
+                  <div class="op2-furt__area-acoes">
+                    {{#each ../travessia.acoes}}
+                      <button type="button" class="op2-botao op2-botao--pequeno op2-furt__area-acao" data-action="jogador" data-acao="area"
+                        data-acao-id="{{id}}" data-uuid="{{../uuid}}" data-tooltip="{{rotuloPericia}} DT {{dt}} · {{rotuloAvanco}}{{#if danoFalha}} · {{localize 'OP2.Furtividade.Travessia.DanoFalha' formula=danoFalha}}{{/if}}">
+                        <i class="fa-solid fa-person-walking-arrow-right" aria-hidden="true"></i> {{nome}} <small>{{rotuloPericia}} {{dt}}</small></button>
+                    {{/each}}
+                  </div>
+                {{/if}}
                 <button type="button" class="op2-botao op2-botao--pequeno" data-action="jogador" data-acao="esconder" data-uuid="{{uuid}}" data-tooltip="{{localize 'OP2.Furtividade.EsconderDica'}}">{{localize "OP2.Furtividade.Esconder"}} <small>DT {{dtEsconder}}</small></button>
                 <button type="button" class="op2-botao op2-botao--pequeno" data-action="jogador" data-acao="distrair" data-uuid="{{uuid}}" data-tooltip="{{localize 'OP2.Furtividade.DistrairDica'}}">{{localize "OP2.Furtividade.Distrair"}} <small>DT {{../dtDistrair}}</small></button>
                 <button type="button" class="op2-botao op2-botao--pequeno" data-action="jogador" data-acao="chamar" data-uuid="{{uuid}}" data-tooltip="{{localize 'OP2.Furtividade.ChamarDica'}}">{{localize "OP2.Furtividade.Chamar"}}</button>

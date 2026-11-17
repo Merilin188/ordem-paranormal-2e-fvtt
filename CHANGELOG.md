@@ -5,6 +5,13 @@ Versões seguem [SemVer](https://semver.org/lang/pt-BR/).
 
 ## [Não publicado]
 
+- **Travessia na cena de furtividade** (etapa 1): a cena configurada ganha áreas
+  (bosque, rio, encosta…), cada uma com os avanços para cruzar e as ações — perícia,
+  DT, avanços que soma (sempre ou só passando) e dano na falha. No painel, cada
+  personagem tem a barra de avanços e os botões das ações da área; o card diz o que
+  veio e por quê. Quem cruza pode ficar **parado em segurança** (não age; a busca das
+  criaturas não tira dados dele). O mestre tem ±1 avanço (ideias livres) e "Próxima
+  área". Equilíbrio no tronco, nadar, salto de fé e escuridão vêm na etapa 2.
 - **Crítico sem dado extra** (livro, Críticos): o teste passa direto e, em ataques e
   testes estendidos, soma as **duas rolagens mais altas** do próprio teste no dano e na
   pontuação do Arrombar (o card diz quais). Sai o botão "Dado do crítico" e a rolagem

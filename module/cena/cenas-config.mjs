@@ -98,7 +98,12 @@ export const FURTIVIDADE_PADRAO = () => ({
   tabela: Object.fromEntries(Object.entries(TABELA_CRIATURAS).map(([n, l]) => [n, {
     tipo: l.tipo, formula: l.formula ?? (l.formulas ?? []).join(", "), texto: "",
   }])),
+  // Travessia: áreas que o grupo cruza durante a furtividade (vazio = sem travessia).
+  areas: [],
 });
+
+const NOVA_ACAO = () => ({ id: foundry.utils.randomID(), nome: L("NovaAcaoArea"), pericia: "acrobacia", dt: 7, avancos: 1, quando: "sucesso", danoFalha: "" });
+const NOVA_AREA = () => ({ id: foundry.utils.randomID(), nome: L("NovaArea"), avancos: 4, acoes: [NOVA_ACAO()] });
 
 const PADROES = { perseguicao: PERSEGUICAO_PADRAO, furtividade: FURTIVIDADE_PADRAO };
 
@@ -234,8 +239,17 @@ export class ConfigCenaApp extends HandlebarsApplicationMixin(ApplicationV2) {
           .map((x) => ({ id: x.id, rotulo: game.i18n.localize(x.name), sel: x.id === c.alcancado?.condicao })),
       };
     }
+    c.areas ??= [];
     return {
       c,
+      areas: c.areas.map((a, ai) => ({
+        ...a, ai,
+        acoes: (a.acoes ?? []).map((ac, i) => ({
+          ...ac, i, ai,
+          pericias: pericias.map((p) => ({ ...p, sel: p.k === ac.pericia })),
+          quandoOpcoes: ["sucesso", "sempre"].map((q) => ({ q, r: L(`Quando.${q}`), sel: q === (ac.quando ?? "sucesso") })),
+        })),
+      })),
       linhas: Object.entries(c.tabela).map(([n, l]) => ({
         n, ...l, padrao: game.i18n.localize(`OP2.Furtividade.Tabela.${n}`),
         tipos: TIPOS_LINHA.map((t) => ({ t, r: L(`TipoLinha.${t}`), sel: t === l.tipo })),
@@ -256,6 +270,17 @@ export class ConfigCenaApp extends HandlebarsApplicationMixin(ApplicationV2) {
       for (const el of f.querySelectorAll("[data-linha]")) {
         c.tabela[el.dataset.linha] = { tipo: v("tipo", el), formula: v("formula", el).trim(), texto: v("texto", el).trim() };
       }
+      const antigas = c.areas ?? [];
+      c.areas = [...f.querySelectorAll("[data-area]")].map((el, ai) => ({
+        id: antigas[ai]?.id ?? foundry.utils.randomID(),
+        nome: v("areaNome", el).trim(), avancos: Math.max(1, n("areaAvancos", el)),
+        acoes: [...el.querySelectorAll("[data-acao-area]")].map((ac, i) => ({
+          id: antigas[ai]?.acoes?.[i]?.id ?? foundry.utils.randomID(),
+          nome: v("acaoNome", ac).trim(), pericia: v("acaoPericia", ac), dt: Math.max(1, n("acaoDt", ac)),
+          avancos: Math.max(0, n("acaoAvancos", ac)), quando: v("acaoQuando", ac) || "sucesso",
+          danoFalha: v("acaoDano", ac).trim(),
+        })),
+      }));
       return;
     }
     Object.assign(c, {
@@ -292,6 +317,8 @@ export class ConfigCenaApp extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#ler();
     const c = this.cena;
     const o = alvo.dataset.lista;
+    if (o === "areas") { (c.areas ??= []).push(NOVA_AREA()); return this.render(); }
+    if (o === "acoesArea") { c.areas[Number(alvo.dataset.area)]?.acoes.push(NOVA_ACAO()); return this.render(); }
     if (o === "marcos") c.marcos.push({ rodada: c.rodadas, pa: c.meta });
     if (o === "eventos") {
       c.eventos.push({
@@ -305,6 +332,8 @@ export class ConfigCenaApp extends HandlebarsApplicationMixin(ApplicationV2) {
 
   static async #remover(_e, alvo) {
     this.#ler();
+    if (alvo.dataset.lista === "areas") { this.cena.areas.splice(Number(alvo.dataset.i), 1); return this.render(); }
+    if (alvo.dataset.lista === "acoesArea") { this.cena.areas[Number(alvo.dataset.area)]?.acoes.splice(Number(alvo.dataset.i), 1); return this.render(); }
     const lista = alvo.dataset.lista === "ataques" ? this.cena.inicioRodada.ataques : this.cena[alvo.dataset.lista];
     lista.splice(Number(alvo.dataset.i), 1);
     this.render();
