@@ -80,6 +80,7 @@ import { registrarCondicoes } from "./cena/condicoes.mjs";
 import { registrarDeclaracao } from "./cena/declaracao.mjs";
 import { registrarAguardar } from "./cena/aguardar.mjs";
 import { registrarInvestigar, iniciarInvestigacao } from "./cena/investigar.mjs";
+import { registrarJanelaAlcancar } from "./cena/alcancar-janela.mjs";
 import { registrarPoderes } from "./cena/poderes.mjs";
 import { registrarAparenciaDoPavor } from "./cena/pavor.mjs";
 import { registrarGuiaCombate, alternarGuiaCombate } from "./ui/guia-combate.mjs";
@@ -175,6 +176,7 @@ Hooks.once("init", () => {
   registrarDeclaracao();
   registrarAguardar();
   registrarInvestigar();
+  registrarJanelaAlcancar();
   registrarPoderes();
   registrarAparenciaDoPavor();
 

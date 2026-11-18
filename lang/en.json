@@ -775,7 +775,21 @@
       "FadigaPergunta": "End of the round. To keep holding ({nome}), test Athletics:",
       "FadigaFalha": "On a failure: lets go of what was held. Letting go now needs no test.",
       "FadigaContinuar": "Keep holding (roll {de} + {atributo})",
-      "FadigaAntes": "Before fatigue: {de}"
+      "FadigaAntes": "Before fatigue: {de}",
+      "AlcancarJanela": {
+        "Titulo": "Reach (safe)",
+        "Parcial": "1st action: passed. The 2nd comes on this character's next action.",
+        "Passo1": "1st action: passed (Acrobatics DT {dt} → {total}).",
+        "Passo2Espera": "2nd action: on this character's next action (next turn or next round).",
+        "Passo2Agora": "2nd action: now — Acrobatics test (DT {dt}).",
+        "Regra": "Passing both, they reach it. Failing, damage equal to the LR and they start over.",
+        "Segunda": "Take the 2nd action (DT {dt})",
+        "Aguarde": "The Reach's 2nd action is on this character's next action.",
+        "AdiantarDica": "GM: it's still the same round. Clicking moves the 2nd action up anyway.",
+        "Desistir": "Give up",
+        "DesistirPergunta": "Give up reaching? The 1st action is lost and a next attempt starts from zero.",
+        "Desistiu": "{nome} gave up reaching."
+      }
     },
     "Ferramenta": {
       "Rotulo": "Tool",

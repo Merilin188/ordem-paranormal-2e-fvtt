@@ -5,6 +5,11 @@ Versões seguem [SemVer](https://semver.org/lang/pt-BR/).
 
 ## [Não publicado]
 
+- **Alcançar seguro em duas ações**, como no livro: a 1ª passou, o personagem fica
+  marcado e a 2ª vem na próxima ação dele (próximo turno no combate, próxima rodada na
+  investigação). Uma janela flutuante, para o jogador e o mestre, aparece depois da 1ª
+  e volta quando chega a vez dele; o mesmo botão do Alcançar também faz a 2ª. O mestre
+  pode adiantar; desistir zera. Encerrar/Resetar cena tira a marca.
 - **Travessia na cena de furtividade** (etapa 1): a cena configurada ganha áreas
   (bosque, rio, encosta…), cada uma com os avanços para cruzar e as ações — perícia,
   DT, avanços que soma (sempre ou só passando) e dano na falha. No painel, cada

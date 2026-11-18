@@ -12,7 +12,7 @@
  */
 import { SYSTEM_ID, CUSTO_PV_ARROMBAR, CUSTO_PV_SUSTENTAR, BONUS_DT_ALCANCAR_ARRISCADO } from "../config.mjs";
 import {
-  acumularArrombar, arrombou, excedeuTentativas, danoDeAlcancar, avaliarPalpite, venceuDestrancar,
+  etapaDoAlcancarSeguro, acumularArrombar, arrombou, excedeuTentativas, danoDeAlcancar, avaliarPalpite, venceuDestrancar,
   podeTentarHackNestaRodada, chancesDeErroHackSocial, linhaDaTabelaDeHack,
   tentativasPorRodadaDeDestrancar, tentativasDeDestrancarNaRodada, facesDasPosicoes,
 } from "./desafios.mjs";
@@ -175,7 +175,22 @@ export async function arrombar(ator, desafioUuid, { rapido = false } = {}) {
  * @param {"seguro"|"arriscado"} modo
  * @returns {Promise<{modo: string, sucesso: boolean, dano: number|null}|null>}
  */
-export async function alcancar(ator, { modo, dt, rapido = false, desafio = null } = {}) {
+export async function alcancar(ator, { modo, dt, rapido = false, desafio = null, seguido = false } = {}) {
+  // Seguro com a 1ª ação já feita: esta é a 2ª (ou ainda é cedo — mesmo turno).
+  if (modo === "seguro" && !seguido) {
+    const { pendenteDe, abrirJanelaAlcancar } = await import("./alcancar-janela.mjs");
+    if (pendenteDe(ator)) {
+      const { chaveDaRodada } = await import("./poderes.mjs");
+      const etapa = etapaDoAlcancarSeguro(pendenteDe(ator), chaveDaRodada());
+      if (etapa === "aguardando" && !game.user.isGM) {
+        abrirJanelaAlcancar(ator);
+        ui.notifications.warn(game.i18n.localize("OP2.Desafio.AlcancarJanela.Aguarde"));
+        return null;
+      }
+      return segundaAcaoDoAlcancar(ator, { rapido });
+    }
+  }
+
   if (dt === undefined || dt === null) {
     dt = await pedirDtAmbiente();
     if (dt === null) return null;
@@ -189,14 +204,46 @@ export async function alcancar(ator, { modo, dt, rapido = false, desafio = null 
     return publicarAlcancar(ator, modo, [roll], roll.sucesso, desafio);
   }
 
-  // Seguro: duas ações em sequência imediata; a segunda só roda se a primeira passar.
+  // Seguro: duas ações em sequência. A 1ª agora; passou, o personagem fica marcado e
+  // a 2ª vem na próxima ação dele (janela flutuante). `seguido`: as duas de uma vez
+  // (macro e e2e).
   const primeira = await rolarTeste(ator, { chavePericia: "acrobacia", dt, rapido, contexto: `${contexto} (1/2)` });
   if (!primeira) return null;
   if (!primeira.sucesso) return publicarAlcancar(ator, modo, [primeira], false, desafio);
 
-  const segunda = await rolarTeste(ator, { chavePericia: "acrobacia", dt, rapido, contexto: `${contexto} (2/2)` });
+  if (seguido) {
+    const segunda = await rolarTeste(ator, { chavePericia: "acrobacia", dt, rapido, contexto: `${contexto} (2/2)` });
+    if (!segunda) return null;
+    return publicarAlcancar(ator, modo, [primeira, segunda], segunda.sucesso, desafio);
+  }
+
+  const { chaveDaRodada } = await import("./poderes.mjs");
+  await ator.setFlag(SYSTEM_ID, "alcancar", {
+    dt, rodada: chaveDaRodada(), primeira: primeira.total,
+    desafioUuid: desafio?.uuid ?? "", desafioNome: desafio?.name ?? "",
+  });
+  await enviarCard(ator, "alcancar", {
+    titulo: desafio ? `${game.i18n.localize("OP2.Desafio.Alcancar")} — ${desafio.name}` : game.i18n.localize("OP2.Desafio.Alcancar"),
+    modo: game.i18n.localize("OP2.Desafio.Modo.seguro"),
+    parcial: true, atorId: ator.id,
+  }, { whisper: sussurroPara(ator) });
+  // A marca abre a janela (hook de updateActor) para o jogador e para o mestre.
+  return { modo, sucesso: null, parcial: true };
+}
+
+/**
+ * A 2ª ação do Alcançar seguro (na próxima ação do personagem): o 2º teste, com a DT e
+ * o desafio guardados na marca. Passou, alcança; falhou, dano RB e recomeça do zero.
+ */
+export async function segundaAcaoDoAlcancar(ator, { rapido = false } = {}) {
+  const p = ator.getFlag(SYSTEM_ID, "alcancar");
+  if (!p) return null;
+  const desafio = p.desafioUuid ? await fromUuid(p.desafioUuid) : null;
+  const contexto = `${game.i18n.localize("OP2.Desafio.Alcancar")} — ${game.i18n.localize("OP2.Desafio.Modo.seguro")} (2/2)`;
+  const segunda = await rolarTeste(ator, { chavePericia: "acrobacia", dt: p.dt, rapido, contexto });
   if (!segunda) return null;
-  return publicarAlcancar(ator, modo, [primeira, segunda], segunda.sucesso, desafio);
+  await ator.unsetFlag(SYSTEM_ID, "alcancar");
+  return publicarAlcancar(ator, "seguro", [segunda], segunda.sucesso, desafio?.type === "desafio-acesso" ? desafio : null);
 }
 
 /**
@@ -206,6 +253,8 @@ export async function alcancar(ator, { modo, dt, rapido = false, desafio = null 
 export async function alcancarDesafio(ator, desafioUuid, { rapido = false } = {}) {
   const desafio = await carregarDesafio(desafioUuid);
   if (!desafio) return null;
+  // A 1ª ação do seguro já foi feita neste desafio: o botão faz a 2ª, sem perguntar o modo.
+  if (ator.getFlag(SYSTEM_ID, "alcancar")?.desafioUuid === desafio.uuid) return alcancar(ator, { modo: "seguro", rapido });
   await marcarQuemTenta(desafio, ator);
   // Abordagem Alcançar ligada: a DT dela; categoria Alcançar sem a abordagem: a do objeto.
   const dt = desafio.system.abordagens?.alcancar ? (desafio.system.alcancar?.dt ?? 7) : (desafio.system.dtObjeto ?? 7);

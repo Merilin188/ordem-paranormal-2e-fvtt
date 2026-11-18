@@ -7,6 +7,14 @@ import {
   linhaDaTabelaDeHack, tentativasPorRodadaDeDestrancar, tentativasDeDestrancarNaRodada,
 } from "../cena/desafios.mjs";
 
+test("alcançar seguro: 1ª ação, a mesma rodada aguarda, a rodada seguinte é a 2ª", async () => {
+  const { etapaDoAlcancarSeguro } = await import("../cena/desafios.mjs");
+  assert.equal(etapaDoAlcancarSeguro(null, "c1.2"), "primeira");
+  assert.equal(etapaDoAlcancarSeguro({ rodada: "c1.2" }, "c1.2"), "aguardando");
+  assert.equal(etapaDoAlcancarSeguro({ rodada: "c1.2" }, "c1.3"), "segunda");
+  assert.equal(etapaDoAlcancarSeguro({ rodada: "i9.4" }, "i9.5"), "segunda");
+});
+
 test("arrombar acumula RA na pontuação, sem passar da PA (spec §7.2)", () => {
   const desafio = { pontuacaoAtual: 5, pontuacaoAlvo: 10 };
   assert.equal(acumularArrombar(desafio, 3), 8);

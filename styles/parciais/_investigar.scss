@@ -93,6 +93,24 @@
   }
   .op2-regras-inv__abrir { font-size: 0.8rem; color: var(--op2-tinta-fraca); }
 
+  /* ---- Alcançar seguro: a janela entre a 1ª e a 2ª ação ---- */
+  .op2-alcancar-janela .window-content { padding: var(--op2-e3); }
+  .op2-alcancar { display: flex; flex-direction: column; gap: var(--op2-e2); }
+  .op2-alcancar__topo {
+    display: flex; align-items: center; gap: var(--op2-e2);
+    img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid var(--op2-linha-forte); flex: none; }
+    div { display: flex; flex-direction: column; }
+    small { color: var(--op2-tinta-fraca); }
+  }
+  .op2-alcancar__passos {
+    margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 0.3rem;
+    li { padding: 0.3rem 0.5rem; border-left: 3px solid var(--op2-linha-forte); background: rgb(0 0 0 / 20%); font-size: 0.9rem; }
+    .feito { border-left-color: var(--op2-sucesso); color: var(--op2-tinta-fraca); }
+    .agora { border-left-color: var(--op2-critico); font-weight: bold; }
+    .espera { border-left-color: var(--op2-linha-forte); font-style: italic; }
+  }
+  .op2-alcancar__botoes { display: flex; gap: var(--op2-e2); .op2-botao { width: auto; } .op2-alcancar__segunda { flex: 1; } }
+
   /* ---- Ações: nenhuma cena em jogo ---- */
   .op2-acoes__vazio + .op2-ajuda { text-align: center; }
   .op2-acoes__vazio { margin: var(--op2-e4) 0 var(--op2-e1); text-align: center; font-family: var(--op2-fonte-display); font-size: 1.1rem; letter-spacing: 0.04em; text-transform: uppercase; }

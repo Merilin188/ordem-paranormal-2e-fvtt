@@ -56,6 +56,7 @@ const TEMPLATES = [
   `${RAIZ}/chat/partials/info-revelada.hbs`,
   `${RAIZ}/cena/investigar-mestre.hbs`,
   `${RAIZ}/cena/regras-investigacao.hbs`,
+  `${RAIZ}/cena/alcancar.hbs`,
   `${RAIZ}/actor/partials/acoes-desafio.hbs`,
   `${RAIZ}/aventura/aventuras.hbs`,
   `${RAIZ}/ui/boas-vindas.hbs`,

@@ -54,6 +54,19 @@ export function danoDeAlcancar(modo, resultado) {
 }
 
 /**
+ * ALCANÇAR seguro em duas ações em sequência (livro): sem marca, é a 1ª; com a marca
+ * da rodada em que a 1ª foi feita, ainda é a mesma ação ("aguardando"); em outra
+ * rodada (o próximo turno, a próxima rodada da investigação), é a 2ª. Pura.
+ * @param {{rodada: string}|null} pendente  a marca da 1ª ação
+ * @param {string} rodadaAtual  `chaveDaRodada()`
+ * @returns {"primeira"|"aguardando"|"segunda"}
+ */
+export function etapaDoAlcancarSeguro(pendente, rodadaAtual) {
+  if (!pendente) return "primeira";
+  return pendente.rodada === rodadaAtual ? "aguardando" : "segunda";
+}
+
+/**
  * DESTRANCAR (spec §7.1): Mastermind numérico — cada posição do palpite é
  * comparada contra a mesma posição da senha, não contra o conjunto inteiro.
  * @param {number[]} senha oculta, gerada pelo mestre

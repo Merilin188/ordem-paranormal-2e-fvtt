@@ -4,7 +4,12 @@
     <span class="op2-card__dt">{{modo}}</span>
   </header>
 
-  {{#if sucesso}}
+  {{#if parcial}}
+    {{!-- Seguro, 1ª ação: passou; a 2ª vem na próxima ação (janela flutuante). --}}
+    <p class="op2-card__desfecho op2-card__desfecho--sucesso">
+      <i class="fa-solid fa-person-walking" aria-hidden="true"></i> {{localize "OP2.Desafio.AlcancarJanela.Parcial"}}
+    </p>
+  {{else if sucesso}}
     <p class="op2-card__desfecho op2-card__desfecho--sucesso">
       <i class="fa-solid fa-check" aria-hidden="true"></i> {{localize "OP2.Desafio.Alcancou"}}
     </p>

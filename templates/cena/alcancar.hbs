@@ -1,0 +1,24 @@
+{{!-- Alcançar seguro: a 1ª ação passou; a 2ª é na próxima ação deste personagem. --}}
+<div class="op2-alcancar">
+  <header class="op2-alcancar__topo">
+    {{#if img}}<img src="{{img}}" alt="">{{/if}}
+    <div>
+      <strong>{{nome}}</strong>
+      {{#if desafio}}<small>{{desafio}}</small>{{/if}}
+    </div>
+  </header>
+  <ol class="op2-alcancar__passos">
+    <li class="feito"><i class="fa-solid fa-check" aria-hidden="true"></i> {{localize "OP2.Desafio.AlcancarJanela.Passo1" dt=dt total=primeira}}</li>
+    <li class="{{#if aguardando}}espera{{else}}agora{{/if}}"><i class="fa-solid {{#if aguardando}}fa-hourglass-half{{else}}fa-person-walking{{/if}}" aria-hidden="true"></i>
+      {{#if aguardando}}{{localize "OP2.Desafio.AlcancarJanela.Passo2Espera"}}{{else}}{{localize "OP2.Desafio.AlcancarJanela.Passo2Agora" dt=dt}}{{/if}}</li>
+  </ol>
+  <p class="op2-ajuda">{{localize "OP2.Desafio.AlcancarJanela.Regra"}}</p>
+  {{#if podeAgir}}
+    <div class="op2-alcancar__botoes">
+      <button type="button" class="op2-botao op2-alcancar__segunda" data-action="segunda" {{#if aguardando}}{{#unless ehGM}}disabled{{/unless}}{{/if}}
+        {{#if aguardando}}data-tooltip="{{#if ehGM}}{{localize 'OP2.Desafio.AlcancarJanela.AdiantarDica'}}{{else}}{{localize 'OP2.Desafio.AlcancarJanela.Aguarde'}}{{/if}}"{{/if}}>
+        <i class="fa-solid fa-dice" aria-hidden="true"></i> {{localize "OP2.Desafio.AlcancarJanela.Segunda" dt=dt}}</button>
+      <button type="button" class="op2-botao op2-botao--fantasma" data-action="desistir">{{localize "OP2.Desafio.AlcancarJanela.Desistir"}}</button>
+    </div>
+  {{/if}}
+</div>

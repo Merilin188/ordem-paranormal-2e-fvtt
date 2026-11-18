@@ -1949,7 +1949,7 @@ const relato = await page.evaluate(async (boasVindas) => {
 
     // ALCANÇAR: DT 0 sempre passa nas duas ações do modo seguro; DT 999 nunca
     // alcança no arriscado e nunca aplica dano sozinho — só oferece o botão.
-    const seguroOk = await comDadosNoMaximo(() => game.op2.alcancar(ator, { modo: "seguro", dt: 0, rapido: true }));
+    const seguroOk = await comDadosNoMaximo(() => game.op2.alcancar(ator, { modo: "seguro", dt: 0, rapido: true, seguido: true }));
     ok("alcançar seguro com DT 0 passa nas duas ações em sequência", seguroOk?.sucesso === true);
 
     const arriscadoFalha = await game.op2.alcancar(ator, { modo: "arriscado", dt: 999, rapido: true });

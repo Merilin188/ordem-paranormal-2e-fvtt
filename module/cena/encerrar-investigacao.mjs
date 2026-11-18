@@ -35,6 +35,8 @@ export async function encerrarCena({ atores, avisar = true, investigacao = inves
     // conhecimento da mesa, não estado do sistema.
     "system.estado.poisInvestigados": [],
     "system.estado.infosReveladas": [],
+    // Alcançar seguro pela metade (1ª ação feita): acaba com a cena.
+    "flags.ordem-paranormal-2e.-=alcancar": null,
   };
 
   const atualizacoes = alvos.map((ator) => ({ _id: ator.id, ...zerado }));

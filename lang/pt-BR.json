@@ -775,7 +775,21 @@
       "FadigaPergunta": "Fim da rodada. Para continuar sustentando ({nome}), teste Atletismo:",
       "FadigaFalha": "Falhou: solta o que sustentava. Soltar agora não custa teste.",
       "FadigaContinuar": "Continuar sustentando (rolar {de} + {atributo})",
-      "FadigaAntes": "Antes da fadiga: {de}"
+      "FadigaAntes": "Antes da fadiga: {de}",
+      "AlcancarJanela": {
+        "Titulo": "Alcançar (seguro)",
+        "Parcial": "1ª ação: passou. A 2ª vem na próxima ação deste personagem.",
+        "Passo1": "1ª ação: passou (Acrobacia DT {dt} → {total}).",
+        "Passo2Espera": "2ª ação: na próxima ação deste personagem (próximo turno ou próxima rodada).",
+        "Passo2Agora": "2ª ação: agora — teste de Acrobacia (DT {dt}).",
+        "Regra": "Passando nos dois, alcança. Falhando, dano igual à RB e recomeça do zero.",
+        "Segunda": "Fazer a 2ª ação (DT {dt})",
+        "Aguarde": "A 2ª ação do Alcançar é na próxima ação deste personagem.",
+        "AdiantarDica": "Mestre: ainda é a mesma rodada. Clicar adianta a 2ª ação mesmo assim.",
+        "Desistir": "Desistir",
+        "DesistirPergunta": "Desistir do Alcançar? A 1ª ação se perde e, numa próxima tentativa, começa do zero.",
+        "Desistiu": "{nome} desistiu de alcançar."
+      }
     },
     "Ferramenta": {
       "Rotulo": "Ferramenta",
