@@ -76,6 +76,8 @@ async function atacarSemLimpar(ator, { alvoUuid, armado, rapido = false } = {}) 
   await publicarAtaque(ator, alvo, roll, {
     armado: Boolean(arma), defesa, distancia, nome,
     dano: arma ? { base: "ra", bonus: arma.system.danoBonus ?? 0 } : { base: "rb", bonus: 0 },
+    // Empate com a defesa: o ataque se repete com a mesma composição (Finta e Mira inclusas).
+    repetir: { tipo: "personagem", armaId: arma?.id ?? null, pericia, passos, dadosExtras, notas },
   });
   return roll;
 }
@@ -86,14 +88,14 @@ async function atacarSemLimpar(ator, { alvoUuid, armado, rapido = false } = {}) 
  * defende só tem Acrobacia.
  * `rolar({ dt })` rola e publica o teste; devolve o roll.
  */
-export async function atacarComCriatura(ator, { rolar, dano = null, distancia = false, nome = "" }) {
+export async function atacarComCriatura(ator, { rolar, dano = null, distancia = false, nome = "", ataqueId = null }) {
   try {
     const alvo = await escolherAlvo(ator);
     if (!alvo) return null;
     const defesa = await perguntarDefesa(ator, alvo, { distancia, nome });
     const roll = await rolar({ dt: defesa ? null : 7 });
     if (!roll) return null;
-    await publicarAtaque(ator, alvo, roll, { armado: true, dano, distancia, nome, defesa });
+    await publicarAtaque(ator, alvo, roll, { armado: true, dano, distancia, nome, defesa, repetir: ataqueId ? { tipo: "criatura", ataqueId } : null });
     return roll;
   } finally {
     limparAlvos();
@@ -172,7 +174,7 @@ async function responderDefesa({ atacanteId, alvoUuid, distancia, nome }) {
 
 /* ---------------- card do ataque ---------------- */
 
-async function publicarAtaque(ator, alvo, roll, { armado, dano = null, distancia = false, nome = "", defesa = null }) {
+async function publicarAtaque(ator, alvo, roll, { armado, dano = null, distancia = false, nome = "", defesa = null, repetir = null, desempate = 0 }) {
   const acertou = defesa ? null : acertaContraDT(roll);
   const esquiva = defesa ? (await import("./poderes.mjs")).poderDe(alvo, "esquiva") : null;
   // Os dados do card ficam na flag: a Guardiã e o dado do crítico re-renderizam o card.
@@ -194,6 +196,8 @@ async function publicarAtaque(ator, alvo, roll, { armado, dano = null, distancia
     defesa: defesa ? { ...defesa, rotulo: rotuloDaDefesa(defesa, esquiva) } : null,
     acertou,
     alvoUuid: alvo.uuid,
+    repetir,
+    desempate,
   };
   Object.assign(dados, await calcularDanoDoAtaque(dados, roll));
   const conteudo = await renderizar(`systems/${SYSTEM_ID}/templates/chat/ataque.hbs`, dados);
@@ -241,7 +245,7 @@ export async function atualizarAtaquesDoTeste(roll) {
  * Teste oposto do alvo que escolheu se defender: Acrobacia (ou Luta) com +d6 — a
  * única exceção aditiva do playtest (spec §8.1). Vencendo, não sofre nem causa dano.
  */
-export async function defender(defensor, { atacanteId, totalAtaque, raAtaque, rbAtaque, pericia = "acrobacia", danoAtacante = null, rapido = false }) {
+export async function defender(defensor, { atacanteId, totalAtaque, raAtaque, rbAtaque, pericia = "acrobacia", danoAtacante = null, rapido = false, mensagemAtaqueId = null }) {
   const atacante = game.actors.get(atacanteId);
   if (!atacante) return null;
 
@@ -272,12 +276,21 @@ export async function defender(defensor, { atacanteId, totalAtaque, raAtaque, rb
   if (escudo && alvo === "defensor" && roll.total >= 7) danoFinal = Math.max(0, dano - roll.rb);
 
   const quemSofre = alvo === "defensor" ? defensor : null;
+  // Empate: os dois repetem os testes até haver vencedor (v1.2, Testes Opostos).
+  const ataqueOriginal = game.messages.get(mensagemAtaqueId)?.getFlag(SYSTEM_ID, "ataque");
+  const empate = vencedor === "empate";
   const conteudo = await renderizar(`systems/${SYSTEM_ID}/templates/chat/ataque-resultado.hbs`, {
     titulo: game.i18n.localize("OP2.Combate.Resultado"),
     totalAtaque,
     totalDefesa: roll.total,
     esquiva: true,
-    texto: textoDoDesfecho({ vencedor, atacante, defensor, dano: danoFinal }),
+    texto: empate
+      ? game.i18n.format("OP2.Combate.EmpateRepetir", { atacante: atacante.name, defensor: defensor.name, placar: `${totalAtaque} × ${roll.total}` })
+      : textoDoDesfecho({ vencedor, atacante, defensor, dano: danoFinal }),
+    repetir: empate && ataqueOriginal?.repetir ? {
+      atacanteId: atacante.id, atacanteUuid: atacante.uuid, mensagemAtaqueId,
+      rotulo: game.i18n.format("OP2.Combate.RepetirAtaque", { atacante: atacante.name }),
+    } : null,
     danosMutuos: [],
     temDano: danoFinal > 0 && Boolean(quemSofre),
     dano: danoFinal,
@@ -312,6 +325,7 @@ export async function rolarDefesaDoCard(defensor, dataset) {
       rbAtaque: Number(dataset.rb),
       pericia: dataset.pericia || "acrobacia",
       danoAtacante: dataset.danoBase ? { base: dataset.danoBase, bonus: Number(dataset.danoBonus) || 0 } : null,
+      mensagemAtaqueId: id,
     });
     if (r) {
       const { marcarAtaqueRespondido } = await import("./guardia.mjs");
@@ -340,6 +354,41 @@ export function registrarDefesa() {
     await game.messages.get(id)?.update({ content, [`flags.${SYSTEM_ID}.ataque`]: ataque });
   });
   Hooks.on("createChatMessage", abrirDefesaAoNascer);
+}
+
+/**
+ * Desempate do Defender-se: quem atacou rola o mesmo ataque de novo, sem gastar outra
+ * ação, e o card nasce já com a defesa escolhida — o teste do alvo abre sozinho.
+ */
+export async function repetirAtaqueEmpatado(atacante, dataset) {
+  if (!game.user.isGM && !atacante.isOwner) return void ui.notifications.warn(game.i18n.localize("OP2.Aviso.SemPermissao"));
+  const resultado = game.messages.get(dataset.mensagemId);
+  if (resultado?.getFlag(SYSTEM_ID, "respondido")) return void ui.notifications.warn(PD("JaRolou"));
+  const a = game.messages.get(dataset.mensagemAtaqueId)?.getFlag(SYSTEM_ID, "ataque");
+  const alvo = a?.alvoUuid ? await fromUuid(a.alvoUuid) : game.actors.get(a?.alvoId);
+  if (!a?.repetir || !alvo) return null;
+  const { marcarAtaqueRespondido } = await import("./guardia.mjs");
+  await marcarAtaqueRespondido(dataset.mensagemId);
+  const r = a.repetir;
+  let roll;
+  if (r.tipo === "criatura") {
+    const { rolarAtaqueDeCriatura } = await import("../sheets/actor-criatura-sheet.mjs");
+    roll = await rolarAtaqueDeCriatura(atacante, r.ataqueId, { dt: null });
+  } else {
+    roll = await rolarTeste(atacante, {
+      chavePericia: r.pericia, oposto: true, arma: r.armaId ? atacante.items.get(r.armaId) ?? null : null,
+      passos: r.passos ?? null, dadosExtras: r.dadosExtras ?? [], notas: r.notas ?? [],
+      contexto: game.i18n.format("OP2.Combate.AtaqueDesempate", { alvo: alvo.name }),
+    });
+  }
+  if (!roll) return null;
+  const defesa = a.defesa ? { modo: a.defesa.modo, pericia: a.defesa.pericia } : null;
+  await publicarAtaque(atacante, alvo, roll, {
+    armado: a.armado, distancia: a.distancia, nome: a.titulo, defesa,
+    dano: a.danoBase ? { base: a.danoBase, bonus: a.danoBonus ?? 0 } : null,
+    repetir: r, desempate: (a.desempate ?? 0) + 1,
+  });
+  return roll;
 }
 
 function textoDoDesfecho({ vencedor, atacante, defensor, dano }) {

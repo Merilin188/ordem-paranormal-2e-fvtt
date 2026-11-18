@@ -19,6 +19,7 @@ export const GUIA = [
     ["Jogar-se no chão (livre)", "A partir da próxima rodada, recebe os benefícios e penalidades de estar caído até se levantar."],
     ["Mirar", "Mire em um alvo visível dentro do alcance da arma. Na próxima rodada, +1d6 nos ataques à distância contra ele."],
     ["Preparar", "Declare uma ação e o evento que a dispara. Ela acontece como reação, antes do evento se resolver. Se o evento não ocorrer até o fim da rodada, perde a ação."],
+    ["Primeiros Socorros", "Mente + Medicina contra DT 7 num personagem moribundo (você mesmo ou um aliado); +3 na DT a cada uso de primeiros socorros nele na cena. Se passar, ele deixa de estar moribundo, recupera 1 PV e acorda. Sem maleta de medicamentos, duas reduções de passo; em si mesmo, outras duas."],
     ["Sacar ou guardar item", "Saca ou guarda um item. Como ação livre, sofre uma redução de passo em todos os testes da rodada."],
     ["Usar habilidade ou item", "Usa uma habilidade ou item que precise ser ativado. Veja o texto dele."],
   ] },
@@ -41,14 +42,16 @@ export const GUIA = [
     ["Caído", "Redução de passo em testes físicos. Corpo a corpo contra caído: aumento de passo. À distância contra caído: DT +3."],
     ["Cobertura leve", "Atrás de árvore, carro etc.: DT para atingir +3 (10 em alcance curto, 13 em longo)."],
     ["Cobertura total", "Totalmente protegido: não pode ser atacado."],
+    ["Movimentação e zonas", "Área pequena (a Caverna de Cruachan): todos estão em alcance curto e o ataque corpo a corpo já inclui chegar até o alvo. Mapa grande: dividido em zonas; mover-se na mesma zona não custa ação, mudar de zona custa uma ação por zona. Corpo a corpo só na mesma zona; outras zonas estão sempre em alcance longo."],
     ["Ocultação leve", "Penumbra, neblina, folhagem: inimigos sofrem uma redução de passo nos ataques contra você."],
     ["Ocultação total", "Escuridão total: duas reduções de passo nos ataques contra você. Se os dois tiverem ocultação, ambos sofrem as reduções."],
+    ["Sobrecarregado", "Precisa gastar uma ação para se mover dentro da mesma zona e não consegue mudar de zona."],
     ["Vantagem tática", "Posição favorável (alvo caído, terreno elevado…): um aumento de passo no ataque."],
   ] },
   { secao: "Defesa e medo", itens: [
     ["Pontos de armadura", "Vêm dos itens. Ao sofrer dano, gaste 1 ponto (ação livre, só 1 por vez) para reduzir esse dano em 10. Gastos não voltam neste playtest."],
     ["Levantar-se", "Caído levanta gastando uma ação, ou como ação livre sofrendo uma redução de passo em todos os testes da rodada."],
-    ["Dado de pavor", "Começa em d6 (receber de novo: sobe um passo). Rola junto em todo teste, não soma e anula os resultados menores que ele; anulou todos, falha crítica. Tirou 1: o pavor termina. Antes do teste: 1 PD reduz um passo; 5 PD o convertem em dado bônus."],
+    ["Dado de pavor", "Começa em d6 (receber de novo: sobe um passo). Rola junto em todo teste, não soma e anula os resultados menores que ele; anulou todos, falha crítica. Os anulados saem só da soma: continuam valendo para RA e RB. Tirou 1: o pavor termina. Antes do teste: 1 PD reduz um passo; 5 PD o convertem em dado bônus."],
   ] },
 ];
 

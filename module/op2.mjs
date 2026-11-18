@@ -12,6 +12,7 @@ import { registrarEfeitosDeCena } from "./ui/efeitos-cena.mjs";
 import { registrarDados3D } from "./ui/dados-3d.mjs";
 import { registrarGuardia } from "./cena/guardia.mjs";
 import { registrarAcoesCombate } from "./cena/acoes-combate-app.mjs";
+import { registrarPrimeirosSocorros } from "./cena/primeiros-socorros.mjs";
 import { registrarDefesa } from "./cena/acoes-combate.mjs";
 import { registrarReducoes } from "./cena/reducoes.mjs";
 import { registrarExcluirDesafio } from "./cena/excluir-desafio.mjs";
@@ -166,6 +167,7 @@ Hooks.once("init", () => {
   registrarDados3D();
   registrarGuardia();
   registrarAcoesCombate();
+  void registrarPrimeirosSocorros();
   registrarDefesa();
   registrarReducoes();
 

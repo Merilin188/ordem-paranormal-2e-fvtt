@@ -267,7 +267,8 @@ export async function solicitarTeste({ atorId = null, chave = "atletismo", motiv
 function vencedorOposto(lados) {
   const [a, b] = lados.map((l) => l.resultado);
   if (!a || !b) return null;
-  // Crítico vence, falha crítica perde; depois maior total; empate fica empatado.
+  // Crítico vence, falha crítica perde; depois maior total. Empate (-1): os dois
+  // repetem os testes até haver vencedor (v1.2, Testes Opostos).
   const peso = (r) => (r.desfecho === "critico" ? 1 : r.desfecho === "falha-critica" ? -1 : 0);
   if (peso(a) !== peso(b)) return peso(a) > peso(b) ? 0 : 1;
   if (a.total !== b.total) return a.total > b.total ? 0 : 1;
@@ -294,13 +295,16 @@ export function htmlOposto(dados) {
       <span class="op2-op__comp">${esc(l.composicao ?? "")}</span>${corpo}</div>`;
   };
   let veredito = "";
-  if (vencedor === -1) veredito = L("Empate");
+  if (vencedor === -1) veredito = F("EmpateRepetir", { placar: `${dados.lados[0].resultado.total} × ${dados.lados[1].resultado.total}` });
   else if (vencedor !== null) veredito = F("Venceu", { nome: esc(dados.lados[vencedor].nome) });
   return `<div class="op2-card op2-op">
     <header class="op2-op__cab"><i class="fa-solid fa-swords"></i> ${L("TesteOposto")}</header>
     ${dados.motivo ? `<p class="op2-req__motivo">${esc(dados.motivo)}</p>` : ""}
     <div class="op2-op__lados">${lado(dados.lados[0], 0)}<span class="op2-op__vs">VS</span>${lado(dados.lados[1], 1)}</div>
     ${veredito ? `<p class="op2-op__veredito">${veredito}</p>` : ""}
+    ${dados.empates?.length ? `<p class="op2-dica">${esc(F("EmpatesAnteriores", { placares: dados.empates.join(", ") }))}</p>` : ""}
+    ${vencedor === -1 && !dados.resolvido ? `<div class="op2-op__resolver" data-op2-gm>
+      <button type="button" class="op2-botao" data-op2-acao="oposto-repetir"><i class="fa-solid fa-rotate"></i> ${L("OpostoRepetir")}</button></div>` : ""}
     ${dados.empatePerseguicao && vencedor !== null && vencedor >= 0 && !dados.resolvido ? `<div class="op2-op__resolver" data-op2-gm>
       <button type="button" class="op2-botao op2-botao--perigo" data-op2-pers-resolver="${esc(dados.lados[vencedor].atorId)}">
         <i class="fa-solid fa-skull"></i> ${L("OpostoResolver")}</button></div>` : ""}
@@ -431,6 +435,16 @@ async function rolarOposto(ator, dataset) {
   await comoMestre("ferrRegistrarOposto", { mensagemId: mensagem.id, indice, resultado: resumo(roll) });
 }
 
+/** Empate: guarda o placar e limpa os dois lados para rolarem de novo. */
+async function repetirOposto({ mensagemId }) {
+  const mensagem = game.messages.get(mensagemId);
+  const dados = foundry.utils.deepClone(mensagem?.getFlag(SYSTEM_ID, "oposto"));
+  if (!dados || vencedorOposto(dados.lados) !== -1) return;
+  dados.empates = [...(dados.empates ?? []), `${dados.lados[0].resultado.total} × ${dados.lados[1].resultado.total}`];
+  for (const lado of dados.lados) lado.resultado = null;
+  await mensagem.update({ content: htmlOposto(dados), [`flags.${SYSTEM_ID}.oposto`]: dados });
+}
+
 async function registrarSolicitacao({ mensagemId, html }) {
   const mensagem = game.messages.get(mensagemId);
   const dados = foundry.utils.deepClone(mensagem?.getFlag(SYSTEM_ID, "solicitacao"));
@@ -452,6 +466,8 @@ export function registrarTestesDoMestre() {
   registrarAcaoDeChat("ferr-oposto", rolarOposto);
   registrarAcaoDeMestre("ferrRegistrarSolicitacao", registrarSolicitacao);
   registrarAcaoDeMestre("ferrRegistrarOposto", registrarOposto);
+  registrarAcaoDeMestre("ferrRepetirOposto", repetirOposto);
+  registrarAcaoDeChat("oposto-repetir", (_ator, dataset) => comoMestre("ferrRepetirOposto", { mensagemId: dataset.mensagemId }), { semAtor: true });
 }
 
 /** Escolhe uma perícia/atributo do ator (Mentoria usa a perícia com que ajudou). */

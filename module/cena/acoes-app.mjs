@@ -10,7 +10,7 @@
  * chamava — só o dono da ação mudou de lugar.
  */
 import { excluirDesafio } from "./excluir-desafio.mjs";
-import { FERRAMENTAS_POI } from "../config.mjs";
+import { FERRAMENTAS_POI, SYSTEM_ID } from "../config.mjs";
 import {
   investigacaoAtiva, investigacoesDasAcoes, definirInvestigacaoAtiva, pontoDoDesafio,
 } from "./investigacao-ativa.mjs";
@@ -71,6 +71,9 @@ function contextoDoDesafio(desafio, investigacao, indice, ator = null) {
     genericoResolvido: desafio.system.generico.resolvido,
     equilibrarResolvido: desafio.system.equilibrar.resolvido,
     alcancarResolvido: desafio.system.alcancar?.resolvido ?? false,
+    escalarResolvido: desafio.system.escalar?.resolvido ?? false,
+    escalarMeta: desafio.system.escalar?.meta ?? 10,
+    escalarPontos: (() => { const m = ator?.getFlag?.(SYSTEM_ID, "escalada"); return m?.desafioUuid === desafio.uuid ? m.pontos : 0; })(),
     // Quem segura este obstáculo agora, e quanto o próximo teste vai descer.
     sustentadores: game.actors.filter((a) => a.type === "personagem" && a.system.estado?.sustentando?.ativo
       && a.system.estado.sustentando.desafioUuid === desafio.uuid)
@@ -98,12 +101,13 @@ const ABORDAGENS_DE_ACESSO = [
   ["arrombar", "arrombar", "fa-hammer"], ["destrancar", "destrancar", "fa-key"],
   ["hackTecnico", "hackTecnico", "fa-laptop-code"], ["hackSocial", "hackSocial", "fa-comments"],
   ["equilibrar", "equilibrarDesafio", "fa-person-falling"], ["alcancar", "alcancarDesafio", "fa-person-walking"],
+  ["escalar", "escalarDesafio", "fa-mountain"],
   ["sustentar", "sustentarDesafio", "fa-weight-hanging"], ["generico", "desafioGenerico", "fa-circle-question"],
 ];
 const ROTULO_ABORDAGEM = {
   arrombar: "OP2.Desafio.Arrombar", destrancar: "OP2.Desafio.Destrancar", hackTecnico: "OP2.Desafio.HackTecnico",
   hackSocial: "OP2.Desafio.HackSocial", equilibrar: "OP2.Desafio.Equilibrar", alcancar: "OP2.Desafio.Alcancar",
-  sustentar: "OP2.Desafio.Sustentar",
+  sustentar: "OP2.Desafio.Sustentar", escalar: "OP2.Desafio.Escalar",
 };
 
 /** A última aba escolhida; sem registro, os pontos de interesse. */
@@ -147,6 +151,7 @@ export class AcoesInvestigacaoApp extends HandlebarsApplicationMixin(Application
       equilibrarDesafio: fechaDepois(AcoesInvestigacaoApp.#equilibrarDesafio),
       resolverAcesso: AcoesInvestigacaoApp.#resolverAcesso,
       alcancarDesafio: fechaDepois(AcoesInvestigacaoApp.#alcancarDesafio),
+      escalarDesafio: fechaDepois(AcoesInvestigacaoApp.#escalarDesafio),
       sustentar: fechaDepois(AcoesInvestigacaoApp.#sustentar),
       sustentarDesafio: fechaDepois(AcoesInvestigacaoApp.#sustentarDesafio),
       excluirDesafio: AcoesInvestigacaoApp.#excluirDesafio,
@@ -485,6 +490,12 @@ export class AcoesInvestigacaoApp extends HandlebarsApplicationMixin(Application
   static async #alcancarDesafio(_evento, alvo) {
     const { alcancarDesafio } = await import("./acoes-desafio.mjs");
     return alcancarDesafio(this.ator, alvo.dataset.desafioUuid);
+  }
+
+  /** Escalar um obstáculo: rápida ou cautelosa, acumulando até a meta. */
+  static async #escalarDesafio(_evento, alvo) {
+    const { escalarDesafio } = await import("./acoes-desafio.mjs");
+    return escalarDesafio(this.ator, alvo.dataset.desafioUuid);
   }
 
   /** Equilibrar-se num desafio: a travessia conta os sucessos dele. */

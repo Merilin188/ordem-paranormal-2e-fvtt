@@ -5,6 +5,28 @@ Versões seguem [SemVer](https://semver.org/lang/pt-BR/).
 
 ## [Não publicado]
 
+- **Regras da v1.2 do PDF** (Contos da Vigília, missões 1 e 2):
+  - **Crítico com 4 dados:** o crítico sai dos três que ficam. A seleção padrão descarta
+    o menor, a menos que ele seja um dos dados do crítico (8, 7, 6, 6 → 8, 6, 6). O
+    setting "Crítico considera" saiu.
+  - **Pavor "Apenas em Testes":** os dados anulados saem só da soma e continuam valendo
+    para RA e RB (dano, avanço, Alcançar). O card diz isso.
+  - **Empate em teste oposto:** repete até haver vencedor. Teste oposto do mestre com
+    "Repetir os testes"; manobras e Defender-se com botão de desempate para quem agiu.
+  - **Moribundo faz teste de lesão**, com a DT na mesma escada da queda a 0 PV.
+  - **Dano não letal:** o card do teste de lesão tem "Com dano não letal (+d6)", e a
+    tabela de Lesões rola 2d20 e fica com o melhor.
+  - **Primeiros Socorros** em Ações de combate → Ações gerais: Mente + Medicina DT 7
+    (+3 por uso no personagem na cena), −2 passos sem maleta e −2 em si mesmo. Passou:
+    sai de moribundo, recupera 1 PV e acorda.
+  - **Desafio Escalar:** rápida (DT 8, soma a RA) ou cautelosa (DT 6, soma a RB) até a
+    meta; falhou, cai com dano igual ao acumulado.
+  - **Alcançar com perícia configurável** no desafio (a Plataforma Elevada é Atletismo).
+  - **Guia de combate:** movimentação e zonas, Sobrecarregado, Primeiros Socorros e o
+    pavor "Apenas em Testes".
+- **Interagir:** o card do mestre lista o que o ponto guarda (linhas ocultas com itens)
+  com o botão de entregar cada item.
+
 - **Alcançar seguro em duas ações**, como no livro: a 1ª passou, o personagem fica
   marcado e a 2ª vem na próxima ação dele (próximo turno no combate, próxima rodada na
   investigação). Uma janela flutuante, para o jogador e o mestre, aparece depois da 1ª

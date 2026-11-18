@@ -16,6 +16,13 @@
       {{/each}}
     </div>
   {{/if}}
+  {{#if repetir}}
+    <div class="op2-card__acoes">
+      <button type="button" class="op2-botao op2-botao--pequeno" data-op2-acao="repetir-ataque-empate"
+        data-ator-id="{{repetir.atacanteId}}" data-ator-uuid="{{repetir.atacanteUuid}}" data-op2-so-dono="{{repetir.atacanteId}}"
+        data-mensagem-ataque-id="{{repetir.mensagemAtaqueId}}"><i class="fa-solid fa-rotate"></i> {{repetir.rotulo}}</button>
+    </div>
+  {{/if}}
   {{#if temDano}}
     <div class="op2-card__acoes">
       <button type="button" class="op2-botao op2-botao--pequeno op2-botao--perigo"

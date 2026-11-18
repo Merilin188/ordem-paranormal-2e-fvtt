@@ -3,7 +3,6 @@ import { NpcSheet } from "./actor-npc-sheet.mjs";
 import { dadosDoAtaque, danoDoAtaque } from "../data/actor-criatura.mjs";
 import { OP2Roll } from "../dice/op2-roll.mjs";
 import { mostrarDados3D, enviarParaChat } from "../dice/teste.mjs";
-import { lerConfig } from "../settings/register.mjs";
 import { iconeDado } from "../ui/dice-icons.mjs";
 import { enriquecerHtml } from "../ui/enriquecer.mjs";
 import { mostrarHabilidadeNoChat, opcoesDeCondicao } from "../cena/habilidade-criatura.mjs";
@@ -87,39 +86,8 @@ export class CriaturaSheet extends NpcSheet {
       nome: ataque.nome,
       dano,
       distancia: ataque.alcance === "distancia",
-      rolar: async ({ dt = null } = {}) => {
-        // Atrapalhar (e outras reduções da rodada): desce o MAIOR dado do ataque.
-        const { reducaoDoTeste } = await import("../cena/reducoes.mjs");
-        const reducao = await reducaoDoTeste(ator);
-        const usados = [...dados];
-        const ajustes = [];
-        if (reducao.passos) {
-          const { stepDie, faces } = await import("../dice/escada.mjs");
-          const i = usados.reduce((m, d, j) => (faces(d) > faces(usados[m]) ? j : m), 0);
-          const antes = usados[i];
-          usados[i] = stepDie(antes, -reducao.passos);
-          for (const n of reducao.notas) {
-            ajustes.push({ tipo: "texto", texto: game.i18n.format("OP2.Motivo.ReducaoAtaque", { passos: n.passos, motivo: n.motivo, de: antes, para: usados[i] }) });
-          }
-        }
-        const roll = OP2Roll.paraComponentes(
-          usados.map((dado, i) => ({ chave: `ataque.${i}`, rotulo: ataque.nome, tipo: "extra", dado })),
-          {
-            dt,
-            escopoCritico: lerConfig("escopoCritico"),
-            rotulo: `${ataque.nome}${ataque.nota ? ` (${ataque.nota})` : ""}`,
-            atorId: ator.id,
-            chavePericia: "luta",
-            semArma: true,
-          },
-        );
-        if (ajustes.length) roll.options.ajustes = ajustes;
-        await roll.evaluate();
-        await mostrarDados3D(roll);
-        if (roll.precisaSelecao) roll.aplicarSelecao(roll.selecaoSugerida());
-        await enviarParaChat(roll, ator, { pularDados3D: true });
-        return roll;
-      },
+      ataqueId: alvo.dataset.id,
+      rolar: ({ dt = null } = {}) => rolarAtaqueDeCriatura(ator, alvo.dataset.id, { dt }),
     });
   }
 
@@ -200,4 +168,45 @@ function escolherArquivo(aceitar) {
     campo.addEventListener("cancel", () => resolver(null), { once: true });
     campo.click();
   });
+}
+
+/**
+ * Rola o ataque do bloco da criatura ("2d10", "d8+d6"), com as reduções da rodada no
+ * maior dado. Usado pelo botão da ficha e pelo desempate do Defender-se.
+ */
+export async function rolarAtaqueDeCriatura(ator, ataqueId, { dt = null } = {}) {
+  const ataque = ator.system.ataques?.[ataqueId];
+  if (!ataque) return null;
+  const dados = dadosDoAtaque(ataque.dados);
+  if (!dados.length) return null;
+  // Atrapalhar (e outras reduções da rodada): desce o MAIOR dado do ataque.
+  const { reducaoDoTeste } = await import("../cena/reducoes.mjs");
+  const reducao = await reducaoDoTeste(ator);
+  const usados = [...dados];
+  const ajustes = [];
+  if (reducao.passos) {
+    const { stepDie, faces } = await import("../dice/escada.mjs");
+    const i = usados.reduce((m, d, j) => (faces(d) > faces(usados[m]) ? j : m), 0);
+    const antes = usados[i];
+    usados[i] = stepDie(antes, -reducao.passos);
+    for (const n of reducao.notas) {
+      ajustes.push({ tipo: "texto", texto: game.i18n.format("OP2.Motivo.ReducaoAtaque", { passos: n.passos, motivo: n.motivo, de: antes, para: usados[i] }) });
+    }
+  }
+  const roll = OP2Roll.paraComponentes(
+    usados.map((dado, i) => ({ chave: `ataque.${i}`, rotulo: ataque.nome, tipo: "extra", dado })),
+    {
+      dt,
+      rotulo: `${ataque.nome}${ataque.nota ? ` (${ataque.nota})` : ""}`,
+      atorId: ator.id,
+      chavePericia: "luta",
+      semArma: true,
+    },
+  );
+  if (ajustes.length) roll.options.ajustes = ajustes;
+  await roll.evaluate();
+  await mostrarDados3D(roll);
+  if (roll.precisaSelecao) roll.aplicarSelecao(roll.selecaoSugerida());
+  await enviarParaChat(roll, ator, { pularDados3D: true });
+  return roll;
 }

@@ -168,7 +168,8 @@ export class PersonagemData extends foundry.abstract.TypeDataModel {
     this.modificadores = modificadoresDasMarcas(this.lesoes, this.traumas);
     if (this.modificadores.pvMax) this.recursos.pv.max = Math.max(0, this.recursos.pv.max + this.modificadores.pvMax);
     if (this.modificadores.pdMax) this.recursos.pd.max = Math.max(0, this.recursos.pd.max + this.modificadores.pdMax);
-    this.estado.dtProximoMorte = DT_FERIMENTO_BASE + DT_FERIMENTO_INCREMENTO * this.estado.testesMorte;
+    // Moribundo faz teste de lesão (v1.2): mesma escada da queda a 0 PV.
+    this.estado.dtProximoMorte = DT_FERIMENTO_BASE + DT_FERIMENTO_INCREMENTO * this.estado.testesFerimento;
 
     // DT escala 7 → 10 → 13 → 16… a cada teste já feito (spec §8.2/§8.3).
     this.estado.dtProximoFerimento = DT_FERIMENTO_BASE + DT_FERIMENTO_INCREMENTO * this.estado.testesFerimento;

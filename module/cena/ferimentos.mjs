@@ -28,10 +28,11 @@ const CONFIGURACAO = {
     pericia: "disciplina",
     i18n: "OP2.Trauma",
   },
-  // Moribundo: no fim de cada rodada, teste de morte (Físico + Vigor, DT +3 por teste).
+  // Moribundo: no fim de cada rodada, um teste de lesão (v1.2). A DT é a mesma escada
+  // da queda a 0 PV: +3 por teste de lesão já feito na cena, então o contador é o mesmo.
   morte: {
     recurso: "pv",
-    contador: "testesMorte",
+    contador: "testesFerimento",
     pericia: "vigor",
     i18n: "OP2.Morte",
   },
@@ -48,6 +49,9 @@ export async function pedirTesteDeQueda(ator, tipo) {
   const conteudo = await renderizar(`systems/${SYSTEM_ID}/templates/chat/queda.hbs`, {
     tipo,
     atorId: ator.id,
+    // Dano não letal: +d6 no teste de lesão e 2d20 (o melhor) na tabela (v1.2).
+    naoLetal: tipo !== "trauma",
+    rotuloNaoLetal: game.i18n.format("OP2.Ferimento.RolarNaoLetal", { dt: dtDaQueda(testes) }),
     titulo: game.i18n.localize(`${config.i18n}.Titulo`),
     texto: game.i18n.format(`${config.i18n}.Texto`, {
       ator: ator.name,
@@ -73,7 +77,7 @@ export async function pedirTesteDeQueda(ator, tipo) {
  * mesa decide o que fazer com o personagem. No trauma, a consequência da falha
  * segue o setting `falhaTrauma` (o playtest avisa que vai mudar, §8.3).
  */
-export async function rolarTesteDeQueda(ator, tipo, { rapido = false } = {}) {
+export async function rolarTesteDeQueda(ator, tipo, { rapido = false, naoLetal = false } = {}) {
   const config = CONFIGURACAO[tipo];
   const testes = ator.system.estado?.[config.contador] ?? 0;
   const dt = dtDaQueda(testes);
@@ -83,6 +87,10 @@ export async function rolarTesteDeQueda(ator, tipo, { rapido = false } = {}) {
     dt,
     rapido,
     contexto: game.i18n.localize(`${config.i18n}.Titulo`),
+    ...(naoLetal && tipo !== "trauma" ? {
+      dadosExtras: [{ chave: "naoLetal", rotulo: game.i18n.localize("OP2.Ferimento.NaoLetalDado"), tipo: "extra", dado: "d6" }],
+      notas: [game.i18n.localize("OP2.Ferimento.NaoLetalNota")],
+    } : {}),
   });
   if (!roll) return null;
 
@@ -124,6 +132,7 @@ export async function rolarTesteDeQueda(ator, tipo, { rapido = false } = {}) {
     proximaDt: dtDaQueda(testes + 1),
     tabela,
     rotuloTabela: tabela ? game.i18n.localize(`OP2.Tabela.Abrir.${tabela}`) : "",
+    melhorDeDois: Boolean(tabela === "lesoes" && naoLetal),
     atorId: ator.id,
   });
 
@@ -142,8 +151,9 @@ export async function zerarContadoresDeQueda(ator) {
   await ator.update({
     "system.estado.testesFerimento": 0,
     "system.estado.testesTrauma": 0,
-    "system.estado.testesMorte": 0,
   });
+  const { zerarPrimeirosSocorros } = await import("./primeiros-socorros.mjs");
+  await zerarPrimeirosSocorros(ator);
 }
 
 async function recuperar(ator, recurso, n) {

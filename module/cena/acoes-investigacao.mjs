@@ -411,11 +411,20 @@ export async function interagir(ator, poiUuid) {
   await enviarCard(ator, "interagir", { poiNome: poi.name, quemInterage, soMestre: false, atorId: ator.id, poiUuid: poi.uuid });
 
   const contextual = poi.system.descricaoContextual?.trim() ?? "";
+  // O que o ponto guarda para quem interage (o enigma resolvido, a mão no nicho): as
+  // linhas ocultas com itens. O mestre entrega cada item a quem ele escolher.
+  const { itensDaLinha } = await import("./itens-pista.mjs");
+  const guardados = [];
+  for (const info of poi.system.informacoes.filter((i) => i.oculta && i.itens?.length)) {
+    const itens = itensDaLinha(info);
+    if (itens.length) guardados.push({ infoId: info.id, texto: await editorDeTexto().enrichHTML(info.texto ?? "", { relativeTo: poi }), itens });
+  }
   return enviarCardAoMestre(ator, "interagir", {
     poiNome: poi.name,
     quemInterage,
     soMestre: true,
     descricaoContextual: contextual ? await editorDeTexto().enrichHTML(contextual, { relativeTo: poi }) : "",
+    guardados,
   });
 }
 

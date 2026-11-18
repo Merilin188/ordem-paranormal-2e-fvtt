@@ -12,7 +12,7 @@
  */
 import { SYSTEM_ID, CUSTO_PV_ARROMBAR, CUSTO_PV_SUSTENTAR, BONUS_DT_ALCANCAR_ARRISCADO } from "../config.mjs";
 import {
-  etapaDoAlcancarSeguro, acumularArrombar, arrombou, excedeuTentativas, danoDeAlcancar, avaliarPalpite, venceuDestrancar,
+  etapaDoAlcancarSeguro, passoDaEscalada, acumularArrombar, arrombou, excedeuTentativas, danoDeAlcancar, avaliarPalpite, venceuDestrancar,
   podeTentarHackNestaRodada, chancesDeErroHackSocial, linhaDaTabelaDeHack,
   tentativasPorRodadaDeDestrancar, tentativasDeDestrancarNaRodada, facesDasPosicoes,
 } from "./desafios.mjs";
@@ -175,7 +175,7 @@ export async function arrombar(ator, desafioUuid, { rapido = false } = {}) {
  * @param {"seguro"|"arriscado"} modo
  * @returns {Promise<{modo: string, sucesso: boolean, dano: number|null}|null>}
  */
-export async function alcancar(ator, { modo, dt, rapido = false, desafio = null, seguido = false } = {}) {
+export async function alcancar(ator, { modo, dt, rapido = false, desafio = null, seguido = false, pericia = "acrobacia" } = {}) {
   // Seguro com a 1ª ação já feita: esta é a 2ª (ou ainda é cedo — mesmo turno).
   if (modo === "seguro" && !seguido) {
     const { pendenteDe, abrirJanelaAlcancar } = await import("./alcancar-janela.mjs");
@@ -199,7 +199,7 @@ export async function alcancar(ator, { modo, dt, rapido = false, desafio = null,
   const contexto = `${game.i18n.localize("OP2.Desafio.Alcancar")} — ${game.i18n.localize(`OP2.Desafio.Modo.${modo}`)}`;
 
   if (modo === "arriscado") {
-    const roll = await rolarTeste(ator, { chavePericia: "acrobacia", dt: dt + BONUS_DT_ALCANCAR_ARRISCADO, rapido, contexto });
+    const roll = await rolarTeste(ator, { chavePericia: pericia, dt: dt + BONUS_DT_ALCANCAR_ARRISCADO, rapido, contexto });
     if (!roll) return null;
     return publicarAlcancar(ator, modo, [roll], roll.sucesso, desafio);
   }
@@ -207,19 +207,19 @@ export async function alcancar(ator, { modo, dt, rapido = false, desafio = null,
   // Seguro: duas ações em sequência. A 1ª agora; passou, o personagem fica marcado e
   // a 2ª vem na próxima ação dele (janela flutuante). `seguido`: as duas de uma vez
   // (macro e e2e).
-  const primeira = await rolarTeste(ator, { chavePericia: "acrobacia", dt, rapido, contexto: `${contexto} (1/2)` });
+  const primeira = await rolarTeste(ator, { chavePericia: pericia, dt, rapido, contexto: `${contexto} (1/2)` });
   if (!primeira) return null;
   if (!primeira.sucesso) return publicarAlcancar(ator, modo, [primeira], false, desafio);
 
   if (seguido) {
-    const segunda = await rolarTeste(ator, { chavePericia: "acrobacia", dt, rapido, contexto: `${contexto} (2/2)` });
+    const segunda = await rolarTeste(ator, { chavePericia: pericia, dt, rapido, contexto: `${contexto} (2/2)` });
     if (!segunda) return null;
     return publicarAlcancar(ator, modo, [primeira, segunda], segunda.sucesso, desafio);
   }
 
   const { chaveDaRodada } = await import("./poderes.mjs");
   await ator.setFlag(SYSTEM_ID, "alcancar", {
-    dt, rodada: chaveDaRodada(), primeira: primeira.total,
+    dt, pericia, rodada: chaveDaRodada(), primeira: primeira.total,
     desafioUuid: desafio?.uuid ?? "", desafioNome: desafio?.name ?? "",
   });
   await enviarCard(ator, "alcancar", {
@@ -240,7 +240,7 @@ export async function segundaAcaoDoAlcancar(ator, { rapido = false } = {}) {
   if (!p) return null;
   const desafio = p.desafioUuid ? await fromUuid(p.desafioUuid) : null;
   const contexto = `${game.i18n.localize("OP2.Desafio.Alcancar")} — ${game.i18n.localize("OP2.Desafio.Modo.seguro")} (2/2)`;
-  const segunda = await rolarTeste(ator, { chavePericia: "acrobacia", dt: p.dt, rapido, contexto });
+  const segunda = await rolarTeste(ator, { chavePericia: p.pericia || "acrobacia", dt: p.dt, rapido, contexto });
   if (!segunda) return null;
   await ator.unsetFlag(SYSTEM_ID, "alcancar");
   return publicarAlcancar(ator, "seguro", [segunda], segunda.sucesso, desafio?.type === "desafio-acesso" ? desafio : null);
@@ -258,6 +258,8 @@ export async function alcancarDesafio(ator, desafioUuid, { rapido = false } = {}
   await marcarQuemTenta(desafio, ator);
   // Abordagem Alcançar ligada: a DT dela; categoria Alcançar sem a abordagem: a do objeto.
   const dt = desafio.system.abordagens?.alcancar ? (desafio.system.alcancar?.dt ?? 7) : (desafio.system.dtObjeto ?? 7);
+  const pericia = (desafio.system.abordagens?.alcancar && desafio.system.alcancar?.pericia) || "acrobacia";
+  const nomePericia = rotuloDePericia(pericia);
   const modo = await foundry.applications.api.DialogV2.wait({
     window: { title: `${game.i18n.localize("OP2.Desafio.Alcancar")} — ${desafio.name}`, icon: "fa-solid fa-person-walking" },
     classes: ["op2", "op2-dlg", "op2-defesa-janela"],
@@ -265,17 +267,78 @@ export async function alcancarDesafio(ator, desafioUuid, { rapido = false } = {}
     buttons: [
       {
         action: "seguro", icon: "fa-solid fa-person-walking", default: true,
-        label: game.i18n.format("OP2.Desafio.AlcancarSeguroRegra", { dt }),
+        label: game.i18n.format("OP2.Desafio.AlcancarSeguroRegra", { dt, pericia: nomePericia }),
       },
       {
         action: "arriscado", icon: "fa-solid fa-person-running",
-        label: game.i18n.format("OP2.Desafio.AlcancarArriscadoRegra", { dt: dt + BONUS_DT_ALCANCAR_ARRISCADO }),
+        label: game.i18n.format("OP2.Desafio.AlcancarArriscadoRegra", { dt: dt + BONUS_DT_ALCANCAR_ARRISCADO, pericia: nomePericia }),
       },
     ],
     rejectClose: false,
   });
   if (!["seguro", "arriscado"].includes(modo)) return null;
-  return alcancar(ator, { modo, dt, rapido, desafio });
+  return alcancar(ator, { modo, dt, rapido, desafio, pericia });
+}
+
+/**
+ * ESCALAR (v1.2): cada ação, o jogador escolhe a forma — rápida (DT 8, soma a RA) ou
+ * cautelosa (DT 6, soma a RB) — e acumula até a meta (10 por padrão). Falhou: cai,
+ * sofre dano igual ao acumulado (botão no card) e recomeça. O progresso fica no
+ * personagem; chegar ao topo vence o desafio.
+ */
+export async function escalarDesafio(ator, desafioUuid, { rapido = false } = {}) {
+  const desafio = await carregarDesafio(desafioUuid);
+  if (!desafio) return null;
+  const cfg = desafio.system.escalar;
+  await marcarQuemTenta(desafio, ator);
+  const marca = ator.getFlag(SYSTEM_ID, "escalada");
+  const acumulado = marca?.desafioUuid === desafio.uuid ? Number(marca.pontos) || 0 : 0;
+  const nomePericia = rotuloDePericia(cfg.pericia);
+  const modo = await foundry.applications.api.DialogV2.wait({
+    window: { title: `${game.i18n.localize("OP2.Desafio.Escalar")} — ${desafio.name}`, icon: "fa-solid fa-mountain" },
+    classes: ["op2", "op2-dlg", "op2-defesa-janela"],
+    content: `<p class="op2-ajuda">${game.i18n.format("OP2.Desafio.EscalarEscolha", { pontos: acumulado, meta: cfg.meta })}</p>`,
+    buttons: [
+      { action: "rapida", icon: "fa-solid fa-person-running", default: true,
+        label: game.i18n.format("OP2.Desafio.EscalarRapidaRegra", { dt: cfg.dtRapida, pericia: nomePericia }) },
+      { action: "cautelosa", icon: "fa-solid fa-person-walking",
+        label: game.i18n.format("OP2.Desafio.EscalarCautelosaRegra", { dt: cfg.dtCautelosa, pericia: nomePericia }) },
+    ],
+    rejectClose: false,
+  });
+  if (!["rapida", "cautelosa"].includes(modo)) return null;
+  const dt = modo === "rapida" ? cfg.dtRapida : cfg.dtCautelosa;
+  const rotuloModo = game.i18n.localize(`OP2.Desafio.EscalarModo.${modo}`);
+  const roll = await rolarTeste(ator, {
+    chavePericia: cfg.pericia, dt, rapido,
+    contexto: `${game.i18n.localize("OP2.Desafio.Escalar")} — ${rotuloModo}`,
+  });
+  if (!roll) return null;
+  const duas = roll.contados.map((d) => d.resultado).sort((a, b) => b - a).slice(0, 2);
+  const passo = passoDaEscalada({ modo, sucesso: roll.sucesso, ra: roll.ra, rb: roll.rb, critico: roll.critico, duas }, acumulado, cfg.meta);
+
+  if (passo.chegou) {
+    await ator.unsetFlag(SYSTEM_ID, "escalada");
+    if (!cfg.resolvido) await gravarNoDesafio(desafio, { "system.escalar.resolvido": true });
+  } else {
+    await ator.setFlag(SYSTEM_ID, "escalada", { desafioUuid: desafio.uuid, pontos: passo.pontos });
+  }
+
+  const ganhoTexto = roll.critico && duas.length >= 2
+    ? game.i18n.format("OP2.Desafio.EscalarGanhoCritico", { dados: duas.join(" + "), ganho: passo.ganho })
+    : game.i18n.format(modo === "rapida" ? "OP2.Desafio.EscalarGanhoRa" : "OP2.Desafio.EscalarGanhoRb", { ganho: passo.ganho });
+  await enviarCard(ator, "escalar", {
+    titulo: `${game.i18n.localize("OP2.Desafio.Escalar")} — ${desafio.name}`,
+    modo: rotuloModo,
+    sucesso: !passo.caiu,
+    caiu: passo.caiu,
+    chegou: passo.chegou,
+    ganhoTexto,
+    progresso: game.i18n.format("OP2.Desafio.EscalarProgresso", { pontos: passo.pontos, meta: cfg.meta }),
+    dano: passo.dano,
+    atorId: ator.id,
+  }, { whisper: sussurroPara(ator) });
+  return { roll, ...passo };
 }
 
 async function pedirDtAmbiente() {
@@ -448,7 +511,7 @@ export async function testarFadigaDeSustentar(ator) {
     { chave: "pericia.atletismo", rotulo: rotuloDePericia("atletismo"), tipo: "pericia", dado: para },
     { chave: `atributo.${pericia.atributo}`, rotulo: game.i18n.localize(`OP2.Atributo.${pericia.atributo}`), tipo: "atributo", dado: atributo.dadoEfetivo },
   ], {
-    dt: lerConfig("dtPadrao"), escopoCritico: lerConfig("escopoCritico"), rotulo, atorId: ator.id,
+    dt: lerConfig("dtPadrao"), rotulo, atorId: ator.id,
     ajustes: [{ tipo: "texto", texto: nota }],
   });
   await roll.evaluate();

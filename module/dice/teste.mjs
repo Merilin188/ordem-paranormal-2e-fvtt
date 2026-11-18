@@ -141,7 +141,7 @@ export async function rolarTeste(ator, {
   const roll = OP2Roll.paraComponentes(componentes, {
     criticoMinimo: armaCritico || 0,
     dt: config.dt,
-    escopoCritico: lerConfig("escopoCritico"),
+   
     rotulo: contexto ?? base.rotuloPericia,
     atorId: ator.id,
     chavePericia,

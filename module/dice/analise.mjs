@@ -53,7 +53,8 @@ export function rb(dados) {
  * 5 não conta; par de 1 é falha crítica, nunca crítico.
  *
  * @param {DadoRolado[]} dados
- * @param {"todos"|"contados"} [escopo] o playtest não define se descartados contam (spec §4.5)
+ * @param {"todos"|"contados"} [escopo] o sistema usa "contados": o crítico sai dos 3
+ *   dados que ficam depois de descartar o 4º (v1.2, Críticos)
  */
 export function valorCritico(dados, escopo = "todos", minimo = VALOR_MINIMO_CRITICO) {
   const alvo = escopo === "contados" ? contados(dados) : dados;
@@ -101,15 +102,36 @@ export function analisar(dados, { dt = null, escopoCritico = "todos", minimoCrit
 }
 
 /**
- * Atalho de seleção quando se rola mais dados do que se soma: os maiores valores.
- * É só um default — a escolha ótima nem sempre é a soma máxima, porque RA e RB
- * alimentam efeitos posteriores (spec §4.5).
+ * Seleção padrão quando se rola mais dados do que se soma (até 4 rolados, 3 somados).
+ *
+ * O livro (v1.2, Críticos): "se rolar 4 dados, determine o crítico após descartar o
+ * menor valor". O padrão é descartar o menor — a menos que ele seja um dos dados do
+ * crítico: 8, 7, 6, 6 mantém 8, 6, 6 (crítico) e descarta o 7. O jogador ainda pode
+ * escolher outra combinação na janela de seleção (spec §4.5).
  * @param {DadoRolado[]} dados
+ * @param {number} [minimo] valor mínimo do crítico (espada: 5)
  */
-export function selecaoSugerida(dados) {
-  return [...dados]
-    .sort((a, b) => b.resultado - a.resultado)
-    .slice(0, MAX_DADOS_CONTADOS)
-    .map((d) => d.indice)
-    .sort((a, b) => a - b);
+export function selecaoSugerida(dados, minimo = VALOR_MINIMO_CRITICO) {
+  const ordenados = [...dados].sort((a, b) => b.resultado - a.resultado);
+  if (ordenados.length <= MAX_DADOS_CONTADOS) return ordenados.map((d) => d.indice).sort((a, b) => a - b);
+  const valor = valorCritico(dados, "todos", minimo || VALOR_MINIMO_CRITICO);
+  let escolhidos;
+  if (valor === null) escolhidos = ordenados.slice(0, MAX_DADOS_CONTADOS);
+  else {
+    const par = ordenados.filter((d) => d.resultado === valor).slice(0, 2);
+    const resto = ordenados.filter((d) => !par.includes(d));
+    escolhidos = [...par, ...resto].slice(0, MAX_DADOS_CONTADOS);
+  }
+  return escolhidos.map((d) => d.indice).sort((a, b) => a - b);
+}
+
+/**
+ * Pavor "Apenas em Testes" (v1.2): os dados anulados saem só da soma e continuam
+ * valendo para RA e RB. Recebe os dados contados e os anulados.
+ * @param {DadoRolado[]} contadosDoTeste
+ * @param {DadoRolado[]} anulados
+ */
+export function raRbComAnulados(contadosDoTeste, anulados) {
+  const v = [...contadosDoTeste, ...anulados].map((d) => d.resultado);
+  return v.length ? { ra: Math.max(...v), rb: Math.min(...v) } : { ra: 0, rb: 0 };
 }

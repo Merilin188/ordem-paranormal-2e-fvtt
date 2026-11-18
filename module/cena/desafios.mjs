@@ -34,7 +34,8 @@ export function desafioResolvido(system) {
     || (abordagens.hackSocial && system.hackSocial?.resolvido)
     || (abordagens.generico && system.generico?.resolvido)
     || (abordagens.equilibrar && system.equilibrar?.resolvido)
-    || (abordagens.alcancar && system.alcancar?.resolvido));
+    || (abordagens.alcancar && system.alcancar?.resolvido)
+    || (abordagens.escalar && system.escalar?.resolvido));
 }
 
 /** @returns {boolean} 0 tentativas = sem teto; caso contrário, estourou o teto. */
@@ -181,4 +182,19 @@ export function facesDasPosicoes(sistema) {
   const tamanho = sistema.tamanhoSenha;
   const lista = sistema.facesPorPosicao ?? [];
   return Array.from({ length: tamanho }, (_, i) => Number(lista[i]) || sistema.facesSenha);
+}
+
+/**
+ * ESCALAR (v1.2): um passo da escalada. Rápida soma a RA; cautelosa, a RB; crítico
+ * soma as duas rolagens mais altas (é pontuação alvo, como o teste estendido).
+ * Falhou: cai, sofre dano igual ao que já tinha acumulado e recomeça do zero. Pura.
+ * @param {{modo: "rapida"|"cautelosa", sucesso: boolean, ra: number, rb: number, critico?: boolean, duas?: number[]}} teste
+ * @param {number} acumulado pontos antes deste teste
+ * @param {number} meta
+ */
+export function passoDaEscalada({ modo, sucesso, ra, rb, critico = false, duas = [] }, acumulado = 0, meta = 10) {
+  if (!sucesso && !critico) return { pontos: 0, ganho: 0, caiu: true, dano: acumulado, chegou: false };
+  const ganho = critico && duas.length >= 2 ? duas[0] + duas[1] : (modo === "rapida" ? ra : rb);
+  const pontos = acumulado + ganho;
+  return { pontos, ganho, caiu: false, dano: 0, chegou: pontos >= meta };
 }

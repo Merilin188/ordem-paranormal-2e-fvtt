@@ -12,11 +12,6 @@ const SETTINGS = {
     scope: "world", config: true, type: Number, default: DT_PADRAO,
     range: { min: 2, max: 20, step: 1 },
   },
-  // O playtest não diz se dados descartados alimentam a detecção de crítico (spec §4.5).
-  escopoCritico: {
-    scope: "world", config: true, type: String, default: "todos",
-    choices: { todos: "OP2.Config.escopoCritico.todos", contados: "OP2.Config.escopoCritico.contados" },
-  },
   // O corpo do texto diz Pesquisar; a tabela-resumo diz Intuição (spec §6.5).
   compartilharPericia: {
     scope: "world", config: true, type: String, default: "pesquisar",

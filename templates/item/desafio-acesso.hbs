@@ -56,6 +56,11 @@
         <span>{{localize "OP2.Desafio.Equilibrar"}}</span>
       </label>
       <label class="op2-campo op2-campo--inline">
+        <input type="checkbox" name="system.abordagens.escalar" {{#if sistema.abordagens.escalar}}checked{{/if}}
+          {{#unless editavel}}disabled{{/unless}}>
+        <span>{{localize "OP2.Desafio.Escalar"}}</span>
+      </label>
+      <label class="op2-campo op2-campo--inline">
         <input type="checkbox" name="system.abordagens.generico" {{#if sistema.abordagens.generico}}checked{{/if}}
           {{#unless editavel}}disabled{{/unless}}>
         <span>{{localize "OP2.Desafio.Generico"}}</span>
@@ -354,15 +359,62 @@
     <fieldset class="op2-desafio-hack">
       <legend>{{localize "OP2.Desafio.Alcancar"}}</legend>
       <p class="op2-ajuda">{{localize "OP2.Desafio.AlcancarAjuda"}}</p>
-      <label class="op2-campo">
-        <span>{{localize "OP2.Desafio.AlcancarDt"}}</span>
-        <input type="number" name="system.alcancar.dt" value="{{sistema.alcancar.dt}}" min="0" step="1"
-          {{#unless editavel}}disabled{{/unless}}>
-      </label>
+      <div class="op2-grade-campos">
+        <label class="op2-campo">
+          <span>{{localize "OP2.Desafio.AlcancarDt"}}</span>
+          <input type="number" name="system.alcancar.dt" value="{{sistema.alcancar.dt}}" min="0" step="1"
+            {{#unless editavel}}disabled{{/unless}}>
+        </label>
+        <label class="op2-campo">
+          <span>{{localize "OP2.Desafio.Pericia"}}</span>
+          <select name="system.alcancar.pericia" {{#unless editavel}}disabled{{/unless}}>
+            {{#each opcoesPericia}}
+              <option value="{{chave}}" {{#if (op2Eq chave @root.sistema.alcancar.pericia)}}selected{{/if}}>{{rotulo}}</option>
+            {{/each}}
+          </select>
+        </label>
+      </div>
       <label class="op2-campo op2-campo--inline">
         <input type="checkbox" name="system.alcancar.resolvido" {{#if sistema.alcancar.resolvido}}checked{{/if}}
           {{#unless editavel}}disabled{{/unless}}>
         <span>{{localize "OP2.Desafio.AlcancarVencido"}}</span>
+      </label>
+    </fieldset>
+  {{/if}}
+
+  {{#if sistema.abordagens.escalar}}
+    <fieldset class="op2-desafio-hack">
+      <legend>{{localize "OP2.Desafio.Escalar"}}</legend>
+      <p class="op2-ajuda">{{localize "OP2.Desafio.EscalarAjuda"}}</p>
+      <div class="op2-grade-campos">
+        <label class="op2-campo">
+          <span>{{localize "OP2.Desafio.EscalarMeta"}}</span>
+          <input type="number" name="system.escalar.meta" value="{{sistema.escalar.meta}}" min="1" step="1"
+            {{#unless editavel}}disabled{{/unless}}>
+        </label>
+        <label class="op2-campo">
+          <span>{{localize "OP2.Desafio.Pericia"}}</span>
+          <select name="system.escalar.pericia" {{#unless editavel}}disabled{{/unless}}>
+            {{#each opcoesPericia}}
+              <option value="{{chave}}" {{#if (op2Eq chave @root.sistema.escalar.pericia)}}selected{{/if}}>{{rotulo}}</option>
+            {{/each}}
+          </select>
+        </label>
+        <label class="op2-campo">
+          <span>{{localize "OP2.Desafio.EscalarDtRapida"}}</span>
+          <input type="number" name="system.escalar.dtRapida" value="{{sistema.escalar.dtRapida}}" min="0" step="1"
+            {{#unless editavel}}disabled{{/unless}}>
+        </label>
+        <label class="op2-campo">
+          <span>{{localize "OP2.Desafio.EscalarDtCautelosa"}}</span>
+          <input type="number" name="system.escalar.dtCautelosa" value="{{sistema.escalar.dtCautelosa}}" min="0" step="1"
+            {{#unless editavel}}disabled{{/unless}}>
+        </label>
+      </div>
+      <label class="op2-campo op2-campo--inline">
+        <input type="checkbox" name="system.escalar.resolvido" {{#if sistema.escalar.resolvido}}checked{{/if}}
+          {{#unless editavel}}disabled{{/unless}}>
+        <span>{{localize "OP2.Desafio.EscalarVencido"}}</span>
       </label>
     </fieldset>
   {{/if}}

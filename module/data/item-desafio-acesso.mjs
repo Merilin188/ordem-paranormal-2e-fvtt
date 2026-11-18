@@ -41,6 +41,9 @@ export class DesafioAcessoData extends foundry.abstract.TypeDataModel {
         // na hora — seguro (duas ações, falha dá RB e recomeça) ou arriscado (uma
         // ação, DT+3, falha dá RA).
         alcancar: new BooleanField({ required: true, initial: false }),
+        // ESCALAR (v1.2): acumula pontos de Atletismo até a meta. Rápida (DT 8) soma a
+        // RA; cautelosa (DT 6) soma a RB; falhar derruba com dano igual ao acumulado.
+        escalar: new BooleanField({ required: true, initial: false }),
       }),
 
       // Itens guardados atrás do obstáculo (o gládio e o elmo dentro do baú): vencer o
@@ -50,6 +53,18 @@ export class DesafioAcessoData extends foundry.abstract.TypeDataModel {
       /** Alcançar: a DT do obstáculo e se alguém já alcançou. */
       alcancar: new SchemaField({
         dt: new NumberField({ required: true, initial: 7, min: 0, integer: true, nullable: false }),
+        // O livro diz Acrobacia, mas o obstáculo pode pedir outra (a Plataforma Elevada
+        // da Caverna de Cruachan é escalada com Atletismo).
+        pericia: new StringField({ required: true, initial: "acrobacia", blank: false }),
+        resolvido: new BooleanField({ required: true, initial: false }),
+      }),
+
+      /** Escalar: a meta de pontos, a perícia e as DTs das duas formas. */
+      escalar: new SchemaField({
+        meta: new NumberField({ required: true, initial: 10, min: 1, integer: true, nullable: false }),
+        pericia: new StringField({ required: true, initial: "atletismo", blank: false }),
+        dtRapida: new NumberField({ required: true, initial: 8, min: 0, integer: true, nullable: false }),
+        dtCautelosa: new NumberField({ required: true, initial: 6, min: 0, integer: true, nullable: false }),
         resolvido: new BooleanField({ required: true, initial: false }),
       }),
 

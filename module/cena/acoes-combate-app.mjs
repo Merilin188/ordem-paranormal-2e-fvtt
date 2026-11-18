@@ -32,8 +32,8 @@ export const OPOSTAS = {
 export const COM_ALVO = new Set(["Mirar", ...Object.keys(OPOSTAS)]);
 
 /**
- * Desfecho do teste oposto da ação: quem age precisa vencer (empate não gera efeito);
- * vencer por 5 ou mais libera o efeito maior das manobras.
+ * Desfecho do teste oposto da ação: quem age precisa vencer; vencer por 5 ou mais
+ * libera o efeito maior das manobras. Empate: os dois repetem (v1.2, Testes Opostos).
  */
 export function desfechoOposto(totalAcao, totalDefesa) {
   const margem = totalAcao - totalDefesa;
@@ -148,6 +148,12 @@ async function resistirAcao(defensor, dataset) {
   }
   // Derrubar vencido: Caído num clique; por 5+, junto com o dano de impacto (RB).
   const danoDerrubar = d.forte ? rb : 0;
+  // Empate: os dois repetem os testes até haver vencedor (v1.2, Testes Opostos).
+  const repetir = d.empate
+    ? `<div class="op2-card__acoes"><button type="button" class="op2-botao op2-botao--pequeno" data-op2-acao="repetir-acao-oposta"
+        data-ator-id="${agente.id}" data-ator-uuid="${agente.uuid}" data-op2-so-dono="${agente.id}" data-acao="${esc(titulo)}"
+        data-alvo-uuid="${defensor.uuid}"><i class="fa-solid fa-rotate"></i> ${esc(L("RepetirAcao", { acao: titulo }))}</button></div>`
+    : "";
   const dano = d.venceu && titulo === "Derrubar"
     ? `<div class="op2-card__acoes"><button type="button" class="op2-botao op2-botao--pequeno op2-botao--perigo" data-op2-acao="derrubar-aplicar"
         data-ator-id="${defensor.id}" data-ator-uuid="${defensor.uuid}" data-quantidade="${danoDerrubar}">${esc(danoDerrubar
@@ -159,10 +165,20 @@ async function resistirAcao(defensor, dataset) {
     content: `<div class="op2 op2-card op2-acao-combate-card">
       <header class="op2-card__topo"><span class="op2-tag op2-tag--pequena"><i class="fa-solid fa-swords"></i> ${esc(L("Resultado", { acao: titulo }))}</span></header>
       <p class="op2-card__texto">${esc(texto)}</p>
-      ${efeito ? `<p class="op2-prontidao-nota">${esc(efeito)}</p>` : ""}${dano}</div>`,
+      ${efeito ? `<p class="op2-prontidao-nota">${esc(efeito)}</p>` : ""}${dano}${repetir}</div>`,
     flags: { [SYSTEM_ID]: { tipo: "acao-oposta-resultado", atorId: defensor.id } },
   });
   return { roll, ...d };
+}
+
+/** Empate na ação oposta: quem agiu rola de novo, sem gastar outra ação, e o alvo resiste de novo. */
+async function repetirAcaoOposta(agente, dataset) {
+  if (!game.user.isGM && !agente.isOwner) return void ui.notifications.warn(game.i18n.localize("OP2.Aviso.SemPermissao"));
+  const alvo = dataset.alvoUuid ? await fromUuid(dataset.alvoUuid) : null;
+  const titulo = dataset.acao;
+  if (!alvo || !OPOSTAS[titulo]) return null;
+  const texto = acoesDeCombate().flatMap((s) => s.itens).find((a) => a.titulo === titulo)?.texto ?? "";
+  return acaoOposta(agente, titulo, texto, alvo);
 }
 
 /** Derrubar: o alvo fica Caído (e sofre o dano de impacto, se venceu por 5 ou mais). */
@@ -195,6 +211,7 @@ async function comoSeErgue(ator) {
 export function registrarAcoesCombate() {
   registrarAcaoDeChat("resistir-acao", resistirAcao);
   registrarAcaoDeChat("derrubar-aplicar", derrubarAplicar);
+  registrarAcaoDeChat("repetir-acao-oposta", repetirAcaoOposta);
 }
 
 /** Executa a ação: declara e roda a automação dela. */
@@ -216,6 +233,10 @@ export async function executarAcaoDeCombate(ator, titulo, texto) {
     } finally {
       limparAlvos();
     }
+  }
+  if (titulo === "Primeiros Socorros") {
+    const { primeirosSocorros } = await import("./primeiros-socorros.mjs");
+    return primeirosSocorros(ator);
   }
   if (titulo === "Erguer-se") {
     const modo = await comoSeErgue(ator);

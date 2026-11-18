@@ -11,5 +11,12 @@
       data-op2-acao="rolar-teste-queda" data-ator-id="{{atorId}}" data-tipo="{{tipo}}">
       {{rotuloBotao}}
     </button>
+    {{#if naoLetal}}
+    <button type="button" class="op2-botao op2-botao--pequeno"
+      data-op2-acao="rolar-teste-queda" data-ator-id="{{atorId}}" data-tipo="{{tipo}}" data-nao-letal="1"
+      data-tooltip="{{localize "OP2.Ferimento.NaoLetalDica"}}">
+      {{rotuloNaoLetal}}
+    </button>
+    {{/if}}
   </div>
 </div>

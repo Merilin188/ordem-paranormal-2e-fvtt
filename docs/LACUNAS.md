@@ -77,9 +77,12 @@ justificada pela perícia do ajudante. Setting `ajudaAlvo`.
 Rolam-se até 4 dados, somam-se 3. O texto não diz se os descartados alimentam a detecção
 de crítico e a leitura de RA/RB.
 
-**Default adotado:** o crítico varre **todos os dados rolados**; RA e RB olham **só os
-contabilizados**. Racional: o crítico é um evento da rolagem inteira, enquanto RA/RB são
-leituras do resultado. Setting `escopoCritico` controla o lado do crítico.
+**Resolvido na v1.2 do PDF:** "se rolar 4 dados, determine o crítico após descartar o
+menor valor". O crítico sai dos **três dados que ficam** (escopo `contados`, fixo; o
+setting `escopoCritico` saiu). A seleção padrão descarta o menor — **a menos que ele seja
+um dos dados do crítico**: 8, 7, 6, 6 fica com 8, 6, 6 (`selecaoSugerida`). O jogador
+ainda pode escolher outra combinação na janela. RA e RB olham os contabilizados — e
+também os anulados pelo pavor, que na v1.2 saem só da soma ("Apenas em Testes").
 
 ### Consequência da falha no teste de trauma (spec §8.3)
 
@@ -253,9 +256,11 @@ um nome. Se algum dia houver migração de schema por outro motivo, o rename peg
 
 ## Empate em teste oposto (spec §4.6)
 
-O texto diz "maior resultado vence" e não trata empate. **Decisão:** empate não move
-nada — ninguém vence, ninguém causa dano. Preserva o status quo, que é o que a mesa
-narra naturalmente.
+**Resolvido na v1.2 do PDF:** em caso de empate, os dois repetem os testes até haver um
+vencedor. O teste oposto do mestre ganha "Repetir os testes" (guarda o placar empatado);
+nas manobras e no Defender-se, quem agiu repete sem gastar outra ação e o alvo resiste
+de novo. A exceção continua: ataques corpo a corpo opostos empatados acertam os dois
+(se cada um chegou a 7).
 
 ## "Empunhando arma" (spec §8.1)
 
@@ -267,7 +272,9 @@ hora do ataque, em vez de deduzir do inventário.
 
 O playtest não define cura nem descanso. **Decisão:** `game.op2.zerarContadoresDeQueda(ator)`
 existe como ferramenta de mestre, e nada os zera sozinho — nem encerrar a cena, que só
-limpa reduções temporárias e revelações.
+limpa reduções temporárias e revelações. Na v1.2 o moribundo faz **teste de lesão** e a
+DT é a mesma escada da queda a 0 PV (um contador só). O contador de Primeiros Socorros
+(+3 por uso no personagem) zera com o fim do combate e com essa mesma função.
 
 ## Barra de Ímpeto
 

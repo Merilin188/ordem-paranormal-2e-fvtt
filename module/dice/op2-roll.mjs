@@ -23,13 +23,12 @@ export class OP2Roll extends Roll {
 
   /**
    * @param {ComponenteTeste[]} componentes um dado por componente, na ordem exibida
-   * @param {{dt?: number|null, escopoCritico?: "todos"|"contados", rotulo?: string, atorId?: string}} [opcoes]
+   * @param {{dt?: number|null, rotulo?: string, atorId?: string}} [opcoes]
    */
   static paraComponentes(componentes, opcoes = {}) {
     const formula = componentes.map((c) => `1${c.dado}`).join(" + ");
     return new this(formula, {}, {
       dt: null,
-      escopoCritico: "todos",
       // Identifica o teste: o card de ataque se atualiza quando o dado do crítico rola.
       id: globalThis.foundry?.utils?.randomID?.() ?? Math.random().toString(36).slice(2),
       ...opcoes,
@@ -55,8 +54,9 @@ export class OP2Roll extends Roll {
     return this.options.dt ?? null;
   }
 
+  /** O crítico sai dos dados que ficaram depois de descartar o 4º (v1.2, Críticos). */
   get escopoCritico() {
-    return this.options.escopoCritico ?? "todos";
+    return "contados";
   }
 
   /**
@@ -127,7 +127,10 @@ export class OP2Roll extends Roll {
       }
     }
     r.pavor = this.dados.find((d) => d.pavor) ?? null;
-    r.consumidos = this.dados.filter((d) => d.consumido).length;
+    const anulados = this.dados.filter((d) => d.consumido);
+    r.consumidos = anulados.length;
+    // Pavor "Apenas em Testes" (v1.2): o anulado sai da soma, não de RA/RB.
+    if (anulados.length) Object.assign(r, analise.raRbComAnulados(this.contados, anulados));
     return r;
   }
 
@@ -185,6 +188,6 @@ export class OP2Roll extends Roll {
   }
 
   selecaoSugerida() {
-    return analise.selecaoSugerida(this.dadosDoTeste);
+    return analise.selecaoSugerida(this.dadosDoTeste, this.options.criticoMinimo);
   }
 }

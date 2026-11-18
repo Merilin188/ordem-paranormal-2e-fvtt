@@ -17,7 +17,7 @@ import { anunciarItensDoDesafio } from "./itens-pista.mjs";
 /** As abordagens oferecidas ao criar o desafio pelo ponto, com as marcadas de início. */
 const ABORDAGENS = [
   ["arrombar", "OP2.Desafio.Arrombar", true], ["destrancar", "OP2.Desafio.Destrancar", true],
-  ["equilibrar", "OP2.Desafio.Equilibrar", false], ["alcancar", "OP2.Desafio.Alcancar", false], ["hackTecnico", "OP2.Desafio.HackTecnico", false],
+  ["equilibrar", "OP2.Desafio.Equilibrar", false], ["alcancar", "OP2.Desafio.Alcancar", false], ["escalar", "OP2.Desafio.Escalar", false], ["hackTecnico", "OP2.Desafio.HackTecnico", false],
   ["hackSocial", "OP2.Desafio.HackSocial", false], ["sustentar", "OP2.Desafio.Sustentar", false],
   ["generico", "OP2.Desafio.Generico", false],
 ];
@@ -139,7 +139,7 @@ export function dadosParaTrancar(system = {}) {
     "system.destrancarTentativas": 0,
     "system.historicoDestrancar": [],
   };
-  for (const chave of ["generico", "hackTecnico", "hackSocial", "equilibrar", "alcancar"]) {
+  for (const chave of ["generico", "hackTecnico", "hackSocial", "equilibrar", "alcancar", "escalar"]) {
     if (system[chave]) dados[`system.${chave}.resolvido`] = false;
   }
   return dados;

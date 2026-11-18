@@ -28,10 +28,11 @@ class TabelaApp extends HandlebarsApplicationMixin(ApplicationV2) {
 
   static PARTS = { corpo: { template: `systems/${SYSTEM_ID}/templates/cena/tabela.hbs`, scrollable: [".op2-tabela__linhas"] } };
 
-  constructor({ tabela, atorId }) {
+  constructor({ tabela, atorId, melhorDeDois = false }) {
     super({ id: `op2-tabela-${tabela}-${atorId}` });
     this.tabela = tabela;
     this.atorId = atorId;
+    this.melhorDeDois = melhorDeDois;
     this.resultado = null;
     this.repetida = false;
     this.rolando = false;
@@ -45,6 +46,12 @@ class TabelaApp extends HandlebarsApplicationMixin(ApplicationV2) {
     return game.actors.get(this.atorId);
   }
 
+  /** Dano não letal: na tabela de Lesões rola 2d20 e fica com o melhor (v1.2). */
+  get formula() {
+    const base = TABELAS[this.tabela]?.formula ?? "1d20";
+    return this.melhorDeDois ? base.replace(/^1?d20/, "2d20kh") : base;
+  }
+
   podeRolar() {
     return Boolean(this.ator?.isOwner);
   }
@@ -55,7 +62,7 @@ class TabelaApp extends HandlebarsApplicationMixin(ApplicationV2) {
     const linhaSorteada = this.resultado !== null ? linhaDaTabela(this.tabela, this.resultado) : null;
     return {
       ator: ator ? { nome: ator.name, img: ator.img } : null,
-      formula: def.formula,
+      formula: this.formula,
       resultado: this.resultado,
       repetida: this.repetida,
       rolando: this.rolando,
@@ -81,7 +88,7 @@ class TabelaApp extends HandlebarsApplicationMixin(ApplicationV2) {
     this.render();
     paraTodos("op2TabelaRolando", { tabela: this.tabela, atorId: this.atorId });
     // O dado gira em 3D para todos; só quando ele para a linha acende (em todas as telas).
-    const roll = await new Roll(TABELAS[this.tabela].formula).evaluate();
+    const roll = await new Roll(this.formula).evaluate();
     await mostrarDados3D(roll);
     const resultado = roll.total;
     const linha = linhaDaTabela(this.tabela, resultado);
@@ -91,7 +98,7 @@ class TabelaApp extends HandlebarsApplicationMixin(ApplicationV2) {
 
     paraTodos("op2TabelaResultado", { tabela: this.tabela, atorId: this.atorId, resultado, repetida });
     this.mostrarResultado(resultado, repetida);
-    await publicarResultado(ator, this.tabela, resultado, linha, repetida);
+    await publicarResultado(ator, this.tabela, resultado, linha, repetida, this.formula);
     if (!repetida) await aplicarLinha(ator, this.tabela, linha, resultado);
   }
 }
@@ -145,7 +152,7 @@ async function aplicarLinha(ator, tabela, linha, resultado) {
   }
 }
 
-async function publicarResultado(ator, tabela, resultado, linha, repetida) {
+async function publicarResultado(ator, tabela, resultado, linha, repetida, formula = TABELAS[tabela].formula) {
   if (tabela === "falhaCritica") return; // o card da falha crítica é o de sempre
   const texto = repetida
     ? game.i18n.localize("OP2.Tabela.Repetida")
@@ -154,7 +161,7 @@ async function publicarResultado(ator, tabela, resultado, linha, repetida) {
     speaker: ChatMessage.getSpeaker({ actor: ator }),
     content: `<div class="op2 op2-card op2-card--falha op2-tabela-card">
       <header class="op2-card__topo"><span class="op2-tag op2-tag--pequena">${esc(TABELAS[tabela].titulo)}</span>
-      <span class="op2-card__dt">${TABELAS[tabela].formula}: <strong>${resultado}</strong></span></header>
+      <span class="op2-card__dt">${formula}: <strong>${resultado}</strong></span></header>
       <p class="op2-tabela-card__nome">${esc(linha.nome)}</p>
       <p class="op2-card__texto">${texto}</p>
     </div>`,
@@ -166,13 +173,14 @@ async function publicarResultado(ator, tabela, resultado, linha, repetida) {
 
 const abertas = new Map();
 
-function abrirLocal({ tabela, atorId }) {
+function abrirLocal({ tabela, atorId, melhorDeDois = false }) {
   const chave = `${tabela}.${atorId}`;
   let app = abertas.get(chave);
   if (!app) {
-    app = new TabelaApp({ tabela, atorId });
+    app = new TabelaApp({ tabela, atorId, melhorDeDois });
     abertas.set(chave, app);
   }
+  app.melhorDeDois = melhorDeDois;
   app.resultado = null;
   app.repetida = false;
   app.rolando = false;
@@ -181,10 +189,10 @@ function abrirLocal({ tabela, atorId }) {
 }
 
 /** Abre a tabela em todas as telas. */
-export function abrirTabelaParaTodos(tabela, atorId) {
+export function abrirTabelaParaTodos(tabela, atorId, { melhorDeDois = false } = {}) {
   if (!TABELAS[tabela]) return;
-  paraTodos("op2TabelaAbrir", { tabela, atorId });
-  abrirLocal({ tabela, atorId });
+  paraTodos("op2TabelaAbrir", { tabela, atorId, melhorDeDois });
+  abrirLocal({ tabela, atorId, melhorDeDois });
 }
 
 /** Mesma janela só para consulta, sem abrir para os outros. */
@@ -205,7 +213,7 @@ export function registrarTabelas() {
   });
   registrarAcaoDeChat("abrir-tabela", (ator, dataset) => {
     if (!ator.isOwner && !game.user.isGM) return void ui.notifications.warn(game.i18n.localize("OP2.Ferramentas.SemPermissao"));
-    abrirTabelaParaTodos(dataset.tabela, ator.id);
+    abrirTabelaParaTodos(dataset.tabela, ator.id, { melhorDeDois: dataset.melhorDeDois === "1" });
   });
   // "Rolar efeito (1d8)" da falha crítica abre a tabela para todos.
   registrarAcaoDeChat("rolar-falha-critica", (ator) => {

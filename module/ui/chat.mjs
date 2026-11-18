@@ -65,6 +65,11 @@ const ACOES = {
     const { rolarDefesaDoCard } = await import("../cena/acoes-combate.mjs");
     await rolarDefesaDoCard(ator, dataset);
   },
+  // Empate com a defesa: o atacante repete o ataque (v1.2, Testes Opostos).
+  async "repetir-ataque-empate"(ator, dataset) {
+    const { repetirAtaqueEmpatado } = await import("../cena/acoes-combate.mjs");
+    await repetirAtaqueEmpatado(ator, dataset);
+  },
   // Dano do ataque que acertou: marca o card como respondido (a Guardiã não troca mais).
   async "dano-ataque"(ator, dataset) {
     const { marcarAtaqueRespondido } = await import("../cena/guardia.mjs");
@@ -103,7 +108,7 @@ const ACOES = {
       ui.notifications.warn(game.i18n.localize("OP2.Aviso.SemPermissao"));
       return;
     }
-    await rolarTesteDeQueda(ator, dataset.tipo);
+    await rolarTesteDeQueda(ator, dataset.tipo, { naoLetal: dataset.naoLetal === "1" });
   },
   // O teste do aliado no Compartilhar é ação livre (spec §6.5).
   async "testar-compartilhar"(ator, dataset) {
